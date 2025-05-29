@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
@@ -27,10 +28,19 @@ class Event extends Model
     {
         return $this->belongsTo(Organizer::class);
     }
-    
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class)
+            ->where('is_active', 1)
+            ->whereNull('parent_id')
+            ->orderBy('order_by', 'asc')
+            ->with(['children']);
     }
 
 }
