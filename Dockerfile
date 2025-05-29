@@ -1,6 +1,7 @@
+# Guna PHP 8.2 CLI base image
 FROM php:8.2-cli
 
-# Pasang system dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
@@ -10,29 +11,30 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
+    npm \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
-# Pasang composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /app
 
-# Salin semua fail projek
+# Salin semua file ke dalam container
 COPY . .
 
-# Pasang composer dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install && npm run build
 
-# Generate APP_KEY kalau tiada
-RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
-    php artisan key:generate
+# Install Node modules & build Vite assets
+RUN npm install && npm run build
 
-# Betulkan permission untuk folder penting
-RUN chmod -R 775 storage bootstrap/cache
+# Laravel needs storage links
+RUN php artisan storage:link || true
 
-# Expose port (Railway inject ${PORT})
+# Expose port 8080
 EXPOSE 8080
 
-# Jalankan Laravel dengan port dinamik
+# Serve Laravel app on dynamic port (default: 8080)
 CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
