@@ -1,8 +1,6 @@
-# Dockerfile
-
 FROM php:8.2-cli
 
-# Install system dependencies
+# Pasang system dependencies yang diperlukan
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
@@ -14,17 +12,19 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
-# Install Composer
+# Pasang composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /app
 
-# Copy existing application directory
+# Copy semua fail source code ke container
 COPY . .
 
-# Expose dynamic port
+# Pasang composer dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Expose port, fallback 8080 jika PORT tak diset
 EXPOSE 8080
 
-# Use runtime env variable PORT if available
+# Serve Laravel pada port dinamik, default 8080
 CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
