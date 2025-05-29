@@ -1,39 +1,36 @@
-# Guna PHP 8.2 CLI base image
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install system dependencies and Node.js
 RUN apt-get update && apt-get install -y \
-    unzip \
-    git \
-    curl \
-    libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    npm \
+    unzip git curl libzip-dev libpng-dev libonig-dev libxml2-dev zip \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /app
 
-# Salin semua file ke dalam container
+# Copy source
 COPY . .
 
-# Install PHP dependencies
+# Composer install
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node modules & build Vite assets
+# Node modules and build assets
 RUN npm install && npm run build
 
-# Laravel needs storage links
+# Generate APP_KEY if not exists
+# RUN php artisan key:generate
+
+# Link storage and fix permissions
 RUN php artisan storage:link || true
 
-# Expose port 8080
+# Fix permissions - combine chown and chmod in one go
+RUN chown -R www-data:www-data storage bootstrap/cache public \
+    && chmod -R 775 storage bootstrap/cache public
+
 EXPOSE 8080
 
-# Serve Laravel app on dynamic port (default: 8080)
 CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
