@@ -46,9 +46,16 @@ Route::get('/db-check', function () {
     }
 });
 
+// Used route
+Route::get('/', [JiadeAdminController::class, 'page_login'])->name('page_login');
+Route::get('/index', [JiadeAdminController::class, 'page_login'])->name('page_login');
+Route::get('/login', [JiadeAdminController::class, 'page_login'])->name('login');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 
-Route::controller(JiadeAdminController::class)->group(function () {
+Route::prefix('organizer')
+    ->middleware('auth:organizer')
+    ->controller(JiadeAdminController::class)
+    ->group(function () {
     Route::get('/', 'dashboard');
     Route::get('/index', 'dashboard')->name('dashboard');
     Route::get('/index-2','dashboard_2')->name('dashboard_2');

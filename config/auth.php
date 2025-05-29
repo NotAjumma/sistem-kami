@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        // Add this
+        'organizer' => [
+            'driver' => 'session',      // or token if API guard
+            'provider' => 'organizers', // must match a provider below
+        ],
     ],
 
     /*
@@ -69,6 +74,11 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'organizers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Organizer::class, // your organizer model here
+        ],
     ],
 
     /*
