@@ -22,7 +22,7 @@
         iframe {
             border-radius: 8px;
             width: 100%;
-            height: 300px;
+            height: 450px;
             border: 0;
         }
     </style>
@@ -68,7 +68,7 @@
                 @if($event->latitude && $event->longitude)
                     <iframe
                         src="https://www.google.com/maps?q={{ urlencode($event->venue_name) }}%20{{ $event->latitude }},{{ $event->longitude }}&output=embed"
-                        width="100%" height="300" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                        width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
                     </iframe>
 
                 @endif

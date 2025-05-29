@@ -53,13 +53,13 @@ function getUrlParams(dParam)
 		new dlabSettings(dlabSettingsOptions); 
 	});
 	
-	if(direction == 'rtl' || body.attr('direction') == 'rtl'){
-        direction = 'rtl';
-			jQuery('.main-css').attr('href','css/style-rtl.css');
-		}else{
-			direction = 'ltr';
-			jQuery('.main-css').attr('href','css/style.css');
-		}
+	// if(direction == 'rtl' || body.attr('direction') == 'rtl'){
+    //     direction = 'rtl';
+	// 		jQuery('.main-css').attr('href','css/style-rtl.css');
+	// 	}else{
+	// 		direction = 'ltr';
+	// 		jQuery('.main-css').attr('href','css/style.css');
+	// 	}
 	
 })(jQuery);
 /* Cookies Function */
