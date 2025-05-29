@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
-
+use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,6 +20,15 @@ Route::get('/test', function() {
 
 Route::get('/debug-log', function () {
     return response()->file(storage_path('logs/laravel.log'));
+});
+
+Route::get('/db-check', function () {
+    try {
+        DB::connection()->getPdo();
+        return '✅ DB connected!';
+    } catch (\Exception $e) {
+        return '❌ Connection failed: ' . $e->getMessage();
+    }
 });
 
 Route::controller(JiadeAdminController::class)->group(function () {
