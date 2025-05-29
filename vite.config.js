@@ -30,7 +30,7 @@ export default defineConfig({
                 }
             },
         },
-        outDir: 'public',
+        outDir: 'public/build',
         emptyOutDir: true,
     }
 });
