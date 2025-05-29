@@ -25,9 +25,18 @@ Route::get('/debug-log', function () {
 Route::get('/db-check', function () {
     try {
         DB::connection()->getPdo();
-        return '✅ DB connected!';
+
+        $users = DB::table('users')->get(); // Fetch all users
+
+        return response()->json([
+            'status' => '✅ DB connected!',
+            'users' => $users,
+        ]);
     } catch (\Exception $e) {
-        return '❌ Connection failed: ' . $e->getMessage();
+        return response()->json([
+            'status' => '❌ Connection failed',
+            'error' => $e->getMessage(),
+        ], 500);
     }
 });
 
