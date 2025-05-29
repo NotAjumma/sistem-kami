@@ -8,6 +8,12 @@ class JiadeAdminController extends Controller
 {
 	public $page_description;
 	
+    public function index(){
+        $page_title = 'Dashboard';
+        $page_description = $this->page_description();
+        return view('landing.index', compact('page_title', 'page_description'));
+    }
+
     // Dashboard
     public function dashboard(){
         $page_title = 'Dashboard';

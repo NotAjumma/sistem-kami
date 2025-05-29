@@ -20,4 +20,16 @@ class Organizer extends Authenticatable
     {
         return $this->hasMany(Event::class);
     }
+
+    public function getLogoUrlAttribute()
+    {
+        if ($this->logo_path) {
+            return asset('images/organizers/' . $this->id . '/' . $this->logo_path);
+        }
+
+        // fallback to default logo if no logo_path set
+        return asset('images/organizers/default-organizer-logo.jpg');
+    }
+
+
 }
