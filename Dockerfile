@@ -23,6 +23,7 @@ COPY . .
 
 # Pasang composer dependencies
 RUN composer install --no-dev --optimize-autoloader
+npm install && npm run build
 
 # Generate APP_KEY kalau tiada
 RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
