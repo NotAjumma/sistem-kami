@@ -14,6 +14,10 @@ use App\Http\Controllers\JiadeAdminController;
 |
 */
 
+// routes/web.php
+Route::get('/debug-log', function () {
+    return response()->file(storage_path('logs/laravel.log'));
+});
 
 Route::controller(JiadeAdminController::class)->group(function () {
     Route::get('/', 'dashboard');
