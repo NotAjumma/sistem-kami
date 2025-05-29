@@ -10,7 +10,13 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
+    # install Node.js and npm dependencies
+    ca-certificates \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+
+# Install Node.js (latest LTS) and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
 # Pasang composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -24,6 +30,7 @@ COPY . .
 # Pasang composer dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Pasang npm dependencies dan build assets
 RUN npm install && npm run build
 
 # Generate APP_KEY kalau tiada
