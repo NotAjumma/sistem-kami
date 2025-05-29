@@ -25,7 +25,6 @@ COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run build
 
 # Install Node modules & build Vite assets
 RUN npm install && npm run build

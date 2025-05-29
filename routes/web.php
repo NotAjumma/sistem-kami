@@ -14,7 +14,10 @@ use App\Http\Controllers\JiadeAdminController;
 |
 */
 
-// routes/web.php
+Route::get('/test', function() {
+    return 'Hello World';
+});
+
 Route::get('/debug-log', function () {
     return response()->file(storage_path('logs/laravel.log'));
 });
