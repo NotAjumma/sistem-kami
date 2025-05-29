@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
@@ -22,15 +23,20 @@ Route::get('/debug-log', function () {
     return response()->file(storage_path('logs/laravel.log'));
 });
 
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
+
+
 Route::get('/db-check', function () {
     try {
         DB::connection()->getPdo();
 
-        $users = DB::table('users')->get(); // Fetch all users
+        $events = DB::table('events')->get();
 
         return response()->json([
             'status' => '✅ DB connected!',
-            'users' => $users,
+            'events' => $events,
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -39,6 +45,8 @@ Route::get('/db-check', function () {
         ], 500);
     }
 });
+
+Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 
 Route::controller(JiadeAdminController::class)->group(function () {
     Route::get('/', 'dashboard');
