@@ -49,6 +49,7 @@ Route::get('/db-check', function () {
 // Used route
 Route::get('/', [JiadeAdminController::class, 'page_login'])->name('page_login');
 Route::get('/index', [JiadeAdminController::class, 'page_login'])->name('page_login');
+Route::get('/organizer', [JiadeAdminController::class, 'page_login'])->middleware('auth:organizer')->name('page_login');
 Route::get('/login', [JiadeAdminController::class, 'page_login'])->name('login');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 
