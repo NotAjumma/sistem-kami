@@ -1,35 +1,30 @@
-# Dockerfile (letak di root project Laravel)
-FROM php:8.2-fpm
+# Dockerfile
+
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    unzip \
+    git \
+    curl \
+    libzip-dev \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     zip \
-    curl \
-    unzip \
-    git \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /app
 
-# Copy project files
+# Copy existing application directory
 COPY . .
 
-# Install Laravel dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Expose dynamic port
+EXPOSE 8080
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www
-
-# Laravel serve at dynamic port from Railway
-EXPOSE ${PORT}
-CMD php artisan serve --host=0.0.0.0 --port=${PORT}
+# Use runtime env variable PORT if available
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
