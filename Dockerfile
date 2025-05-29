@@ -48,4 +48,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache public \
 EXPOSE 8080
 
 # Jalankan Laravel dengan port dinamik
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php -S 0.0.0.0 --port=${PORT:-8080} -t public
+
