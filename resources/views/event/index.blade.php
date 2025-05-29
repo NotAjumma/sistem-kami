@@ -64,12 +64,14 @@
                 <h2>{{ $event->category->name }}</h2>
                 <p>{!! $event->description !!}</p>
 
-                {{-- Google Map --}}
-                @if($event->location)
-                    <iframe src="https://www.google.com/maps?q={{ urlencode($event->location) }}&output=embed"
-                        allowfullscreen loading="lazy">
+               {{-- Google Map --}}
+                @if($event->latitude && $event->longitude)
+                    <iframe 
+                        src="https://www.google.com/maps?q={{ $event->latitude }},{{ $event->longitude }}&output=embed"
+                        width="100%" height="300" frameborder="0" style="border:0;" allowfullscreen loading="lazy">
                     </iframe>
                 @endif
+
             </div>
 
             {{-- Right Column: Ticket Price --}}
