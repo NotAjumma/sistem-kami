@@ -23,27 +23,33 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1. Simpan atau update participant
+            // 0. Simpan atau update participant
             $participant = Participant::updateOrCreate(
                 [
                     'email' => $data['email'],
                     'no_ic' => $data['no_ic'],
                 ],
                 [
-                    'name' => $data['name'],
+                    'name'  => $data['name'],
                     'phone' => $data['phone'] ?? null,
                 ]
             );
+            // 1. Cari ticket type (master ticket)
+            $ticket = Ticket::where('id', $ticket_id)->first();
+            if (!$ticket) {
+                DB::rollBack();
+                return response()->json(['error' => 'Invalid ticket type'], 400);
+            }
+
             $eventCode = strtoupper($ticket->event->shortcode ?? 'DFT');
 
             // 2. Buat booking baru
             $resitPath = null;
 
             if ($request->has('resit_pembayaran_base64')) {
-                $base64 = $request->input('resit_pembayaran_base64');
-                $filename = $request->input('resit_filename', 'resit_' . time() . '.jpg');
-
-                $fileData = base64_decode($base64);
+                $base64     = $request->input('resit_pembayaran_base64');
+                $filename   = $request->input('resit_filename', 'resit_' . time() . '.jpg');
+                $fileData   = base64_decode($base64);
 
                 // Define local path relative to project root
                 $localPath = public_path('images/resit/' . $filename);
@@ -59,38 +65,32 @@ class BookingController extends Controller
                 // Simpan path relatif untuk database (contoh: images/resit/filename.jpg)
                 $resitPath = 'images/resit/' . $filename;
             }
+            $bilanganJoran  = (int) ($data['bilangan_joran'] ?? 1);
+            $totalPrice     = (float) $ticket->price * (int) $bilanganJoran;
 
             // Buat booking baru
             $booking = Booking::create([
-                'participant_id' => $participant->id,
-                'booking_code' => $eventCode . '-' . strtoupper(Str::random(8)),
-                'status' => 'pending',
-                'resit_path' => $resitPath ?? null,
+                'participant_id'    => $participant->id,
+                'booking_code'      => $eventCode . '-' . strtoupper(Str::random(8)),
+                'status'            => 'pending',
+                'total_price'       => $totalPrice,
+                'payment_method'    => 'gform',
+                'resit_path'        => $resitPath ?? null,
             ]);
 
-
-            // 3. Cari ticket type (master ticket)
-            $ticket = Ticket::where('id', $ticket_id)->first();
-            if (!$ticket) {
-                DB::rollBack();
-                return response()->json(['error' => 'Invalid ticket type'], 400);
-            }
-
             // 4. Buat booking ticket detail
-            $bilanganJoran = (int) ($data['bilangan_joran'] ?? 1);
             for ($i = 0; $i < $bilanganJoran; $i++) {
                 BookingTicket::create([
-                    'booking_id' => $booking->id,
-                    'ticket_id' => $ticket->id,
-                    'participant_name' => $data['participant_name'] ?? $data['name'],
+                    'booking_id'        => $booking->id,
+                    'ticket_id'         => $ticket->id,
+                    'participant_name'  => $data['participant_name'] ?? $data['name'],
                     'participant_email' => $data['email'],
                     'participant_no_ic' => $data['no_ic'] ?? null,
                     'participant_phone' => $data['phone'] ?? null,
-                    'ticket_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(3)),
-                    'status' => 'available',
+                    'ticket_code'       => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(3)),
+                    'status'            => 'available',
                 ]);
             }
-
 
             DB::commit();
 

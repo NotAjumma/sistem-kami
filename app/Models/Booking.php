@@ -11,6 +11,9 @@ class Booking extends Model
     protected $fillable = [
         'participant_id',
         'booking_code',
+        'total_price',
+        'resit_path',
+        'payment_method',
         'status',
     ];
 

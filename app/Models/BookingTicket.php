@@ -14,6 +14,7 @@ class BookingTicket extends Model
         'participant_name',
         'participant_email',
         'participant_no_ic',
+        'participant_phone',
         'checked_in_at',
         'status',
     ];
