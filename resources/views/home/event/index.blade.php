@@ -1,7 +1,4 @@
-@extends('landing.layouts.landing')
-
-@section('title', $event->title)
-
+@extends('home.homeLayout')
 @push('styles')
     <style>
         .ticket-box {
@@ -283,17 +280,17 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                            <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Add to Calendar
-                                <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                            </p> -->
+                                    <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Add to Calendar
+                                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                    </p> -->
                     <hr class="mb-4" />
                     <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
                     <hr class="mb-4" />
                     @if ($event->status == 1 && $event->buy_link)
                         @foreach ($filteredTickets as $ticket)
-                            <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+                            <div class="mb-4 p-3 border rounded shadow-sm bg-light" style="background-color: #fff !important;">
                                 <p class="fw-bold mb-1">
                                     {{ $ticket->name }} -
                                     <span class="text-primary">{{ $event->currency }}
@@ -335,3 +332,9 @@
     </div>
 
 @endsection
+
+@push('scripts')
+    <script>
+    </script>
+@endpush
+

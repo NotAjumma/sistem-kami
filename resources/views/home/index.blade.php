@@ -1,14 +1,5 @@
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <title>
-        Sistem Kami
-    </title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+@extends('home.homeLayout')
+@push('styles')
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
 
@@ -116,52 +107,12 @@
             }
         }
 
-        .bg-gray-900{
-            background-color: #3736af !important;
-        }
     </style>
-</head>
-
-<body class="bg-white text-gray-900">
-    <header class="w-full border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <ul class="flex space-x-6 text-xs font-normal text-gray-900">
-                <li>
-                    <a class="hover:underline" href="#">
-                        Home
-                    </a>
-                </li>
-                <li>
-                    <a class="hover:underline" href="#">
-                        Event
-                    </a>
-                </li>
-                <!-- <li>
-                    <a class="hover:underline" href="#">
-                        Schedule
-                    </a>
-                </li> -->
-            </ul>
-            <div class="font-bold text-xl select-none">
-                Sistem Kami
-            </div>
-            <ul class="flex space-x-6 text-xs font-normal text-gray-900">
-                <li>
-                    <a class="hover:underline" href="#">
-                        Contact us
-                    </a>
-                </li>
-                <li>
-                    <a class="hover:underline" href="#">
-                        Login
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </header>
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+@endpush
+@section('content')
+    <main class="mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Hero Section -->
-        <section class="pt-10 pb-16 md:pb-20 lg:pb-24">
+        <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <h1 class="text-4xl sm:text-4xl md:text-5xl font-extrabold leading-tight max-w-4xl">
                 Sistem Kami makes systems for your business.
                 <br />
@@ -174,9 +125,8 @@
                 </span>
                 or
                 <span class="inline-block relative">
-                    <img alt="city skyline at night"
-                        class="inline-block w-[120px] h-[40px] object-cover rounded-md mx-2" height="40"
-                        src="https://storage.googleapis.com/a1aa/image/3d77011a-1bfe-4c66-5275-5e435dda84b5.jpg"
+                    <img alt="city skyline at night" class="inline-block w-[120px] h-[40px] object-cover rounded-md mx-2"
+                        height="40" src="https://storage.googleapis.com/a1aa/image/3d77011a-1bfe-4c66-5275-5e435dda84b5.jpg"
                         width="120" />
                 </span>
                 custom software to help you work better.
@@ -191,52 +141,49 @@
             </button>
             <div class="mt-10 flex items-center space-x-10 max-w-md">
                 <img alt="Border company logo" class="h-6 object-contain" height="24"
-                    src="https://storage.googleapis.com/a1aa/image/d3fd383c-735d-41e2-d454-d369a5da6204.jpg"
-                    width="80" />
+                    src="https://storage.googleapis.com/a1aa/image/d3fd383c-735d-41e2-d454-d369a5da6204.jpg" width="80" />
                 <img alt="hues company logo" class="h-6 object-contain" height="24"
-                    src="https://storage.googleapis.com/a1aa/image/75b95c7e-e315-470e-d749-abb4e02c9aad.jpg"
-                    width="80" />
+                    src="https://storage.googleapis.com/a1aa/image/75b95c7e-e315-470e-d749-abb4e02c9aad.jpg" width="80" />
                 <img alt="Leafe company logo" class="h-6 object-contain" height="24"
-                    src="https://storage.googleapis.com/a1aa/image/789f6300-112c-432d-d426-1a285cd1d308.jpg"
-                    width="80" />
+                    src="https://storage.googleapis.com/a1aa/image/789f6300-112c-432d-d426-1a285cd1d308.jpg" width="80" />
             </div>
             <!-- <div class="mt-10 max-w-xs relative">
-                <div class="ticket">
-                    <div class="ticket-perforation"></div>
-                    <div class="ticket-content">
-                        <div>
-                            <div class="ticket-header">
-                                ONE WAY TICKET
+                            <div class="ticket">
+                                <div class="ticket-perforation"></div>
+                                <div class="ticket-content">
+                                    <div>
+                                        <div class="ticket-header">
+                                            ONE WAY TICKET
+                                        </div>
+                                        <div class="ticket-subheader">
+                                            Sistem Kami Exclusive
+                                        </div>
+                                        <div class="ticket-stars" aria-label="3 star rating">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-footer select-none">
+                                        01
+                                    </div>
+                                </div>
                             </div>
-                            <div class="ticket-subheader">
-                                Sistem Kami Exclusive
+                            <div class="absolute top-2 right-2 text-xs text-white/80 font-semibold select-none">
+                                The best ticket category
+                                <br />
+                                currently available
                             </div>
-                            <div class="ticket-stars" aria-label="3 star rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="ticket-footer select-none">
-                            01
-                        </div>
-                    </div>
-                </div>
-                <div class="absolute top-2 right-2 text-xs text-white/80 font-semibold select-none">
-                    The best ticket category
-                    <br />
-                    currently available
-                </div>
-            </div> -->
+                        </div> -->
         </section>
         <!-- Decide To Join Section -->
-        <section class="bg-gray-900 text-white px-4 py-12 rounded-lg mb-16">
-            <h2 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-light">
+        <section class="container bg-gray-900 text-white px-4 py-12 rounded-lg mb-16">
+            <h2 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-white">
                 Decide To
                 <span class="font-bold">
-                    Join
+                    Create
                 </span>
-                The Event.
+                Your system.
             </h2>
             <p class="max-w-3xl text-gray-300 text-sm sm:text-base mb-6 leading-relaxed">
                 Lorem Ipsum Dolor Sit Amet, Consectetur Adipisicing Veniam Dignissim Ullamco Non Aliquat Ex Aliquet
@@ -287,7 +234,7 @@
             </div>
         </section>
         <!-- Detail Custom Section -->
-        <section class="mb-20 max-w-5xl mx-auto px-4 sm:px-0">
+        <section class="container mb-20 max-w-5xl mx-auto px-4 sm:px-0">
             <div class="mb-6 max-w-2xl">
                 <h3 class="text-2xl font-extrabold mb-3 leading-snug">
                     We bring together
@@ -295,7 +242,7 @@
                 </h3>
                 <p class="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
                     Every detail is designed to help your business run smoothly.
-Custom or ready-made systems — made simple for you.
+                    Custom or ready-made systems — made simple for you.
                 </p>
                 <button
                     class="inline-flex items-center bg-gray-900 text-white text-xs font-semibold px-6 py-2 rounded-md hover:bg-gray-800 transition"
@@ -308,11 +255,10 @@ Custom or ready-made systems — made simple for you.
         </section>
         <!-- Meet Our Artist Section -->
         <section
-            class="mb-20 max-w-5xl mx-auto px-4 sm:px-0 flex flex-col md:flex-row items-center md:items-start space-y-8 md:space-y-0 md:space-x-10">
+            class="container mb-20 max-w-5xl mx-auto px-4 sm:px-0 flex flex-col md:flex-row items-center md:items-start space-y-8 md:space-y-0 md:space-x-10">
             <div class="relative w-full max-w-xs md:max-w-[280px]">
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
-                    height="400"
-                    src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
+                    height="400" src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
                     width="280" />
                 <button
                     class="absolute bottom-4 left-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
@@ -332,18 +278,17 @@ Custom or ready-made systems — made simple for you.
                     <br />
                     <br />
                     <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
+                                Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
                 </p>
                 <!-- <p class="text-xs text-gray-500 mb-6">
-                    @AnirudhRavichander Tour On March-21
-                    <br />
-                    Tickets Open Now: Sitlix.Com
-                </p> -->
+                                @AnirudhRavichander Tour On March-21
+                                <br />
+                                Tickets Open Now: Sitlix.Com
+                            </p> -->
             </div>
             <div class="relative w-full max-w-xs md:max-w-[280px]">
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
-                    height="400"
-                    src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
+                    height="400" src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
                     width="280" />
                 <button
                     class="absolute bottom-4 left-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
@@ -363,22 +308,23 @@ Custom or ready-made systems — made simple for you.
                     <br />
                     <br />
                     <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
+                                Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
                 </p>
                 <p class="text-xs text-gray-500 mb-6">
                     <!-- @AnirudhRavichander Tour On March-21
-                    <br />
-                    Tickets Open Now: Sitlix.Com -->
+                                <br />
+                                Tickets Open Now: Sitlix.Com -->
                 </p>
             </div>
         </section>
         <!-- Opinions Section -->
-        <section class="max-w-5xl mx-auto px-4 sm:px-0 mb-20">
+        <section class="container max-w-5xl mx-auto px-4 sm:px-0 mb-20">
             <h3 class="text-xl font-extrabold mb-6">
                 We Value Your Feedback
             </h3>
             <p class="text-gray-600 text-sm sm:text-base mb-8">
-                Who should join us? Anyone looking for tailored systems and solutions to make their work easier and more efficient.
+                Who should join us? Anyone looking for tailored systems and solutions to make their work easier and more
+                efficient.
                 <br>We listen to your needs and deliver smart, reliable tools built just for you.
             </p>
             <div class="space-y-4 text-gray-900 font-semibold text-sm">
@@ -412,8 +358,8 @@ Custom or ready-made systems — made simple for you.
             </div>
         </section>
         <!-- Get Your First Ticket Section -->
-        <section class="bg-gray-900 text-white py-16 px-4 rounded-lg mb-20 max-w-7xl mx-auto relative overflow-hidden">
-            <h3 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-center text-light">
+        <section class="container bg-gray-900 text-white py-16 px-4 rounded-lg mb-20 relative overflow-hidden">
+            <h3 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-center text-white">
                 Get Your First Ticket
             </h3>
             <p class="max-w-3xl text-gray-300 text-sm sm:text-base mb-8 leading-relaxed text-center mx-auto">
@@ -428,38 +374,14 @@ Custom or ready-made systems — made simple for you.
                 </button>
             </div>
             <img alt="Background silhouettes of people at concert with dark overlay"
-                class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none"
-                height="300" src="https://storage.googleapis.com/a1aa/image/19541d07-888e-4f94-3539-c0e925b86cee.jpg"
-                style="z-index:0" width="1200" />
+                class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none" height="300"
+                src="https://storage.googleapis.com/a1aa/image/19541d07-888e-4f94-3539-c0e925b86cee.jpg" style="z-index:0"
+                width="1200" />
         </section>
     </main>
-    <footer
-        class="bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
-        <div class="mb-4 md:mb-0 flex items-center space-x-2 font-semibold select-none">
-            <img alt="Sistem Kami logo icon" class="w-6 h-6 object-contain" height="24"
-                src="https://storage.googleapis.com/a1aa/image/501f42d5-3fc2-42e0-434a-b77bbd7fba90.jpg" width="24" />
-            <span>
-                Sistem Kami
-            </span>
-        </div>
-        <div class="flex space-x-6 mb-4 md:mb-0 text-gray-400">
-            <a class="hover:text-white" href="#">
-                Schedule
-            </a>
-            <a class="hover:text-white" href="#">
-                Broadcast
-            </a>
-            <a class="hover:text-white" href="#">
-                Event
-            </a>
-        </div>
-        <div class="text-gray-500 select-none">
-            Privacy policy
-        </div>
-        <div class="text-gray-500 select-none">
-            © 2022
-        </div>
-    </footer>
-</body>
+@endsection
 
-</html>
+@push('scripts')
+    <script>
+    </script>
+@endpush
