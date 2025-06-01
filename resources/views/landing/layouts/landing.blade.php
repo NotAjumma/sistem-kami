@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@yield('title', 'Landing Page')</title>
+    <title>{{ config('dz.name') }} | @yield('title', $page_title ?? '')</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -12,9 +12,17 @@
     <!-- Font Awesome for social icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
-    <!-- Your custom CSS (optional) -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet" />
-
+    <!-- Style css -->
+    @if(!empty(config('dz.public.global.css')))
+        @foreach(config('dz.public.global.css') as $style)
+            <link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
+        @endforeach
+    @endif
+    <link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
+    <script src="https://cdn.tailwindcss.com">
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">

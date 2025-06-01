@@ -70,7 +70,7 @@ class EventController extends Controller
         // If single day event, just show one day
         $event->date_days = ($startDay === $endDay) ? $startDay : ($startDay . ' - ' . $endDay);
 
-        return view('event.index', compact('event', 'filteredTickets'));
+        return view('home.event.index', compact('event', 'filteredTickets'));
     }
 
 

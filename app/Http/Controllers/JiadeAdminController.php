@@ -451,7 +451,7 @@ class JiadeAdminController extends Controller
 	public function login(){
         $page_title = 'Login';
         $page_description = $this->page_description();
-        return view('jiade.page.login', compact('page_title', 'page_description'));
+        return view('admin.auth.login', compact('page_title', 'page_description'));
     }
 	
 	//login
