@@ -40,6 +40,8 @@ RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
 RUN php artisan config:clear && php artisan cache:clear && php artisan config:cache
 # RUN php artisan migrate --force
 
+RUN php artisan storage:link
+
 # Betulkan permission untuk folder penting
 RUN chmod -R 775 storage bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache public \

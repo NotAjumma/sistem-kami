@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Artisan;
 
 class BookingController extends Controller
 {
@@ -96,6 +97,7 @@ class BookingController extends Controller
                 ]);
             }
 
+            Artisan::call('drive:download-receipts');
             DB::commit();
 
             return response()->json(['message' => 'Sync successful'], 200);
