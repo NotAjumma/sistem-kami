@@ -1155,10 +1155,10 @@
         </div>
     @else
         <div class="page-titles">
-            <div class="d-flex align-items-center">
+            <!-- <div class="d-flex align-items-center">
                 <h2 class="text-white">{{ isset($page_title) ? $page_title : '' }}</h2>
-                <p class="text-warning ms-2">Welcome Back Yatin Sharma!</p>
-            </div>
+                <p class="text-warning ms-2">Welcome Back {{ $authUser->name }}</p>
+            </div> -->
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active ms-auto">
                     @php 
