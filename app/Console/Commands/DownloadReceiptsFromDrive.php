@@ -15,7 +15,7 @@ class DownloadReceiptsFromDrive extends Command
     {
         $folderId = '1oAN9RZ6sso2223i-Njtp4fDeBpJIx5w2pG44hQu31_KGxij_r5HKbqgXcBNUPd-0eGLNs_xx';
         $client = new \Google_Client();
-        $client->setAuthConfig(storage_path('app/google/credentials.json'));
+        $client->setAuthConfig(storage_path('app/credentials.json'));
 
 
         $client->addScope(Drive::DRIVE_READONLY);
