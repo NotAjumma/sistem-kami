@@ -55,7 +55,7 @@ class BookingController extends Controller
                 $fileData = base64_decode($base64);
 
                 // Define local path relative to project root
-                $localPath = public_path('images/resit/' . $filename);
+                $localPath = public_path('images/receipts/' . $filename);
 
                 // Pastikan folder wujud
                 if (!file_exists(dirname($localPath))) {
