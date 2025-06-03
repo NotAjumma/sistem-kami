@@ -14,13 +14,9 @@ class DownloadReceiptsFromDrive extends Command
     public function handle()
     {
         $folderId = '1oAN9RZ6sso2223i-Njtp4fDeBpJIx5w2pG44hQu31_KGxij_r5HKbqgXcBNUPd-0eGLNs_xx';
-        // Optional
-        // $credentialsPath = $this->writeGoogleCredentialsToFile();
+        $client = new \Google_Client();
+        $client->setAuthConfig(storage_path('app/google/credentials.json'));
 
-        $client = new Client();
-        // $client->setAuthConfig(storage_path('app/google/credentials.json')); // path to your JSON key
-        $client->setAuthConfig(base_path('storage/app/credentials.json'));
-        // $client->setAuthConfig($credentialsPath);
 
         $client->addScope(Drive::DRIVE_READONLY);
 
