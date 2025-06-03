@@ -5,10 +5,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\OrganizerController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
-use App\Http\Controllers\Auth\AuthController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,15 +49,23 @@ Route::get('/db-check', function () {
 
 // Used route
 Route::get('/', [HomeController::class, 'index'])->name('index');
-Route::get('/index', [JiadeAdminController::class, 'index'])->name('page_login');
-Route::get('/organizer', [JiadeAdminController::class, 'page_login'])->middleware('auth:organizer')->name('page_login');
-Route::get('/login', [JiadeAdminController::class, 'page_login'])->name('login');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
 Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('admin.dashboard');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
+    // Similar for organizer, marshal, participant...
+});
+
+// Organizer Route
+Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
+Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
+    Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.logout');
+    Route::get('/bookings', 'bookings')->name('organizer.bookings');
 
     // Similar for organizer, marshal, participant...
 });
@@ -65,8 +74,8 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
 // Route::get('/marshal/login', [AuthController::class, 'marshal'])->name('marshal.login');
 // Route::get('/login', [AuthController::class, 'participant'])->name('participant.login');
 
-Route::prefix('organizer')
-    ->middleware('auth:organizer')
+Route::prefix('jiade')
+    // ->middleware('auth:organizer')
     ->controller(JiadeAdminController::class)
     ->group(function () {
     Route::get('/', 'dashboard');

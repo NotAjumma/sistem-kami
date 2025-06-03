@@ -107,7 +107,7 @@
 		<!--**********************************
             Chat box start
         ***********************************-->
-        @include('layouts.elements.header')
+        @include('layouts.admin.elements.header')
 			<!--**********************************
             Header end ti-comment-alt
         ***********************************-->
@@ -115,7 +115,7 @@
         <!--**********************************
             Sidebar start
         ***********************************-->
-        @include('layouts.elements.sidebar')
+        @include('layouts.admin.elements.sidebar')
         <!--**********************************
             Sidebar end
         ***********************************-->

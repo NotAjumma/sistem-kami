@@ -13,7 +13,7 @@ return [
 	|
 	*/
 
-	'name' => env('APP_NAME', 'Jiade Laravel'),
+	'name' => env('APP_NAME', 'Sistem Kami'),
 
 	'public' => [
 		'global' => [
@@ -35,6 +35,14 @@ return [
 		],
 		'pagelevel' => [
 			'css' => [
+				'OrganizerController_dashboard' => [
+					'vendor/swiper/css/swiper-bundle.min.css',
+				],
+				'OrganizerController_bookings' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					
+				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
 					
@@ -262,6 +270,23 @@ return [
 				],
 			],
 			'js' => [
+				'OrganizerController_dashboard' => [
+					'vendor/apexchart/apexchart.js',
+					'vendor/chart-js/chart.bundle.min.js',
+					'vendor/counter/counter.min.js',
+					'vendor/counter/waypoint.min.js',
+					'vendor/peity/jquery.peity.min.js',
+					'vendor/swiper/js/swiper-bundle.min.js',
+					'js/dashboard/dashboard-1.js',
+					
+				],
+				'OrganizerController_bookings' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					
+				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/apexchart/apexchart.js',
 					'vendor/chart-js/chart.bundle.min.js',

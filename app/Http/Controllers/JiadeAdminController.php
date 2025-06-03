@@ -17,15 +17,17 @@ class JiadeAdminController extends Controller
     // Dashboard
     public function dashboard(){
         $page_title = 'Dashboard';
+        $authUser = auth()->guard('organizer')->user()->load('user');
         $page_description = $this->page_description();
-        return view('jiade.dashboard.index', compact('page_title', 'page_description'));
+        return view('jiade.dashboard.index', compact('page_title', 'page_description', 'authUser'));
     }
 	
 	// Dashboard 2
 	public function dashboard_2(){
         $page_title = 'Dashboard';
+        $authUser = auth()->guard('organizer')->user()->load('user');
         $page_description = $this->page_description();
-        return view('jiade.dashboard.index_2', compact('page_title', 'page_description'));
+        return view('jiade.dashboard.index_2', compact('page_title', 'page_description', 'authUser'));
     }
 	
 	// order-list 

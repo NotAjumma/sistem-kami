@@ -21,6 +21,16 @@ class AuthController extends Controller
         $role = $request->route('role') ?? 'participant';
         return view('admin.auth.login', compact('role'));
     }
+
+    public function showLoginOrganizer(Request $request)
+    {
+        if (auth('organizer')->check()) {
+            return redirect()->route('organizer.dashboard');
+        }
+        // dd(auth('organizer')->user());
+        $role = $request->route('role') ?? 'participant';
+        return view('organizer.auth.login', compact('role'));
+    }
     /**
      * Handle login for given role.
      * 
@@ -43,11 +53,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // If role is specified, check user role matches
+        // Role check
         if ($role) {
-            // For superadmin role, your user.role must be 'superadmin'
-            // Adjust role names if needed
-
             if ($role === 'admin' && $user->role !== 'superadmin') {
                 return response()->json(['message' => 'Unauthorized: Superadmin only'], 403);
             }
@@ -56,31 +63,28 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Unauthorized: ' . $role . ' only'], 403);
             }
         } else {
-            // No role param means generic login - only allow participant
             if ($user->role !== 'participant') {
                 return response()->json(['message' => 'Unauthorized: Participant only'], 403);
             }
         }
 
-        // Create token
-        $token = $user->createToken($role ? $role . '_auth_token' : 'auth_token')->plainTextToken;
-        Auth::login($user);
+        // Find organizer record linked to this user
+        $organizer = \App\Models\Organizer::where('user_id', $user->id)->first();
+
+        if (!$organizer) {
+            return response()->json(['message' => 'Organizer not found for user'], 404);
+        }
+
+        // Log in using organizer model for the organizer guard
+        Auth::guard('organizer')->login($organizer);
+
         // Update last login timestamp
         $user->last_login = now();
         $user->save();
 
-        // return response()->json([
-        //     'access_token' => $token,
-        //     'token_type' => 'Bearer',
-        //     'user' => [
-        //         'id' => $user->id,
-        //         'username' => $user->username,
-        //         'role' => $user->role,
-        //     ],
-        // ]);
         // Redirect based on role
         if ($role === 'admin') {
-            return redirect()->route('admin.dashboard'); // define this route
+            return redirect()->route('admin.dashboard');
         } elseif ($role === 'organizer') {
             return redirect()->route('organizer.dashboard');
         } elseif ($role === 'marshal') {
@@ -89,6 +93,7 @@ class AuthController extends Controller
             return redirect()->route('participant.dashboard');
         }
     }
+
     public function register(Request $request)
     {
 
@@ -115,12 +120,33 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = auth()->guard('organizer')->user()->load('user');
+        $redirectUrl = '/login';
+
+        if ($user) {
+            switch ($user->user->role) {
+                case 'admin':
+                    $redirectUrl = '/admin/login';
+                    break;
+                case 'organizer':
+                    $redirectUrl = '/organizer/login';
+                    break;
+                case 'marshal':
+                    $redirectUrl = '/marshal/login';
+                    break;
+                case 'user':
+                    $redirectUrl = '/login';
+                    break;
+                // Add other roles as needed
+            }
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/admin/login'); // redirect to login page after logout
+        return redirect($redirectUrl);
     }
+
 }

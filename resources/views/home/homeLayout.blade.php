@@ -9,7 +9,14 @@
 
 <head>
 	<!--Title-->
-	<title>{{ config('dz.name') }} | @yield('title', $page_title ?? '')</title>
+	<title>
+		@if (request()->is('/'))
+			{{ config('dz.name') }}
+		@else
+			{{ $page_title ?? '' }}
+		@endif
+	</title>
+
 
 	<!-- Meta -->
 	<meta charset="utf-8">
@@ -146,7 +153,7 @@
 						</a>
 					</li>
 					<li>
-						<a class="hover:underline" href="#">
+						<a class="hover:underline" href="{{ route('organizer.login') }}">
 							Login
 						</a>
 					</li>

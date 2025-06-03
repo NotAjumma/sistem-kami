@@ -65,11 +65,11 @@
                         <span class="nav-text">Dashboard</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('index') }}">Dashboard Light</a></li>
-                        <li><a href="{{ url('index-2') }}">Dashboard Dark</a></li>
-                        <li><a href="{{ url('market') }}">Market</a></li>
-                        <li><a href="{{ url('coin-details') }}">Coin Details</a></li>
-                        <li><a href="{{ url('portofolio') }}">Portofolio</a></li>
+                        <li><a href="{{ route('dashboard') }}">Dashboard Light</a></li>
+                        <li><a href="{{ route('dashboard_2') }}">Dashboard Dark</a></li>
+                        <li><a href="{{ route('market') }}">Market</a></li>
+                        <li><a href="{{ route('coin_details') }}">Coin Details</a></li>
+                        <li><a href="{{ route('portofolio') }}">Portofolio</a></li>
                     </ul>
 
                 </li>
@@ -78,10 +78,10 @@
                         <span class="nav-text">Trading</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('trading-market') }}">Market</a></li>
-                        <li><a href="{{ url('ico-listing') }}">Ico Listing</a></li>
-                        <li><a href="{{ url('p2p') }}">P2P</a></li>
-                        <li><a href="{{ url('future') }}">Future</a></li>
+                        <li><a href="{{ route('trading_market') }}">Market</a></li>
+                        <li><a href="{{ route('ico_listing') }}">Ico Listing</a></li>
+                        <li><a href="{{ route('p2p') }}">P2P</a></li>
+                        <li><a href="{{ route('future') }}">Future</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
@@ -89,9 +89,9 @@
                         <span class="nav-text">Crypto</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('market-watch') }}">Market Watch </a></li>
-                        <li><a href="{{ url('exchange') }}">Exchange</a></li>
-                        <li><a href="{{ url('banking') }}">Banking</a></li>
+                        <li><a href="{{ route('market_watch') }}">Market Watch </a></li>
+                        <li><a href="{{ route('exchange') }}">Exchange</a></li>
+                        <li><a href="{{ route('banking') }}">Banking</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
@@ -99,10 +99,10 @@
                         <span class="nav-text">Reports</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('history') }}">History</a></li>
-                        <li><a href="{{ url('orders') }}">Orders</a></li>
-                        <li><a href="{{ url('reports') }}">Report</a></li>
-                        <li><a href="{{ url('user') }}">User</a></li>
+                        <li><a href="{{ route('history') }}">History</a></li>
+                        <li><a href="{{ route('orders') }}">Orders</a></li>
+                        <li><a href="{{ route('reports') }}">Report</a></li>
+                        <li><a href="{{ route('user') }}">User</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -110,26 +110,26 @@
                         <span class="nav-text">Apps</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('app-profile') }}">Profile</a></li>
-                        <li><a href="{{ url('edit-profile') }}">Edit Profile</a></li>
-                        <li><a href="{{ url('post-details') }}">Post Details</a></li>
+                        <li><a href="{{ route('app_profile') }}">Profile</a></li>
+                        <li><a href="{{ route('edit_profile') }}">Edit Profile</a></li>
+                        <li><a href="{{ route('post_details') }}">Post Details</a></li>
                         <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Email</a>
                             <ul aria-expanded="false">
-                                <li><a href="{{ url('email-compose') }}">Compose</a></li>
-                                <li><a href="{{ url('email-inbox') }}">Inbox</a></li>
-                                <li><a href="{{ url('email-read') }}">Read</a></li>
+                                <li><a href="{{ route('email_compose') }}">Compose</a></li>
+                                <li><a href="{{ route('email_inbox') }}">Inbox</a></li>
+                                <li><a href="{{ route('email_read') }}">Read</a></li>
                             </ul>
                         </li>
-                        <li><a href="{{ url('app-calender') }}">Calendar</a></li>
+                        <li><a href="{{ route('app_calender') }}">Calendar</a></li>
                         <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Shop</a>
                             <ul aria-expanded="false">
-                                <li><a href="{{ url('ecom-product-grid') }}">Product Grid</a></li>
-                                <li><a href="{{ url('ecom-product-list') }}">Product List</a></li>
-                                <li><a href="{{ url('ecom-product-detail') }}">Product Details</a></li>
-                                <li><a href="{{ url('ecom-product-order') }}">Order</a></li>
-                                <li><a href="{{ url('ecom-checkout') }}">Checkout</a></li>
-                                <li><a href="{{ url('ecom-invoice') }}">Invoice</a></li>
-                                <li><a href="{{ url('ecom-customers') }}">Customers</a></li>
+                                <li><a href="{{ route('ecom_product_grid') }}">Product Grid</a></li>
+                                <li><a href="{{ route('ecom_product_list') }}">Product List</a></li>
+                                <li><a href="{{ route('ecom_product_detail') }}">Product Details</a></li>
+                                <li><a href="{{ route('ecom_product_order') }}">Order</a></li>
+                                <li><a href="{{ route('ecom_checkout') }}">Checkout</a></li>
+                                <li><a href="{{ route('ecom_invoice') }}">Invoice</a></li>
+                                <li><a href="{{ route('ecom_customers') }}">Customers</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -139,14 +139,14 @@
                         <span class="nav-text">CMS</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('content') }}">Content</a></li>
-                        <li><a href="{{ url('content-add') }}">Add Content</a></li>
-                        <li><a href="{{ url('menu') }}">Menus</a></li>
-                        <li><a href="{{ url('email-template') }}">Email Template</a></li>
-                        <li><a href="{{ url('add-email') }}">Add Email</a></li>
-                        <li><a href="{{ url('blog') }}">Blog</a></li>
-                        <li><a href="{{ url('add-blog') }}">Add Blog</a></li>
-                        <li><a href="{{ url('blog-category') }}">Blog Category</a></li>
+                        <li><a href="{{ route('content') }}">Content</a></li>
+                        <li><a href="{{ route('content_add') }}">Add Content</a></li>
+                        <li><a href="{{ route('menu') }}">Menus</a></li>
+                        <li><a href="{{ route('email_template') }}">Email Template</a></li>
+                        <li><a href="{{ route('add_email') }}">Add Email</a></li>
+                        <li><a href="{{ route('blog') }}">Blog</a></li>
+                        <li><a href="{{ route('add_blog') }}">Add Blog</a></li>
+                        <li><a href="{{ route('blog_category') }}">Blog Category</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -154,12 +154,12 @@
                         <span class="nav-text">Charts</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('chart-flot') }}">Flot</a></li>
-                        <li><a href="{{ url('chart-morris') }}">Morris</a></li>
-                        <li><a href="{{ url('chart-chartjs') }}">Chartjs</a></li>
-                        <li><a href="{{ url('chart-chartist') }}">Chartist</a></li>
-                        <li><a href="{{ url('chart-sparkline') }}">Sparkline</a></li>
-                        <li><a href="{{ url('chart-peity') }}">Peity</a></li>
+                        <li><a href="{{ route('chart_flot') }}">Flot</a></li>
+                        <li><a href="{{ route('chart_morris') }}">Morris</a></li>
+                        <li><a href="{{ route('chart_chartjs') }}">Chartjs</a></li>
+                        <li><a href="{{ route('chart_chartist') }}">Chartist</a></li>
+                        <li><a href="{{ route('chart_sparkline') }}">Sparkline</a></li>
+                        <li><a href="{{ route('chart_peity') }}">Peity</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -168,22 +168,22 @@
                         <span class="nav-text">Bootstrap</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('ui-accordion') }}">Accordion</a></li>
-                        <li><a href="{{ url('ui-alert') }}">Alert</a></li>
-                        <li><a href="{{ url('ui-badge') }}">Badge</a></li>
-                        <li><a href="{{ url('ui-button') }}">Button</a></li>
-                        <li><a href="{{ url('ui-modal') }}">Modal</a></li>
-                        <li><a href="{{ url('ui-button-group') }}">Button Group</a></li>
-                        <li><a href="{{ url('ui-list-group') }}">List Group</a></li>
-                        <li><a href="{{ url('ui-card') }}">Cards</a></li>
-                        <li><a href="{{ url('ui-carousel') }}">Carousel</a></li>
-                        <li><a href="{{ url('ui-dropdown') }}">Dropdown</a></li>
-                        <li><a href="{{ url('ui-popover') }}">Popover</a></li>
-                        <li><a href="{{ url('ui-progressbar') }}">Progressbar</a></li>
-                        <li><a href="{{ url('ui-tab') }}">Tab</a></li>
-                        <li><a href="{{ url('ui-typography') }}">Typography</a></li>
-                        <li><a href="{{ url('ui-pagination') }}">Pagination</a></li>
-                        <li><a href="{{ url('ui-grid') }}">Grid</a></li>
+                        <li><a href="{{ route('ui_accordion') }}">Accordion</a></li>
+                        <li><a href="{{ route('ui_alert') }}">Alert</a></li>
+                        <li><a href="{{ route('ui_badge') }}">Badge</a></li>
+                        <li><a href="{{ route('ui_button') }}">Button</a></li>
+                        <li><a href="{{ route('ui_modal') }}">Modal</a></li>
+                        <li><a href="{{ route('ui_button_group') }}">Button Group</a></li>
+                        <li><a href="{{ route('ui_list_group') }}">List Group</a></li>
+                        <li><a href="{{ route('ui_card') }}">Cards</a></li>
+                        <li><a href="{{ route('ui_carousel') }}">Carousel</a></li>
+                        <li><a href="{{ route('ui_dropdown') }}">Dropdown</a></li>
+                        <li><a href="{{ route('ui_popover') }}">Popover</a></li>
+                        <li><a href="{{ route('ui_progressbar') }}">Progressbar</a></li>
+                        <li><a href="{{ route('ui_tab') }}">Tab</a></li>
+                        <li><a href="{{ route('ui_typography') }}">Typography</a></li>
+                        <li><a href="{{ route('ui_pagination') }}">Pagination</a></li>
+                        <li><a href="{{ route('ui_grid') }}">Grid</a></li>
 
                     </ul>
                 </li>
@@ -192,16 +192,16 @@
                         <span class="nav-text">Plugins</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('uc-select2') }}">Select 2</a></li>
-                        <li><a href="{{ url('uc-nestable') }}">Nestedable</a></li>
-                        <li><a href="{{ url('uc-noui-slider') }}">Noui Slider</a></li>
-                        <li><a href="{{ url('uc-sweetalert') }}">Sweet Alert</a></li>
-                        <li><a href="{{ url('uc-toastr') }}">Toastr</a></li>
-                        <li><a href="{{ url('map-jqvmap') }}">Jqv Map</a></li>
-                        <li><a href="{{ url('uc-lightgallery') }}">Light Gallery</a></li>
+                        <li><a href="{{ route('uc_select2') }}">Select 2</a></li>
+                        <li><a href="{{ route('uc_nestable') }}">Nestedable</a></li>
+                        <li><a href="{{ route('uc_noui_slider') }}">Noui Slider</a></li>
+                        <li><a href="{{ route('uc_sweetalert') }}">Sweet Alert</a></li>
+                        <li><a href="{{ route('uc_toastr') }}">Toastr</a></li>
+                        <li><a href="{{ route('map_jqvmap') }}">Jqv Map</a></li>
+                        <li><a href="{{ route('uc_lightgallery') }}">Light Gallery</a></li>
                     </ul>
                 </li>
-                <li><a href="{{ url('widget-basic') }}" class="" aria-expanded="false">
+                <li><a href="{{ route('widget_basic') }}" class="" aria-expanded="false">
                         <i class="material-symbols-outlined">widgets</i>
                         <span class="nav-text">Widget</span>
                     </a>
@@ -211,11 +211,11 @@
                         <span class="nav-text">Forms</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('form-element') }}">Form Elements</a></li>
-                        <li><a href="{{ url('form-wizard') }}">Wizard</a></li>
-                        <li><a href="{{ url('form-ckeditor') }}">CkEditor</a></li>
-                        <li><a href="{{ url('form-pickers') }}">Pickers</a></li>
-                        <li><a href="{{ url('form-validation') }}">Form Validate</a></li>
+                        <li><a href="{{ route('form_element') }}">Form Elements</a></li>
+                        <li><a href="{{ route('form_wizard') }}">Wizard</a></li>
+                        <li><a href="{{ route('form_ckeditor') }}">CkEditor</a></li>
+                        <li><a href="{{ route('form_pickers') }}">Pickers</a></li>
+                        <li><a href="{{ route('form_validation') }}">Form Validate</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -223,8 +223,8 @@
                         <span class="nav-text">Table</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('table-bootstrap-basic') }}">Bootstrap</a></li>
-                        <li><a href="{{ url('table-datatable-basic') }}">Datatable</a></li>
+                        <li><a href="{{ route('table_bootstrap_basic') }}">Bootstrap</a></li>
+                        <li><a href="{{ route('table_datatable_basic') }}">Datatable</a></li>
                     </ul>
                 </li>
                 <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -232,19 +232,19 @@
                         <span class="nav-text">Pages</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ url('page-login') }}">Login</a></li>
-                        <li><a href="{{ url('page-register') }}">Register</a></li>
+                        <li><a href="{{ route('page_login') }}">Login</a></li>
+                        <li><a href="{{ route('page_register') }}">Register</a></li>
                         <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Error</a>
                             <ul aria-expanded="false">
-                                <li><a href="{{ url('page-error-400') }}">Error 400</a></li>
-                                <li><a href="{{ url('page-error-403') }}">Error 403</a></li>
-                                <li><a href="{{ url('page-error-404') }}">Error 404</a></li>
-                                <li><a href="{{ url('page-error-500') }}">Error 500</a></li>
-                                <li><a href="{{ url('page-error-503') }}">Error 503</a></li>
+                                <li><a href="{{ route('page_error_400') }}">Error 400</a></li>
+                                <li><a href="{{ route('page_error_403') }}">Error 403</a></li>
+                                <li><a href="{{ route('page_error_404') }}">Error 404</a></li>
+                                <li><a href="{{ route('page_error_500') }}">Error 500</a></li>
+                                <li><a href="{{ route('page_error_503') }}">Error 503</a></li>
                             </ul>
                         </li>
-                        <li><a href="{{url('page-lock-screen')}}">Lock Screen</a></li>
-                        <li><a href="{{ url('empty-page') }}">Empty Page</a></li>
+                        <li><a href="{{route('page_lock_screen')}}">Lock Screen</a></li>
+                        <li><a href="{{ route('empty_page') }}">Empty Page</a></li>
                     </ul>
                 </li>
             </ul>

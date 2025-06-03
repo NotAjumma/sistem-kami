@@ -40,10 +40,24 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        // Add this
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'users', // assuming admin is stored in the users table
+        ],
+
         'organizer' => [
-            'driver' => 'session',      // or token if API guard
-            'provider' => 'organizers', // must match a provider below
+            'driver' => 'session',
+            'provider' => 'organizers',
+        ],
+
+        'marshal' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        'participant' => [
+            'driver' => 'session',
+            'provider' => 'users',
         ],
     ],
 
@@ -68,6 +82,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+
+        'organizers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Organizer::class,
         ],
 
         // 'users' => [

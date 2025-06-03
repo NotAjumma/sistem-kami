@@ -14,7 +14,13 @@ class Organizer extends Authenticatable
         'name',
         'email',
         'phone',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function events(): HasMany
     {
