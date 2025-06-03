@@ -72,13 +72,13 @@ class BookingController extends Controller
 
             // Buat booking baru
             $booking = Booking::create([
-                'participant_id'    => $participant->id,
-                'event_id'          => $ticket->event_id,
-                'booking_code'      => $eventCode . '-' . now()->format('ymd') . '-' . strtoupper(Str::random(5)),
-                'status'            => 'pending',
-                'total_price'       => $totalPrice,
-                'payment_method'    => 'gform',
-                'resit_path'        => $resitPath ?? null,
+                'participant_id' => $participant->id,
+                'event_id' => $ticket->event_id,
+                'booking_code' => $eventCode . '-' . now()->format('ymd') . '-' . strtoupper(Str::random(5)),
+                'status' => 'pending',
+                'total_price' => $totalPrice,
+                'payment_method' => 'gform',
+                'resit_path' => $resitPath ?? null,
             ]);
 
             // 4. Buat booking ticket detail
@@ -102,7 +102,27 @@ class BookingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Sync failed', 'details' => $e->getMessage()], 500);
+            $data = $request->all();
+
+            // Log to sync_failed table
+            $noIc = $data['no_ic'] ?? '';
+            $email = $data['email'] ?? '';
+
+            // Format uniq_code by concatenating no_ic and email, separated by underscore or any delimiter you want
+            $uniqCode = $noIc . '_' . $email;
+
+            DB::table('sync_failed')->insert([
+                'module' => 'booking_sync',
+                'uniq_code' => $uniqCode,
+                'data' => json_encode($request->all()),
+                'error' => $e->getMessage(),
+                'created_at' => now()
+            ]);
+
+            return response()->json([
+                'error' => 'Sync failed',
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
