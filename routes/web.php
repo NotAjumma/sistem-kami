@@ -1,8 +1,14 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\DB;
+use App\Mail\TestMail;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\Auth\AuthController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,23 +20,23 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
-Route::get('/test', function() {
-    return 'Hello World';
+Route::get('/send-test-mail', function () {
+    Mail::to('muhamadakmal9973@gmail.com')->send(new TestMail());
+    return 'Test email sent!';
 });
 
-Route::get('/debug-log', function () {
-    return response()->file(storage_path('logs/laravel.log'));
-});
+
+
 
 Route::get('/db-check', function () {
     try {
         DB::connection()->getPdo();
 
-        $users = DB::table('users')->get(); // Fetch all users
+        $events = DB::table('events')->get();
 
         return response()->json([
             'status' => '✅ DB connected!',
-            'users' => $users,
+            'events' => $events,
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -40,7 +46,29 @@ Route::get('/db-check', function () {
     }
 });
 
-Route::controller(JiadeAdminController::class)->group(function () {
+// Used route
+Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/index', [JiadeAdminController::class, 'index'])->name('page_login');
+Route::get('/organizer', [JiadeAdminController::class, 'page_login'])->middleware('auth:organizer')->name('page_login');
+Route::get('/login', [JiadeAdminController::class, 'page_login'])->name('login');
+Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
+
+Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
+Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
+    Route::get('/dashboard', 'dashboard')->name('admin.dashboard');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Similar for organizer, marshal, participant...
+});
+
+// Route::get('/organizer/login', [AuthController::class, 'organizer'])->name('organizer.login');
+// Route::get('/marshal/login', [AuthController::class, 'marshal'])->name('marshal.login');
+// Route::get('/login', [AuthController::class, 'participant'])->name('participant.login');
+
+Route::prefix('organizer')
+    ->middleware('auth:organizer')
+    ->controller(JiadeAdminController::class)
+    ->group(function () {
     Route::get('/', 'dashboard');
     Route::get('/index', 'dashboard')->name('dashboard');
     Route::get('/index-2','dashboard_2')->name('dashboard_2');
