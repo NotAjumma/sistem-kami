@@ -65,7 +65,7 @@ class BookingController extends Controller
                 file_put_contents($localPath, $fileData);
 
                 // Simpan path relatif untuk database (contoh: images/resit/filename.jpg)
-                $resitPath = 'images/resit/' . $filename;
+                $resitPath = $filename;
             }
             $bilanganJoran = (int) ($data['bilangan_joran'] ?? 1);
             $totalPrice = (float) $ticket->price * (int) $bilanganJoran;
