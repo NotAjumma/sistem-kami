@@ -46,12 +46,33 @@ class OrganizerController extends Controller
             ->pluck('booking_id');
 
         // Step 4: Fetch bookings with eager loading
-        $bookings = Booking::with(['bookingTickets', 'participant'])
+        $bookings = Booking::with([
+            'bookingTickets',
+            'participant',
+            'event:id,title'
+        ])
             ->whereIn('id', $bookingIds)
             ->latest()
             ->get();
 
+
+        \Log::info($bookings);
         return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings'));
     }
+
+    public function verifyPayment($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        if ($booking->payment_method === 'gform' && $booking->status !== 'confirmed') {
+            $booking->status = 'confirmed';
+            $booking->save();
+
+            return redirect()->back()->with('success', 'Payment verified and status updated.');
+        }
+
+        return redirect()->back()->with('error', 'Cannot verify this booking.');
+    }
+
 
 }

@@ -10,6 +10,7 @@ class Booking extends Model
 
     protected $fillable = [
         'participant_id',
+        'booking_id',
         'booking_code',
         'total_price',
         'resit_path',
@@ -28,4 +29,10 @@ class Booking extends Model
     {
         return $this->hasMany(BookingTicket::class);
     }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
 }

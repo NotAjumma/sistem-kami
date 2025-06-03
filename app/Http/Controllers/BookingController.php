@@ -73,6 +73,7 @@ class BookingController extends Controller
             // Buat booking baru
             $booking = Booking::create([
                 'participant_id'    => $participant->id,
+                'event_id'          => $ticket->event_id,
                 'booking_code'      => $eventCode . '-' . now()->format('ymd') . '-' . strtoupper(Str::random(5)),
                 'status'            => 'pending',
                 'total_price'       => $totalPrice,

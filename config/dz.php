@@ -41,7 +41,7 @@ return [
 				'OrganizerController_bookings' => [
 					'vendor/datatables/css/jquery.dataTables.min.css',
 					'vendor/datatables/responsive/responsive.css',
-					
+					'vendor/sweetalert2/dist/sweetalert2.min.css'
 				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
@@ -285,7 +285,8 @@ return [
 					'vendor/datatables/responsive/responsive.js',
 					'js/plugins-init/datatables.init.js',
 					'js/highlight.min.js',
-					
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
 				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/apexchart/apexchart.js',
