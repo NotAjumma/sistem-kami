@@ -74,7 +74,7 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'participant_id' => $participant->id,
                 'event_id' => $ticket->event_id,
-                'booking_code' => $eventCode . '-' . now()->format('ymd') . '-' . strtoupper(Str::random(5)),
+                'booking_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
                 'status' => 'pending',
                 'total_price' => $totalPrice,
                 'payment_method' => 'gform',
@@ -91,7 +91,7 @@ class BookingController extends Controller
                     'participant_no_ic' => $data['no_ic'] ?? null,
                     'participant_phone' => $data['phone'] ?? null,
                     // 'ticket_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(4)),
-                    'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(5)),
+                    'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
                     'status' => 'pending',
                 ]);
             }

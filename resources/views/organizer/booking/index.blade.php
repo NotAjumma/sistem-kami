@@ -22,6 +22,7 @@
                             <table id="example3" class="display min-w850">
                                 <thead>
                                     <tr>
+                                        <th>#</th>
                                         <th>Booking Code</th>
                                         <th>Event</th>
                                         <th>Name</th>
@@ -31,8 +32,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($bookings as $booking)
+                                    @foreach ($bookings as $index => $booking)
                                         <tr>
+                                            <td>{{ $index+1 }}</td>
                                             <td>{{ $booking->booking_code }}</td>
                                             <td>{{ $booking->event->title }}</td>
                                             <td>{{ $booking->participant->name }}</td>
