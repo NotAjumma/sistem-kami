@@ -147,4 +147,19 @@ class BookingController extends Controller
 
         return redirect()->back()->with('success', 'Payment validated and email sent.');
     }
+
+    protected function writeGoogleCredentialsToFile()
+    {
+        $json = env('GOOGLE_CREDENTIALS_JSON');
+
+        if (!$json) {
+            throw new \Exception('Google credentials not found in environment variable.');
+        }
+
+        $path = storage_path('app/google/credentials-temp.json');
+
+        file_put_contents($path, $json);
+
+        return $path;
+    }
 }

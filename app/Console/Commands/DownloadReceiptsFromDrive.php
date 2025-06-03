@@ -13,11 +13,14 @@ class DownloadReceiptsFromDrive extends Command
 
     public function handle()
     {
-        $folderId = '1oAN9RZ6sso2223i-Njtp4fDeBpJIx5w2pG44hQu31_KGxij_r5HKbqgXcBNUPd-0eGLNs_xx'; // Your Drive folder ID here
+        $folderId = '1oAN9RZ6sso2223i-Njtp4fDeBpJIx5w2pG44hQu31_KGxij_r5HKbqgXcBNUPd-0eGLNs_xx';
+        // Optional
+        $credentialsPath = $this->writeGoogleCredentialsToFile();
 
-        // Initialize Google Client
         $client = new Client();
-        $client->setAuthConfig(storage_path('app/google/credentials.json')); // path to your JSON key
+        // $client->setAuthConfig(storage_path('app/google/credentials.json')); // path to your JSON key
+        $client->setAuthConfig($credentialsPath);
+
         $client->addScope(Drive::DRIVE_READONLY);
 
         $driveService = new Drive($client);
@@ -61,4 +64,19 @@ class DownloadReceiptsFromDrive extends Command
 
         $this->info('All receipt files downloaded!');
     }
+    protected function writeGoogleCredentialsToFile()
+    {
+        $json = env('GOOGLE_CREDENTIALS_JSON');
+
+        if (!$json) {
+            throw new \Exception('Google credentials not found in environment variable.');
+        }
+
+        $path = storage_path('app/google/credentials-temp.json');
+
+        file_put_contents($path, $json);
+
+        return $path;
+    }
+
 }
