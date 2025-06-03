@@ -59,7 +59,7 @@
                                                 @php
                                                     $filename = $booking->resit_path; // e.g., 'resit.pdf' or 'resit.png'
                                                     $encoded = rawurlencode($filename);
-                                                    $url = asset('storage/receipts/' . $encoded);
+                                                    $url = asset('images/receipts/' . $encoded);
 
                                                     $isPdf = Str::endsWith(strtolower($filename), '.pdf');
                                                 @endphp

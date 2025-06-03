@@ -34,7 +34,7 @@ class DownloadReceiptsFromDrive extends Command
             foreach ($response->files as $file) {
                 $this->info("Downloading: {$file->name}");
 
-                $filePath = storage_path('app/public/receipts/' . $file->name);
+                $filePath = public_path('images/receipts/' . $file->name);
 
                 if (file_exists($filePath)) {
                     $this->info("Skipping (already exists): {$file->name}");
@@ -44,7 +44,6 @@ class DownloadReceiptsFromDrive extends Command
                 $content = $driveService->files->get($file->id, ['alt' => 'media']);
 
                 // $filePath = storage_path('app/receipts/' . $file->name);
-                $filePath = storage_path('app/public/receipts/' . $file->name);
                 // Make sure directory exists
                 if (!file_exists(dirname($filePath))) {
                     mkdir(dirname($filePath), 0755, true);
