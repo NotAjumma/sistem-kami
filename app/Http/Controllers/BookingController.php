@@ -121,6 +121,20 @@ class BookingController extends Controller
                 'created_at' => now()
             ]);
 
+            $credPath = storage_path('app/credentials.json');
+
+            if (!file_exists($credPath) || filesize($credPath) === 0) {
+
+                DB::table('sync_failed')->insert([
+                    'module' => 'checking_gcred',
+                    'uniq_code' => $uniqCode,
+                    'data' => json_encode($data),
+                    'error' => 'Invalid or empty credentials.json file',
+                    'created_at' => now(),
+                ]);
+            }
+
+
             return response()->json([
                 'error' => 'Sync failed',
                 'details' => $e->getMessage(),
