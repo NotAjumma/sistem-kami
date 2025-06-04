@@ -87,6 +87,7 @@ class BookingController extends Controller
                 BookingTicket::create([
                     'booking_id' => $booking->id,
                     'ticket_id' => $ticket->id,
+                    'price' => $ticket->price,
                     'participant_name' => $data['participant_name'] ?? $data['name'],
                     'participant_email' => $data['email'],
                     'participant_no_ic' => $data['no_ic'] ?? null,

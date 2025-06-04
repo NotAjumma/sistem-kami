@@ -11,6 +11,7 @@ class BookingTicket extends Model
     protected $fillable = [
         'booking_id',
         'ticket_id',
+        'price',
         'participant_name',
         'participant_email',
         'participant_no_ic',

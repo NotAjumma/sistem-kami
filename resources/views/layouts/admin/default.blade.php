@@ -88,11 +88,10 @@
         ***********************************-->
 		<div class="nav-header">
 			<a href="{{ url('index') }}" class="brand-logo">
-				<img src="{{ asset('images/logo-white.png') }}" alt="">
-
+				<img id="brand-logo-img" src="{{ asset('images/logo-white.png') }}" alt="">
 			</a>
 			<div class="nav-control">
-				<div class="hamburger">
+				<div class="hamburger" id="hamburger-toggle">
 					<span class="line"></span><span class="line"></span><span class="line"></span>
 				</div>
 			</div>
@@ -416,6 +415,23 @@
 	@endif
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const hamburger = document.getElementById('hamburger-toggle');
+			const logoImg = document.getElementById('brand-logo-img');
+			let isMenuOpen = false;
+
+			hamburger.addEventListener('click', function () {
+				isMenuOpen = !isMenuOpen;
+
+				if (isMenuOpen) {
+					logoImg.src = "{{ asset('images/logo-white-only.png') }}";
+				} else {
+					logoImg.src = "{{ asset('images/logo-white.png') }}";
+				}
+			});
+		});
+	</script>
 	@stack('scripts')
 </body>
 

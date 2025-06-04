@@ -16,6 +16,9 @@ class Booking extends Model
         'resit_path',
         'payment_method',
         'status',
+        'coupon_code',
+        'discount',
+        'final_price',
     ];
 
     // Relasi ke participant

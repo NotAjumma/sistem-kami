@@ -10,6 +10,9 @@ use App\Http\Controllers\OrganizerController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Booking;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -26,7 +29,7 @@ Route::get('/send-test-mail', function () {
     return 'Test email sent!';
 });
 
-Route::get('/env', function() {
+Route::get('/env', function () {
     return response()->json([
         'APP_ENV' => env('APP_ENV'),
         'GOOGLE_DRIVE_CREDENTIALS' => env('GOOGLE_DRIVE_CREDENTIALS'),
@@ -54,6 +57,8 @@ Route::get('/db-check', function () {
     }
 });
 
+
+
 // Used route
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
@@ -67,6 +72,7 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
     // Similar for organizer, marshal, participant...
 });
 
+
 // Organizer Route
 Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
@@ -75,7 +81,13 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::get('/bookings', 'bookings')->name('organizer.bookings');
     Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.booking.edit');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.booking.verify');
+    Route::get('/preview-ticket/{booking}', function ($bookingId) {
+        $booking = Booking::findOrFail($bookingId);
 
+        $pdf = PDF::loadView('emails.ticket_pdf', ['booking' => $booking]);
+
+        return $pdf->stream('ticket.pdf'); // open inline in browser
+    });
     // Similar for organizer, marshal, participant...
 });
 

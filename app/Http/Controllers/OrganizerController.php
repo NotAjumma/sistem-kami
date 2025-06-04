@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Booking;
 use App\Models\BookingTicket;
+use App\Models\EmailLog;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class OrganizerController extends Controller
 {
@@ -62,13 +64,28 @@ class OrganizerController extends Controller
 
     public function verifyPayment($id)
     {
-        $booking = Booking::findOrFail($id);
+        // $booking = Booking::with(['participant', 'bookingTickets', 'event.organizers'])->findOrFail($id);
+        $booking = Booking::with(['participant', 'bookingTickets', 'event.organizer'])->findOrFail($id);
+
 
         if ($booking->payment_method === 'gform' && $booking->status !== 'confirmed') {
             $booking->status = 'confirmed';
             $booking->save();
 
-            return redirect()->back()->with('success', 'Payment verified and status updated.');
+            $booking->bookingTickets()->update(['status' => 'printed']);
+
+            $booking->load('bookingTickets');
+
+            // Send email to booking's email
+            Mail::to($booking->participant->email)->send(new PaymentConfirmed($booking));
+
+            EmailLog::create([
+                'to_email' => $booking->participant->email,
+                'type' => 'payment_confirmed',
+                'sent_at' => now(),
+            ]);
+
+            return redirect()->back()->with('success', 'Payment verified and email has been send.');
         }
 
         return redirect()->back()->with('error', 'Cannot verify this booking.');

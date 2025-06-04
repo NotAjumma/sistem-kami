@@ -33,9 +33,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
 # Generate APP_KEY kalau tiada
-# RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
-#     php artisan key:generate
-RUN cp -f .env.example .env && php artisan key:generate --force
+RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
+    php artisan key:generate
+# RUN cp -f .env.example .env && php artisan key:generate --force
 
 RUN php artisan config:clear && php artisan cache:clear
 # RUN php artisan migrate --force
