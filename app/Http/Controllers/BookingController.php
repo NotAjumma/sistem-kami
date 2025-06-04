@@ -97,7 +97,7 @@ class BookingController extends Controller
                 ]);
             }
 
-            Artisan::call('drive:download-receipts');
+            // Artisan::call('drive:download-receipts');
             DB::commit();
 
             return response()->json(['message' => 'Sync successful'], 200);
@@ -121,18 +121,18 @@ class BookingController extends Controller
                 'created_at' => now()
             ]);
 
-            $credPath = storage_path('app/credentials.json');
+            // $credPath = storage_path('app/credentials.json');
 
-            if (!file_exists($credPath) || filesize($credPath) === 0) {
+            // if (!file_exists($credPath) || filesize($credPath) === 0) {
 
-                DB::table('sync_failed')->insert([
-                    'module' => 'checking_gcred',
-                    'uniq_code' => $uniqCode,
-                    'data' => json_encode($data),
-                    'error' => 'Invalid or empty credentials.json file',
-                    'created_at' => now(),
-                ]);
-            }
+            //     DB::table('sync_failed')->insert([
+            //         'module' => 'checking_gcred',
+            //         'uniq_code' => $uniqCode,
+            //         'data' => json_encode($data),
+            //         'error' => 'Invalid or empty credentials.json file',
+            //         'created_at' => now(),
+            //     ]);
+            // }
 
 
             return response()->json([
