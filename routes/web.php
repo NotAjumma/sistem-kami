@@ -34,6 +34,9 @@ Route::get('/env', function () {
         'APP_ENV' => env('APP_ENV'),
         'GOOGLE_DRIVE_CREDENTIALS' => env('GOOGLE_DRIVE_CREDENTIALS'),
         'APP_URL' => env('APP_URL'),
+        'MAILGUN_SECRET' => env('MAILGUN_SECRET'),
+        'MAILGUN_ENDPOINT' => env('MAILGUN_ENDPOINT'),
+        'MAILGUN_DOMAIN' => env('MAILGUN_DOMAIN'),
         // Add any other keys you want to check
     ]);
 });
