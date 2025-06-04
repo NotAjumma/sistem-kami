@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Google\Client;
 use Google\Service\Drive;
+use Illuminate\Support\Facades\Storage;
 
 class DownloadReceiptsFromDrive extends Command
 {
@@ -13,23 +14,31 @@ class DownloadReceiptsFromDrive extends Command
 
     public function handle()
     {
+
         $base64 = env('GOOGLE_DRIVE_CREDENTIALS');
-        if ($base64) {
-            $json = base64_decode($base64);
-            $path = storage_path('app/credentials.json');
 
-            if (!file_exists(dirname($path))) {
-                mkdir(dirname($path), 0755, true);
-            }
-
-            file_put_contents($path, $json);
-            $this->info('✅ credentials.json written to storage/app/credentials.json');
+        if (!$base64) {
+            throw new \Exception('GOOGLE_DRIVE_CREDENTIALS not set');
         }
+
+        // Decode base64 to get original JSON string
+        $credentialsJson = base64_decode($base64);
+
+        if (!$credentialsJson) {
+            throw new \Exception('Failed to decode GOOGLE_DRIVE_CREDENTIALS');
+        }
+
+        $credentialsPath = storage_path('app/google-credentials.json');
+
+        if (!file_exists($credentialsPath)) {
+            Storage::disk('local')->put('google-credentials.json', $credentialsJson);
+        }
+
 
         $folderId = '1oAN9RZ6sso2223i-Njtp4fDeBpJIx5w2pG44hQu31_KGxij_r5HKbqgXcBNUPd-0eGLNs_xx';
         $client = new \Google_Client();
-        $client->setAuthConfig(storage_path('app/credentials.json'));
-
+        // $client->setAuthConfig(storage_path('app/credentials.json'));
+        $client->setAuthConfig($credentialsPath);
 
         $client->addScope(Drive::DRIVE_READONLY);
 
