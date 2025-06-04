@@ -37,7 +37,7 @@ RUN npm install && npm run build
 #     php artisan key:generate
 RUN cp -f .env.example .env && php artisan key:generate --force
 
-RUN php artisan config:clear && php artisan cache:clear && php artisan config:cache
+RUN php artisan config:clear && php artisan cache:clear
 # RUN php artisan migrate --force
 
 # Create public/app folder to avoid error if missing
