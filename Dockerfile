@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    # install Node.js and npm dependencies
     ca-certificates \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
@@ -40,12 +39,9 @@ RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
 RUN php artisan config:clear && php artisan cache:clear && php artisan config:cache
 # RUN php artisan migrate --force
 
-RUN php artisan storage:link
-
 # Betulkan permission untuk folder penting
-RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache public \
-    && chmod -R 775 storage bootstrap/cache public
+RUN chmod -R 775 storage bootstrap/cache public/app \
+    && chown -R www-data:www-data storage bootstrap/cache public public/app
 
 # Expose port (Railway inject ${PORT})
 EXPOSE 8080
