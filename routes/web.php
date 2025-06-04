@@ -26,7 +26,14 @@ Route::get('/send-test-mail', function () {
     return 'Test email sent!';
 });
 
-
+Route::get('/env', function() {
+    return response()->json([
+        'APP_ENV' => env('APP_ENV'),
+        'GOOGLE_DRIVE_CREDENTIALS' => env('GOOGLE_DRIVE_CREDENTIALS'),
+        'APP_URL' => env('APP_URL'),
+        // Add any other keys you want to check
+    ]);
+});
 
 
 Route::get('/db-check', function () {
