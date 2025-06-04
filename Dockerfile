@@ -39,7 +39,10 @@ RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
 RUN php artisan config:clear && php artisan cache:clear && php artisan config:cache
 # RUN php artisan migrate --force
 
-# Betulkan permission untuk folder penting
+# Create public/app folder to avoid error if missing
+RUN mkdir -p public/app
+
+# Then fix permissions (including public/app)
 RUN chmod -R 775 storage bootstrap/cache public/app \
     && chown -R www-data:www-data storage bootstrap/cache public public/app
 
