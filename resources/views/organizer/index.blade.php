@@ -2,7 +2,7 @@
 @section('content')
 <div class="container-fluid">
     <!-- Row -->
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-xl-12">
             <div class="row  main-card">
                 <div class="swiper mySwiper-counter position-relative overflow-hidden">
@@ -709,7 +709,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 @endsection
 

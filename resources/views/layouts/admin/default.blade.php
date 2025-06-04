@@ -48,10 +48,10 @@
 	<link rel="stylesheet"
 		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
 	<!-- Bootstrap CSS -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
 	<!-- Bootstrap JS Bundle (includes Popper) -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
 
 	@stack('styles')
 
@@ -368,8 +368,8 @@
         ***********************************-->
 		<div class="footer style-1">
 			<div class="copyright">
-				<p>Copyright © Designed &amp; Developed by <a href="https://dexignlab.com/"
-						target="_blank">DexignLab</a> <span class="current-year">2024</span></p>
+				<p>Copyright © Designed &amp; Developed by <a href=""
+						target="_blank">SistemKami</a> <span class="current-year">2025</span></p>
 			</div>
 		</div>
 		<!--**********************************

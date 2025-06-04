@@ -1,6 +1,6 @@
 <div class="dlabnav {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'follow-info' : '' }}">
     <div class="feature-box {{ in_array($page, array('dashboard', 'dashboard_2')) ? '' : 'style-3' }}">
-        <div class="wallet-box">
+        <!-- <div class="wallet-box">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50px"
                 height="50px" viewBox="0 0 24 24" version="1.1" class="svg-main-icon">
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -54,7 +54,7 @@
                     <small>Following</small>
                 </div>
             </div>
-        @endif
+        @endif -->
     </div>
     <span class="main-menu">Main Menu</span>
     <div class="menu-scroll">

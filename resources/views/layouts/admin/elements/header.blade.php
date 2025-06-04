@@ -849,7 +849,7 @@
                             </a>
                         </li>
                     @endif    
-                    <li class="nav-item dropdown notification_dropdown">
+                    <!-- <li class="nav-item dropdown notification_dropdown">
                         <a class="nav-link " href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                 width="32px" height="32px" viewBox="0 0 24 24" version="1.1"
@@ -1026,7 +1026,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </li>
+                    </li> -->
                     <li>
                         @auth
                             <div class="dropdown header-profile2">
@@ -1045,7 +1045,7 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="{{ url('app-profile') }}" class="dropdown-item ai-icon ">
+                                    <!-- <a href="{{ url('app-profile') }}" class="dropdown-item ai-icon ">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                             width="24px" height="24px" viewBox="0 0 24 24" version="1.1"
                                             class="svg-main-icon">
@@ -1104,9 +1104,9 @@
                                             </g>
                                         </svg>
                                         <span class="ms-2">Settings </span>
-                                    </a>
+                                    </a> -->
 
-                                <a href="#" class="dropdown-item ai-icon" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <a href="#" class="dropdown-item ai-icon" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <svg class="logout" xmlns="http://www.w3.org/2000/svg" width="18"
                                             height="18" viewBox="0 0 24 24" fill="none" stroke="#fd5353"
                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1149,7 +1149,10 @@
             <div class="sub-dz-head">
                 <div class="d-flex align-items-center dz-head-title">
                     <h2 class="text-white m-0">Dashboard</h2>
-                    <p class="ms-2 text-warning">Welcome Back {{ $authUser->name }}</p>
+                    <p class="ms-2 text-warning">
+                        Coming Soon
+                        <!-- Welcome Back {{ $authUser->name }} -->
+                    </p>
                 </div>
             </div>
         </div>
