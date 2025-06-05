@@ -149,7 +149,7 @@
         }
 
         li {
-        list-style-type: inherit !important; 
+            list-style-type: inherit !important; 
         }
     </style>
 @endpush
