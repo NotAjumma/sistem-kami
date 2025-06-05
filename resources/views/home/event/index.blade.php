@@ -231,7 +231,7 @@
                 </h6>
 
 
-                <h4 class="pb-4">Description</h4>
+                <h4 class="pb-4">SYARAT-SYARAT PERTANDINGAN</h4>
                 <p>{!! $event->description !!}</p>
 
                 {{-- Google Map --}}
