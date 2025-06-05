@@ -84,6 +84,11 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::get('/bookings', 'bookings')->name('organizer.bookings');
     Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.booking.edit');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.booking.verify');
+    Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.tickets.confirmed');
+    Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.ticket.checkin');
+
+
+
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);
 

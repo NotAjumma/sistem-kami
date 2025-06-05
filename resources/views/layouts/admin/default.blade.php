@@ -432,7 +432,38 @@
 			});
 		});
 	</script>
-	@stack('scripts')
+	@if(session('success'))
+		<script>
+			toastr.info("{{ session('success') }}", "Success", {
+				timeOut: 5000,
+				closeButton: true,
+				progressBar: true,
+				positionClass: "toast-top-right",
+				newestOnTop: true,
+				preventDuplicates: true,
+				tapToDismiss: false,
+				showDuration: "300",
+				hideDuration: "1000",
+				extendedTimeOut: "1000",
+				showEasing: "swing",
+				hideEasing: "linear",
+				showMethod: "fadeIn",
+				hideMethod: "fadeOut"
+			});
+		</script>
+	@endif
+	<!-- @if(session('success'))
+		<script>
+			Swal.fire({
+				icon: 'success',
+				title: 'Success',
+				text: '{{ session('success') }}',
+				timer: 2000,
+				showConfirmButton: false
+			});
+		</script>
+	@endif -->
+		@stack('scripts')
 </body>
 
 </html>
