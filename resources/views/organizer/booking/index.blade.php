@@ -15,7 +15,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Bookings List</h4>
+                        <h4 class="card-title">{{ $page_title }}</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -144,42 +144,48 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const verifyButtons = document.querySelectorAll('.btn-verify-payment');
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     const verifyButtons = document.querySelectorAll('.btn-verify-payment');
 
-            verifyButtons.forEach(button => {
-                button.addEventListener('click', function (e) {
-                    const form = this.closest('form');
-                    const bookingCode = this.getAttribute('data-booking-code');
+        //     verifyButtons.forEach(button => {
+        //         button.addEventListener('click', function (e) {
+        //             const form = this.closest('form');
+        //             const bookingCode = this.getAttribute('data-booking-code');
 
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: `Mark payment for booking code "${bookingCode}" as confirmed?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#28a745',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, verify it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
+        //             Swal.fire({
+        //                 title: 'Are you sure?',
+        //                 text: `Mark payment for booking code "${bookingCode}" as confirmed?`,
+        //                 icon: 'warning',
+        //                 showCancelButton: true,
+        //                 confirmButtonColor: '#28a745',
+        //                 cancelButtonColor: '#d33',
+        //                 confirmButtonText: 'Yes, verify it!'
+        //             }).then((result) => {
+        //                 if (result.isConfirmed) {
+        //                     form.submit();
+        //                 }
+        //             });
+        //         });
+        //     });
+        // });
+        $('#example3 tbody').on('click', '.btn-verify-payment', function () {
+            const form = $(this).closest('form')[0]; // get the form element
+            const bookingCode = $(this).data('booking-code'); // jQuery .data auto converts
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Mark payment for booking code "${bookingCode}" as confirmed?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, verify it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
             });
         });
-
-        @if(session('success'))
-                    < script >
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: '{{ session('success') }}',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-            </script>
-        @endif
 
     </script>
     <script>

@@ -37,11 +37,22 @@ return [
 			'css' => [
 				'OrganizerController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
 				],
 				'OrganizerController_bookings' => [
 					'vendor/datatables/css/jquery.dataTables.min.css',
 					'vendor/datatables/responsive/responsive.css',
-					'vendor/sweetalert2/dist/sweetalert2.min.css'
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
+				],
+				'OrganizerController_ticketsConfirmed' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
 				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
@@ -278,6 +289,10 @@ return [
 					'vendor/peity/jquery.peity.min.js',
 					'vendor/swiper/js/swiper-bundle.min.js',
 					'js/dashboard/dashboard-1.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
+
 					
 				],
 				'OrganizerController_bookings' => [
@@ -287,6 +302,18 @@ return [
 					'js/highlight.min.js',
 					'vendor/sweetalert2/dist/sweetalert2.min.js',
 					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+				],
+				'OrganizerController_ticketsConfirmed' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
 				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/apexchart/apexchart.js',

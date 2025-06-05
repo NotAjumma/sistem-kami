@@ -62,6 +62,40 @@ class OrganizerController extends Controller
         return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings'));
     }
 
+    public function ticketsConfirmed()
+    {
+        $page_title = 'Tickets List Confirmed';
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        // Step 1: Get all event IDs by this organizer
+        $eventIds = DB::table('events')
+            ->where('organizer_id', $authUser->id)
+            ->pluck('id');
+
+        // Step 2: Get all ticket IDs for those events
+        $ticketIds = DB::table('tickets')
+            ->whereIn('event_id', $eventIds)
+            ->pluck('id');
+
+        // Step 3: Fetch booking tickets with related ticket, event, and booking
+        $bookingTickets = BookingTicket::with([
+            'ticket.event:id,title',
+            'booking' => function ($query) {
+                $query->where('status', 'confirmed');
+            }
+        ])
+            ->whereIn('ticket_id', $ticketIds)
+            ->whereHas('booking', function ($query) {
+                $query->where('status', 'confirmed');
+            })
+            ->latest()
+            ->get();
+
+        \Log::info($bookingTickets);
+
+        return view('organizer.booking.ticket_confirmed', compact('page_title', 'authUser', 'bookingTickets'));
+    }
+
     public function verifyPayment($id)
     {
         // $booking = Booking::with(['participant', 'bookingTickets', 'event.organizers'])->findOrFail($id);
@@ -89,6 +123,21 @@ class OrganizerController extends Controller
         }
 
         return redirect()->back()->with('error', 'Cannot verify this booking.');
+    }
+
+    public function ticketCheckin($id)
+    {
+        $bookingTicket = BookingTicket::with('booking')->findOrFail($id);
+
+        if ($bookingTicket->booking->status !== 'confirmed') {
+            return redirect()->back()->with('error', 'Cannot check in ticket because booking is not confirmed.');
+        }
+
+        $bookingTicket->status = 'checkin';
+        $bookingTicket->checked_in_at = Now();
+        $bookingTicket->save();
+
+        return redirect()->back()->with('success', 'Ticket successfully checked in.');
     }
 
 

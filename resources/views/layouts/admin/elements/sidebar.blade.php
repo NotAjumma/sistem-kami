@@ -71,8 +71,8 @@
                     </a>
                     <ul aria-expanded="false">
                         <li><a href="{{ route('organizer.bookings') }}">Bookings List</a></li>
+                        <li><a href="{{ route('organizer.tickets.confirmed') }}">Tickets List Confirmed</a></li>
                     </ul>
-
                 </li>
 
         </div>
