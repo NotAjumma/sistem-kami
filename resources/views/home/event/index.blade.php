@@ -140,6 +140,17 @@
         .link-red:hover {
             text-decoration: underline;
         }
+
+        ol {
+            display: block !important;
+            list-style-type: lower-roman !important;
+            margin: 1em 0 !important;
+            padding-left: 40px !important;
+        }
+
+        li {
+            list-style-type: inherit !important; 
+        }
     </style>
 @endpush
 
