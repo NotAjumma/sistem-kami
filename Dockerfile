@@ -40,8 +40,6 @@ RUN npm install && npm run build
 RUN php artisan config:clear && php artisan cache:clear
 # RUN php artisan migrate --force
 
-RUN php artisan drive:download-receipts
-
 # Create public/app folder to avoid error if missing
 RUN mkdir -p public/app
 
@@ -49,8 +47,12 @@ RUN mkdir -p public/app
 RUN chmod -R 775 storage bootstrap/cache public/app \
     && chown -R www-data:www-data storage bootstrap/cache public public/app
 
+# Copy entrypoint script and give execution permission
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port (Railway inject ${PORT})
 EXPOSE 8080
 
-# Jalankan Laravel dengan port dinamik
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# Use entrypoint script to start container
+ENTRYPOINT ["/entrypoint.sh"]
