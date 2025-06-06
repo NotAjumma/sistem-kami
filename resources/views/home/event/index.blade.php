@@ -243,7 +243,7 @@
 
 
                 <h4 class="pb-4">SYARAT-SYARAT PERTANDINGAN</h4>
-                <p>{!! $event->description !!}</p>
+                {!! $event->description !!}
 
                 {{-- Google Map --}}
                 @if($event->latitude && $event->longitude)
@@ -291,11 +291,11 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                                    <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                        <i class="fas fa-calendar-alt me-2"></i>
-                                        Add to Calendar
-                                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                    </p> -->
+                                        <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            Add to Calendar
+                                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                        </p> -->
                     <hr class="mb-4" />
                     <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
                     <hr class="mb-4" />
@@ -348,4 +348,3 @@
     <script>
     </script>
 @endpush
-

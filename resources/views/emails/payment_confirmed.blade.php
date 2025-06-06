@@ -2,11 +2,19 @@
 
 <p>We are pleased to inform you that your payment has been successfully confirmed. Thank you for booking with <strong>SistemKami</strong>.</p>
 
+@if ($isEligibleForShirt)
+    <p>🎉 Congratulations! You are among the first 100 participants eligible to receive a shirt for this event.</p>
+    <p>The shirt will be provided according to the size you selected: <strong>{{ $booking->extra_info['shirt_size'] ?? 'Not specified' }}</strong>.</p>
+@endif
+
 <p><strong>Booking Summary</strong></p>
 <ul>
     <li><strong>Booking Code:</strong> {{ $booking->booking_code }}</li>
     <li><strong>Status:</strong> {{ ucfirst($booking->status) }}</li>
     <li><strong>Total Price:</strong> RM {{ number_format($booking->final_price, 2) }}</li>
+    @if ($isEligibleForShirt)
+        <li><strong>Shirt Size:</strong> {{ $booking->extra_info['shirt_size'] ?? 'Not specified' }}</li>
+    @endif
 </ul>
 
 <p><strong>Ticket Details</strong></p>

@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Models\Booking;
 
 class PaymentConfirmed extends Mailable
 {
@@ -26,6 +27,13 @@ class PaymentConfirmed extends Mailable
     public function build()
     {
         $event = $this->booking->event;
+
+        $isEligibleForShirt = Booking::where('event_id', $this->booking->event_id)
+        ->where('status', 'confirmed')
+        ->orderBy('created_at', 'asc')
+        ->limit(100)
+        ->pluck('id')
+        ->contains($this->booking->id);
 
         // Format start_date
         $startDate = Carbon::parse($event->start_date);
@@ -58,7 +66,10 @@ class PaymentConfirmed extends Mailable
 
         return $this->subject('Payment Confirmation')
             ->view('emails.payment_confirmed')
-            ->with(['booking' => $this->booking])
+            ->with([
+                'booking' => $this->booking,
+                'isEligibleForShirt' => $isEligibleForShirt,
+            ])
             ->attachData($pdf->output(), 'tickets.pdf', [
                 'mime' => 'application/pdf',
             ]);

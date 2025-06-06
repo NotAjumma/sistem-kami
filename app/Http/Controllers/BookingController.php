@@ -50,20 +50,20 @@ class BookingController extends Controller
             $resitPath = null;
 
             if ($request->has('resit_pembayaran_base64')) {
-                $base64 = $request->input('resit_pembayaran_base64');
+                // $base64 = $request->input('resit_pembayaran_base64');
                 $filename = $request->input('resit_filename', 'resit_' . time() . '.jpg');
-                $fileData = base64_decode($base64);
+                // $fileData = base64_decode($base64);
 
-                // Define local path relative to project root
-                $localPath = public_path('images/receipts/' . $filename);
+                // // Define local path relative to project root
+                // $localPath = public_path('images/receipts/' . $filename);
 
-                // Pastikan folder wujud
-                if (!file_exists(dirname($localPath))) {
-                    mkdir(dirname($localPath), 0755, true);
-                }
+                // // Pastikan folder wujud
+                // if (!file_exists(dirname($localPath))) {
+                //     mkdir(dirname($localPath), 0755, true);
+                // }
 
-                // Simpan file
-                file_put_contents($localPath, $fileData);
+                // // Simpan file
+                // file_put_contents($localPath, $fileData);
 
                 // Simpan path relatif untuk database (contoh: images/resit/filename.jpg)
                 $resitPath = $filename;
@@ -71,6 +71,9 @@ class BookingController extends Controller
             $bilanganJoran = (int) ($data['bilangan_joran'] ?? 1);
             $totalPrice = (float) $ticket->price * (int) $bilanganJoran;
 
+            $extraInfo = [
+                'shirt_size' => $data['shirt_size'] ?? null,
+            ];
             // Buat booking baru
             $booking = Booking::create([
                 'participant_id' => $participant->id,
@@ -80,6 +83,7 @@ class BookingController extends Controller
                 'total_price' => $totalPrice,
                 'payment_method' => 'gform',
                 'resit_path' => $resitPath ?? null,
+                'extra_info' => $extraInfo,
             ]);
 
             // 4. Buat booking ticket detail
