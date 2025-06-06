@@ -27,10 +27,17 @@ class OrganizerController extends Controller
         return view('organizer.index', compact('page_title', 'authUser'));
     }
 
-    public function bookings()
+    public function bookings(Request $request)
     {
         $page_title = 'Bookings List';
         $authUser = auth()->guard('organizer')->user()->load('user');
+
+        // Fetch events for the current organizer to populate dropdown
+        $events = DB::table('events')
+            ->where('organizer_id', $authUser->id)
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
 
         // Step 1: Get all event IDs by this organizer
         $eventIds = DB::table('events')
@@ -47,25 +54,47 @@ class OrganizerController extends Controller
             ->whereIn('ticket_id', $ticketIds)
             ->pluck('booking_id');
 
-        // Step 4: Fetch bookings with eager loading
-        $bookings = Booking::with([
-            'bookingTickets',
-            'participant',
-            'event:id,title'
-        ])
+        // Step 4: Fetch bookings with optional status & search filters
+        $bookings = Booking::with(['bookingTickets', 'participant', 'event:id,title'])
             ->whereIn('id', $bookingIds)
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->event_search, function ($query, $event_search) {
+                $query->whereHas('event', function ($q) use ($event_search) {
+                    $q->where('title', $event_search);
+                });
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('participant', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('no_ic', 'like', "%{$search}%")
+                            ->orWhere('booking_code', 'like', "%{$search}%");
+                    });
+                });
+            })
+
             ->latest()
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
-
-        \Log::info($bookings);
-        return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings'));
+        return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings', 'events'));
     }
 
-    public function ticketsConfirmed()
+
+
+    public function ticketsConfirmed(Request $request)
     {
         $page_title = 'Tickets List Confirmed';
         $authUser = auth()->guard('organizer')->user()->load('user');
+
+        // Fetch events for the current organizer to populate dropdown
+        $events = DB::table('events')
+            ->where('organizer_id', $authUser->id)
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
 
         // Step 1: Get all event IDs by this organizer
         $eventIds = DB::table('events')
@@ -80,20 +109,40 @@ class OrganizerController extends Controller
         // Step 3: Fetch booking tickets with related ticket, event, and booking
         $bookingTickets = BookingTicket::with([
             'ticket.event:id,title',
-            'booking' => function ($query) {
-                $query->where('status', 'confirmed');
-            }
+            'booking.bookingTickets'
         ])
             ->whereIn('ticket_id', $ticketIds)
             ->whereHas('booking', function ($query) {
                 $query->where('status', 'confirmed');
             })
+            ->when($request->event_search, function ($query, $event_search) {
+                $query->whereHas('ticket.event', function ($q) use ($event_search) {
+                    $q->where('title', $event_search);
+                });
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    // Search bookingTickets participant fields OR ticket_code
+                    $q->where('ticket_code', 'like', "%{$search}%")
+                        ->orWhereHas('booking.bookingTickets', function ($qq) use ($search) {
+                        $qq->where('participant_name', 'like', "%{$search}%")
+                            ->orWhere('participant_email', 'like', "%{$search}%")
+                            ->orWhere('participant_phone', 'like', "%{$search}%")
+                            ->orWhere('participant_no_ic', 'like', "%{$search}%");
+                    })
+                        // Search booking_code on booking
+                        ->orWhereHas('booking', function ($qq) use ($search) {
+                        $qq->where('booking_code', 'like', "%{$search}%");
+                    });
+                });
+            })
             ->latest()
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         \Log::info($bookingTickets);
 
-        return view('organizer.booking.ticket_confirmed', compact('page_title', 'authUser', 'bookingTickets'));
+        return view('organizer.booking.ticket_confirmed', compact('page_title', 'authUser', 'bookingTickets', 'events'));
     }
 
     public function verifyPayment($id)
@@ -124,6 +173,24 @@ class OrganizerController extends Controller
 
         return redirect()->back()->with('error', 'Cannot verify this booking.');
     }
+
+    public function cancelBooking($id)
+    {
+        $booking = Booking::with(['participant', 'bookingTickets', 'event.organizer'])->findOrFail($id);
+
+        if ($booking->status !== 'cancelled') {
+            $booking->status = 'cancelled';
+            $booking->save();
+
+            // Optionally update related ticket status
+            $booking->bookingTickets()->update(['status' => 'cancelled']);
+
+            return redirect()->back()->with('success', 'Booking has been cancelled.');
+        }
+
+        return redirect()->back()->with('error', 'This booking is already cancelled.');
+    }
+
 
     public function ticketCheckin($id)
     {

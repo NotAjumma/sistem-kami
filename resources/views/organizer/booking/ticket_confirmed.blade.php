@@ -18,6 +18,29 @@
                         <h4 class="card-title">{{ $page_title }}</h4>
                     </div>
                     <div class="card-body">
+                        <form method="GET" id="filterForm" class="mb-3 d-flex gap-2 flex-wrap">
+
+                            <select name="event_search" onchange="document.getElementById('filterForm').submit()"
+                                class="form-select" style="width: 250px;">
+                                <option value="">All Events</option>
+                                @foreach ($events as $event)
+                                    <option value="{{ $event->title }}" {{ request('event_search') == $event->title ? 'selected' : '' }}>
+                                        {{ $event->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            {{-- Search input --}}
+                            <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                                placeholder="Search bookings..." style="width: 250px;">
+
+                            {{-- Buttons wrapper --}}
+                            <div class="d-flex gap-2 flex-grow-1 flex-wrap flex-md-nowrap"
+                                style="width: 100%; max-width: 200px;">
+                                <button type="submit" class="btn btn-primary flex-fill">Filter</button>
+                                <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-info flex-fill">Clear</a>
+                            </div>
+                        </form>
                         <div class="table-responsive">
                             <table id="example3" class="display min-w850">
                                 <thead>
@@ -39,71 +62,71 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($bookingTickets as $index => $eachBookingTicket)
-                                                                    <tr>
-                                                                        <td>{{ $index + 1 }}</td>
-                                                                        <td>{{ $eachBookingTicket->booking->booking_code }}</td>
-                                                                        <td>{{ $eachBookingTicket->ticket_code }}</td>
-                                                                        <td>{{ $eachBookingTicket->ticket->event?->title ?? '-' }}</td>
-                                                                        <td>{{ $eachBookingTicket->participant_name }}</td>
-                                                                        <td>{{ $eachBookingTicket->participant_no_ic }}</td>
-                                                                        <td>{{ $eachBookingTicket->participant_email }}</td>
-                                                                        <td>{{ $eachBookingTicket->participant_phone }}</td>
-                                                                        <td>
-                                                                            @php
-                                                                                $statusClass = match ($eachBookingTicket->status) {
-                                                                                    'printed', 'success' => 'success',
-                                                                                    'checkin' => 'primary',
-                                                                                    'pending' => 'warning',
-                                                                                    default => 'secondary',
-                                                                                };
-                                                                            @endphp
-                                         <span
-                                                                                class="badge bg-{{ $statusClass }}">{{ ucfirst($eachBookingTicket->status) }}</span>
-                                                                        </td>
-                                                                        <td>
-                                                                            <span
-                                                                                class="badge bg-success">{{ ucfirst($eachBookingTicket->booking->status) }}</span>
-                                                                        </td>
-                                                                        <td>RM{{ number_format($eachBookingTicket->booking->final_price, 2) }}</td>
-                                                                        <td>
-                                                                            @php
-                                                                                $filename = $eachBookingTicket->booking->resit_path;
-                                                                                $encoded = rawurlencode($filename);
-                                                                                $url = asset('images/receipts/' . $encoded);
-                                                                                $isPdf = Str::endsWith(strtolower($filename), '.pdf');
-                                                                            @endphp
+                                        <tr>
+                                            <td>{{ $bookingTickets->firstItem() + $index }}</td>
+                                            <td>{{ $eachBookingTicket->booking->booking_code }}</td>
+                                            <td>{{ $eachBookingTicket->ticket_code }}</td>
+                                            <td>{{ $eachBookingTicket->ticket->event?->title ?? '-' }}</td>
+                                            <td>{{ $eachBookingTicket->participant_name }}</td>
+                                            <td>{{ $eachBookingTicket->participant_no_ic }}</td>
+                                            <td>{{ $eachBookingTicket->participant_email }}</td>
+                                            <td>{{ $eachBookingTicket->participant_phone }}</td>
+                                            <td>
+                                                @php
+                                                    $statusClass = match ($eachBookingTicket->status) {
+                                                        'printed', 'success' => 'success',
+                                                        'checkin' => 'primary',
+                                                        'pending' => 'warning',
+                                                        default => 'secondary',
+                                                    };
+                                                @endphp
+                                                <span class="badge bg-{{ $statusClass }}">{{ ucfirst($eachBookingTicket->status) }}</span>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge bg-success">{{ ucfirst($eachBookingTicket->booking->status) }}</span>
+                                            </td>
+                                            <td>RM{{ number_format($eachBookingTicket->booking->final_price, 2) }}</td>
+                                            <td>
+                                                @php
+                                                    $filename = $eachBookingTicket->booking->resit_path;
+                                                    $encoded = rawurlencode($filename);
+                                                    $url = asset('images/receipts/' . $encoded);
+                                                    $isPdf = Str::endsWith(strtolower($filename), '.pdf');
+                                                @endphp
 
-                                                                            @if ($isPdf)
-                                                                                <button class="btn btn-primary btn-xs" data-bs-toggle="modal"
-                                                                                    data-bs-target="#receiptPdfModal" data-pdf-url="{{ $url }}">
-                                                                                    View PDF Receipt
-                                                                                </button>
-                                                                            @else
-                                                                                <img src="{{ $url }}" alt="Receipt" style="width: 100px; cursor: pointer;"
-                                                                                    data-bs-toggle="modal" data-bs-target="#receiptImageModal"
-                                                                                    data-img-url="{{ $url }}" />
-                                                                            @endif
-                                                                        </td>
-                                                                        <td>
-                                                                            @if($eachBookingTicket->booking->payment_method === 'gform' && !is_null($eachBookingTicket->booking->resit_path) && $eachBookingTicket->status !== 'checkin')
-                                                                                <form action="{{ route('organizer.ticket.checkin', $eachBookingTicket->id) }}"
-                                                                                    method="POST" class="d-inline">
-                                                                                    @csrf
-                                                                                    @method('PATCH')
-                                                                                    <button type="button"
-                                                                                        class="btn btn-secondary shadow btn-xs sharp btn-verify-payment"
-                                                                                        data-ticket-code="{{ $eachBookingTicket->ticket_code }}">
-                                                                                        <span style="padding-left: 5px;">Check In</span>
-                                                                                    </button>
-                                                                                </form>
-                                                                            @endif
-                                                                        </td>
-                                                                    </tr>
+                                                @if ($isPdf)
+                                                    <button class="btn btn-primary btn-xs" data-bs-toggle="modal"
+                                                        data-bs-target="#receiptPdfModal" data-pdf-url="{{ $url }}">
+                                                        View PDF Receipt
+                                                    </button>
+                                                @else
+                                                    <img src="{{ $url }}" alt="Receipt" style="width: 100px; cursor: pointer;"
+                                                        data-bs-toggle="modal" data-bs-target="#receiptImageModal"
+                                                        data-img-url="{{ $url }}" />
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($eachBookingTicket->booking->payment_method === 'gform' && !is_null($eachBookingTicket->booking->resit_path) && $eachBookingTicket->status !== 'checkin')
+                                                    <form action="{{ route('organizer.ticket.checkin', $eachBookingTicket->id) }}"
+                                                        method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="button"
+                                                            class="btn btn-secondary shadow btn-xs sharp btn-verify-payment"
+                                                            data-ticket-code="{{ $eachBookingTicket->ticket_code }}">
+                                                            <span style="padding-left: 5px;">Check In</span>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </td>
+                                        </tr>
                                     @endforeach
 
                                 </tbody>
                             </table>
                         </div>
+                        {{ $bookingTickets->withQueryString()->links('vendor.pagination.custom') }}
                     </div>
                 </div>
             </div>

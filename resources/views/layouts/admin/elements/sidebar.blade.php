@@ -59,21 +59,48 @@
     <span class="main-menu">Main Menu</span>
     <div class="menu-scroll">
         <div class="dlabnav-scroll">
+            @php
+                $currentRoute = Route::currentRouteName();
+
+                // Routes that belong to the Bookings submenu
+                $bookingRoutes = [
+                    'organizer.bookings',
+                    'organizer.tickets.confirmed',
+                ];
+
+                $isBookingRoute = in_array($currentRoute, $bookingRoutes);
+            @endphp
+
             <ul class="metismenu" id="menu">
-                <li><a href="{{ route('organizer.dashboard') }}" class="" aria-expanded="false">
+                <li>
+                    <a href="{{ route('organizer.dashboard') }}"
+                        class="{{ $currentRoute === 'organizer.dashboard' ? 'active' : '' }}" aria-expanded="false">
                         <i class="material-symbols-outlined">dashboard</i>
                         <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
-                <li><a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
-                        <i class="material-symbols-outlined">dashboard</i>
+
+                <li class="{{ $isBookingRoute ? 'mm-active' : '' }}">
+                    <a class="has-arrow" href="javascript:void(0);"
+                        aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
+                        <i class="material-symbols-outlined">calendar_month</i>
                         <span class="nav-text">Bookings</span>
                     </a>
-                    <ul aria-expanded="false">
-                        <li><a href="{{ route('organizer.bookings') }}">Bookings List</a></li>
-                        <li><a href="{{ route('organizer.tickets.confirmed') }}">Tickets List Confirmed</a></li>
+
+                    <ul class="{{ $isBookingRoute ? 'mm-show' : '' }}"
+                        aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
+                        <li class="{{ $currentRoute === 'organizer.bookings' ? 'mm-active' : '' }}">
+                            <a href="{{ route('organizer.bookings') }}"
+                                class="{{ $currentRoute === 'organizer.bookings' ? 'active mm-active' : '' }}">Bookings List</a>
+                        </li>
+                        <li class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'mm-active' : '' }}">
+                            <a href="{{ route('organizer.tickets.confirmed') }}"
+                                class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'active mm-active' : '' }}">Tickets
+                                List Confirmed</a>
+                        </li>
                     </ul>
                 </li>
+            </ul>
 
         </div>
     </div>
