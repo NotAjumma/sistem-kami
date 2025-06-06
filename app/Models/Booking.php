@@ -21,6 +21,10 @@ class Booking extends Model
         'final_price',
     ];
 
+    protected $casts = [
+        'extra_info' => 'array',
+    ];
+
     // Relasi ke participant
     public function participant()
     {
