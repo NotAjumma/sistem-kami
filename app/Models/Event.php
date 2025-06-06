@@ -44,4 +44,9 @@ class Event extends Model
             ->with(['children']);
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
 }

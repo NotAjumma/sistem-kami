@@ -87,7 +87,7 @@
 	<!--**********************************
         Main wrapper start
     ***********************************-->
-	<div id="main-wrapper" class="{{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
+	<div id="main-wrapper" class="{{ in_array($page, array('dashboard', 'dashboard_2')) ? '' : '' }}">
 		@if (in_array($page, array('dashboard', 'dashboard_2')))
 			<div class="header-banner" style="background-image:url(images/bg-1.png);"></div>
 		@endif

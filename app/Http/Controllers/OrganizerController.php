@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\BookingTicket;
 use App\Models\EmailLog;
 use App\Models\Ticket;
+use App\Models\Event;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -18,14 +19,64 @@ use Carbon\Carbon;
 class OrganizerController extends Controller
 {
 
+
     public function dashboard()
     {
         $page_title = 'Dashboard';
         $authUser = auth()->guard('organizer')->user()->load('user');
+        $organizerId = $authUser->id;
 
-        // \Log::info($authUser);
-        return view('organizer.index', compact('page_title', 'authUser'));
+        // Basic stats
+        $totalEvents = Event::where('organizer_id', $organizerId)->count();
+        $ticketSold = BookingTicket::whereIn('status', ['printed', 'checkin'])
+            ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'confirmed'))
+            ->count();
+        $totalBookings = Booking::where('organizer_id', $organizerId)->count();
+        $totalIncome = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->sum('final_price');
+        $pendingBookings = Booking::where('organizer_id', $organizerId)->where('status', 'pending')->count();
+        $confirmBookings = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->count();
+
+        // Get top 3 events by booking count
+        $topEvents = Event::where('organizer_id', $organizerId)
+            ->withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->take(3)
+            ->get();
+
+        $salesChartData = [];
+
+        foreach ($topEvents as $event) {
+            $monthlySales = Booking::selectRaw('MONTH(created_at) as month, SUM(final_price) as total')
+                ->where('event_id', $event->id)
+                ->where('status', 'confirmed')
+                ->groupBy(DB::raw('MONTH(created_at)'))
+                ->pluck('total', 'month');
+
+            $salesChartData[] = [
+                'name' => $event->title,
+                'className' => 'bg-primary',
+                'data' => collect(range(1, 12))->map(fn($m) => (int) ($monthlySales[$m] ?? 0))->toArray()
+            ];
+        }
+
+        // \Log::info("salesChartData");
+        // \Log::info(print_r($salesChartData, true));
+
+        return view('organizer.index', compact(
+            'page_title',
+            'authUser',
+            'totalEvents',
+            'ticketSold',
+            'totalBookings',
+            'totalIncome',
+            'confirmBookings',
+            'pendingBookings',
+            'salesChartData'
+        ));
     }
+
+
+
 
     public function bookings(Request $request)
     {

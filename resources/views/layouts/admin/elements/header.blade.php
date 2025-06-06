@@ -1150,8 +1150,8 @@
                 <div class="d-flex align-items-center dz-head-title">
                     <h2 class="text-white m-0">Dashboard</h2>
                     <p class="ms-2 text-warning">
-                        Coming Soon
-                        <!-- Welcome Back {{ $authUser->name }} -->
+                        <!-- Coming Soon -->
+                        Welcome Back, {{ $authUser->name }}
                     </p>
                 </div>
             </div>
