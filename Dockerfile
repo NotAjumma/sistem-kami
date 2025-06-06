@@ -40,7 +40,7 @@ RUN npm install && npm run build
 RUN php artisan config:clear && php artisan cache:clear
 # RUN php artisan migrate --force
 
-RUN php artisan gdrive:sync
+RUN php artisan drive:download-receipts
 
 # Create public/app folder to avoid error if missing
 RUN mkdir -p public/app
