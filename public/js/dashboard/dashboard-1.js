@@ -138,127 +138,127 @@
     }
     var widgetChart5 = function () {
       if (jQuery("#widgetChart5").length > 0) {
-      var options = {
-        series: [
-          {
-            name: 'Net Profit',
-            data: [200, 310, 50, 250, 50, 300, 100, 200, 100, 400],
-            /* radius: 30,	 */
+        var options = {
+          series: [
+            {
+              name: 'Net Profit',
+              data: [200, 310, 50, 250, 50, 300, 100, 200, 100, 400],
+              /* radius: 30,	 */
+            },
+          ],
+          chart: {
+            type: 'line',
+            height: 70,
+            width: 500,
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false
+            },
+            sparkline: {
+              enabled: true
+            }
+
           },
-        ],
-        chart: {
-          type: 'line',
-          height: 70,
-          width: 500,
-          toolbar: {
+
+          //colors:['var(--primary)'],
+          dataLabels: {
+            enabled: false,
+          },
+
+          legend: {
             show: false,
           },
-          zoom: {
-            enabled: false
+          stroke: {
+            show: true,
+            width: 6,
+            curve: 'smooth',
+            colors: ['rgba(163, 199, 241, 1)'],
           },
-          sparkline: {
-            enabled: true
-          }
 
-        },
-
-        //colors:['var(--primary)'],
-        dataLabels: {
-          enabled: false,
-        },
-
-        legend: {
-          show: false,
-        },
-        stroke: {
-          show: true,
-          width: 6,
-          curve: 'smooth',
-          colors: ['rgba(163, 199, 241, 1)'],
-        },
-
-        grid: {
-          show: false,
-          borderColor: '#eee',
-          padding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: -1
-
-          }
-        },
-        states: {
-          normal: {
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          },
-          hover: {
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          },
-          active: {
-            allowMultipleDataPointsSelection: false,
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          }
-        },
-        xaxis: {
-          categories: ['Jan', 'feb', 'Mar', 'Apr', 'May', 'June', 'July', 'August', 'Sept', 'Oct'],
-          axisBorder: {
+          grid: {
             show: false,
-          },
-          axisTicks: {
-            show: false
-          },
-          labels: {
-            show: false,
-            style: {
-              fontSize: '12px',
+            borderColor: '#eee',
+            padding: {
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: -1
+
             }
           },
-          crosshairs: {
-            show: false,
-            position: 'front',
-            stroke: {
-              width: 1,
-              dashArray: 3
+          states: {
+            normal: {
+              filter: {
+                type: 'none',
+                value: 0
+              }
+            },
+            hover: {
+              filter: {
+                type: 'none',
+                value: 0
+              }
+            },
+            active: {
+              allowMultipleDataPointsSelection: false,
+              filter: {
+                type: 'none',
+                value: 0
+              }
             }
+          },
+          xaxis: {
+            categories: ['Jan', 'feb', 'Mar', 'Apr', 'May', 'June', 'July', 'August', 'Sept', 'Oct'],
+            axisBorder: {
+              show: false,
+            },
+            axisTicks: {
+              show: false
+            },
+            labels: {
+              show: false,
+              style: {
+                fontSize: '12px',
+              }
+            },
+            crosshairs: {
+              show: false,
+              position: 'front',
+              stroke: {
+                width: 1,
+                dashArray: 3
+              }
+            },
+            tooltip: {
+              enabled: true,
+              formatter: undefined,
+              offsetY: 0,
+              style: {
+                fontSize: '12px',
+              }
+            }
+          },
+          yaxis: {
+            show: false,
           },
           tooltip: {
-            enabled: true,
-            formatter: undefined,
-            offsetY: 0,
+            enabled: false,
             style: {
               fontSize: '12px',
+            },
+            y: {
+              formatter: function (val) {
+                return "$" + val + " thousands"
+              }
             }
           }
-        },
-        yaxis: {
-          show: false,
-        },
-        tooltip: {
-          enabled: false,
-          style: {
-            fontSize: '12px',
-          },
-          y: {
-            formatter: function (val) {
-              return "$" + val + " thousands"
-            }
-          }
-        }
-      };
-      var chartBar5 = new ApexCharts(document.querySelector("#widgetChart5"), options);
-      chartBar5.render();
+        };
+        var chartBar5 = new ApexCharts(document.querySelector("#widgetChart5"), options);
+        chartBar5.render();
 
-    }
+      }
 
     }
 
@@ -637,311 +637,215 @@
     }
     var widgetChart6 = function () {
       if (jQuery("#widgetChart6").length > 0) {
-      var options = {
-        series: [
-          {
-            name: 'Net Profit',
-            data: [200, 310, 50, 250, 50, 300, 100, 200,],
-            /* radius: 30,	 */
+        var options = {
+          series: [
+            {
+              name: 'Net Profit',
+              data: [200, 310, 50, 250, 50, 300, 100, 200,],
+              /* radius: 30,	 */
+            },
+          ],
+          chart: {
+            type: 'line',
+            height: 70,
+            width: 450,
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false
+            },
+            sparkline: {
+              enabled: true
+            }
+
           },
-        ],
-        chart: {
-          type: 'line',
-          height: 70,
-          width: 450,
-          toolbar: {
+
+          //colors:['var(--primary)'],
+          dataLabels: {
+            enabled: false,
+          },
+
+          legend: {
             show: false,
           },
-          zoom: {
-            enabled: false
+          stroke: {
+            show: true,
+            width: 6,
+            curve: 'smooth',
+            colors: ['rgba(229, 159, 241, 1)'],
           },
-          sparkline: {
-            enabled: true
-          }
 
-        },
-
-        //colors:['var(--primary)'],
-        dataLabels: {
-          enabled: false,
-        },
-
-        legend: {
-          show: false,
-        },
-        stroke: {
-          show: true,
-          width: 6,
-          curve: 'smooth',
-          colors: ['rgba(229, 159, 241, 1)'],
-        },
-
-        grid: {
-          show: false,
-          borderColor: '#eee',
-          padding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: -1
-
-          }
-        },
-        states: {
-          normal: {
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          },
-          hover: {
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          },
-          active: {
-            allowMultipleDataPointsSelection: false,
-            filter: {
-              type: 'none',
-              value: 0
-            }
-          }
-        },
-        xaxis: {
-          categories: ['Jan', 'feb', 'Mar', 'Apr', 'May', 'June', 'July', 'August', 'Sept', 'Oct'],
-          axisBorder: {
+          grid: {
             show: false,
-          },
-          axisTicks: {
-            show: false
-          },
-          labels: {
-            show: false,
-            style: {
-              fontSize: '12px',
+            borderColor: '#eee',
+            padding: {
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: -1
+
             }
           },
-          crosshairs: {
-            show: false,
-            position: 'front',
-            stroke: {
-              width: 1,
-              dashArray: 3
+          states: {
+            normal: {
+              filter: {
+                type: 'none',
+                value: 0
+              }
+            },
+            hover: {
+              filter: {
+                type: 'none',
+                value: 0
+              }
+            },
+            active: {
+              allowMultipleDataPointsSelection: false,
+              filter: {
+                type: 'none',
+                value: 0
+              }
             }
+          },
+          xaxis: {
+            categories: ['Jan', 'feb', 'Mar', 'Apr', 'May', 'June', 'July', 'August', 'Sept', 'Oct'],
+            axisBorder: {
+              show: false,
+            },
+            axisTicks: {
+              show: false
+            },
+            labels: {
+              show: false,
+              style: {
+                fontSize: '12px',
+              }
+            },
+            crosshairs: {
+              show: false,
+              position: 'front',
+              stroke: {
+                width: 1,
+                dashArray: 3
+              }
+            },
+            tooltip: {
+              enabled: true,
+              formatter: undefined,
+              offsetY: 0,
+              style: {
+                fontSize: '12px',
+              }
+            }
+          },
+          yaxis: {
+            show: false,
           },
           tooltip: {
-            enabled: true,
-            formatter: undefined,
-            offsetY: 0,
+            enabled: false,
             style: {
               fontSize: '12px',
+            },
+            y: {
+              formatter: function (val) {
+                return "$" + val + " thousands"
+              }
             }
           }
-        },
-        yaxis: {
-          show: false,
-        },
-        tooltip: {
-          enabled: false,
-          style: {
-            fontSize: '12px',
-          },
-          y: {
-            formatter: function (val) {
-              return "$" + val + " thousands"
-            }
-          }
-        }
-      };
+        };
 
-      var chartBar6 = new ApexCharts(document.querySelector("#widgetChart6"), options);
-      chartBar6.render();
+        var chartBar6 = new ApexCharts(document.querySelector("#widgetChart6"), options);
+        chartBar6.render();
+
+      }
 
     }
-
-    }
+    const isMobile = window.innerWidth <= 450;
     var marketChart = function () {
       if (jQuery('#marketChart').length > 0) {
-        var options = {
-          series: [{
-            name: '1 ETH',
-            className: 'bg-primary',
-            data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-          }, {
-            name: '1 XRP',
-            className: 'bg-secondary',
-            data: [7000, 15000, 8000, 3000, 4000, 5000, 1000, 500, 8000, 2000]
-          }],
+        const colors = ["var(--primary)", "var(--secondary)", "#ffc107"];
+        const chartData = window.salesChartData || [];
+
+        const options = {
+          series: chartData,
           chart: {
             height: 300,
             type: 'line',
-            toolbar: {
-              show: false
-            }
+            toolbar: { show: false }
           },
-          colors: ["var(--primary)", "var(--secondary)"],
-          dataLabels: {
-            enabled: false
-          },
+          colors: colors.slice(0, chartData.length),
+          dataLabels: { enabled: false },
           stroke: {
             curve: 'smooth',
             width: 6
           },
-          legend: {
-            show: false,
-
-          },
+          legend: { show: true },
           markers: {
             strokeWidth: 5,
             strokeColors: '#fff',
-            hover: {
-              size: 10,
-            },
+            hover: { size: 10 },
           },
           grid: {
             show: true,
             strokeDashArray: 6,
             borderColor: 'var(--border)',
-            xaxis: {
-              lines: {
-                show: true
-              },
-            },
-            yaxis: {
-              lines: {
-                show: false
-              },
-            },
+            xaxis: { lines: { show: true } },
+            yaxis: { lines: { show: false } },
           },
           yaxis: {
-            show: false,
+            show: true,
             labels: {
               style: {
                 colors: 'var(--text)',
                 fontSize: '12px',
                 fontFamily: 'Poppins',
                 fontWeight: 400
-
               },
               formatter: function (value) {
-                return value + "USD";
+                return "RM" + value;
               }
             },
           },
           xaxis: {
-            categories: ["Jan", "Feb", "Mar", "Apr", "jun", "Jul", "Aug", "Sep", "Oct", "Nov"],
+            categories: isMobile
+              ? ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+              : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
             labels: {
               style: {
                 colors: '#B5B5C3',
                 fontSize: '12px',
                 fontFamily: 'Poppins',
                 fontWeight: 400
-
-              },
+              }
             },
-            axisBorder: {
-              show: false,
-            },
-            tooltip: {
-              enabled: false,
-            }
+            axisBorder: { show: false },
+            tooltip: { enabled: false }
           },
           tooltip: {
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-              return '<div class="tooltip_box">' +
-                '<div class="tooltip-data">' +
-                '<span class="data-point ' + w.config.series[0].className + '">' + w.config.series[0].name + ' </span>' +
-                '<span>' + series[0][dataPointIndex] + ' USD</span>' +
-                '</div>' +
-                '<div class="tooltip-data">' +
-                '<span class="data-point ' + w.config.series[1].className + '">' + w.config.series[1].name + ' </span>' +
-                '<span>' + series[1][dataPointIndex] + ' USD</span>' +
-                '</div>' +
-                '</div>'
+              let tooltipHtml = '<div class="tooltip_box">';
+              w.config.series.forEach((s, i) => {
+                tooltipHtml += `
+                        <div class="tooltip-data">
+                            <span class="data-point ${s.className}">${s.name}</span>
+                            <span>RM ${series[i][dataPointIndex]}</span>
+                        </div>`;
+              });
+              return tooltipHtml + '</div>';
             }
           },
           fill: {
             type: 'solid',
             opacity: 0
-          },
-
+          }
         };
 
-
-        if (jQuery("#marketChart").length > 0) {
-          var chartBar1 = new ApexCharts(document.querySelector("#marketChart"), options);
-          chartBar1.render();
-
-          jQuery('.nav-pills .nav-link').on('click', function () {
-            if ($(this).attr("href") == "#navpills-1") {
-              chartBar1.updateSeries([{
-                name: '1 ETH',
-                className: 'bg-primary',
-                data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-              },
-              {
-                name: '1 XRP',
-                className: 'bg-secondary',
-                data: [7000, 15000, 8000, 3000, 4000, 5000, 1000, 500, 8000, 2000]
-              }]
-              )
-            } else if ($(this).attr("href") == "#navpills-2") {
-              chartBar1.updateSeries([{
-                name: '1 ETH',
-                className: 'bg-primary',
-                data: [25000, 10000, 15000, 10000, 6000, 7000, 6000, 5000, 10000, 4000]
-              },
-              {
-                name: '1 XRP',
-                className: 'bg-secondary',
-                data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-              }]
-              )
-            } else if ($(this).attr("href") == "#navpills-3") {
-              chartBar1.updateSeries([{
-                name: '1 ETH',
-                className: 'bg-primary',
-                data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-              },
-              {
-                name: '1 XRP',
-                className: 'bg-secondary',
-                data: [7000, 15000, 8000, 3000, 4000, 5000, 1000, 500, 8000, 2000]
-              }]
-              )
-            }
-            else if ($(this).attr("href") == "#navpills-4") {
-              chartBar1.updateSeries([{
-                name: '1 ETH',
-                className: 'bg-primary',
-                data: [7000, 15000, 8000, 3000, 4000, 5000, 1000, 500, 8000, 2000]
-              },
-              {
-                name: '1 XRP',
-                className: 'bg-secondary',
-                data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-              }]
-              )
-            }
-            else if ($(this).attr("href") == "#navpills-5") {
-              chartBar1.updateSeries([{
-                name: '1 ETH',
-                className: 'bg-primary',
-                data: [10000, 25000, 15000, 5000, 8000, 7000, 6000, 5000, 10000, 4000]
-              },
-              {
-                name: '1 XRP',
-                className: 'bg-secondary',
-                data: [3000, 10000, 2000, 3000, 4000, 5000, 6000, 100, 8000, 2000]
-              }]
-              )
-            }
-          })
-
-        }
+        var chartBar1 = new ApexCharts(document.querySelector("#marketChart"), options);
+        chartBar1.render();
       }
     }
+
 
     var marketChart2 = function () {
       if (jQuery('#marketChart2').length > 0) {
@@ -1214,7 +1118,7 @@
           },
           xaxis: {
             type: 'datetime',
-        
+
             labels: {
               style: {
                 color: 'var(--text)',
@@ -1222,7 +1126,7 @@
               },
             }
           },
-         
+
           yaxis: {
             opposite: true,
             tooltip: {
@@ -2387,17 +2291,17 @@
     }
     var swipercard = function () {
 
-      function carouselDir(){
-        if($('body').attr('direction') == "rtl"){
+      function carouselDir() {
+        if ($('body').attr('direction') == "rtl") {
           return true;
-        }else{
+        } else {
           return false;
         }
       }
       if (jQuery(".mySwiper-counter").length > 0) {
         var swiper = new Swiper('.mySwiper-counter', {
 
-          
+
           speed: 1500,
           slidesPerView: 4,
           spaceBetween: 40,
@@ -2410,26 +2314,30 @@
           breakpoints: {
 
             300: {
-              slidesPerView: 1,
+              slidesPerView: 1.2,
               spaceBetween: 30,
             },
             480: {
-              slidesPerView: 2,
+              slidesPerView: 2.2,
               spaceBetween: 30,
             },
             768: {
-              slidesPerView: 3,
+              slidesPerView: 2.2,
               spaceBetween: 30,
             },
             991: {
-              slidesPerView: 3,
+              slidesPerView: 2.3,
               spaceBetween: 30,
             },
             1200: {
-              slidesPerView: 4,
+              slidesPerView: 3.3,
               spaceBetween: 30,
             },
-			
+            1500: {
+              slidesPerView: 5.2,
+              spaceBetween: 30,
+            },
+
           },
         });
       }
