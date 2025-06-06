@@ -29,6 +29,7 @@
                                         <th>Status</th>
                                         <th>Total</th>
                                         <th>Receipt</th>
+                                        <th>Date/Time</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -79,7 +80,7 @@
 
 
                                             </td>
-
+                                            <td>{{ $booking->created_at->format('j M Y, H:iA') }}</td>
                                             <td>
                                                 <!-- Verify payment button (only if payment_method is gform and not completed yet) -->
                                                 @if($booking->payment_method === 'gform' && $booking->status == 'pending' && !is_null($booking->resit_path))
