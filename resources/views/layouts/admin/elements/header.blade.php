@@ -612,7 +612,7 @@
         <nav class="navbar navbar-expand">
             <div class="collapse navbar-collapse justify-content-between">
                 <div class="header-left">
-                    <div class="input-group search-area">
+                    <!-- <div class="input-group search-area">
                         <input type="text" class="form-control" placeholder="Search Dashboard">
                         <span class="input-group-text"><a href="javascript:void(0)">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -629,11 +629,11 @@
                                     </g>
                                 </svg>
                             </a></span>
-                    </div>
+                    </div> -->
                 </div>
                 <ul class="navbar-nav header-right">
 
-                    <li class="nav-item dropdown notification_dropdown sm-search">
+                    <!-- <li class="nav-item dropdown notification_dropdown sm-search">
                         <a class="nav-link " href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                 width="24px" height="24px" viewBox="0 0 24 24" version="1.1"
@@ -831,7 +831,7 @@
                                 </g>
                             </svg>
                         </a>
-                    </li>
+                    </li> -->
                     @if (in_array($page,array('dashboard','dashboard_2')))
                         <li class="nav-item dropdown notification_dropdown">
                             <a class="nav-link  menu-wallet" href="javascript:void(0);">
@@ -1166,12 +1166,12 @@
                 <li class="breadcrumb-item active ms-auto">
                     @php 
                     if(isset($main_title)){
-                        $url = 'javascript:void(0)';
+                        $url = route('organizer.dashboard');
                     }else{
-                        $url = url('index');
+                        $url = route('organizer.dashboard');
                     }
                     @endphp
-                    <a class="d-flex align-self-center" href="{{ $url }}">
+                    <a class="d-flex align-self-center" href="{{ route('organizer.dashboard') }}">
                         <svg class="me-2 svg-main-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                             <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                 <rect x="0" y="0" width="24" height="24"></rect>

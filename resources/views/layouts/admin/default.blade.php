@@ -59,6 +59,14 @@
 
 	@stack('styles')
 
+	<style>
+		@media (max-width: 576px) {
+			#brand-logo-img {
+				height: 40px;
+			}
+		}
+	</style>
+
 </head>
 
 <body>
@@ -87,8 +95,8 @@
             Nav header start
         ***********************************-->
 		<div class="nav-header">
-			<a href="{{ url('index') }}" class="brand-logo">
-				<img id="brand-logo-img" src="{{ asset('images/logo-white.png') }}" alt="">
+			<a href="{{ route('organizer.dashboard') }}" class="brand-logo">
+				<img id="brand-logo-img" src="{{ asset('images/logo-white.png') }}" alt="Sistem Kami Logo" class="img-fluid">
 			</a>
 			<div class="nav-control">
 				<div class="hamburger" id="hamburger-toggle">
