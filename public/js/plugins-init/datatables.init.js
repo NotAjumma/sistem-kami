@@ -124,11 +124,12 @@ let dataSet = [
 		
 	});
 	// dataTable3
-	var table = $('#dataTable3').DataTable({
+	var table = $('#example3').DataTable({
 		searching: false,
-		paging:true,
+		paging: false,
 		select: false,         
 		lengthChange:false ,
+		info: false 
 		
 	});
 	// dataTable4
@@ -285,7 +286,7 @@ let dataSet = [
 		
 	
 	// table row
-	var table = $('#dataTable1, #dataTable2, #dataTable3, #dataTable4,  #example3, #example4 ').DataTable({
+	var table = $('#dataTable1, #dataTable2, #dataTable3, #dataTable4, #example4 ').DataTable({
 		language: {
 			paginate: {
 			  next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
