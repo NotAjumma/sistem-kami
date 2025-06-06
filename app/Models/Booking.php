@@ -19,6 +19,7 @@ class Booking extends Model
         'coupon_code',
         'discount',
         'final_price',
+        'extra_info',
     ];
 
     protected $casts = [
