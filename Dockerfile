@@ -36,9 +36,11 @@ RUN npm install && npm run build
 # RUN if [ ! -f .env ]; then cp .env.example .env; fi && \
 #     php artisan key:generate
 # RUN cp -f .env.example .env && php artisan key:generate --force
-RUN rm -f .env --force
+# RUN rm -f .env --force
 RUN php artisan config:clear && php artisan cache:clear
 # RUN php artisan migrate --force
+
+RUN php artisan gdrive:sync
 
 # Create public/app folder to avoid error if missing
 RUN mkdir -p public/app
