@@ -421,17 +421,31 @@
 			const logoImg = document.getElementById('brand-logo-img');
 			let isMenuOpen = false;
 
-			hamburger.addEventListener('click', function () {
-				isMenuOpen = !isMenuOpen;
+			// Function to update logo based on screen size and menu state
+			function updateLogo() {
+				const isMobile = window.innerWidth <= 768;
 
-				if (isMenuOpen) {
+				if (isMobile) {
 					logoImg.src = "{{ asset('images/logo-white-only.png') }}";
 				} else {
-					logoImg.src = "{{ asset('images/logo-white.png') }}";
+					logoImg.src = isMenuOpen
+						? "{{ asset('images/logo-white-only.png') }}"
+						: "{{ asset('images/logo-white.png') }}";
 				}
+			}
+
+			// Handle hamburger toggle
+			hamburger.addEventListener('click', function () {
+				isMenuOpen = !isMenuOpen;
+				updateLogo();
 			});
+
+			// Trigger on load and resize
+			window.addEventListener('resize', updateLogo);
+			updateLogo();
 		});
 	</script>
+
 	@if(session('success'))
 		<script>
 			toastr.info("{{ session('success') }}", "Success", {
