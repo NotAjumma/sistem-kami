@@ -846,6 +846,63 @@
       }
     }
 
+    var extraInfoChart = function(){
+      if(jQuery('#extra_info_chart').length > 0 ){
+        const extra_info_chart = document.getElementById("extra_info_chart").getContext('2d');
+			// doughnut_chart.height = 100;
+
+        const labels = Object.keys(window.$shirtSizeData);
+        const data = Object.values(window.$shirtSizeData);
+
+        console.log(labels);
+        console.log(data);
+        // Generate dynamic colors (fallback: max 6 colors)
+        const bgColors = [
+          "rgb(210, 243, 25)",
+          "rgba(100, 24, 195, 1)",
+          "rgba(255, 62, 62, 1)",
+          "rgba(235, 129, 83, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)"
+        ];
+        const hoverColors = bgColors.map(c => c.replace('1)', '0.9)'));
+
+        new Chart(extra_info_chart, {
+          type: 'doughnut',
+          data: {
+            weight: 5,	
+            // labels: labels,
+            datasets: [{
+              data: data,
+              borderWidth: 3,
+              backgroundColor: bgColors.slice(0, data.length),
+              hoverBackgroundColor: hoverColors.slice(0, data.length)
+            }]
+          },
+          options: {
+            cutout: 30,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'bottom' // or 'right'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const i = context.dataIndex;
+                    const value = context.raw || 0;
+                    const label = labels[i] || 'Unknown';
+                    return `${label}: ${value}`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
 
     var marketChart2 = function () {
       if (jQuery('#marketChart2').length > 0) {
@@ -2372,6 +2429,7 @@
         marketChart2();
         marketChart23();
         marketChart22();
+        extraInfoChart();
         swipercard();
 
       },

@@ -26,6 +26,33 @@ class OrganizerController extends Controller
         $authUser = auth()->guard('organizer')->user()->load('user');
         $organizerId = $authUser->id;
 
+        // Get first 100 confirmed bookings with shirt_size info
+        $shirtSizeData = Booking::where('organizer_id', $authUser->id)
+            ->where('status', 'confirmed')
+            ->take(100)
+            ->get()
+            ->map(function ($booking) {
+                $extraRaw = $booking->extra_info;
+
+                // Skip if null or empty
+                if (empty($extraRaw))
+                    return null;
+
+                // Decode if it's a string (JSON)
+                $extra = is_string($extraRaw) ? json_decode($extraRaw, true) : (array) $extraRaw;
+
+                // Skip if not array or doesn't contain shirt_size
+                if (!is_array($extra) || empty($extra['shirt_size']))
+                    return null;
+
+                return $extra['shirt_size'];
+            })
+            ->filter()
+            ->countBy();
+
+        $shirtSizes = $shirtSizeData->keys();
+        $shirtCounts = $shirtSizeData->values();
+
         // Basic stats
         $totalEvents = Event::where('organizer_id', $organizerId)->count();
         $ticketSold = BookingTicket::whereIn('status', ['printed', 'checkin'])
@@ -59,9 +86,6 @@ class OrganizerController extends Controller
             ];
         }
 
-        // \Log::info("salesChartData");
-        // \Log::info(print_r($salesChartData, true));
-
         return view('organizer.index', compact(
             'page_title',
             'authUser',
@@ -71,12 +95,12 @@ class OrganizerController extends Controller
             'totalIncome',
             'confirmBookings',
             'pendingBookings',
-            'salesChartData'
+            'salesChartData',
+            'shirtSizes',
+            'shirtCounts',
+            'shirtSizeData'
         ));
     }
-
-
-
 
     public function bookings(Request $request)
     {
