@@ -78,6 +78,8 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
 
 // Organizer Route
 Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
+Route::post('/{role}/login', [AuthController::class, 'login'])->name('role.login');
+
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.logout');

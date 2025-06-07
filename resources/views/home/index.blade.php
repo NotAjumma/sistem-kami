@@ -106,7 +106,6 @@
                 height: 140px;
             }
         }
-
     </style>
 @endpush
 @section('content')
@@ -148,33 +147,33 @@
                     src="https://storage.googleapis.com/a1aa/image/789f6300-112c-432d-d426-1a285cd1d308.jpg" width="80" />
             </div>
             <!-- <div class="mt-10 max-w-xs relative">
-                            <div class="ticket">
-                                <div class="ticket-perforation"></div>
-                                <div class="ticket-content">
-                                    <div>
-                                        <div class="ticket-header">
-                                            ONE WAY TICKET
-                                        </div>
-                                        <div class="ticket-subheader">
-                                            Sistem Kami Exclusive
-                                        </div>
-                                        <div class="ticket-stars" aria-label="3 star rating">
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ticket-footer select-none">
-                                        01
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="absolute top-2 right-2 text-xs text-white/80 font-semibold select-none">
-                                The best ticket category
-                                <br />
-                                currently available
-                            </div>
-                        </div> -->
+                                                <div class="ticket">
+                                                    <div class="ticket-perforation"></div>
+                                                    <div class="ticket-content">
+                                                        <div>
+                                                            <div class="ticket-header">
+                                                                ONE WAY TICKET
+                                                            </div>
+                                                            <div class="ticket-subheader">
+                                                                Sistem Kami Exclusive
+                                                            </div>
+                                                            <div class="ticket-stars" aria-label="3 star rating">
+                                                                <i class="fas fa-star"></i>
+                                                                <i class="fas fa-star"></i>
+                                                                <i class="fas fa-star"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ticket-footer select-none">
+                                                            01
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="absolute top-2 right-2 text-xs text-white/80 font-semibold select-none">
+                                                    The best ticket category
+                                                    <br />
+                                                    currently available
+                                                </div>
+                                            </div> -->
         </section>
         <!-- Decide To Join Section -->
         <section class="container bg-gray-900 text-white px-4 py-12 rounded-lg mb-16">
@@ -278,13 +277,13 @@
                     <br />
                     <br />
                     <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                                Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
+                                                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
                 </p>
                 <!-- <p class="text-xs text-gray-500 mb-6">
-                                @AnirudhRavichander Tour On March-21
-                                <br />
-                                Tickets Open Now: Sitlix.Com
-                            </p> -->
+                                                    @AnirudhRavichander Tour On March-21
+                                                    <br />
+                                                    Tickets Open Now: Sitlix.Com
+                                                </p> -->
             </div>
             <div class="relative w-full max-w-xs md:max-w-[280px]">
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
@@ -308,12 +307,12 @@
                     <br />
                     <br />
                     <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                                Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
+                                                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
                 </p>
                 <p class="text-xs text-gray-500 mb-6">
                     <!-- @AnirudhRavichander Tour On March-21
-                                <br />
-                                Tickets Open Now: Sitlix.Com -->
+                                                    <br />
+                                                    Tickets Open Now: Sitlix.Com -->
                 </p>
             </div>
         </section>

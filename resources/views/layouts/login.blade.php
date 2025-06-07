@@ -64,9 +64,9 @@
                     <img src="{{ asset('images/logo-white.png') }}" alt="">
                 </div>
                 <h3 class="mb-2 text-white">Welcome back!</h3>
-                <p class="mb-4">User Experience & Interface Design <br>Strategy SaaS Solutions</p>
+                <p class="mb-4">Your all-in-one platform to organize, manage,<br>and grow your events seamlessly.</p>
             </div>
-            <div class="aside-image position-relative" style="background-image:url(images/background/pic-2.png);">
+            <div class="aside-image position-relative" style="background-image: url('{{ asset('images/background/pic-2.png') }}');">
                 <img class="img1 move-1" src="{{ asset('images/background/pic3.png') }}" alt="">
                 <img class="img2 move-2" src="{{ asset('images/background/pic4.png') }}" alt="">
                 <img class="img3 move-3" src="{{ asset('images/background/pic5.png') }}" alt="">
