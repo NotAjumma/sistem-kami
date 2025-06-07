@@ -229,7 +229,8 @@
                 </div>
                 <div>
                     <div class="label">Date/Time:</div>
-                    <div class="value" aria-label="Event location">{{ $booking->event->formatted_start_date }} AT {{ $booking->event->formatted_start_time }}
+                    <div class="value" aria-label="Event location">{{ \Carbon\Carbon::parse($booking->event->start_date)->format('D, jS M Y') }} AT {{ \Carbon\Carbon::parse($booking->event->start_time)->format('g:i A') }}
+
                     </div>
                 </div>
                 <div>
