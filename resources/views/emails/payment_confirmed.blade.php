@@ -10,6 +10,8 @@
 <p><strong>Booking Summary</strong></p>
 <ul>
     <li><strong>Booking Code:</strong> {{ $booking->booking_code }}</li>
+    <li><strong>Event:</strong> {{ $booking->event->title }}</li>
+    <li><strong>Date/Time:</strong> {{ \Carbon\Carbon::parse($booking->event->start_date)->format('D, jS M Y') }} AT {{ \Carbon\Carbon::parse($booking->event->start_time)->format('g:i A') }}</li>
     <li><strong>Status:</strong> {{ ucfirst($booking->status) }}</li>
     <li><strong>Total Price:</strong> RM {{ number_format($booking->final_price, 2) }}</li>
     @if ($isEligibleForShirt)
