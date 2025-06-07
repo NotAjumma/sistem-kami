@@ -31,14 +31,8 @@ class AuthController extends Controller
         $role = $request->route('role') ?? 'participant';
         return view('organizer.auth.login', compact('role'));
     }
-    /**
-     * Handle login for given role.
-     * 
-     * @param Request $request
-     * @param string $role
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function login(Request $request, $role = null)
+
+     public function login(Request $request, $role = null)
     {
         $request->validate([
             'username' => 'required|string',
@@ -48,37 +42,34 @@ class AuthController extends Controller
         $user = User::where('username', $request->username)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid username or password'
-            ], 401);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Invalid username or password');
         }
-
         // Role check
         if ($role) {
             if ($role === 'admin' && $user->role !== 'superadmin') {
-                return response()->json(['message' => 'Unauthorized: Superadmin only'], 403);
+                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
             }
 
             if ($role !== 'admin' && $user->role !== $role) {
-                return response()->json(['message' => 'Unauthorized: ' . $role . ' only'], 403);
+                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
             }
         } else {
             if ($user->role !== 'participant') {
-                return response()->json(['message' => 'Unauthorized: Participant only'], 403);
+                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
             }
         }
 
-        // Find organizer record linked to this user
         $organizer = \App\Models\Organizer::where('user_id', $user->id)->first();
 
         if (!$organizer) {
-            return response()->json(['message' => 'Organizer not found for user'], 404);
+            return redirect()->back()->withInput()->with('error', 'Invalid username or password');
         }
 
-        // Log in using organizer model for the organizer guard
         Auth::guard('organizer')->login($organizer);
 
-        // Update last login timestamp
         $user->last_login = now();
         $user->save();
 
@@ -93,6 +84,15 @@ class AuthController extends Controller
             return redirect()->route('participant.dashboard');
         }
     }
+    /**
+     * Handle login for given role.
+     * 
+     * @param Request $request
+     * @param string $role
+     * @return \Illuminate\Http\JsonResponse
+     */
+   
+
 
     public function register(Request $request)
     {
