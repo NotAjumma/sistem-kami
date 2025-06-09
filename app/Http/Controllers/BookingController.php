@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
+use App\Services\ToyyibPayService;
 
 class BookingController extends Controller
 {
@@ -167,5 +169,135 @@ class BookingController extends Controller
 
         return redirect()->back()->with('success', 'Payment validated and email sent.');
     }
+
+    public function showCheckout(Request $request)
+    {
+        return view('home.checkout');
+    }
+
+
+    public function webFormBooking(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'no_ic' => 'required|string',
+            'phone' => 'nullable|string',
+            'shirt_size' => 'nullable|string',
+            'bilangan_joran' => 'nullable|integer|min:1',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $participant = Participant::updateOrCreate(
+                [
+                    'email' => $request->email,
+                    'no_ic' => $request->no_ic,
+                ],
+                [
+                    'name' => $request->name,
+                    'phone' => $request->phone,
+                ]
+            );
+
+            $ticket_id = 2;
+            $ticket = Ticket::with('event')->findOrFail($ticket_id);
+            $eventCode = strtoupper($ticket->event->shortcode ?? 'DFT');
+
+            $bilanganJoran = max(1, (int) $request->bilangan_joran);
+            $totalPrice = $ticket->price * $bilanganJoran;
+
+            $booking = Booking::create([
+                'participant_id' => $participant->id,
+                'event_id' => $ticket->event_id,
+                'organizer_id' => $ticket->event->organizer_id,
+                'booking_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status' => 'pending',
+                'total_price' => $totalPrice,
+                'payment_method' => 'webform',
+                'extra_info' => ['shirt_size' => $request->shirt_size],
+            ]);
+
+            for ($i = 0; $i < $bilanganJoran; $i++) {
+                BookingTicket::create([
+                    'booking_id' => $booking->id,
+                    'ticket_id' => $ticket->id,
+                    'price' => $ticket->price,
+                    'participant_name' => $request->name,
+                    'participant_email' => $request->email,
+                    'participant_no_ic' => $request->no_ic,
+                    'participant_phone' => $request->phone,
+                    'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
+                    'status' => 'pending',
+                ]);
+            }
+
+            // === ToyyibPay integration ===
+            $toyyibPay = new ToyyibPayService();
+            $bill = $toyyibPay->createBill([
+                'name' => 'Bayaran Tiket ' . $ticket->event->name,
+                'description' => 'Tempahan oleh ' . $participant->name,
+                'amount' => $totalPrice,
+                'ref_no' => $booking->booking_code,
+                'to' => $participant->name,
+                'email' => $participant->email,
+                'phone' => $participant->phone,
+            ]);
+
+            if (!isset($bill[0]['BillCode'])) {
+                throw new \Exception('ToyyibPay: BillCode gagal dicipta');
+            }
+
+            Payment::create([
+                'booking_id' => $booking->id,
+                'bill_code' => $bill[0]['BillCode'],
+                'ref_no' => $booking->booking_code,
+                'amount' => $totalPrice,
+                'status' => 'pending',
+            ]);
+
+            DB::commit();
+
+            return redirect()->away('https://sandbox.toyyibpay.com/' . $bill[0]['BillCode']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('webFormBooking failed', [
+                'error' => $e->getMessage(),
+                'input' => $request->all()
+            ]);
+
+            return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function handleCallback(Request $request)
+    {
+        $payment = Payment::where('bill_code', $request->billcode)->first();
+
+        if (!$payment) {
+            \Log::warning('Callback tanpa payment: ', $request->all());
+            return response()->json(['error' => 'Invalid bill code'], 404);
+        }
+
+        $payment->update([
+            'status' => $request->status_id == 1 ? 'paid' : 'failed',
+            'paid_at' => now(),
+            'raw_response' => $request->all(),
+        ]);
+
+        // Kemaskini status booking jika berjaya
+        if ($request->status_id == 1) {
+            $payment->booking->update([
+                'status' => 'paid'
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
 
 }

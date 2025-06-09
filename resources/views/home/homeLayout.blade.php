@@ -157,6 +157,11 @@
 						</a>
 					</li>
 					<li>
+						<a class="hover:underline" href="{{ route('checkout') }}">
+							Checkout
+						</a>
+					</li>
+					<li>
 						<a class="hover:underline" href="{{ route('organizer.login') }}">
 							Login
 						</a>

@@ -44,4 +44,9 @@ class Booking extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
 }

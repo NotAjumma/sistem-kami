@@ -7,6 +7,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
@@ -63,9 +64,13 @@ Route::get('/db-check', function () {
 
 
 // Used route
+Route::post('/toyyibpay-callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
+Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
+Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
 Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
