@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ToyyibpayController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
 use App\Http\Controllers\EventController;
@@ -64,9 +65,9 @@ Route::get('/db-check', function () {
 
 
 // Used route
-Route::post('/toyyibpay-callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
-Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
-Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
+Route::get('/checkout', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
+Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->name('toyyibpay.status');
+Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
