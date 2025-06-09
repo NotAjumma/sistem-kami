@@ -244,6 +244,7 @@ class BookingController extends Controller
                 'email' => $participant->email,
                 'phone' => $participant->phone,
             ]);
+            \Log::info($bill);
 
             if (!isset($bill[0]['BillCode'])) {
                 throw new \Exception('ToyyibPay: BillCode gagal dicipta');
@@ -259,7 +260,7 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->away('https://sandbox.toyyibpay.com/' . $bill[0]['BillCode']);
+            return redirect()->away('https://dev.toyyibpay.com/' . $bill[0]['BillCode']);
 
         } catch (\Exception $e) {
             DB::rollBack();

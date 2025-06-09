@@ -12,7 +12,7 @@ class ToyyibPayService
 
     public function __construct()
     {
-        $this->baseUrl = config('toyyibpay.sandbox') ? 'https://sandbox.toyyibpay.com' : 'https://toyyibpay.com';
+        $this->baseUrl = config('toyyibpay.sandbox') ? 'https://dev.toyyibpay.com' : 'https://toyyibpay.com';
         $this->apiKey = config('toyyibpay.api_key');
         $this->categoryCode = config('toyyibpay.category_code');
     }
@@ -36,6 +36,8 @@ class ToyyibPayService
         ];
 
         $response = Http::asForm()->post($this->baseUrl . '/index.php/api/createBill', $payload);
+            \Log::info($response);
+
         return $response->json();
     }
 }

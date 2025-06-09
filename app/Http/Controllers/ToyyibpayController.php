@@ -29,26 +29,29 @@ class ToyyibpayController extends Controller
             'billSplitPaymentArgs' => '',
             'billPaymentChannel' => '0',
             'billContentEmail' => 'Thank you for purchasing our product!',
-            'billChargeToCustomer' => 1
+            'billChargeToCustomer' => 0,
             // 'billExpiryDate' => '17-12-2020 17:00:00',
             // 'billExpiryDays' => 3
         );
 
         $url = 'https://dev.toyyibpay.com/index.php/api/createBill';
         $response = Http::asForm()->post($url, $bill_data);
-        $billCode = $response[0]['Billcode'];
-
         \Log::info($response);
+        $billCode = $response[0]['BillCode'];
+
+        // \Log::info($response);
         return redirect('https://dev.toyyibpay.com/' . $billCode);
     }
 
     public function paymentStatus()
     {
-
+        $response = request()->all(['status_id', 'billcode', 'order_id']);
+        return $response;
     }
 
     public function callback()
     {
-
+        $response = request()->all();
+        \Log::info($response);
     }
 }
