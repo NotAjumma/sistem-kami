@@ -157,11 +157,6 @@
 						</a>
 					</li>
 					<li>
-						<a class="hover:underline" href="{{ route('checkout') }}">
-							Checkout
-						</a>
-					</li>
-					<li>
 						<a class="hover:underline" href="{{ route('organizer.login') }}">
 							Login
 						</a>
@@ -204,7 +199,7 @@
             Footer start
         ***********************************-->
 		<footer
-			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto">
+			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto" style="margin-top: 150px;">
 			<div class="container">
 				<div class="row">
 					<!-- About Section -->

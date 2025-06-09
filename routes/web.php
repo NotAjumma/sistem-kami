@@ -70,6 +70,7 @@ Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
 Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
+Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');

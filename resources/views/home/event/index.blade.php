@@ -149,7 +149,7 @@
         }
 
         li {
-            list-style-type: inherit !important; 
+            list-style-type: inherit !important;
         }
     </style>
 @endpush
@@ -247,10 +247,13 @@
 
                 {{-- Google Map --}}
                 @if($event->latitude && $event->longitude)
-                    <iframe
-                        src="https://www.google.com/maps?q={{ urlencode($event->venue_name) }}%20{{ $event->latitude }},{{ $event->longitude }}&output=embed"
-                        width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
-                    </iframe>
+                    <div style="margin-top: 50px;">
+                        <iframe
+                            src="https://www.google.com/maps?q={{ urlencode($event->venue_name) }}%20{{ $event->latitude }},{{ $event->longitude }}&output=embed"
+                            width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                        </iframe>
+                    </div>
+
 
                 @endif
 
@@ -291,46 +294,58 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                                        <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                            <i class="fas fa-calendar-alt me-2"></i>
-                                            Add to Calendar
-                                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                        </p> -->
+                                            <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                                <i class="fas fa-calendar-alt me-2"></i>
+                                                Add to Calendar
+                                                <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                            </p> -->
                     <hr class="mb-4" />
-                    <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
-                    <hr class="mb-4" />
-                    @if ($event->status == 1 && $event->buy_link)
-                        @foreach ($filteredTickets as $ticket)
-                            <div class="mb-4 p-3 border rounded shadow-sm bg-light" style="background-color: #fff !important;">
-                                <p class="fw-bold mb-1">
-                                    {{ $ticket->name }} -
-                                    <span class="text-primary">{{ $event->currency }}
-                                        {{ number_format($ticket->price, 2) }}</span>
-                                </p>
+                    <form method="POST" action="{{ route('tickets.select') }}">
+                        @csrf
 
-                                @if ($ticket->children->isNotEmpty())
-                                    <ul class="list-group mt-2">
-                                        @foreach ($ticket->children as $subTicket)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ $subTicket->name }}
-                                                <span class="badge bg-primary">RM {{ number_format($subTicket->price, 2) }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                            </div>
-                        @endforeach
-                        <a href="{{ $event->buy_link }}" target="_blank" rel="noopener noreferrer"
-                            style="text-decoration: none;">
-                            <h6 class="event-started" style="font-size: 0.75em;">
+                        <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
+                        <hr class="mb-4" />
+
+                        @if ($event->status == 1)
+                            <input type="hidden" name="event_id" value="{{ $event->id }}" />
+
+                            @foreach ($filteredTickets as $ticket)
+                                <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+                                    <p class="fw-bold mb-1">
+                                        {{ $ticket->name }} -
+                                        <span class="text-primary">{{ $event->currency }}
+                                            {{ number_format($ticket->price, 2) }}</span>
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <label for="ticket_{{ $ticket->id }}">Quantity</label>
+                                        <input type="number" name="tickets[{{ $ticket->id }}][quantity]" class="form-control"
+                                            min="0" max="10" value="0" id="ticket_{{ $ticket->id }}" />
+                                        <input type="hidden" name="tickets[{{ $ticket->id }}][id]" value="{{ $ticket->id }}" />
+                                    </div>
+
+                                    @if ($ticket->children->isNotEmpty())
+                                        <ul class="list-group mt-2">
+                                            @foreach ($ticket->children as $subTicket)
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    {{ $subTicket->name }}
+                                                    <span class="badge bg-primary">
+                                                        RM {{ number_format($subTicket->price, 2) }}
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            @endforeach
+
+                            <button type="submit" class="btn btn-primary mt-3">Proceed to Checkout</button>
+                        @else
+                            <h6 class="event-ended" style="font-size: 0.75em;">
                                 {{ $event->status_label }}
                             </h6>
-                        </a>
-                    @else
-                        <h6 class="event-ended" style="font-size: 0.75em;">
-                            {{ $event->status_label }}
-                        </h6>
-                    @endif
+                        @endif
+                    </form>
                 </div>
 
             </div>
@@ -338,13 +353,10 @@
         </div>
 
     </div>
-    <div style="height: 200px;">
-
-    </div>
 
 @endsection
 
 @push('scripts')
-    <script>
-    </script>
+<script>
+</script>
 @endpush

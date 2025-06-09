@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Event;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
@@ -170,9 +171,85 @@ class BookingController extends Controller
         return redirect()->back()->with('success', 'Payment validated and email sent.');
     }
 
-    public function showCheckout(Request $request)
+    public function storeSelection(Request $request)
     {
-        return view('home.checkout');
+        $validated = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'tickets' => 'required|array',
+            'tickets.*.id' => 'required|exists:tickets,id',
+            'tickets.*.quantity' => 'required|integer|min:0',
+        ]);
+
+        $eventId = $validated['event_id'];
+
+        \Log::info($validated['tickets']);
+        // Get all ticket IDs from validated tickets that have quantity > 0
+        $selectedTicketIds = collect($validated['tickets'])
+            ->filter(fn($t) => $t['quantity'] > 0)
+            ->pluck('id') // use 'id' here
+            ->all();
+
+        $tickets = Ticket::where('event_id', $eventId)
+            ->whereIn('id', $selectedTicketIds)
+            ->get(['id', 'name', 'price', 'is_active']);
+
+        $selectedTickets = collect($validated['tickets'])
+            ->filter(fn($t) => $t['quantity'] > 0)
+            ->map(function ($selected) use ($tickets) {
+                $ticket = $tickets->firstWhere('id', $selected['id']);
+                if (!$ticket) {
+                    return null;
+                }
+                return [
+                    'ticket_id' => $ticket->id,
+                    'name' => $ticket->name,
+                    'price' => $ticket->price,
+                    'is_active' => $ticket->is_active,
+                    'quantity' => $selected['quantity'],
+                ];
+            })
+            ->filter()  // remove nulls
+            ->values();
+
+
+        if ($selectedTickets->isEmpty()) {
+            return back()->with('error', 'Please select at least one ticket.');
+        }
+
+        session([
+            'selected_event' => Event::select([
+                'id',
+                'title',
+                'start_date',
+                'start_time',
+                'district',
+                'state',
+                'country',
+                'images',
+                'status',
+                'registration_deadline',
+                'is_free',
+            ])
+                ->where('id', $validated['event_id'])
+                ->first(),
+            'selected_tickets' => $selectedTickets,
+        ]);
+
+        return redirect()->route('checkout');
+    }
+
+    public function showCheckout()
+    {
+        $event = session('selected_event');
+        $tickets = session('selected_tickets');
+
+        \Log::info($event);
+        \Log::info($tickets);
+        if (!$event || !$tickets) {
+            return redirect('/')->with('error', 'Please select tickets first.');
+        }
+
+        return view('home.checkout', compact('event', 'tickets'));
     }
 
 
