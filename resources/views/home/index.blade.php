@@ -139,14 +139,14 @@
                 type="button">
                 Contact us NOW
             </button>
-            <div class="mt-10 flex items-center space-x-10 max-w-md">
+            <!-- <div class="mt-10 flex items-center space-x-10 max-w-md">
                 <img alt="Border company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/d3fd383c-735d-41e2-d454-d369a5da6204.jpg" width="80" />
                 <img alt="hues company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/75b95c7e-e315-470e-d749-abb4e02c9aad.jpg" width="80" />
                 <img alt="Leafe company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/789f6300-112c-432d-d426-1a285cd1d308.jpg" width="80" />
-            </div>
+            </div> -->
             <!-- <div class="mt-10 max-w-xs relative">
                                                 <div class="ticket">
                                                     <div class="ticket-perforation"></div>
@@ -177,7 +177,7 @@
                                             </div> -->
         </section>
         <!-- Decide To Join Section -->
-        <section class="container bg-gray-900 text-white px-4 py-12 rounded-lg mb-16">
+        <!-- <section class="container bg-gray-900 text-white px-4 py-12 rounded-lg mb-16">
             <h2 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-white">
                 Decide To
                 <span class="font-bold">
@@ -232,9 +232,9 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> -->
         <!-- Detail Custom Section -->
-        <section class="container mb-20 max-w-5xl mx-auto px-4 sm:px-0">
+        <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <div class="mb-6 max-w-2xl">
                 <h3 class="text-2xl font-extrabold mb-3 leading-snug">
                     We bring together
@@ -254,19 +254,19 @@
             </div>
         </section>
         <!-- Meet Our Artist Section -->
-        <section
-            class="container mb-20 max-w-5xl mx-auto px-4 sm:px-0 flex flex-col md:flex-row items-center md:items-start space-y-8 md:space-y-0 md:space-x-10">
-            <div class="relative w-full max-w-xs md:max-w-[280px]">
+        <!-- <section
+            class="container mb-20 max-w-5xl mx-auto px-4 sm:px-0 flex flex-col md:flex-row items-center md:items-start space-y-8 md:space-y-0 md:space-x-10"> -->
+            <!-- <div class="relative w-full max-w-xs md:max-w-[280px]">
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
-                    height="400" src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
+                    height="400" src="{{ asset('images/events/1/strike-joran-wp-1.jpg') }}" 
                     width="280" />
                 <button
                     class="absolute bottom-4 left-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
                     type="button">
                     See More
                 </button>
-            </div>
-            <div class="max-w-xl text-gray-900">
+            </div> -->
+            <!-- <div class="max-w-xl text-gray-900">
                 <h4 class="text-xl font-extrabold mb-3">
                     STRIKE
                     <span class="font-bold">
@@ -277,16 +277,10 @@
                     Event
                     <br />
                     <br />
-                    <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                                                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
+                   
                 </p>
-                <!-- <p class="text-xs text-gray-500 mb-6">
-                                                    @AnirudhRavichander Tour On March-21
-                                                    <br />
-                                                    Tickets Open Now: Sitlix.Com
-                                                </p> -->
-            </div>
-            <div class="relative w-full max-w-xs md:max-w-[280px]">
+            </div> -->
+            <!-- <div class="relative w-full max-w-xs md:max-w-[280px]">
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
                     height="400" src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
                     width="280" />
@@ -295,30 +289,24 @@
                     type="button">
                     Coming Soon
                 </button>
-            </div>
-            <div class="max-w-xl text-gray-900">
+            </div> -->
+            <!-- <div class="max-w-xl text-gray-900">
                 <h4 class="text-xl font-extrabold mb-3">
                     Dayangyunk
                     <span class="font-bold">
-                        <!-- Artist -->
                     </span>
                 </h4>
                 <p class="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
                     Wedding Planner System
                     <br />
                     <br />
-                    <!-- Ullamco Sociisget Eget Dolor Amet Dui Dolor Taciti Taciti Ullamco Pretium Ac. Sociisget Amet Sit Id
-                                                    Amet Magna Nisi. Ullamco Semper Odio Lorem Molestie Nunc Eget. -->
                 </p>
                 <p class="text-xs text-gray-500 mb-6">
-                    <!-- @AnirudhRavichander Tour On March-21
-                                                    <br />
-                                                    Tickets Open Now: Sitlix.Com -->
                 </p>
-            </div>
+            </div> -->
         </section>
         <!-- Opinions Section -->
-        <section class="container max-w-5xl mx-auto px-4 sm:px-0 mb-20">
+        <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <h3 class="text-xl font-extrabold mb-6">
                 We Value Your Feedback
             </h3>
@@ -358,8 +346,8 @@
             </div>
         </section>
         <!-- Get Your First Ticket Section -->
-        <section class="container bg-gray-900 text-white py-16 px-4 rounded-lg mb-20 relative overflow-hidden">
-            <h3 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-center text-white">
+        <!-- <section class="container bg-gray-900 text-white py-16 px-4 rounded-lg mb-20 relative overflow-hidden"> -->
+            <!-- <h3 class="text-3xl font-extrabold max-w-4xl leading-tight mb-4 text-center text-white">
                 Get Your First Ticket
             </h3>
             <p class="max-w-3xl text-gray-300 text-sm sm:text-base mb-8 leading-relaxed text-center mx-auto">
@@ -377,7 +365,7 @@
                 class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none" height="300"
                 src="https://storage.googleapis.com/a1aa/image/19541d07-888e-4f94-3539-c0e925b86cee.jpg" style="z-index:0"
                 width="1200" />
-        </section>
+        </section> -->
     </main>
 @endsection
 
