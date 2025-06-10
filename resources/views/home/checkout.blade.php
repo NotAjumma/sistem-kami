@@ -60,18 +60,6 @@
             object-fit: contain;
         }
 
-        .form-label {
-            font-weight: 600;
-            /* font-size: 0.75rem; */
-        }
-
-        .form-control,
-        .form-select {
-            /* font-size: 0.75rem; */
-            padding: 0.25rem 0.5rem;
-            height: 32px;
-        }
-
         textarea.form-control {
             height: 72px;
             resize: none;
@@ -108,18 +96,12 @@
             /* font-size: 0.75rem; */
         }
 
-        .coupon-input-group .form-control {
-            font-size: 0.75rem;
-            height: 32px;
-        }
-
         .coupon-input-group .btn {
             background-color: #3736af;
             color: white;
             font-weight: 600;
             /* font-size: 0.75rem; */
             border: none;
-            height: 32px;
         }
 
         .payment-method label {
@@ -150,10 +132,6 @@
             margin-top: 1rem;
         }
 
-        .border-checkout {
-            border: dashed #3736af 1px;
-
-        }
 
         @media (min-width: 992px) {
             .header-checkout {
@@ -178,22 +156,24 @@
         </div>
     </header>
 
-    <main class="container my-4">
+    <main class="container my-4 mt-5">
         <div class="row gx-4">
             <section class="col-lg-8">
-                <form aria-label="Billing Details Form" class="mb-5">
+                <form aria-label="Billing Details Form" class="mb-5" method="post" action="{{ route('webform.booking') }}">
+                    @csrf
                     <h2 class="section-title">Billing Details</h2>
-                    <div class="row gx-3 gy-3">
+                    <div class="row gx-3 gy-3 section-ticket">
                         <div class="col-sm-6">
                             <label for="firstName" class="form-label">Full Name *</label>
                             <input type="text" id="firstName" name="name" placeholder="Enter Your First Name"
                                 class="form-control" required />
                         </div>
                         <div class="col-sm-6">
-                            <label for="phone" class="form-label">Phone *</label>
-                            <input type="tel" id="phone" name="phone" placeholder="Phone Number" class="form-control"
+                            <label for="phone" class="form-label">No IC *</label>
+                            <input type="tel" id="phone" name="no_ic" placeholder="Phone Number" class="form-control"
                                 required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="email" class="form-label">Email *</label>
                             <input type="email" id="email" name="email" placeholder="Enter Your Email" class="form-control"
@@ -204,19 +184,32 @@
                             <input type="email" id="emailConfirm" name="emailConfirm" placeholder="Reconfirm your email"
                                 class="form-control" required />
                         </div>
-
+                        <div class="col-sm-6">
+                            <label for="phone" class="form-label">Phone *</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Phone Number" class="form-control"
+                                required />
+                        </div>
                         <div class="col-sm-6">
                             <label for="country" class="form-label">Country *</label>
-                            <select id="country" name="country" class="form-select" required>
-                                <option selected>Malaysia</option>
+                            <select id="country" name="country" class="default-select form-control" required>
+                                @foreach (config('value.countries') as $code => $name)
+                                    <option value="{{ $code }}" {{ $code == 'MY' ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
+
                         <div class="col-sm-6">
                             <label for="state" class="form-label">State *</label>
-                            <select id="state" name="state" class="form-select" required>
+                            <select id="state" name="state" class="default-select form-control" required>
                                 <option selected disabled>Select State</option>
+                                @foreach (config('value.states') as $state)
+                                    <option value="{{ $state }}">{{ $state }}</option>
+                                @endforeach
                             </select>
                         </div>
+
                         <div class="col-sm-6">
                             <label for="city" class="form-label">City *</label>
                             <input type="text" id="city" name="city" placeholder="City" class="form-control" required />
@@ -230,56 +223,75 @@
                             <textarea id="address" name="address" placeholder="Address" class="form-control"
                                 required></textarea>
                         </div>
+                        <select name="shirt_size">
+                            <option value="">Pilih saiz baju</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                        </select>
+                        <input type="number" name="bilangan_joran" placeholder="Bilangan Joran" value="1" min="1">
                     </div>
-                </form>
 
-                @php
-                    $totalSelected = collect($tickets)->sum('quantity');
-                    $globalIndex = 1;
-                @endphp
+                    @php
+                        $totalSelected = collect($tickets)->sum('quantity');
+                        $globalIndex = 1;
+                    @endphp
 
-                <h2 class="section-title">Ticket Details ({{ $totalSelected }} {{ Str::plural('ticket', $totalSelected) }})
-                </h2>
+                    <h2 class="section-title mt-10">Ticket Details ({{ $totalSelected }}
+                        {{ Str::plural('ticket', $totalSelected) }})
+                    </h2>
 
-                @foreach ($tickets as $ticket)
-                    @for ($i = 1; $i <= $ticket['quantity']; $i++)
-                        <form aria-label="Ticket Details Form" class="section-ticket">
-                            <p class="ticket-info">
-                                {{ $globalIndex }}) {{ $ticket['name'] }} - #{{ $i }}
-                            </p>
-                            <div class="row gx-3 gy-3">
-                                <div class="col-sm-6">
-                                    <label for="fullName_{{ $globalIndex }}" class="form-label">Full Name *</label>
-                                    <input type="text" id="fullName_{{ $globalIndex }}" name="fullName[]" class="form-control"
-                                        required />
+                    <!-- @foreach ($tickets as $ticket)
+                            @for ($i = 1; $i <= $ticket['quantity']; $i++)
+                                <div aria-label="Ticket Details Form" class="section-ticket">
+                                    <p class="ticket-info">
+                                        {{ $globalIndex }}) {{ $ticket['name'] }} - #{{ $i }}
+                                    </p>
+                                    <div class="row gx-3 gy-3">
+                                        <div class="col-sm-6">
+                                            <label for="fullName_{{ $globalIndex }}" class="form-label">Full Name *</label>
+                                            <input type="text" id="fullName_{{ $globalIndex }}" name="fullName[]" class="form-control"
+                                                required />
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="age_{{ $globalIndex }}" class="form-label">Age *</label>
+                                            <input type="number" id="age_{{ $globalIndex }}" name="age[]" class="form-control"
+                                                required />
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="ticketState_{{ $globalIndex }}" class="form-label">State *</label>
+                                            <select id="ticketState_{{ $globalIndex }}" name="ticketState[]"
+                                                class="default-select form-control" required>
+                                                <option selected disabled>Select State</option>
+                                                @foreach (config('value.states') as $state)
+                                                    <option value="{{ $state }}">{{ $state }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="ticketCountry_{{ $globalIndex }}" class="form-label">Country *</label>
+                                            <select id="ticketCountry_{{ $globalIndex }}" name="ticketCountry[]"
+                                                class="default-select form-control" required>
+                                                @foreach (config('value.countries') as $code => $name)
+                                                    <option value="{{ $code }}" {{ $code == 'MY' ? 'selected' : '' }}>
+                                                        {{ $name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="passportNumber_{{ $globalIndex }}" class="form-label">IC / Passport Number
+                                                *</label>
+                                            <input type="text" id="passportNumber_{{ $globalIndex }}" name="passportNumber[]"
+                                                class="form-control" required />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <label for="age_{{ $globalIndex }}" class="form-label">Age *</label>
-                                    <input type="number" id="age_{{ $globalIndex }}" name="age[]" class="form-control" required />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label for="ticketState_{{ $globalIndex }}" class="form-label">State *</label>
-                                    <select id="ticketState_{{ $globalIndex }}" name="ticketState[]" class="form-select" required>
-                                        <option selected disabled>Select State</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-6">
-                                    <label for="ticketCountry_{{ $globalIndex }}" class="form-label">Country *</label>
-                                    <select id="ticketCountry_{{ $globalIndex }}" name="ticketCountry[]" class="form-select"
-                                        required>
-                                        <option selected disabled>Select Country</option>
-                                    </select>
-                                </div>
-                                <div class="col-12">
-                                    <label for="passportNumber_{{ $globalIndex }}" class="form-label">IC / Passport Number *</label>
-                                    <input type="text" id="passportNumber_{{ $globalIndex }}" name="passportNumber[]"
-                                        class="form-control" required />
-                                </div>
-                            </div>
-                        </form>
-                        @php $globalIndex++; @endphp
-                    @endfor
-                @endforeach
+                                @php $globalIndex++; @endphp
+                            @endfor
+                        @endforeach -->
 
 
             </section>
@@ -372,8 +384,8 @@
                 </div>
 
                 <div class="payment-method mb-3">
-                    <p class="fw-semibold mb-1" style="font-size: 0.75rem;">Payment Method</p>
-                    <p class="mb-2" style="font-size: 0.75rem;">Select a payment method</p>
+                    <p class="fw-semibold mb-1" style="">Payment Method</p>
+                    <p class="mb-2" style="">Select a payment method</p>
                     <label>
                         <input type="radio" name="paymentMethod" value="online" checked />
                         <i class="fas fa-credit-card"></i> ONLINE PAYMENT
@@ -382,6 +394,7 @@
 
                 <button type="submit" class="btn-pay">Proceed to Pay</button>
             </aside>
+            </form>
         </div>
     </main>
 @endsection
