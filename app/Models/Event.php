@@ -19,6 +19,8 @@ class Event extends Model
         'buy_link',
         'images',
         'shortcode',
+        'service_charge_fixed',
+        'service_charge_percentage',
     ];
 
     protected $casts = [
