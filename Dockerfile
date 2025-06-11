@@ -28,6 +28,7 @@ COPY . .
 
 # Pasang composer dependencies
 RUN composer install --no-dev --optimize-autoloader
+RUN composer dump-autoload
 
 # Pasang npm dependencies dan build assets
 RUN npm install && npm run build
