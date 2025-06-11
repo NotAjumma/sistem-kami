@@ -223,9 +223,9 @@
                         </div>
 
                         <div class="col-sm-6">
-                            <label for="zip" class="form-label">Zip/Postcode *</label>
-                            <input type="text" id="zip" name="zip" placeholder="Zip/Postcode"
-                                class="form-control" value="{{ old('zip') }}" />
+                            <label for="postcode" class="form-label">Zip/Postcode *</label>
+                            <input type="text" id="postcode" name="postcode" placeholder="Zip/Postcode"
+                                class="form-control" value="{{ old('postcode') }}" />
                         </div>
 
                         <div class="col-12">
