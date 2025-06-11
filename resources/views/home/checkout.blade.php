@@ -166,34 +166,38 @@
                         <div class="col-sm-6">
                             <label for="firstName" class="form-label">Full Name *</label>
                             <input type="text" id="firstName" name="name" placeholder="Enter Your First Name"
-                                class="form-control" required />
+                                class="form-control" value="{{ old('name') }}" required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="phone" class="form-label">No IC *</label>
-                            <input type="tel" id="phone" name="no_ic" placeholder="Phone Number" class="form-control"
-                                required />
+                            <input type="tel" id="phone" name="no_ic" placeholder="IC Number"
+                                class="form-control" value="{{ old('no_ic') }}" required />
                         </div>
 
                         <div class="col-sm-6">
                             <label for="email" class="form-label">Email *</label>
-                            <input type="email" id="email" name="email" placeholder="Enter Your Email" class="form-control"
-                                required />
+                            <input type="email" id="email" name="email" placeholder="Enter Your Email"
+                                class="form-control" value="{{ old('email') }}" required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="emailConfirm" class="form-label">Email Confirmation *</label>
                             <input type="email" id="emailConfirm" name="emailConfirm" placeholder="Reconfirm your email"
-                                class="form-control" required />
+                                class="form-control" value="{{ old('emailConfirm') }}" required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="phone" class="form-label">Phone *</label>
-                            <input type="tel" id="phone" name="phone" placeholder="Phone Number" class="form-control"
-                                required />
+                            <input type="tel" id="phone" name="phone" placeholder="Phone Number"
+                                class="form-control" value="{{ old('phone') }}" required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="country" class="form-label">Country *</label>
                             <select id="country" name="country" class="default-select form-control" required>
                                 @foreach (config('value.countries') as $code => $name)
-                                    <option value="{{ $code }}" {{ $code == 'MY' ? 'selected' : '' }}>
+                                    <option value="{{ $code }}" {{ old('country', 'MY') == $code ? 'selected' : '' }}>
                                         {{ $name }}
                                     </option>
                                 @endforeach
@@ -203,36 +207,43 @@
                         <div class="col-sm-6">
                             <label for="state" class="form-label">State *</label>
                             <select id="state" name="state" class="default-select form-control" required>
-                                <option selected disabled>Select State</option>
+                                <option disabled {{ old('state') ? '' : 'selected' }}>Select State</option>
                                 @foreach (config('value.states') as $state)
-                                    <option value="{{ $state }}">{{ $state }}</option>
+                                    <option value="{{ $state }}" {{ old('state') == $state ? 'selected' : '' }}>
+                                        {{ $state }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="col-sm-6">
                             <label for="city" class="form-label">City *</label>
-                            <input type="text" id="city" name="city" placeholder="City" class="form-control" required />
+                            <input type="text" id="city" name="city" placeholder="City"
+                                class="form-control" value="{{ old('city') }}" required />
                         </div>
+
                         <div class="col-sm-6">
                             <label for="zip" class="form-label">Zip/Postcode *</label>
-                            <input type="text" id="zip" name="zip" placeholder="Zip/Postcode" class="form-control" />
+                            <input type="text" id="zip" name="zip" placeholder="Zip/Postcode"
+                                class="form-control" value="{{ old('zip') }}" />
                         </div>
+
                         <div class="col-12">
                             <label for="address" class="form-label">Address *</label>
-                            <textarea id="address" name="address" placeholder="Address" class="form-control"
-                                required></textarea>
+                            <textarea id="address" name="address" placeholder="Address" class="form-control" required>{{ old('address') }}</textarea>
                         </div>
-                        <select name="shirt_size">
-                            <option value="">Pilih saiz baju</option>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                        </select>
-                        <input type="number" name="bilangan_joran" placeholder="Bilangan Joran" value="1" min="1">
+
+                        <div class="col-sm-6">
+                            <label for="shirt_size" class="form-label">Shirt Size</label>
+                            <select name="shirt_size" class="form-control">
+                                <option value="">Pilih saiz baju</option>
+                                @foreach(['S', 'M', 'L', 'XL', 'XXL'] as $size)
+                                    <option value="{{ $size }}" {{ old('shirt_size') == $size ? 'selected' : '' }}>{{ $size }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
+
 
                     @php
                         $totalSelected = collect($tickets)->sum('quantity');
@@ -341,8 +352,20 @@
                             $subtotal += $ticket['quantity'] * floatval($ticket['price']);
                         }
 
-                        $serviceChargeRate = 1; // rm1
-                        $serviceCharge = $serviceChargeRate;
+                        $fixed = $event->service_charge_fixed ?? null;
+                        $percentage = $event->service_charge_percentage ?? null;
+
+                        if (!is_null($percentage) && $percentage != 0) {
+                            $serviceCharge = $subtotal * ($percentage / 100);
+                            $serviceChargeLabel = 'Service Charge (' . $percentage . '%)';
+                        } elseif (!is_null($fixed) && $fixed != 0) {
+                            $serviceCharge = $fixed;
+                            $serviceChargeLabel = 'Service Charge (MYR' . number_format($fixed, 2) . ')';
+                        } else {
+                            $serviceCharge = 0;
+                            $serviceChargeLabel = null; // no label to display
+                        }
+
                         $total = $subtotal + $serviceCharge;
                     @endphp
 
@@ -366,7 +389,7 @@
                         <span>MYR{{ number_format($subtotal, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 text-primary">
-                        <span>Service Charge (MYR1.00)</span>
+                        <span>{{ $serviceChargeLabel }}</span>
                         <span>+ MYR{{ number_format($serviceCharge, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between total-row">

@@ -171,6 +171,7 @@ class BookingController extends Controller
         return redirect()->back()->with('success', 'Payment validated and email sent.');
     }
 
+    // After check select ticket and before checkout
     public function storeSelection(Request $request)
     {
         $validated = $request->validate([
@@ -219,7 +220,9 @@ class BookingController extends Controller
         session([
             'selected_event' => Event::select([
                 'id',
+                'organizer_id',
                 'title',
+                'shortcode',
                 'start_date',
                 'start_time',
                 'district',
@@ -229,6 +232,8 @@ class BookingController extends Controller
                 'status',
                 'registration_deadline',
                 'is_free',
+                'service_charge_fixed',
+                'service_charge_percentage',
             ])
                 ->where('id', $validated['event_id'])
                 ->first(),
@@ -252,76 +257,110 @@ class BookingController extends Controller
         return view('home.checkout', compact('event', 'tickets'));
     }
 
-
     public function webFormBooking(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'no_ic' => 'required|string',
-            'phone' => 'nullable|string',
-            'shirt_size' => 'nullable|string',
-            'bilangan_joran' => 'nullable|integer|min:1',
+            'name'      => 'required|string',
+            'email'     => 'required|email',
+            'no_ic'     => 'required|string',
+            'phone'     => 'nullable|string',
+            'country'   => 'nullable|string',
+            'state'     => 'nullable|string',
+            'city'      => 'nullable|string',
+            'postcode'  => 'nullable|string',
+            'address'   => 'nullable|string',
         ]);
 
         DB::beginTransaction();
 
         try {
-            $participant = Participant::updateOrCreate(
-                [
-                    'email' => $request->email,
-                    'no_ic' => $request->no_ic,
-                ],
-                [
-                    'name' => $request->name,
-                    'phone' => $request->phone,
-                ]
-            );
+            \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
-            $ticket_id = 2;
-            $ticket = Ticket::with('event')->findOrFail($ticket_id);
-            $eventCode = strtoupper($ticket->event->shortcode ?? 'DFT');
+            $participant = Participant::create($request->only([
+                'name', 'email', 'no_ic', 'phone', 'country', 'state', 'city', 'postcode', 'address',
+            ]));
 
-            $bilanganJoran = max(1, (int) $request->bilangan_joran);
-            $totalPrice = $ticket->price * $bilanganJoran;
+            $event = session('selected_event');
+            $tickets = session('selected_tickets');
+
+            if (!$event || !$tickets) {
+                \Log::warning('Session expired or incomplete', ['event' => $event, 'tickets' => $tickets]);
+                throw new \Exception('Session expired or incomplete. Sila pilih tiket semula.');
+            }
+
+            $eventCode = strtoupper($event['shortcode'] ?? 'DFT');
+            $totalPrice = 0;
 
             $booking = Booking::create([
                 'participant_id' => $participant->id,
-                'event_id' => $ticket->event_id,
-                'organizer_id' => $ticket->event->organizer_id,
-                'booking_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
-                'status' => 'pending',
-                'total_price' => $totalPrice,
-                'payment_method' => 'webform',
-                'extra_info' => ['shirt_size' => $request->shirt_size],
+                'event_id'       => $event['id'],
+                'organizer_id'   => $event['organizer_id'] ?? null,
+                'booking_code'   => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status'         => 'pending',
+                'total_price'    => 0,
+                'payment_method' => 'sistemkami-toyyibpay',
+                'extra_info'     => ['shirt_size' => $request->shirt_size],
             ]);
 
-            for ($i = 0; $i < $bilanganJoran; $i++) {
-                BookingTicket::create([
-                    'booking_id' => $booking->id,
-                    'ticket_id' => $ticket->id,
-                    'price' => $ticket->price,
-                    'participant_name' => $request->name,
-                    'participant_email' => $request->email,
-                    'participant_no_ic' => $request->no_ic,
-                    'participant_phone' => $request->phone,
-                    'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
-                    'status' => 'pending',
-                ]);
+            foreach ($tickets as $ticket) {
+                $quantity = (int) $ticket['quantity'];
+                $price = (float) $ticket['price'];
+
+                for ($i = 0; $i < $quantity; $i++) {
+                    BookingTicket::create([
+                        'booking_id'        => $booking->id,
+                        'ticket_id'         => $ticket['ticket_id'],
+                        'price'             => $price,
+                        'participant_name'  => $request->name,
+                        'participant_email' => $request->email,
+                        'participant_no_ic' => $request->no_ic,
+                        'participant_phone' => $request->phone,
+                        'ticket_code'       => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
+                        'status'            => 'paid',
+                    ]);
+                }
+
+                $totalPrice += $price * $quantity;
             }
+
+            $fixed = $event['service_charge_fixed'] ?? null;
+            $percentage = $event['service_charge_percentage'] ?? null;
+
+            if (!is_null($percentage) && $percentage != 0) {
+                $serviceCharge = $totalPrice * ($percentage / 100);
+            } elseif (!is_null($fixed) && $fixed != 0) {
+                $serviceCharge = $fixed;
+            } else {
+                $serviceCharge = 0;
+            }
+
+            $grandTotal = $totalPrice + $serviceCharge;
+
+            \Log::info('Booking totals calculated', [
+                'booking_id'    => $booking->id,
+                'total_price'   => $totalPrice,
+                'service_charge'=> $serviceCharge,
+                'grand_total'   => $grandTotal
+            ]);
+
+            $booking->update([
+                'total_price'    => $totalPrice,
+                'service_charge' => $serviceCharge
+            ]);
 
             // === ToyyibPay integration ===
             $toyyibPay = new ToyyibPayService();
             $bill = $toyyibPay->createBill([
-                'name' => 'Bayaran Tiket ' . $ticket->event->name,
-                'description' => 'Tempahan oleh ' . $participant->name,
-                'amount' => $totalPrice,
-                'ref_no' => $booking->booking_code,
-                'to' => $participant->name,
-                'email' => $participant->email,
-                'phone' => $participant->phone,
+                'name'        => Str::limit('Payment for ' . $event['title'], 30),
+                'description' => 'Booked by ' . $participant->name,
+                'amount'      => $grandTotal,
+                'ref_no'      => $booking->booking_code,
+                'to'          => $participant->name,
+                'email'       => $participant->email,
+                'phone'       => $participant->phone,
             ]);
-            \Log::info($bill);
+
+            \Log::info('ToyyibPay bill response', ['bill' => $bill]);
 
             if (!isset($bill[0]['BillCode'])) {
                 throw new \Exception('ToyyibPay: BillCode gagal dicipta');
@@ -329,22 +368,28 @@ class BookingController extends Controller
 
             Payment::create([
                 'booking_id' => $booking->id,
-                'bill_code' => $bill[0]['BillCode'],
-                'ref_no' => $booking->booking_code,
-                'amount' => $totalPrice,
-                'status' => 'pending',
+                'bill_code'  => $bill[0]['BillCode'],
+                'ref_no'     => $booking->booking_code,
+                'amount'     => $grandTotal,
+                'status'     => 'pending',
+            ]);
+
+            \Log::info('Payment record created', [
+                'booking_id' => $booking->id,
+                'bill_code'  => $bill[0]['BillCode'],
             ]);
 
             DB::commit();
 
-            return redirect()->away('https://dev.toyyibpay.com/' . $bill[0]['BillCode']);
+           $baseUrl = config('toyyibpay.sandbox') ? 'https://dev.toyyibpay.com' : 'https://toyyibpay.com';
+            return redirect()->away($baseUrl . '/' . $bill[0]['BillCode']);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('webFormBooking failed', [
-                'error' => $e->getMessage(),
-                'input' => $request->all()
+            \Log::error('Web form booking failed', [
+                'message' => $e->getMessage(),
+                'input'   => $request->all()
             ]);
 
             return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
@@ -353,29 +398,40 @@ class BookingController extends Controller
 
     public function handleCallback(Request $request)
     {
+        \Log::info('ToyyibPay callback received:', $request->all());
+
         $payment = Payment::where('bill_code', $request->billcode)->first();
 
         if (!$payment) {
-            \Log::warning('Callback tanpa payment: ', $request->all());
+            \Log::warning('Callback tanpa payment (invalid bill_code):', $request->all());
             return response()->json(['error' => 'Invalid bill code'], 404);
         }
 
+        $status = $request->status_id == 1 ? 'paid' : 'failed';
+
         $payment->update([
-            'status' => $request->status_id == 1 ? 'paid' : 'failed',
-            'paid_at' => now(),
-            'raw_response' => $request->all(),
+            'status'        => $status,
+            'paid_at'       => now(),
+            'raw_response'  => $request->all(),
         ]);
 
-        // Kemaskini status booking jika berjaya
-        if ($request->status_id == 1) {
-            $payment->booking->update([
-                'status' => 'paid'
+        \Log::info('Payment updated:', [
+            'payment_id'    => $payment->id,
+            'status'        => $status,
+        ]);
+
+        if ($status === 'paid') {
+            $payment->booking->update(['status' => 'paid']);
+            \Log::info('Booking marked as paid:', ['booking_id' => $payment->booking->id]);
+        } else {
+            $payment->booking->update(['status' => 'failed']);
+            \Log::warning('Booking marked as failed:', [
+                'booking_id' => $payment->booking->id,
+                'reason' => $request->description ?? 'No reason given'
             ]);
         }
 
         return response()->json(['success' => true]);
     }
-
-
 
 }

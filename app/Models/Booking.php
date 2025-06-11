@@ -19,6 +19,7 @@ class Booking extends Model
         'status',
         'coupon_code',
         'discount',
+        'service_charge',
         'final_price',
         'extra_info',
     ];

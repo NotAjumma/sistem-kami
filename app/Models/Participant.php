@@ -13,6 +13,11 @@ class Participant extends Model
         'email',
         'phone',
         'no_ic',
+        'country',
+        'state',
+        'city',
+        'postcode',
+        'address',
     ];
 
     public function bookings()
