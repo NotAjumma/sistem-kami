@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\TicketInput;
 use App\Models\Event;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
@@ -183,7 +184,7 @@ class BookingController extends Controller
 
         $eventId = $validated['event_id'];
 
-        \Log::info($validated['tickets']);
+        // \Log::info($validated['tickets']);
         // Get all ticket IDs from validated tickets that have quantity > 0
         $selectedTicketIds = collect($validated['tickets'])
             ->filter(fn($t) => $t['quantity'] > 0)
@@ -217,6 +218,28 @@ class BookingController extends Controller
             return back()->with('error', 'Please select at least one ticket.');
         }
 
+        // ✅ Fetch and group ticket_inputs
+        $ticketInputs = TicketInput::whereIn('ticket_id', $selectedTicketIds)
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(['ticket_id', fn($input) => $input->parent ?? 'General']);
+
+        $ticketInputsArray = $ticketInputs->map(function ($byParent) {
+            return $byParent->map(function ($inputs) {
+                return $inputs->map(fn($input) => [
+                    'id' => $input->id,
+                    'label' => $input->label,
+                    'input_type' => $input->input_type,
+                    'options' => $input->options,
+                    'is_required' => $input->is_required,
+                    'sort_order' => $input->sort_order,
+                    'placeholder' => $input->placeholder,
+                ]);
+            });
+        });
+
+
+        // Store in session for checkout/payment process
         session([
             'selected_event' => Event::select([
                 'id',
@@ -238,6 +261,7 @@ class BookingController extends Controller
                 ->where('id', $validated['event_id'])
                 ->first(),
             'selected_tickets' => $selectedTickets,
+            'selected_ticket_inputs' => $ticketInputsArray,
         ]);
 
         return redirect()->route('checkout');
@@ -247,6 +271,7 @@ class BookingController extends Controller
     {
         $event = session('selected_event');
         $tickets = session('selected_tickets');
+        $ticketInputs = session('selected_ticket_inputs');
 
         \Log::info($event);
         \Log::info($tickets);
@@ -254,21 +279,21 @@ class BookingController extends Controller
             return redirect('/')->with('error', 'Please select tickets first.');
         }
 
-        return view('home.checkout', compact('event', 'tickets'));
+        return view('home.checkout', compact('event', 'tickets', 'ticketInputs'));
     }
 
     public function webFormBooking(Request $request)
     {
         $request->validate([
-            'name'      => 'required|string',
-            'email'     => 'required|email',
-            'no_ic'     => 'required|string',
-            'phone'     => 'nullable|string',
-            'country'   => 'nullable|string',
-            'state'     => 'nullable|string',
-            'city'      => 'nullable|string',
-            'postcode'  => 'nullable|string',
-            'address'   => 'nullable|string',
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'no_ic' => 'required|string',
+            'phone' => 'nullable|string',
+            'country' => 'nullable|string',
+            'state' => 'nullable|string',
+            'city' => 'nullable|string',
+            'postcode' => 'nullable|string',
+            'address' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -277,7 +302,15 @@ class BookingController extends Controller
             \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
             $participant = Participant::create($request->only([
-                'name', 'email', 'no_ic', 'phone', 'country', 'state', 'city', 'postcode', 'address',
+                'name',
+                'email',
+                'no_ic',
+                'phone',
+                'country',
+                'state',
+                'city',
+                'postcode',
+                'address',
             ]));
 
             $event = session('selected_event');
@@ -293,13 +326,13 @@ class BookingController extends Controller
 
             $booking = Booking::create([
                 'participant_id' => $participant->id,
-                'event_id'       => $event['id'],
-                'organizer_id'   => $event['organizer_id'] ?? null,
-                'booking_code'   => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
-                'status'         => 'pending',
-                'total_price'    => 0,
+                'event_id' => $event['id'],
+                'organizer_id' => $event['organizer_id'] ?? null,
+                'booking_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status' => 'pending',
+                'total_price' => 0,
                 'payment_method' => 'sistemkami-toyyibpay',
-                'extra_info'     => ['shirt_size' => $request->shirt_size],
+                'extra_info' => ['shirt_size' => $request->shirt_size],
             ]);
 
             foreach ($tickets as $ticket) {
@@ -308,15 +341,15 @@ class BookingController extends Controller
 
                 for ($i = 0; $i < $quantity; $i++) {
                     BookingTicket::create([
-                        'booking_id'        => $booking->id,
-                        'ticket_id'         => $ticket['ticket_id'],
-                        'price'             => $price,
-                        'participant_name'  => $request->name,
+                        'booking_id' => $booking->id,
+                        'ticket_id' => $ticket['ticket_id'],
+                        'price' => $price,
+                        'participant_name' => $request->name,
                         'participant_email' => $request->email,
                         'participant_no_ic' => $request->no_ic,
                         'participant_phone' => $request->phone,
-                        'ticket_code'       => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
-                        'status'            => 'paid',
+                        'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
+                        'status' => 'paid',
                     ]);
                 }
 
@@ -337,27 +370,27 @@ class BookingController extends Controller
             $grandTotal = $totalPrice + $serviceCharge;
 
             \Log::info('Booking totals calculated', [
-                'booking_id'    => $booking->id,
-                'total_price'   => $totalPrice,
-                'service_charge'=> $serviceCharge,
-                'grand_total'   => $grandTotal
+                'booking_id' => $booking->id,
+                'total_price' => $totalPrice,
+                'service_charge' => $serviceCharge,
+                'grand_total' => $grandTotal
             ]);
 
             $booking->update([
-                'total_price'    => $totalPrice,
+                'total_price' => $totalPrice,
                 'service_charge' => $serviceCharge
             ]);
 
             // === ToyyibPay integration ===
             $toyyibPay = new ToyyibPayService();
             $bill = $toyyibPay->createBill([
-                'name'        => Str::limit('Payment for ' . $event['title'], 30),
+                'name' => Str::limit('Payment for ' . $event['title'], 30),
                 'description' => 'Booked by ' . $participant->name,
-                'amount'      => $grandTotal,
-                'ref_no'      => $booking->booking_code,
-                'to'          => $participant->name,
-                'email'       => $participant->email,
-                'phone'       => $participant->phone,
+                'amount' => $grandTotal,
+                'ref_no' => $booking->booking_code,
+                'to' => $participant->name,
+                'email' => $participant->email,
+                'phone' => $participant->phone,
             ]);
 
             \Log::info('ToyyibPay bill response', ['bill' => $bill]);
@@ -368,20 +401,20 @@ class BookingController extends Controller
 
             Payment::create([
                 'booking_id' => $booking->id,
-                'bill_code'  => $bill[0]['BillCode'],
-                'ref_no'     => $booking->booking_code,
-                'amount'     => $grandTotal,
-                'status'     => 'pending',
+                'bill_code' => $bill[0]['BillCode'],
+                'ref_no' => $booking->booking_code,
+                'amount' => $grandTotal,
+                'status' => 'pending',
             ]);
 
             \Log::info('Payment record created', [
                 'booking_id' => $booking->id,
-                'bill_code'  => $bill[0]['BillCode'],
+                'bill_code' => $bill[0]['BillCode'],
             ]);
 
             DB::commit();
 
-           $baseUrl = config('toyyibpay.sandbox') ? 'https://dev.toyyibpay.com' : 'https://toyyibpay.com';
+            $baseUrl = config('toyyibpay.sandbox') ? 'https://dev.toyyibpay.com' : 'https://toyyibpay.com';
             return redirect()->away($baseUrl . '/' . $bill[0]['BillCode']);
 
         } catch (\Exception $e) {
@@ -389,7 +422,7 @@ class BookingController extends Controller
 
             \Log::error('Web form booking failed', [
                 'message' => $e->getMessage(),
-                'input'   => $request->all()
+                'input' => $request->all()
             ]);
 
             return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
@@ -410,14 +443,14 @@ class BookingController extends Controller
         $status = $request->status_id == 1 ? 'paid' : 'failed';
 
         $payment->update([
-            'status'        => $status,
-            'paid_at'       => now(),
-            'raw_response'  => $request->all(),
+            'status' => $status,
+            'paid_at' => now(),
+            'raw_response' => $request->all(),
         ]);
 
         \Log::info('Payment updated:', [
-            'payment_id'    => $payment->id,
-            'status'        => $status,
+            'payment_id' => $payment->id,
+            'status' => $status,
         ]);
 
         if ($status === 'paid') {

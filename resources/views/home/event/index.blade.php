@@ -152,10 +152,6 @@
             list-style-type: inherit !important;
         }
 
-        .text-pink {
-            color: #c2185b;
-        }
-
         .btn-qty {
             width: 38px;
             height: 38px;
@@ -304,7 +300,7 @@
                             <p class="fw-semibold mb-1" style="font-size: 1rem; line-height: 1.2;">
                                 {{ $event->organizer->name }}
                             </p>
-                            <p class="mb-1" style="font-size: 0.875rem; color: #dc2626;">
+                            <p class="mb-0" style="font-size: 0.875rem; color: #dc2626; font-weight: 600;">
                                 Email: <a href="mailto:{{ $event->organizer->email }}"
                                     class="link-red">{{ $event->organizer->email }}</a>
                             </p>
@@ -327,11 +323,11 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                                                                                <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                                                                    <i class="fas fa-calendar-alt me-2"></i>
-                                                                                    Add to Calendar
-                                                                                    <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                                                                </p> -->
+                                                                                    <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                                                                        <i class="fas fa-calendar-alt me-2"></i>
+                                                                                        Add to Calendar
+                                                                                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                                                                    </p> -->
                     <hr class="mb-4" />
                     <form method="POST" action="{{ route('tickets.select') }}">
                         @csrf
@@ -343,17 +339,18 @@
                             <input type="hidden" name="event_id" value="{{ $event->id }}" />
 
                             @foreach ($filteredTickets as $ticket)
-                                <div class="p-4 mb-1" style="border: 1px #c3c5c9 solid;">
-                                    <p class="text-pink fw-semibold mb-1" style="font-size: 0.875rem;">
+                                <div class="p-4 mb-1" style="border: 2px rgb(235, 237, 241) dashed;">
+                                    <h6 class="text-pink fw-semibold mb-1" style="font-size: 1rem;">
                                         {{ strtoupper($ticket->name) }}
-                                    </p>
+                                    </h6>
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
-                                            <p class="mb-3" style="font-size: 0.875rem;">
+                                            <h6 class="mb-3" style="font-size: 0.85rem;">
                                                 <span class="price-current-bold">{{ $event->currency }}
                                                     {{ number_format($ticket->price, 2) }}</span>
-                                            </p>
+                                            </h6>
                                         </div>
+                                        <h6>
                                         <div class="d-flex align-items-center mb-3">
                                             <button type="button" class="btn btn-outline-secondary btn-qty"
                                                 data-ticket="{{ $ticket->id }}" data-action="minus">−</button>
@@ -364,13 +361,14 @@
                                             <button type="button" class="btn btn-outline-secondary btn-qty"
                                                 data-ticket="{{ $ticket->id }}" data-action="plus">+</button>
                                         </div>
+                                        </h6>
                                     </div>
                                 </div>
                             @endforeach
                             <div class="d-flex justify-content-between align-items-center mt-2">
-                                <p class="fw-semibold mb-0">Total Price</p>
+                                <p class="fw-semibold mb-0" style="font-size: 1rem;">Total Price</p>
                                 <p class="fw-bold mb-0" style="font-size: 1.5rem; color: #111827;">{{ $event->currency }} <span
-                                        id="total-price">0</span>
+                                        id="total-price">0.00</span>
                                 </p>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3">Book Now</button>

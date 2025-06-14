@@ -78,6 +78,10 @@
 		.bg-gray-900 {
 			background-color: #3736af !important;
 		}
+
+		 .text-pink {
+            color: #c2185b;
+        }
 	</style>
 	@stack('styles')
 </head>
