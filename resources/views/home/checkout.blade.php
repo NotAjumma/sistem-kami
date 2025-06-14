@@ -73,6 +73,13 @@
             margin-top: 1.5rem;
         }
 
+        .parent-ticket {
+            border-top: 2px dashed rgb(224, 230, 229);
+            padding-top: 1rem;
+            width: 90%;
+            margin: 1.5rem 0.5rem 0.5rem;
+        }
+
         .ticket-info {
             font-weight: 600;
             /* font-size: 0.75rem; */
@@ -165,7 +172,7 @@
                     <div class="row gx-3 gy-3 section-ticket">
                         <div class="col-sm-6">
                             <label for="firstName" class="form-label">Full Name *</label>
-                            <input type="text" id="firstName" name="name" placeholder="Enter Your First Name"
+                            <input type="text" id="firstName" name="name" placeholder="Enter Your Full Name"
                                 class="form-control" value="{{ old('name') }}" required />
                         </div>
 
@@ -236,7 +243,7 @@
                         <div class="col-sm-6">
                             <label for="shirt_size" class="form-label">Shirt Size</label>
                             <select name="shirt_size" class="form-control">
-                                <option value="">Pilih saiz baju</option>
+                               <option disabled {{ old('shirt_size') ? '' : 'selected' }}>Select Size</option>
                                 @foreach(['S', 'M', 'L', 'XL', 'XXL'] as $size)
                                     <option value="{{ $size }}" {{ old('shirt_size') == $size ? 'selected' : '' }}>{{ $size }}</option>
                                 @endforeach
@@ -254,55 +261,114 @@
                         {{ Str::plural('ticket', $totalSelected) }})
                     </h2>
 
-                    <!-- @foreach ($tickets as $ticket)
-                            @for ($i = 1; $i <= $ticket['quantity']; $i++)
-                                <div aria-label="Ticket Details Form" class="section-ticket">
-                                    <p class="ticket-info">
-                                        {{ $globalIndex }}) {{ $ticket['name'] }} - #{{ $i }}
-                                    </p>
-                                    <div class="row gx-3 gy-3">
-                                        <div class="col-sm-6">
-                                            <label for="fullName_{{ $globalIndex }}" class="form-label">Full Name *</label>
-                                            <input type="text" id="fullName_{{ $globalIndex }}" name="fullName[]" class="form-control"
-                                                required />
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="age_{{ $globalIndex }}" class="form-label">Age *</label>
-                                            <input type="number" id="age_{{ $globalIndex }}" name="age[]" class="form-control"
-                                                required />
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="ticketState_{{ $globalIndex }}" class="form-label">State *</label>
-                                            <select id="ticketState_{{ $globalIndex }}" name="ticketState[]"
-                                                class="default-select form-control" required>
-                                                <option selected disabled>Select State</option>
-                                                @foreach (config('value.states') as $state)
-                                                    <option value="{{ $state }}">{{ $state }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="ticketCountry_{{ $globalIndex }}" class="form-label">Country *</label>
-                                            <select id="ticketCountry_{{ $globalIndex }}" name="ticketCountry[]"
-                                                class="default-select form-control" required>
-                                                @foreach (config('value.countries') as $code => $name)
-                                                    <option value="{{ $code }}" {{ $code == 'MY' ? 'selected' : '' }}>
-                                                        {{ $name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="passportNumber_{{ $globalIndex }}" class="form-label">IC / Passport Number
-                                                *</label>
-                                            <input type="text" id="passportNumber_{{ $globalIndex }}" name="passportNumber[]"
-                                                class="form-control" required />
-                                        </div>
-                                    </div>
+                    @foreach ($tickets as $ticket)
+                        @for ($i = 1; $i <= $ticket['quantity']; $i++)
+                            <div class="section-ticket">
+                                <p class="ticket-info" style="font-size: 1rem;">
+                                    {{ $globalIndex }}. {{ strtoupper($ticket['name']) }} - #{{ $i }}
+                                </p>
+
+                                @php
+                                    $ticketInputs = session('selected_ticket_inputs')[$ticket['ticket_id']] ?? [];
+                                @endphp
+
+                                <div class="row gx-3 gy-3">
+                                    @foreach ($ticketInputs as $parent => $inputs)
+                                        @if ($parent !== 'General')
+                                            <div class="col-12 mb-2 parent-ticket">
+                                                <h6 class="text-primary" style="font-size: 0.8rem;">{{ $parent }}</h6>
+                                            </div>
+                                        @endif
+
+
+                                        @foreach ($inputs as $input)
+                                            <div class="col-sm-6">
+                                                <label for="input_{{ $input['id'] }}_{{ $globalIndex }}" class="form-label">
+                                                    {{ $input['label'] }}{{ $input['is_required'] ? ' *' : '' }}
+                                                </label>
+
+                                                @switch($input['input_type'])
+                                                    @case('text')
+                                                        <input type="text"
+                                                            id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            value="{{ old("ticket_inputs.$globalIndex." . $input['id']) }}"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            {{ $input['is_required'] ? 'required' : '' }} />
+                                                        @break
+
+                                                    @case('textarea')
+                                                        <textarea id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            {{ $input['is_required'] ? 'required' : '' }}>{{ old("ticket_inputs.$globalIndex." . $input['id']) }}</textarea>
+                                                        @break
+
+                                                    @case('select')
+                                                        <select id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            {{ $input['is_required'] ? 'required' : '' }}>
+                                                            <option disabled {{ old("ticket_inputs.$globalIndex." . $input['id']) ? '' : 'selected' }}>Select {{ $input['label'] }}</option>
+                                                            @foreach ($input['options'] as $option)
+                                                                <option value="{{ $option }}"
+                                                                    {{ old("ticket_inputs.$globalIndex." . $input['id']) == $option ? 'selected' : '' }}>
+                                                                    {{ $option }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        @break
+
+                                                    @case('radio')
+                                                        <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
+                                                            @foreach ($input['options'] as $option)
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio"
+                                                                        name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                                        id="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
+                                                                        value="{{ $option }}"
+                                                                        {{ old("ticket_inputs.$globalIndex." . $input['id']) == $option ? 'checked' : '' }}
+                                                                        {{ $input['is_required'] ? 'required' : '' }} />
+                                                                    <label class="form-check-label"
+                                                                        for="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
+                                                                        {{ $option }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
+
+                                                    @case('checkbox')
+                                                        <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
+                                                            @foreach ($input['options'] as $option)
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}][]"
+                                                                        id="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
+                                                                        value="{{ $option }}"
+                                                                        {{ is_array(old("ticket_inputs.$globalIndex." . $input['id'])) && in_array($option, old("ticket_inputs.$globalIndex." . $input['id'])) ? 'checked' : '' }}
+                                                                        {{ $input['is_required'] ? 'required' : '' }} />
+                                                                    <label class="form-check-label"
+                                                                        for="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
+                                                                        {{ $option }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
+                                                @endswitch
+                                            </div>
+                                        @endforeach
+
+                                    @endforeach
                                 </div>
-                                @php $globalIndex++; @endphp
-                            @endfor
-                        @endforeach -->
+                            </div>
+
+                            @php $globalIndex++; @endphp
+                        @endfor
+                    @endforeach
 
 
             </section>
