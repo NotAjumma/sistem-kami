@@ -119,6 +119,13 @@
             border-bottom-right-radius: 0;
         }
 
+        @media (max-width: 768px) {
+            .portfolio-image, .package-carousel img {
+                height: 200px; /* 50% of desktop height on mobile */
+            }
+        }
+
+
         .portfolio-content {
             padding: 1rem 1rem 1.25rem;
         }
@@ -378,7 +385,6 @@
                         </article>
                     </div>
                 @endforeach
-
             </div>
         </section>
 
@@ -391,7 +397,7 @@
                     @php
                         $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name);
                     @endphp
-                    <div class="col-12 col-md-6 col-xl-4">
+                    <div class="col-6 col-md-6 col-xl-4">
                         <article class="portfolio-item">
                             <img src="{{ $imgUrl }}" alt="{{ $gallery->alt_text ?? 'Gallery Image' }}" class="portfolio-image"
                                 loading="lazy" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#galleryModal"
