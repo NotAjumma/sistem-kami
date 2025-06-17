@@ -1,0 +1,468 @@
+@extends('home.homeLayout')
+@push('styles')
+
+    <style>
+        .breadcrumb-item+.breadcrumb-item::before {
+            content: "›";
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-top: -5rem;
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 96px;
+            height: 96px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid white;
+            position: absolute;
+            top: 30px;
+            left: 1.5rem;
+            background-color: #e9ecef;
+            z-index: 100;
+        }
+
+        @media (min-width: 768px) {
+            .profile-pic {
+                width: 112px;
+                height: 112px;
+                top: 30px;
+                left: 2rem;
+            }
+        }
+
+        .profile-intro {
+            margin-left: 130px;
+        }
+
+        .profile-intro h2 {
+            font-weight: 700;
+            margin-bottom: 0;
+            font-size: 2rem;
+        }
+
+        .profile-intro .location {
+            font-size: 0.9rem;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .profile-intro .location .material-icons {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+
+        .service-card {
+            border-radius: 12px;
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 1px 6px rgb(0 0 0 / 0.05);
+            transition: box-shadow 0.3s ease;
+            cursor: default;
+        }
+
+        .service-card:hover {
+            box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+        }
+
+        .service-card h5 {
+            font-weight: 600;
+        }
+
+        .package-carousel {
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgb(0 0 0 / 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .package-carousel:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        }
+
+        .package-carousel img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+
+        .portfolio-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgb(0 0 0 / 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        }
+
+        .portfolio-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .portfolio-content {
+            padding: 1rem 1rem 1.25rem;
+        }
+
+        .portfolio-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .portfolio-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .carousel-image {
+            height: 350px;
+            /* You can adjust this value (e.g. 300px or 400px) */
+            object-fit: cover;
+            object-position: center;
+        }
+
+        h1,
+        h2,
+        h3,
+        h6 {
+            font-family: 'Playfair Display', serif !important;
+        }
+
+        .social-links a i {
+            font-size: 2rem;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover i {
+            color: var(--bs-primary);
+        }
+
+        /* Always apply brand colors */
+        .bi-facebook {
+            color: #1877F2;
+        }
+
+        .bi-instagram {
+            color: #E1306C;
+        }
+
+        .bi-tiktok {
+            color: #000000;
+        }
+
+        .bi-twitter {
+            color: #1DA1F2;
+        }
+
+        .bi-youtube {
+            color: #FF0000;
+        }
+
+        .bi-linkedin {
+            color: #0A66C2;
+        }
+
+        .carousel-caption {
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+    </style>
+@endpush
+
+@section('content')
+    <div class="container">
+
+
+        {{-- Carousel --}}
+        <!-- Size banner 1500px x 350px -->
+        <div id="organizerCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @foreach($organizer->banner_path ?? [] as $index => $image)
+                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}"
+                            class="d-block w-100 carousel-image" alt="Slide {{ $index + 1 }}">
+                    </div>
+                @endforeach
+            </div>
+            @if(!empty($organizer->banner_path) && count($organizer->banner_path) > 1)
+                <button class="carousel-control-prev" type="button" data-bs-target="#organizerCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#organizerCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            @endif
+        </div>
+
+
+        <!-- Profile Section -->
+        <section id="profile" class="position-relative mb-5 mt-5">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5d987ede-c9f0-4c63-a837-e2fef063a538.png"
+                alt="Portrait of Emma Williams, wedding planner smiling" class="profile-pic shadow" loading="lazy" />
+            <div class="profile-card">
+                <div class="profile-intro">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h2 class="mb-0">{{ $organizer->name }}</h2>
+                            <p class="mb-1 fst-italic text-muted">Wedding Planner</p>
+                        </div>
+
+                        @if (!empty($organizer->social_links))
+                            @php
+                                $socials = is_array($organizer->social_links)
+                                    ? $organizer->social_links
+                                    : json_decode($organizer->social_links, true);
+                            @endphp
+
+                            @if (!empty($socials))
+                                <div class="social-links d-flex gap-3 align-items-center">
+                                    @foreach ($socials as $platform => $url)
+                                        @if ($url)
+                                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="">
+                                                <i class="bi bi-{{ strtolower($platform) }}"></i>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+
+                    <p class="mb-2">{{ $organizer->description }}</p>
+
+                    @php
+                        $addressParts = array_filter([
+                            $organizer->address_line1,
+                            $organizer->address_line2,
+                            $organizer->postal_code,
+                            $organizer->city,
+                            $organizer->state,
+                            $organizer->country
+                        ]);
+                    @endphp
+
+                    @if (!empty($addressParts))
+                        <div class="location d-flex align-items-start text-muted">
+                            <span>{{ implode(', ', $addressParts) }}</span>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Services Offered Section -->
+        <!-- <section id="services" class="mb-5">
+                                                                            <h3 class="mb-4 fw-bold">Services Offered</h3>
+                                                                            <div class="row g-3">
+                                                                                <div class="col-12 col-md-4">
+                                                                                    <div class="service-card h-100">
+                                                                                        <h5>Full Wedding Planning</h5>
+                                                                                        <p class="mb-0">Handle all of all ealing detatis in step</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-4">
+                                                                                    <div class="service-card h-100">
+                                                                                        <h5>Partial Planning</h5>
+                                                                                        <p class="mb-0">Assistance with selected wedding planning</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-4">
+                                                                                    <div class="service-card h-100">
+                                                                                        <h5>Day-of Coordination</h5>
+                                                                                        <p class="mb-0">Management of wedding day to ensure furns</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </section> -->
+
+        <!-- Packages Section -->
+         <!-- Size package img 1024px x 1024px -->
+        <section id="portfolio" class="mb-5">
+            <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Packages</h3>
+            <div class="row g-4">
+                @foreach($organizer->activePackages as $package)
+                    <div class="col-12 col-md-6 col-xl-6">
+                        <article class="portfolio-item">
+                            {{-- Package image --}}
+                            @php
+                                $validDiscount = $package->discounts[0] ?? null;
+                            @endphp
+                            <div id="packageCarousel_{{ $package->id }}" class="carousel slide mb-4 package-carousel"
+                                data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    @foreach($package->images ?? [] as $index => $image)
+                                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}"
+                                                class="d-block w-100" alt="{{ $image->alt_text ?? 'Slide ' . ($index + 1) }}">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if(!empty($package->images) && count($package->images) > 1)
+                                    <button class="carousel-control-prev" type="button"
+                                        data-bs-target="#packageCarousel_{{ $package->id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                        data-bs-target="#packageCarousel_{{ $package->id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                @endif
+                            </div>
+
+
+
+                            <div class="portfolio-content">
+                                {{-- Package Name --}}
+                                <h4 class="portfolio-title">{{ $package->name }}</h4>
+
+                                {{-- Discount Info --}}
+                                @if($validDiscount && $validDiscount->is_active)
+                                    <p class="text-danger mb-1">
+                                        @if($validDiscount->type === 'percentage')
+                                            Save {{ $validDiscount->amount }}%!
+                                        @else
+                                            Save RM {{ number_format($validDiscount->amount, 2) }}!
+                                        @endif
+                                    </p>
+                                @endif
+
+                                {{-- Pricing --}}
+                                @php
+                                    $originalPrice = $package->base_price;
+                                    $finalPrice = $originalPrice;
+
+                                    if ($validDiscount && $validDiscount->is_active) {
+                                        if ($validDiscount->type === 'percentage') {
+                                            $finalPrice = $originalPrice - ($originalPrice * $validDiscount->amount / 100);
+                                        } else {
+                                            $finalPrice = $originalPrice - $validDiscount->amount;
+                                        }
+                                    }
+                                @endphp
+
+                                <p class="portfolio-price">
+                                    @if($finalPrice < $originalPrice)
+                                        <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
+                                    @endif
+                                    <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
+                                </p>
+
+                                {{-- Validity --}}
+                                <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
+                                    class="portfolio-date">
+                                    Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
+                                </time>
+                            </div>
+                        </article>
+                    </div>
+                @endforeach
+
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+          <!-- Size gallery img 1024px x 1024px -->
+        <section id="portfolio" class="mb-5">
+            <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Gallery</h3>
+            <div class="row g-4">
+                @foreach($organizer->gallery as $index => $gallery)
+                    @php
+                        $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name);
+                    @endphp
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <article class="portfolio-item">
+                            <img src="{{ $imgUrl }}" alt="{{ $gallery->alt_text ?? 'Gallery Image' }}" class="portfolio-image"
+                                loading="lazy" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#galleryModal"
+                                data-img-index="{{ $index }}">
+                            <div class="portfolio-content">
+                                <h4 class="portfolio-title">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h4>
+                                <time datetime="{{ $gallery->created_at ? $gallery->created_at->format('Y-m') : '2025-01' }}"
+                                    class="portfolio-date">
+                                    {{ $gallery->created_at ? $gallery->created_at->format('F Y') : 'N/A' }}
+                                </time>
+                            </div>
+                        </article>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+    </div>
+    <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0">
+                    <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @foreach($organizer->gallery as $index => $gallery)
+                                @php $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name); @endphp
+                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                    <img src="{{ $imgUrl }}" class="d-block w-100"
+                                        alt="{{ $gallery->alt_text ?? 'Gallery Image' }}">
+
+                                    {{-- Caption Text Inside Modal --}}
+                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 p-3 rounded">
+                                        <h5>{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
+                                        @if($gallery->created_at)
+                                            <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('galleryModal');
+            modal.addEventListener('show.bs.modal', function (event) {
+                const trigger = event.relatedTarget;
+                const index = trigger.getAttribute('data-img-index');
+
+                const carousel = bootstrap.Carousel.getInstance(document.getElementById('galleryCarousel')) ||
+                    new bootstrap.Carousel(document.getElementById('galleryCarousel'));
+
+                carousel.to(parseInt(index));
+            });
+        });
+    </script>
+@endpush
