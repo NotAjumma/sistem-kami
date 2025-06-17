@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
 class Organizer extends Authenticatable
 {
     use HasFactory;
@@ -15,6 +16,10 @@ class Organizer extends Authenticatable
         'email',
         'phone',
         'user_id',
+    ];
+
+    protected $casts = [
+        'banner_path' => 'array',
     ];
 
     public function user()
@@ -37,5 +42,19 @@ class Organizer extends Authenticatable
         return asset('images/organizers/default-organizer-logo.jpg');
     }
 
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
+    }
+
+    public function activePackages()
+    {
+        return $this->hasMany(Package::class)->where('status', 'active');
+    }
+
+    public function gallery()
+    {
+        return $this->hasMany(BusinessGallery::class);
+    }
 
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\ToyyibpayController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
@@ -76,6 +77,10 @@ Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::prefix('business')->group(function () {
+    // Public profile
+    Route::get('/{slug}', [BusinessController::class, 'showPublic'])->name('business.profile');
+});
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
 Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
