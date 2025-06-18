@@ -80,6 +80,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::prefix('business')->group(function () {
     // Public profile
     Route::get('/{slug}', [BusinessController::class, 'showPublic'])->name('business.profile');
+    Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
 });
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');

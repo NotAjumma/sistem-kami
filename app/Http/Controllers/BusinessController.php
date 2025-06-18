@@ -34,6 +34,49 @@ class BusinessController extends Controller
             abort(403, 'Unauthorized access to non-business type');
         }
 
-        return view('home.business.profile', compact('organizer'));
+        $page_title = $organizer->name;
+
+        return view('home.business.profile', compact('organizer', 'page_title'));
+    }
+
+    public function showPackage($organizerSlug, $packageSlug)
+    {
+        // Retrieve organizer by slug
+        $organizer = Organizer::where('slug', $organizerSlug)
+            ->with([
+                'activePackages.images',
+                'activePackages.discounts',
+                'gallery',
+            ])
+            ->firstOrFail();
+
+        // Find the package under this organizer
+        $package = Package::whereHas('organizer', function ($query) use ($organizerSlug) {
+            $query->where('slug', $organizerSlug);
+        })
+            ->where('slug', $packageSlug)
+            ->with([
+                'addons',
+                'items',
+                'discounts',
+                'category',
+                'images',
+                'organizer',
+            ])
+            ->firstOrFail();
+
+            \Log::info($package);
+
+        if (!$package) {
+            abort(404, 'Package not found for this business.');
+        }
+
+        $page_title = $package->name;
+
+        return view('home.business.package.index', [
+            'organizer' => $organizer,
+            'package' => $package,
+            'page_title' => $page_title,
+        ]);
     }
 }

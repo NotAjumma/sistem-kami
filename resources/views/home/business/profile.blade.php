@@ -119,9 +119,20 @@
             border-bottom-right-radius: 0;
         }
 
-        @media (max-width: 768px) {
-            .portfolio-image, .package-carousel img {
-                height: 200px; /* 50% of desktop height on mobile */
+        @media (max-width: 600px) {
+
+            .portfolio-image,
+            .package-carousel img {
+                height: 200px;
+                /* 50% of desktop height on mobile */
+            }
+
+            .profile-intro {
+                margin-left: 0px;
+            }
+
+            .profile-intro-name {
+                margin-left: 130px;
             }
         }
 
@@ -154,39 +165,7 @@
             font-family: 'Playfair Display', serif !important;
         }
 
-        .social-links a i {
-            font-size: 2rem;
-            transition: color 0.2s;
-        }
-
-        .social-links a:hover i {
-            color: var(--bs-primary);
-        }
-
-        /* Always apply brand colors */
-        .bi-facebook {
-            color: #1877F2;
-        }
-
-        .bi-instagram {
-            color: #E1306C;
-        }
-
-        .bi-tiktok {
-            color: #000000;
-        }
-
-        .bi-twitter {
-            color: #1DA1F2;
-        }
-
-        .bi-youtube {
-            color: #FF0000;
-        }
-
-        .bi-linkedin {
-            color: #0A66C2;
-        }
+        
 
         .carousel-caption {
             bottom: 20px;
@@ -229,10 +208,10 @@
                 alt="Portrait of Emma Williams, wedding planner smiling" class="profile-pic shadow" loading="lazy" />
             <div class="profile-card">
                 <div class="profile-intro">
-                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
                         <div>
                             <h2 class="mb-0">{{ $organizer->name }}</h2>
-                            <p class="mb-1 fst-italic text-muted">Wedding Planner</p>
+                            <p class="mb-1 fst-italic text-muted">{{ $organizer->category }}</p>
                         </div>
 
                         @if (!empty($organizer->social_links))
@@ -256,7 +235,27 @@
                         @endif
                     </div>
 
-                    <p class="mb-2">{{ $organizer->description }}</p>
+                    @php
+                        $maxLength = 200;
+                        $isLong = strlen($organizer->description) > $maxLength;
+                        $excerpt = Str::limit($organizer->description, $maxLength);
+                    @endphp
+
+                    <p class="profile-intro-desc mb-2">
+                        <span id="desc-preview-{{ $organizer->id }}">
+                            {{ $excerpt }}
+                            @if($isLong)
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Read more</a>
+                            @endif
+                        </span>
+
+                        @if($isLong)
+                            <span id="desc-full-{{ $organizer->id }}" style="display: none;">
+                                {{ $organizer->description }}
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Show less</a>
+                            </span>
+                        @endif
+                    </p>
 
                     @php
                         $addressParts = array_filter([
@@ -281,31 +280,31 @@
 
         <!-- Services Offered Section -->
         <!-- <section id="services" class="mb-5">
-                                                                            <h3 class="mb-4 fw-bold">Services Offered</h3>
-                                                                            <div class="row g-3">
-                                                                                <div class="col-12 col-md-4">
-                                                                                    <div class="service-card h-100">
-                                                                                        <h5>Full Wedding Planning</h5>
-                                                                                        <p class="mb-0">Handle all of all ealing detatis in step</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-12 col-md-4">
-                                                                                    <div class="service-card h-100">
-                                                                                        <h5>Partial Planning</h5>
-                                                                                        <p class="mb-0">Assistance with selected wedding planning</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-12 col-md-4">
-                                                                                    <div class="service-card h-100">
-                                                                                        <h5>Day-of Coordination</h5>
-                                                                                        <p class="mb-0">Management of wedding day to ensure furns</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </section> -->
+                                                                                                <h3 class="mb-4 fw-bold">Services Offered</h3>
+                                                                                                <div class="row g-3">
+                                                                                                    <div class="col-12 col-md-4">
+                                                                                                        <div class="service-card h-100">
+                                                                                                            <h5>Full Wedding Planning</h5>
+                                                                                                            <p class="mb-0">Handle all of all ealing detatis in step</p>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-12 col-md-4">
+                                                                                                        <div class="service-card h-100">
+                                                                                                            <h5>Partial Planning</h5>
+                                                                                                            <p class="mb-0">Assistance with selected wedding planning</p>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-12 col-md-4">
+                                                                                                        <div class="service-card h-100">
+                                                                                                            <h5>Day-of Coordination</h5>
+                                                                                                            <p class="mb-0">Management of wedding day to ensure furns</p>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </section> -->
 
         <!-- Packages Section -->
-         <!-- Size package img 1024px x 1024px -->
+        <!-- Size package img 1024px x 1024px -->
         <section id="portfolio" class="mb-5">
             <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Packages</h3>
             <div class="row g-4">
@@ -337,8 +336,6 @@
                                     </button>
                                 @endif
                             </div>
-
-
 
                             <div class="portfolio-content">
                                 {{-- Package Name --}}
@@ -373,14 +370,30 @@
                                     @if($finalPrice < $originalPrice)
                                         <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
                                     @endif
-                                    <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
+                                    @if($validDiscount && $validDiscount->is_active)
+                                        <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
+                                    @else
+                                        <strong>RM {{ number_format($finalPrice, 2) }}</strong>
+
+                                    @endif
                                 </p>
 
                                 {{-- Validity --}}
-                                <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
-                                    class="portfolio-date">
-                                    Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
-                                </time>
+                                @if($validDiscount && $validDiscount->is_active)
+                                    <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
+                                        class="portfolio-date">
+                                        Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
+                                    </time>
+                                @endif
+
+                                {{-- Quick Booking Button --}}
+                                <div class="mt-3">
+                                    <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
+                                        class="btn btn-primary w-100">
+                                        Quick Booking
+                                    </a>
+                                </div>
+
                             </div>
                         </article>
                     </div>
@@ -389,7 +402,7 @@
         </section>
 
         <!-- Gallery Section -->
-          <!-- Size gallery img 1024px x 1024px -->
+        <!-- Size gallery img 1024px x 1024px -->
         <section id="portfolio" class="mb-5">
             <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Gallery</h3>
             <div class="row g-4">
@@ -471,4 +484,19 @@
             });
         });
     </script>
+    <script>
+        function toggleDesc(id) {
+            const preview = document.getElementById(`desc-preview-${id}`);
+            const full = document.getElementById(`desc-full-${id}`);
+
+            if (preview.style.display === "none") {
+                preview.style.display = "inline";
+                full.style.display = "none";
+            } else {
+                preview.style.display = "none";
+                full.style.display = "inline";
+            }
+        }
+    </script>
+
 @endpush
