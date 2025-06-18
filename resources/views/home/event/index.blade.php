@@ -332,7 +332,6 @@
                         </h6>
                     @endif
                 </div>
-
             </div>
 
         </div>

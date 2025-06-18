@@ -80,6 +80,40 @@
 		.bg-gray-900 {
 			background-color: #3736af !important;
 		}
+
+		.social-links a i {
+            font-size: 2rem;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover i {
+            color: var(--bs-primary);
+        }
+
+        /* Always apply brand colors */
+        .bi-facebook {
+            color: #1877F2;
+        }
+
+        .bi-instagram {
+            color: #E1306C;
+        }
+
+        .bi-tiktok {
+            color: #000000;
+        }
+
+        .bi-twitter {
+            color: #1DA1F2;
+        }
+
+        .bi-youtube {
+            color: #FF0000;
+        }
+
+        .bi-linkedin {
+            color: #0A66C2;
+        }
 	</style>
 	@stack('styles')
 </head>
@@ -201,7 +235,7 @@
             Footer start
         ***********************************-->
 		<footer
-			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto">
+			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto mt-5">
 			<div class="container">
 				<div class="row">
 					<!-- About Section -->
