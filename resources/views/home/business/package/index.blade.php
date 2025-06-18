@@ -210,20 +210,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                            <div class="container">
-                                                                                                                <ol class="breadcrumb mb-0 px-0">
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                    <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                        <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                    </li>
-                                                                                                                </ol>
-                                                                                                            </div>
-                                                                                                        </nav> -->
+                                                                                                                    <div class="container">
+                                                                                                                        <ol class="breadcrumb mb-0 px-0">
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                            </li>
+                                                                                                                        </ol>
+                                                                                                                    </div>
+                                                                                                                </nav> -->
 
         <!-- Images Section -->
         @php
@@ -316,8 +316,10 @@
                         @foreach ($package->items ?? [] as $item)
                             <li>
                                 <i class="fa-solid fa-check text-success me-2"></i>
-                                <strong class="mr-1">{{ $item['title'] }}</strong> : <span
-                                    class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
+                                <strong class="mr-1">{{ $item['title'] }}</strong>
+                                @if(!empty($item['description']))
+                                    : <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -331,7 +333,9 @@
                                 <li>
                                     <i class="fa-solid fa-plus text-primary me-2"></i>
                                     <strong class="mr-1">{{ $addon['name'] }}</strong>:
-                                    <span class="text-muted d-block small mx-1">{{ $addon['description'] }}</span>
+                                    @if(!empty($addon['description']))
+                                        : <span class="text-muted d-block small ml-1">{{ $addon['description'] }}</span>
+                                    @endif
                                     <span class="badge bg-light text-dark mt-1 ml-1">RM
                                         {{ number_format($addon['price'], 2) }}</span>
                                 </li>
@@ -360,7 +364,7 @@
                     {{-- Bootstrap alert (hidden by default) --}}
                     {{-- Top-right fixed alert --}}
                     <div id="copyAlert"
-                        class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
+                        class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
                         role="alert" style="z-index: 1060; min-width: 200px;">
                         Link copied!
                         <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
@@ -471,12 +475,14 @@
                                             alt="{{ $gallery->alt_text ?? 'Gallery Image' }}">
 
                                         {{-- Caption Text Inside Modal --}}
-                                        <div class="carousel-caption d-block d-md-block bg-dark bg-opacity-75 p-3 rounded">
-                                            <h5 class="fs-6 fs-md-5">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
-                                            @if($gallery->created_at)
-                                                <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
-                                            @endif
-                                        </div>
+                                        @if($gallery->alt_text)
+                                            <div class="carousel-caption d-block d-md-block bg-dark bg-opacity-75 p-3 rounded">
+                                                <h5 class="fs-6 fs-md-5">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
+                                                @if($gallery->created_at)
+                                                    <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>

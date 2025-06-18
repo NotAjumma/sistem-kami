@@ -83,7 +83,7 @@
 
 		.text-pink {
             color: #c2185b;
-            
+		}
 		.social-links a i {
             font-size: 2rem;
             transition: color 0.2s;
