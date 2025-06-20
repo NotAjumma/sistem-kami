@@ -302,20 +302,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                    <div class="container">
-                                                                                                                                                                        <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                            </li>
-                                                                                                                                                                        </ol>
-                                                                                                                                                                    </div>
-                                                                                                                                                                </nav> -->
+                                                                                                                                                                                        <div class="container">
+                                                                                                                                                                                            <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                    <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                </li>
+                                                                                                                                                                                            </ol>
+                                                                                                                                                                                        </div>
+                                                                                                                                                                                    </nav> -->
 
         <!-- Images Section -->
         @php
@@ -448,17 +448,17 @@
                     <!-- Legend -->
                     <div class="mt-0">
                         <h5 class="fw-semibold mb-1">Status Indicator:</h5>
-                        <ul class="list-inline">
-                            <li class="list-inline-item me-3">
+                        <ul class="list-inline row gx-2 gy-2">
+                            <li class="list-inline-item col-6 col-md-auto">
                                 <span class="legend-box bg-secondary"></span> Today
                             </li>
-                            <li class="list-inline-item me-3">
+                            <li class="list-inline-item col-6 col-md-auto">
                                 <span class="legend-box bg-success"></span> Booked Date
                             </li>
-                            <li class="list-inline-item me-3">
+                            <li class="list-inline-item col-6 col-md-auto">
                                 <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not Available
                             </li>
-                            <li class="list-inline-item me-3">
+                            <li class="list-inline-item col-6 col-md-auto">
                                 <span class="legend-box bg-primary"></span> Selected Date
                             </li>
                         </ul>
@@ -466,17 +466,40 @@
 
                     <!-- Calendar Navigation Controls -->
                     <div class="calendar-navigation mt-3">
-                        <button id="prevMonth" class="btn btn-secondary">Previous</button>
-                        <div class="d-flex align-items-center gap-2">
-                            <select id="monthSelect" class="form-select w-auto">
-                                <!-- Months populated via JS -->
-                            </select>
-                            <select id="yearSelect" class="form-select w-auto">
-                                <!-- Years populated via JS -->
-                            </select>
+                        <div class="row g-2 col-12">
+                            <!-- Previous Button -->
+                            <div class="col-12 col-md-3">
+                                <button id="prevMonth" class="btn btn-primary w-100"
+                                    style="text-align: center; display: flex; justify-content: center;">
+                                    <div>
+                                        <i class="fa-regular fa-square-caret-left me-2"></i>
+                                    </div>
+                                    <div>Previous</div>
+                                </button>
+                            </div>
+
+                            <!-- Month & Year Selectors -->
+                            <div class="col-12 col-md-5 d-flex gap-2">
+                                <select id="monthSelect" class="form-select w-50">
+                                    <!-- Populated via JS -->
+                                </select>
+                                <select id="yearSelect" class="form-select w-50">
+                                    <!-- Populated via JS -->
+                                </select>
+                            </div>
+
+                            <!-- Today and Next Button -->
+                            <div class="col-12 col-md-4">
+                                <div class="d-flex flex-column flex-md-row gap-2">
+                                    <button id="todayBtn" class="btn btn-secondary w-100">Today</button>
+                                    <button id="nextMonth" class="btn btn-primary w-100"
+                                        style="text-align: center; display: flex; justify-content: center;">
+                                        <div>Next</div>
+                                        <div><i class="fa-regular fa-square-caret-right ms-2"></i></div>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button id="todayBtn" class="btn btn-outline-primary">Today</button>
-                        <button id="nextMonth" class="btn btn-secondary">Next</button>
                     </div>
                     <table class="calendar table table-bordered">
                         <thead>
@@ -604,9 +627,9 @@
                         <i class="fab fa-whatsapp me-1"></i> WhatsApp Web
                     </a>
                     <!-- <a href="{{ route('business.booking', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                                    class="btn btn-primary w-100">
-                                                    Book Now
-                                                </a> -->
+                                                                        class="btn btn-primary w-100">
+                                                                        Book Now
+                                                                    </a> -->
                     @if (!empty($organizer->social_links))
                         @php
                             $socials = is_array($organizer->social_links)
