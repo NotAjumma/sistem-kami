@@ -203,6 +203,98 @@
             font-family: 'Playfair Display', serif !important;
         }
     </style>
+
+    <style>
+        .calendar {
+            border: 1px solid #ccc;
+        }
+
+        .calendar td,
+        .calendar th {
+            height: 60px;
+            text-align: center !important;
+            vertical-align: middle;
+        }
+
+        table.calendar thead tr th {
+            text-align: center !important;
+        }
+
+        .today {
+            background-color: rgba(var(--bs-secondary-rgb)) !important;
+            color: #fff !important;
+        }
+
+        .selected {
+            background-color: var(--primary) !important;
+            color: #fff !important;
+        }
+
+        .off-day {
+            background-color: rgb(205, 205, 207) !important;
+            color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .booked-day {
+            background-color: rgba(var(--bs-success-rgb)) !important;
+            color: #fff !important;
+            cursor: not-allowed;
+        }
+
+        .past-day {
+            background-color: rgb(205, 205, 207) !important;
+            color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .limit-reached {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+            cursor: not-allowed !important;
+        }
+
+        .calendar .highlight {
+            background-color: #f0f0f0;
+        }
+
+        .time-slot {
+            border: 1px solid #ddd;
+            padding: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .time-slot.selected {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .calendar-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        button:disabled {
+            background-color: rgb(205, 205, 207) !important;
+            color: #6c757d !important;
+            border-color: rgb(205, 205, 207) !important;
+            cursor: not-allowed !important;
+        }
+
+        .legend-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 4px;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -210,20 +302,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                    <div class="container">
-                                                                                                                        <ol class="breadcrumb mb-0 px-0">
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                            </li>
-                                                                                                                        </ol>
-                                                                                                                    </div>
-                                                                                                                </nav> -->
+                                                                                                                                                                    <div class="container">
+                                                                                                                                                                        <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                            </li>
+                                                                                                                                                                        </ol>
+                                                                                                                                                                    </div>
+                                                                                                                                                                </nav> -->
 
         <!-- Images Section -->
         @php
@@ -236,7 +328,6 @@
                 default => '440px', // You’ll define this custom class
             };
         @endphp
-
 
         <section class="col-12 col-lg-12">
             <div class="row g-2">
@@ -264,7 +355,6 @@
                 </div>
             </div>
         </section>
-
 
         <!-- Sidebar Section -->
         <aside class="row">
@@ -332,7 +422,7 @@
                             @foreach ($package->addons as $addon)
                                 <li>
                                     <i class="fa-solid fa-plus text-primary me-2"></i>
-                                    <strong class="mr-1">{{ $addon['name'] }}</strong>:
+                                    <strong class="mr-1">{{ $addon['name'] }}</strong>
                                     @if(!empty($addon['description']))
                                         : <span class="text-muted d-block small ml-1">{{ $addon['description'] }}</span>
                                     @endif
@@ -350,6 +440,105 @@
                     <p class="about-property">
                         {{ $package->description }}
                     </p>
+                </section>
+
+                <!-- Calendar -->
+                <section class="col-12 mt-5">
+                    <h5 class="fw-semibold mb-3">Calendar</h5>
+                    <!-- Legend -->
+                    <div class="mt-0">
+                        <h5 class="fw-semibold mb-1">Status Indicator:</h5>
+                        <ul class="list-inline">
+                            <li class="list-inline-item me-3">
+                                <span class="legend-box bg-secondary"></span> Today
+                            </li>
+                            <li class="list-inline-item me-3">
+                                <span class="legend-box bg-success"></span> Booked Date
+                            </li>
+                            <li class="list-inline-item me-3">
+                                <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not Available
+                            </li>
+                            <li class="list-inline-item me-3">
+                                <span class="legend-box bg-primary"></span> Selected Date
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Calendar Navigation Controls -->
+                    <div class="calendar-navigation mt-3">
+                        <button id="prevMonth" class="btn btn-secondary">Previous</button>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="monthSelect" class="form-select w-auto">
+                                <!-- Months populated via JS -->
+                            </select>
+                            <select id="yearSelect" class="form-select w-auto">
+                                <!-- Years populated via JS -->
+                            </select>
+                        </div>
+                        <button id="todayBtn" class="btn btn-outline-primary">Today</button>
+                        <button id="nextMonth" class="btn btn-secondary">Next</button>
+                    </div>
+                    <table class="calendar table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mo</th>
+                                <th>Tu</th>
+                                <th>We</th>
+                                <th>Th</th>
+                                <th>Fr</th>
+                                <th>Sa</th>
+                                <th style="text-align:center !important;">Su</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendarBody">
+                            <!-- Calendar will be dynamically generated here -->
+                            <tr>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td class="selected">4</td>
+                                <td>5</td>
+                                <td>6</td>
+                                <td>7</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>9</td>
+                                <td>10</td>
+                                <td class="highlight">11</td>
+                                <td>12</td>
+                                <td>13</td>
+                                <td>14</td>
+                            </tr>
+                            <tr>
+                                <td>15</td>
+                                <td>16</td>
+                                <td>17</td>
+                                <td class="selected">18</td>
+                                <td>19</td>
+                                <td>20</td>
+                                <td>21</td>
+                            </tr>
+                            <tr>
+                                <td>22</td>
+                                <td>23</td>
+                                <td>24</td>
+                                <td>25</td>
+                                <td>26</td>
+                                <td>27</td>
+                                <td>28</td>
+                            </tr>
+                            <tr>
+                                <td>29</td>
+                                <td>30</td>
+                                <td>31</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
             </div>
             <div class="col-lg-4 col-md-5">
@@ -414,6 +603,10 @@
                         aria-label="Contact {{ $organizer->name }} on WhatsApp Web">
                         <i class="fab fa-whatsapp me-1"></i> WhatsApp Web
                     </a>
+                    <!-- <a href="{{ route('business.booking', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
+                                                    class="btn btn-primary w-100">
+                                                    Book Now
+                                                </a> -->
                     @if (!empty($organizer->social_links))
                         @php
                             $socials = is_array($organizer->social_links)
@@ -554,4 +747,228 @@
         }
     </script>
 
+    <!-- calendar script -->
+    <script>
+        const vendorTimeSlots = @json($timeSlots);
+        const vendorOffDays = @json($offDays);
+        const bookedVendorDates = @json($bookedDates);
+        const limitReachedDays = @json($limitReachedDays);
+        const bookedDatesFormatted = @json($bookedDatesFormatted);
+        const weekRangeBlock = @json($weekRangeBlock);
+        const calendarBody = document.getElementById("calendarBody");
+        const currentMonthDisplay = document.getElementById("currentMonth");
+        const prevMonthBtn = document.getElementById("prevMonth");
+        const nextMonthBtn = document.getElementById("nextMonth");
+
+        console.log(vendorOffDays);
+        let currentDate = new Date();
+
+        function renderCalendar(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth(); // 0-indexed (0 = January)
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstWeekday = (firstDay.getDay() + 6) % 7; // Make Monday = 0
+            const totalDays = lastDay.getDate();
+            const offDaysFormatted = vendorOffDays.map(off => off.off_date);
+            const bookedDatesFormatted = bookedVendorDates.map(date => String(date));
+
+            // Update header
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            monthSelect.value = month;
+            yearSelect.value = year;
+
+            // Clear previous calendar
+            calendarBody.innerHTML = "";
+
+            let row = document.createElement("tr");
+            let dayCount = 0;
+
+            // Fill blanks before 1st
+            for (let i = 0; i < firstWeekday; i++) {
+                row.appendChild(document.createElement("td"));
+                dayCount++;
+            }
+
+            // Fill days
+            for (let day = 1; day <= totalDays; day++) {
+                const td = document.createElement("td");
+                td.textContent = day;
+
+                const currentLoopDate = new Date(year, month, day);
+                const yyyy = currentLoopDate.getFullYear();
+                const mm = String(currentLoopDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(currentLoopDate.getDate()).padStart(2, '0');
+                const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+                // Highlight today
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Normalize time
+                currentLoopDate.setHours(0, 0, 0, 0);
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    td.classList.add("today");
+                }
+
+                if (bookedDatesFormatted.includes(formattedDate)) {
+                    td.classList.add("booked-day");
+                    td.title = "Unavailable (Fully Booked)";
+                } else if (limitReachedDays.includes(formattedDate)) {
+                    td.classList.add("past-day");
+                    td.title = "Booking limit reached for this week";
+                } else if (offDaysFormatted.includes(formattedDate)) {
+                    td.classList.add("off-day");
+                    td.title = "Unavailable (Off Day)";
+                } else if (currentLoopDate.getTime() < today.getTime()) {
+                    td.classList.add("past-day");
+                    td.title = "Cannot book past date";
+                } else if (bookedDatesFormatted.includes(formattedDate)) {
+                    td.classList.add("booked-day");
+                    td.title = "Unavailable (Fully Booked)";
+                } else {
+                    // Check if in a blocked week
+                    const weekWithBooking = weekRangeBlock.find(range => {
+                        const [start, end] = range.split(' - ');
+                        return formattedDate >= start && formattedDate <= end;
+                    });
+
+                    if (weekWithBooking) {
+                        if (bookedDatesFormatted.includes(formattedDate)) {
+                            td.classList.add("booked-day");
+                            td.title = "Unavailable (Fully Booked)";
+                        } else {
+                            td.classList.add("past-day");
+                            td.title = "Booking limit reached for this week";
+                        }
+                    }
+                }
+
+                const isPrevMonthBeforeToday =
+                    year < today.getFullYear() ||
+                    (year === today.getFullYear() && month <= today.getMonth());
+
+                prevMonthBtn.disabled = isPrevMonthBeforeToday;
+
+                td.addEventListener("click", () => {
+                    document.querySelectorAll("#calendarBody td").forEach(cell => cell.classList.remove("selected"));
+                    td.classList.add("selected");
+
+                    // Log selected date in yyyy-mm-dd format
+                    const selectedDate = new Date(year, month, day);
+                    const yyyy = selectedDate.getFullYear();
+                    const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(selectedDate.getDate()).padStart(2, '0');
+                    console.log(`${yyyy}-${mm}-${dd}`);
+                });
+
+                row.appendChild(td);
+                dayCount++;
+
+                if (dayCount % 7 === 0) {
+                    calendarBody.appendChild(row);
+                    row = document.createElement("tr");
+                }
+            }
+
+            // Fill blanks after last day
+            while (dayCount % 7 !== 0) {
+                row.appendChild(document.createElement("td"));
+                dayCount++;
+            }
+            calendarBody.appendChild(row);
+        }
+
+        const todayBtn = document.getElementById("todayBtn");
+
+        todayBtn.addEventListener("click", () => {
+            currentDate = new Date(); // Reset to today
+            renderCalendar(currentDate);
+        });
+
+        prevMonthBtn.addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+
+        nextMonthBtn.addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+
+        // Initial render
+        renderCalendar(currentDate);
+    </script>
+    <script>
+        const monthSelect = document.getElementById("monthSelect");
+        const yearSelect = document.getElementById("yearSelect");
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        const today = new Date();
+        // let currentDate = new Date(); // This will be updated when user changes month/year
+
+        // Populate year dropdown (current year to next 2 years)
+        const currentYear = today.getFullYear();
+        for (let y = currentYear; y <= currentYear + 2; y++) {
+            const option = document.createElement("option");
+            option.value = y;
+            option.textContent = y;
+            yearSelect.appendChild(option);
+        }
+
+        // Function to populate month dropdown based on selected year
+        function populateMonths(selectedYear) {
+            monthSelect.innerHTML = ""; // Clear previous options
+
+            monthNames.forEach((name, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = name;
+
+                if (selectedYear == today.getFullYear() && index < today.getMonth()) {
+                    option.disabled = true;
+                    option.style.color = "#ccc";
+                }
+
+                monthSelect.appendChild(option);
+            });
+        }
+
+        // Set default selections
+        yearSelect.value = currentDate.getFullYear();
+        populateMonths(currentDate.getFullYear());
+        monthSelect.value = currentDate.getMonth();
+
+        // Event listener for year change
+        yearSelect.addEventListener("change", () => {
+            const selectedYear = parseInt(yearSelect.value);
+            currentDate.setFullYear(selectedYear);
+
+            populateMonths(selectedYear);
+
+            // If current selected month is now disabled, move to current month
+            if (
+                selectedYear === today.getFullYear() &&
+                parseInt(monthSelect.value) < today.getMonth()
+            ) {
+                monthSelect.value = today.getMonth();
+                currentDate.setMonth(today.getMonth());
+            }
+
+            renderCalendar(currentDate);
+        });
+
+        // Event listener for month change
+        monthSelect.addEventListener("change", () => {
+            const selectedMonth = parseInt(monthSelect.value);
+            currentDate.setMonth(selectedMonth);
+            renderCalendar(currentDate);
+        });
+    </script>
+
+    <!-- Calendar script -->
 @endpush

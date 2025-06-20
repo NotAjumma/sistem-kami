@@ -59,4 +59,10 @@ class Package extends Model
     {
         return $this->hasMany(PackageDiscount::class);
     }
+
+    public function timeSlots()
+    {
+        return $this->hasMany(VendorTimeSlot::class);
+    }
+
 }

@@ -165,7 +165,7 @@
             font-family: 'Playfair Display', serif !important;
         }
 
-        
+
 
         .carousel-caption {
             bottom: 20px;
@@ -280,28 +280,28 @@
 
         <!-- Services Offered Section -->
         <!-- <section id="services" class="mb-5">
-                                                                                                <h3 class="mb-4 fw-bold">Services Offered</h3>
-                                                                                                <div class="row g-3">
-                                                                                                    <div class="col-12 col-md-4">
-                                                                                                        <div class="service-card h-100">
-                                                                                                            <h5>Full Wedding Planning</h5>
-                                                                                                            <p class="mb-0">Handle all of all ealing detatis in step</p>
+                                                                                                    <h3 class="mb-4 fw-bold">Services Offered</h3>
+                                                                                                    <div class="row g-3">
+                                                                                                        <div class="col-12 col-md-4">
+                                                                                                            <div class="service-card h-100">
+                                                                                                                <h5>Full Wedding Planning</h5>
+                                                                                                                <p class="mb-0">Handle all of all ealing detatis in step</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div class="col-12 col-md-4">
+                                                                                                            <div class="service-card h-100">
+                                                                                                                <h5>Partial Planning</h5>
+                                                                                                                <p class="mb-0">Assistance with selected wedding planning</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div class="col-12 col-md-4">
+                                                                                                            <div class="service-card h-100">
+                                                                                                                <h5>Day-of Coordination</h5>
+                                                                                                                <p class="mb-0">Management of wedding day to ensure furns</p>
+                                                                                                            </div>
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                    <div class="col-12 col-md-4">
-                                                                                                        <div class="service-card h-100">
-                                                                                                            <h5>Partial Planning</h5>
-                                                                                                            <p class="mb-0">Assistance with selected wedding planning</p>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    <div class="col-12 col-md-4">
-                                                                                                        <div class="service-card h-100">
-                                                                                                            <h5>Day-of Coordination</h5>
-                                                                                                            <p class="mb-0">Management of wedding day to ensure furns</p>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </section> -->
+                                                                                                </section> -->
 
         <!-- Packages Section -->
         <!-- Size package img 1024px x 1024px -->
@@ -337,64 +337,67 @@
                                 @endif
                             </div>
 
-                            <div class="portfolio-content">
-                                {{-- Package Name --}}
-                                <h4 class="portfolio-title">{{ $package->name }}</h4>
+                            <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}">
+                                <div class="portfolio-content">
+                                    {{-- Package Name --}}
+                                    <h4 class="portfolio-title">{{ $package->name }}</h4>
 
-                                {{-- Discount Info --}}
-                                @if($validDiscount && $validDiscount->is_active)
-                                    <p class="text-danger mb-1">
-                                        @if($validDiscount->type === 'percentage')
-                                            Save {{ $validDiscount->amount }}%!
+                                    {{-- Discount Info --}}
+                                    @if($validDiscount && $validDiscount->is_active)
+                                        <p class="text-danger mb-1">
+                                            @if($validDiscount->type === 'percentage')
+                                                Save {{ $validDiscount->amount }}%!
+                                            @else
+                                                Save RM {{ number_format($validDiscount->amount, 2) }}!
+                                            @endif
+                                        </p>
+                                    @endif
+
+                                    {{-- Pricing --}}
+                                    @php
+                                        $originalPrice = $package->base_price;
+                                        $finalPrice = $originalPrice;
+
+                                        if ($validDiscount && $validDiscount->is_active) {
+                                            if ($validDiscount->type === 'percentage') {
+                                                $finalPrice = $originalPrice - ($originalPrice * $validDiscount->amount / 100);
+                                            } else {
+                                                $finalPrice = $originalPrice - $validDiscount->amount;
+                                            }
+                                        }
+                                    @endphp
+
+                                    <p class="portfolio-price">
+                                        @if($finalPrice < $originalPrice)
+                                            <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
+                                        @endif
+                                        @if($validDiscount && $validDiscount->is_active)
+                                            <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
                                         @else
-                                            Save RM {{ number_format($validDiscount->amount, 2) }}!
+                                            <strong>RM {{ number_format($finalPrice, 2) }}</strong>
+
                                         @endif
                                     </p>
-                                @endif
 
-                                {{-- Pricing --}}
-                                @php
-                                    $originalPrice = $package->base_price;
-                                    $finalPrice = $originalPrice;
-
-                                    if ($validDiscount && $validDiscount->is_active) {
-                                        if ($validDiscount->type === 'percentage') {
-                                            $finalPrice = $originalPrice - ($originalPrice * $validDiscount->amount / 100);
-                                        } else {
-                                            $finalPrice = $originalPrice - $validDiscount->amount;
-                                        }
-                                    }
-                                @endphp
-
-                                <p class="portfolio-price">
-                                    @if($finalPrice < $originalPrice)
-                                        <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
-                                    @endif
+                                    {{-- Validity --}}
                                     @if($validDiscount && $validDiscount->is_active)
-                                        <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
-                                    @else
-                                        <strong>RM {{ number_format($finalPrice, 2) }}</strong>
-
+                                        <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
+                                            class="portfolio-date">
+                                            Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
+                                        </time>
                                     @endif
-                                </p>
 
-                                {{-- Validity --}}
-                                @if($validDiscount && $validDiscount->is_active)
-                                    <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
-                                        class="portfolio-date">
-                                        Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
-                                    </time>
-                                @endif
+                                    {{-- Quick Booking Button --}}
+                                    <div class="mt-3">
+                                        <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
+                                            class="btn btn-primary w-100">
+                                            Details
+                                        </a>
+                                    </div>
 
-                                {{-- Quick Booking Button --}}
-                                <div class="mt-3">
-                                    <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                        class="btn btn-primary w-100">
-                                        Quick Booking
-                                    </a>
                                 </div>
+                            </a>
 
-                            </div>
                         </article>
                     </div>
                 @endforeach

@@ -57,4 +57,19 @@ class Organizer extends Authenticatable
         return $this->hasMany(BusinessGallery::class);
     }
 
+    public function timeSlots()
+    {
+        return $this->hasMany(VendorTimeSlot::class);
+    }
+
+    public function offDays()
+    {
+        return $this->hasMany(VendorOffDay::class);
+    }
+
+    public function bookedTimeSlots()
+    {
+        return $this->hasMany(BookingsVendorTimeSlot::class, 'organizer_id');
+    }
+
 }
