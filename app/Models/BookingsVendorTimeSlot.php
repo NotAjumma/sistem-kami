@@ -14,6 +14,11 @@ class BookingsVendorTimeSlot extends Model
     protected $fillable = [
         'booking_id',
         'vendor_time_slot_id',
+        'booked_date_start',
+        'booked_date_end',
+        'package_id',
+        'package_category_id',
+        'organizer_id', 
         'booked_time_start',
         'booked_time_end',
         'notes',

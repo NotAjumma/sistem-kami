@@ -302,20 +302,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                                        <div class="container">
-                                                                                                                                                                                            <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                                                <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                                    <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                                                </li>
-                                                                                                                                                                                            </ol>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                    </nav> -->
+                                                                                                                                                                                                                    <div class="container">
+                                                                                                                                                                                                                        <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                                            </li>
+                                                                                                                                                                                                                        </ol>
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                </nav> -->
 
         <!-- Images Section -->
         @php
@@ -400,20 +400,22 @@
                 </div>
 
                 <!-- Package Details -->
-                <section class="mb-4">
-                    <h5 class="fw-semibold mb-3">Package Item List</h5>
-                    <ul class="list-unstyled property-details-list">
-                        @foreach ($package->items ?? [] as $item)
-                            <li>
-                                <i class="fa-solid fa-check text-success me-2"></i>
-                                <strong class="mr-1">{{ $item['title'] }}</strong>
-                                @if(!empty($item['description']))
-                                    : <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
+                @if(!empty($package->items) && count($package->items) > 0)
+                    <section class="mb-4">
+                        <h5 class="fw-semibold mb-3">Package Item List</h5>
+                        <ul class="list-unstyled property-details-list">
+                            @foreach ($package->items ?? [] as $item)
+                                <li>
+                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                    <strong class="mr-1">{{ $item['title'] }}</strong>
+                                    @if(!empty($item['description']))
+                                        : <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
 
                 @if(!empty($package->addons) && count($package->addons) > 0)
                     <section class="mb-4">
@@ -443,7 +445,7 @@
                 </section>
 
                 <!-- Calendar -->
-                <section class="col-12 mt-5">
+                <section class="col-12 mt-5 mb-5">
                     <h5 class="fw-semibold mb-3">Calendar</h5>
                     <!-- Legend -->
                     <div class="mt-0">
@@ -480,10 +482,10 @@
 
                             <!-- Month & Year Selectors -->
                             <div class="col-12 col-md-5 d-flex gap-2">
-                                <select id="monthSelect" class="form-select w-50">
+                                <select id="monthSelect" class="default-select w-50">
                                     <!-- Populated via JS -->
                                 </select>
-                                <select id="yearSelect" class="form-select w-50">
+                                <select id="yearSelect" class="default-select w-50">
                                     <!-- Populated via JS -->
                                 </select>
                             </div>
@@ -515,54 +517,19 @@
                         </thead>
                         <tbody id="calendarBody">
                             <!-- Calendar will be dynamically generated here -->
-                            <tr>
-                                <td>1</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td class="selected">4</td>
-                                <td>5</td>
-                                <td>6</td>
-                                <td>7</td>
-                            </tr>
-                            <tr>
-                                <td>8</td>
-                                <td>9</td>
-                                <td>10</td>
-                                <td class="highlight">11</td>
-                                <td>12</td>
-                                <td>13</td>
-                                <td>14</td>
-                            </tr>
-                            <tr>
-                                <td>15</td>
-                                <td>16</td>
-                                <td>17</td>
-                                <td class="selected">18</td>
-                                <td>19</td>
-                                <td>20</td>
-                                <td>21</td>
-                            </tr>
-                            <tr>
-                                <td>22</td>
-                                <td>23</td>
-                                <td>24</td>
-                                <td>25</td>
-                                <td>26</td>
-                                <td>27</td>
-                                <td>28</td>
-                            </tr>
-                            <tr>
-                                <td>29</td>
-                                <td>30</td>
-                                <td>31</td>
-                                <td>1</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td>4</td>
-                            </tr>
                         </tbody>
                     </table>
+                    <form action="{{ route('business.select_package') }}" method="post">
+                        @csrf
+
+                        <input type="hidden" name="package_id" value="{{ $package->id }}">
+
+                        <input type="hidden" name="selected_date" id="selected_date">
+
+                        <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book Now</button>
+                    </form>
                 </section>
+
             </div>
             <div class="col-lg-4 col-md-5">
                 <!-- Shortlist and Share Buttons -->
@@ -627,9 +594,9 @@
                         <i class="fab fa-whatsapp me-1"></i> WhatsApp Web
                     </a>
                     <!-- <a href="{{ route('business.booking', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                                                        class="btn btn-primary w-100">
-                                                                        Book Now
-                                                                    </a> -->
+                                                                                                    class="btn btn-primary w-100">
+                                                                                                    Book Now
+                                                                                                </a> -->
                     @if (!empty($organizer->social_links))
                         @php
                             $socials = is_array($organizer->social_links)
@@ -721,6 +688,27 @@
 @endsection
 
 @push('scripts')
+    @if(session('error'))
+        <script>
+            toastr.info("{{ session('error') }}", "Error", {
+                timeOut: 5000,
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                newestOnTop: true,
+                preventDuplicates: true,
+                tapToDismiss: false,
+                showDuration: "300",
+                hideDuration: "1000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+            });
+        </script>
+    @endif
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -783,7 +771,7 @@
         const prevMonthBtn = document.getElementById("prevMonth");
         const nextMonthBtn = document.getElementById("nextMonth");
 
-        console.log(vendorOffDays);
+        // console.log(vendorOffDays);
         let currentDate = new Date();
 
         function renderCalendar(date) {
@@ -883,7 +871,14 @@
                     const yyyy = selectedDate.getFullYear();
                     const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(selectedDate.getDate()).padStart(2, '0');
-                    console.log(`${yyyy}-${mm}-${dd}`);
+                    const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+                    // Log it (for debug)
+                    console.log(formattedDate);
+
+                    // Set the hidden input value
+                    document.getElementById("selected_date").value = formattedDate;
+                    checkDateSelected();
                 });
 
                 row.appendChild(td);
@@ -908,6 +903,8 @@
         todayBtn.addEventListener("click", () => {
             currentDate = new Date(); // Reset to today
             renderCalendar(currentDate);
+            document.getElementById("selected_date").value = "";
+            document.getElementById("bookNowBtn").setAttribute("disabled", true);
         });
 
         prevMonthBtn.addEventListener("click", () => {
@@ -922,6 +919,17 @@
 
         // Initial render
         renderCalendar(currentDate);
+
+        const selectedDateInput = document.getElementById('selected_date');
+        const bookNowBtn = document.getElementById('bookNowBtn');
+
+        function checkDateSelected() {
+            if (selectedDateInput.value) {
+                bookNowBtn.removeAttribute('disabled');
+            } else {
+                bookNowBtn.setAttribute('disabled', true);
+            }
+        }
     </script>
     <script>
         const monthSelect = document.getElementById("monthSelect");

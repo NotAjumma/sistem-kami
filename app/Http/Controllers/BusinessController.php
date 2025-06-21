@@ -20,7 +20,7 @@ use Carbon\Carbon;
 class BusinessController extends Controller
 {
 
-    public function showPublic($slug)
+    public function showProfile($slug)
     {
         $organizer = Organizer::with([
             'activePackages.addons',

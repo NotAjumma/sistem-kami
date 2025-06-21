@@ -49,7 +49,9 @@ class Organizer extends Authenticatable
 
     public function activePackages()
     {
-        return $this->hasMany(Package::class)->where('status', 'active');
+        return $this->hasMany(Package::class)
+            ->where('status', 'active')
+            ->orderBy('order_by');
     }
 
     public function gallery()

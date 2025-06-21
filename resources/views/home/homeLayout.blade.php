@@ -62,8 +62,8 @@
 	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins&display=swap" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-	<script src="https://cdn.tailwindcss.com">
-	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 	<style>
 		.content-body {
@@ -82,41 +82,42 @@
 		}
 
 		.text-pink {
-            color: #c2185b;
+			color: #c2185b;
 		}
+
 		.social-links a i {
-            font-size: 2rem;
-            transition: color 0.2s;
-        }
+			font-size: 2rem;
+			transition: color 0.2s;
+		}
 
-        .social-links a:hover i {
-            color: var(--bs-primary);
-        }
+		.social-links a:hover i {
+			color: var(--bs-primary);
+		}
 
-        /* Always apply brand colors */
-        .bi-facebook {
-            color: #1877F2;
-        }
+		/* Always apply brand colors */
+		.bi-facebook {
+			color: #1877F2;
+		}
 
-        .bi-instagram {
-            color: #E1306C;
-        }
+		.bi-instagram {
+			color: #E1306C;
+		}
 
-        .bi-tiktok {
-            color: #000000;
-        }
+		.bi-tiktok {
+			color: #000000;
+		}
 
-        .bi-twitter {
-            color: #1DA1F2;
-        }
+		.bi-twitter {
+			color: #1DA1F2;
+		}
 
-        .bi-youtube {
-            color: #FF0000;
-        }
+		.bi-youtube {
+			color: #FF0000;
+		}
 
-        .bi-linkedin {
-            color: #0A66C2;
-        }
+		.bi-linkedin {
+			color: #0A66C2;
+		}
 	</style>
 	@stack('styles')
 </head>
@@ -326,6 +327,29 @@
 			<script src="{{ asset($script) }}" type="text/javascript"></script>
 		@endforeach
 	@endif
+
+	@if(session('success'))
+		<script>
+			toastr.info("{{ session('success') }}", "Success", {
+				timeOut: 5000,
+				closeButton: true,
+				progressBar: true,
+				positionClass: "toast-top-right",
+				newestOnTop: true,
+				preventDuplicates: true,
+				tapToDismiss: false,
+				showDuration: "300",
+				hideDuration: "1000",
+				extendedTimeOut: "1000",
+				showEasing: "swing",
+				hideEasing: "linear",
+				showMethod: "fadeIn",
+				hideMethod: "fadeOut"
+			});
+		</script>
+	@endif
+
+
 
 	@stack('scripts')
 </body>

@@ -79,9 +79,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('business')->group(function () {
     // Public profile
-    Route::get('/{slug}', [BusinessController::class, 'showPublic'])->name('business.profile');
+    Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
+    Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
+    Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');
     Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
     Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
+    Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
 });
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');

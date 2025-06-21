@@ -19,8 +19,6 @@ return [
 		'global' => [
 			'css' => [
 					'vendor/bootstrap-select/dist/css/bootstrap-select.min.css',
-					
-					
 			],
 			'js' => [
 				'top'=> [
@@ -35,6 +33,16 @@ return [
 		],
 		'pagelevel' => [
 			'css' => [
+				'BusinessController_showPackage' => [
+					'vendor/swiper/css/swiper-bundle.min.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+				],
+				'BookingController_showCheckoutPackage' => [
+					'vendor/swiper/css/swiper-bundle.min.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+				],
 				'OrganizerController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
@@ -281,6 +289,16 @@ return [
 				],
 			],
 			'js' => [
+				'BusinessController_showCheckoutPackage' => [
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
+				],
+				'BookingController_showPackage' => [
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
+				],
 				'OrganizerController_dashboard' => [
 					'vendor/apexchart/apexchart.js',
 					'vendor/chart-js/chart.bundle.min.js',
