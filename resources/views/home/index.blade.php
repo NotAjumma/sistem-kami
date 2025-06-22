@@ -626,7 +626,7 @@
                             <div class="courses-item-inner p-4">
                                 <div class="d-inline-block h4 mb-3"> Event Ticketing Made Easy</div>
                                 <p class="mb-4">Empower organizers to create, promote, and sell tickets for any
-                                    event—concerts, festivals, workshops, and more.
+                                    event—concerts, esports, workshops, and more.
                                 </p>
                             </div>
                         </div>
@@ -671,7 +671,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
+                    <!-- <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
                         <div class="courses-item">
                             <div class="courses-item-inner p-4">
                                 <div class="d-inline-block h4 mb-3">Centralized Platform for All</div>
@@ -680,7 +680,7 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
