@@ -64,6 +64,7 @@ Route::get('/db-check', function () {
 
 // Used route
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

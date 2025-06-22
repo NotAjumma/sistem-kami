@@ -18,6 +18,7 @@ class Event extends Model
         'ticket_price',
         'buy_link',
         'images',
+        'image_cover',
         'shortcode',
     ];
 
