@@ -21,6 +21,7 @@ class HomeController extends Controller
     {
         // Only fetch events that are available (e.g. status = 2 = active)
         $events = Event::with(['organizer', 'tickets'])
+            ->where('status', '1') //todo remove 
             ->get();
 
         $eventCategories = Category::whereNull('parent_id')
@@ -36,8 +37,8 @@ class HomeController extends Controller
         $page_title = "Sistem Kami | Search";
         $query = Event::with(['organizer', 'tickets'])
             ->where('status', '1'); // Only active events
-        \Log::info('request');
-        \Log::info($request->all());
+        // \Log::info('request');
+        // \Log::info($request->all());
 
         // Filter by keyword (title or description)
         if ($request->filled('keyword')) {
