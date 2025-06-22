@@ -78,7 +78,13 @@
 		}
 
 		.bg-gray-900 {
-			background-color: #3736af !important;
+			background-color: rgba(0, 31, 77, 1) !important;
+		}
+
+		.dashed-hr {
+			border: none;
+			border-top: 1px dashed #999;
+			/* or your preferred color */
 		}
 
 		.text-pink {
@@ -180,11 +186,11 @@
 							Home
 						</a>
 					</li>
-					<li>
+					<!-- <li>
 						<a class="hover:underline" href="#">
-							Event
+							Search
 						</a>
-					</li>
+					</li> -->
 					<!-- <li>
                     <a class="hover:underline" href="#">
                         Schedule
@@ -195,14 +201,14 @@
 					Sistem Kami
 				</div>
 				<ul class="flex space-x-6 text-xs font-normal text-gray-900">
-					<li>
+					<!-- <li>
 						<a class="hover:underline" href="#">
 							Contact us
 						</a>
-					</li>
+					</li> -->
 					<li>
 						<a class="hover:underline" href="{{ route('organizer.login') }}">
-							Login
+							Organizer Login
 						</a>
 					</li>
 				</ul>
@@ -262,9 +268,9 @@
 						<h6 class="text-light pb-3">Quick Links</h6>
 						<ul class="list-unstyled">
 							<li><a href="{{ url('/') }}" class="text-light text-decoration-none">Home</a></li>
-							<li><a href="{{ url('/about') }}" class="text-light text-decoration-none">About</a></li>
-							<li><a href="{{ url('/events') }}" class="text-light text-decoration-none">Events</a></li>
-							<li><a href="{{ url('/contact') }}" class="text-light text-decoration-none">Contact</a></li>
+							<!-- <li><a href="{{ url('/about') }}" class="text-light text-decoration-none">About</a></li> -->
+							<!-- <li><a href="{{ url('/events') }}" class="text-light text-decoration-none">Events</a></li> -->
+							<li><a href="{{ route('organizer.login') }}" class="text-light text-decoration-none">Organizer Login</a></li>
 						</ul>
 					</div>
 

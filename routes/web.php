@@ -74,6 +74,7 @@ Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->n
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
