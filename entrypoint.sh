@@ -3,6 +3,9 @@
 # Optional: print start info
 echo "Starting container and running drive:download-receipts..."
 
+echo "Running migrations..."
+php artisan migrate --force
+
 # Run your Laravel artisan command to download receipts from Google Drive
 php artisan drive:download-receipts
 
