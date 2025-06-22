@@ -96,12 +96,15 @@
         }
 
         .agent-avatar {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 0.5rem;
-            border: 2px solid #dc2626;
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+        }
+
+        .logo-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
         }
 
         .agent-name {
@@ -302,20 +305,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                                                                        <div class="container">
-                                                                                                                                                                                                                            <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                                                                                <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                                                                    <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                                                                                </li>
-                                                                                                                                                                                                                            </ol>
-                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                    </nav> -->
+                                                                                                                                                                                                                                            <div class="container">
+                                                                                                                                                                                                                                                <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                                                                    <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                                                                        <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                                                                    </li>
+                                                                                                                                                                                                                                                </ol>
+                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                        </nav> -->
 
         <!-- Images Section -->
         @php
@@ -358,7 +361,7 @@
 
         <!-- Sidebar Section -->
         <aside class="row">
-            <div class="col-lg-8 col-md-7">
+            <div class="col-lg-7 col-md-7">
                 <!-- Package Title & Price -->
                 @php
                     $basePrice = (float) $package->base_price;
@@ -444,203 +447,141 @@
                     </p>
                 </section>
 
-                <!-- Calendar -->
-                <section class="col-12 mt-5 mb-5">
-                    <h5 class="fw-semibold mb-3">Calendar</h5>
-                    <!-- Legend -->
-                    <div class="mt-0">
-                        <h5 class="fw-semibold mb-1">Status Indicator:</h5>
-                        <ul class="list-inline row gx-2 gy-2">
-                            <li class="list-inline-item col-6 col-md-auto">
-                                <span class="legend-box bg-secondary"></span> Today
-                            </li>
-                            <li class="list-inline-item col-6 col-md-auto">
-                                <span class="legend-box bg-success"></span> Booked Date
-                            </li>
-                            <li class="list-inline-item col-6 col-md-auto">
-                                <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not Available
-                            </li>
-                            <li class="list-inline-item col-6 col-md-auto">
-                                <span class="legend-box bg-primary"></span> Selected Date
-                            </li>
-                        </ul>
-                    </div>
 
-                    <!-- Calendar Navigation Controls -->
-                    <div class="calendar-navigation mt-3">
-                        <div class="row g-2 col-12">
-                            <!-- Previous Button -->
-                            <div class="col-12 col-md-3">
-                                <button id="prevMonth" class="btn btn-primary w-100"
-                                    style="text-align: center; display: flex; justify-content: center;">
-                                    <div>
-                                        <i class="fa-regular fa-square-caret-left me-2"></i>
-                                    </div>
-                                    <div>Previous</div>
-                                </button>
+            </div>
+            <div class="col-lg-5 col-md-5">
+                <!-- Shortlist and Share Buttons -->
+                <!-- <div class="d-flex justify-content-between gap-3 flex-wrap position-relative">
+                        <button type="button"
+                            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
+                            onclick="copyCurrentUrl()" aria-label="Share property">
+                            <i class="fa-solid fa-share"></i> Share
+                        </button>
+
+                        {{-- Bootstrap alert (hidden by default) --}}
+                        {{-- Top-right fixed alert --}}
+                        <div id="copyAlert"
+                            class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
+                            role="alert" style="z-index: 1060; min-width: 200px;">
+                            Link copied!
+                            <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
+                        </div>
+                    </div> -->
+
+                <!-- Organizer Contact Card -->
+                <section class="col-12 mt-5 mb-5 ticket-box ">
+                    <div class="">
+                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Service Provider</h6>
+                        <hr class="mb-4" />
+                        <div class="d-flex align-items-center mb-2 gap-3">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a58ec3c2-1752-4c8a-9f9c-9ef970723935.png"
+                                alt=" logo" class="agent-avatar" />
+                            <div>
+                                <p class="fw-semibold mb-1" style="font-size: 1rem; line-height: 1.2;">
+                                    {{ $organizer->name }}
+                                </p>
+                                <!-- <p class="agent-company">{{ $organizer->category }}</small></p> -->
+
+                                <p class="mb-0" style="font-size: 0.875rem; color: #3736af; ">
+                                    Email: <a href="mailto:{{ $organizer->email }}" class="link-red"
+                                        style="font-weight: 600;">{{ $organizer->email }}</a>
+                                </p>
+                                <p class="mb-1" style="font-size: 0.875rem; color: #3736af;">
+                                    Phone: <span style="font-weight: 600;">{{ $organizer->phone }}</span>
+                                </p>
+                                <a href="{{ route('business.profile', ['slug' => $organizer->slug]) }}"
+                                    style="font-size: 0.875rem; color: #3736af; font-weight: 600;">
+                                    View Profile
+                                </a>
                             </div>
+                        </div>
+                        <hr class="my-4" />
+                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select a Date</h6>
+                        <hr class="mb-4" />
+                        <!-- Legend -->
+                        <div class="mt-0">
+                            <h5 class="fw-semibold mb-1">Calendar Indicator:</h5>
+                            <ul class="list-inline row gx-2 gy-2">
+                                <li class="list-inline-item col-6 col-md-auto">
+                                    <span class="legend-box bg-secondary"></span> Today
+                                </li>
+                                <li class="list-inline-item col-6 col-md-auto">
+                                    <span class="legend-box bg-success"></span> Booked Date
+                                </li>
+                                <li class="list-inline-item col-6 col-md-auto">
+                                    <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not
+                                    Available
+                                </li>
+                                <li class="list-inline-item col-6 col-md-auto">
+                                    <span class="legend-box bg-primary"></span> Selected Date
+                                </li>
+                            </ul>
+                        </div>
 
-                            <!-- Month & Year Selectors -->
-                            <div class="col-12 col-md-5 d-flex gap-2">
-                                <select id="monthSelect" class="form-select w-50" style="font-size: 1rem;">
-                                    <!-- Populated via JS -->
-                                </select>
-                                <select id="yearSelect" class="form-select w-50" style="font-size: 1rem;">
-                                    <!-- Populated via JS -->
-                                </select>
-                            </div>
-
-                            <!-- Today and Next Button -->
-                            <div class="col-12 col-md-4">
-                                <div class="d-flex flex-column flex-md-row gap-2">
-                                    <button id="todayBtn" class="btn btn-secondary w-100">Today</button>
-                                    <button id="nextMonth" class="btn btn-primary w-100"
+                        <!-- Calendar Navigation Controls -->
+                        <div class="calendar-navigation mt-3">
+                            <div class="row g-2 col-12">
+                                <!-- Previous Button -->
+                                <div class="col-12 col-md-12">
+                                    <button id="prevMonth" class="btn btn-primary w-100"
                                         style="text-align: center; display: flex; justify-content: center;">
-                                        <div>Next</div>
-                                        <div><i class="fa-regular fa-square-caret-right ms-2"></i></div>
+                                        <div>
+                                            <i class="fa-regular fa-square-caret-left me-2"></i>
+                                        </div>
+                                        <div>Previous</div>
                                     </button>
+                                </div>
+
+                                <!-- Month & Year Selectors -->
+                                <div class="col-12 col-md-12 d-flex gap-2">
+                                    <select id="monthSelect" class="form-select w-50" style="font-size: 1rem;">
+                                        <!-- Populated via JS -->
+                                    </select>
+                                    <select id="yearSelect" class="form-select w-50" style="font-size: 1rem;">
+                                        <!-- Populated via JS -->
+                                    </select>
+                                </div>
+
+                                <!-- Today and Next Button -->
+                                <div class="col-12 col-md-12">
+                                    <div class="d-flex flex-column flex-md-row gap-2">
+                                        <button id="todayBtn" class="btn btn-secondary w-100">Today</button>
+                                        <button id="nextMonth" class="btn btn-primary w-100"
+                                            style="text-align: center; display: flex; justify-content: center;">
+                                            <div>Next</div>
+                                            <div><i class="fa-regular fa-square-caret-right ms-2"></i></div>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <table class="calendar table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Mo</th>
-                                <th>Tu</th>
-                                <th>We</th>
-                                <th>Th</th>
-                                <th>Fr</th>
-                                <th>Sa</th>
-                                <th style="text-align:center !important;">Su</th>
-                            </tr>
-                        </thead>
-                        <tbody id="calendarBody">
-                            <!-- Calendar will be dynamically generated here -->
-                        </tbody>
-                    </table>
-                    <form action="{{ route('business.select_package') }}" method="post">
-                        @csrf
+                        <table class="calendar table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Mo</th>
+                                    <th>Tu</th>
+                                    <th>We</th>
+                                    <th>Th</th>
+                                    <th>Fr</th>
+                                    <th>Sa</th>
+                                    <th style="text-align:center !important;">Su</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calendarBody">
+                                <!-- Calendar will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                        <form action="{{ route('business.select_package') }}" method="post">
+                            @csrf
 
-                        <input type="hidden" name="package_id" value="{{ $package->id }}">
+                            <input type="hidden" name="package_id" value="{{ $package->id }}">
 
-                        <input type="hidden" name="selected_date" id="selected_date">
+                            <input type="hidden" name="selected_date" id="selected_date">
 
-                        <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book Now</button>
-                    </form>
+                            <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book
+                                Now</button>
+                        </form>
                 </section>
-
-            </div>
-            <div class="col-lg-4 col-md-5">
-                <!-- Shortlist and Share Buttons -->
-                <div class="d-flex justify-content-between gap-3 flex-wrap position-relative">
-                    <button type="button"
-                        class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
-                        onclick="copyCurrentUrl()" aria-label="Share property">
-                        <i class="fa-solid fa-share"></i> Share
-                    </button>
-
-                    {{-- Bootstrap alert (hidden by default) --}}
-                    {{-- Top-right fixed alert --}}
-                    <div id="copyAlert"
-                        class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
-                        role="alert" style="z-index: 1060; min-width: 200px;">
-                        Link copied!
-                        <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
-                    </div>
-                </div>
-
-                <!-- Organizer Contact Card -->
-                <div class="ticket-box sticky-on-lg">
-                    <div class="d-flex gap-3">
-                        <img class="agent-avatar"
-                            src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a58ec3c2-1752-4c8a-9f9c-9ef970723935.png"
-                            alt="Agent Jill Lee profile picture" />
-                        <div>
-                            <p class="agent-name">{{ $organizer->name }}</p>
-                            <p class="agent-company">{{ $organizer->category }}</small></p>
-                        </div>
-
-                    </div>
-
-                    @php
-                        $maxLength = 150;
-                        $isLong = strlen($organizer->description) > $maxLength;
-                        $excerpt = Str::limit($organizer->description, $maxLength);
-                    @endphp
-
-                    <p class="profile-intro-desc mb-2">
-                        <span id="desc-preview-{{ $organizer->id }}">
-                            {{ $excerpt }}
-                            @if($isLong)
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Read more</a>
-                            @endif
-                        </span>
-
-                        @if($isLong)
-                            <span id="desc-full-{{ $organizer->id }}" style="display: none;">
-                                {{ $organizer->description }}
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Show less</a>
-                            </span>
-                        @endif
-                    </p>
-                    {{-- WhatsApp Button --}}
-                    @php
-                        $phone = preg_replace('/[^0-9]/', '', $organizer->phone); // remove non-digits
-                        $whatsappUrl = 'https://wa.me/' . $phone;
-                    @endphp
-                    <a href="{{ $whatsappUrl }}" target="_blank" class="btn btn-whatsapp w-100"
-                        aria-label="Contact {{ $organizer->name }} on WhatsApp Web">
-                        <i class="fab fa-whatsapp me-1"></i> WhatsApp Web
-                    </a>
-                    <!-- <a href="{{ route('business.booking', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                                                                                        class="btn btn-primary w-100">
-                                                                                                        Book Now
-                                                                                                    </a> -->
-                    @if (!empty($organizer->social_links))
-                        @php
-                            $socials = is_array($organizer->social_links)
-                                ? $organizer->social_links
-                                : json_decode($organizer->social_links, true);
-                        @endphp
-
-                        @if (!empty($socials))
-                            <div class="social-links d-flex gap-3 align-items-center">
-                                @foreach ($socials as $platform => $url)
-                                    @if ($url)
-                                        <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="">
-                                            <i class="bi bi-{{ strtolower($platform) }}"></i>
-                                        </a>
-                                    @endif
-                                @endforeach
-                            </div>
-                        @endif
-                    @endif
-
-                    <details class="mt-3 text-start">
-                        <summary class="text-decoration-underline" style="cursor:pointer;">Other ways to enquire
-                        </summary>
-                        @php
-                            $addressParts = array_filter([
-                                $organizer->address_line1,
-                                $organizer->address_line2,
-                                $organizer->postal_code,
-                                $organizer->city,
-                                $organizer->state,
-                                $organizer->country
-                            ]);
-                        @endphp
-
-                        <ul class="list-unstyled mt-2" style="font-size: 0.9rem; color:#6b7280;">
-                            <li><strong>Email:</strong> {{ $organizer->email }}</li>
-                            <li><strong>Phone:</strong> {{ $organizer->phone }}</li>
-                            @if (!empty($addressParts))
-                                <li><strong>Address:</strong> {{ implode(', ', $addressParts) }}</li>
-                            @endif
-
-                        </ul>
-                    </details>
-                </div>
             </div>
         </aside>
 

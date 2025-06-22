@@ -423,19 +423,19 @@
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span>Package Price</span>
-                    <span>MYR{{ number_format($subtotal, 2) }}</span>
+                    <span>RM{{ number_format($subtotal, 2) }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span>Subtotal</span>
-                    <span>MYR{{ number_format($subtotal, 2) }}</span>
+                    <span>RM{{ number_format($subtotal, 2) }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3 text-primary">
                     <span>{{ $serviceChargeLabel }}</span>
-                    <span>+ MYR{{ number_format($serviceCharge, 2) }}</span>
+                    <span>+ RM{{ number_format($serviceCharge, 2) }}</span>
                 </div>
                 <div class="d-flex justify-content-between total-row">
                     <span>Total</span>
-                    <span>MYR{{ number_format($total, 2) }}</span>
+                    <span>RM{{ number_format($total, 2) }}</span>
                 </div>
             </div>
 

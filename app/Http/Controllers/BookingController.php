@@ -352,11 +352,11 @@ class BookingController extends Controller
         if ($percentage) {
             $serviceChargeLabel .= " (" . number_format($percentage, 2) . "%)";
         } elseif ($fixed) {
-            $serviceChargeLabel .= " (Fixed)";
+            $serviceChargeLabel .= " (RM" . number_format($fixed, 2) . ")";
         }
 
-        \Log::info($package);
-        \Log::info($selected_date);
+        // \Log::info($package);
+        // \Log::info($selected_date);
         if (!$package || !$selected_date) {
             return redirect()->back()->with('success', 'Please select date first.');
         }
