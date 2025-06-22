@@ -302,20 +302,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                                                                    <div class="container">
-                                                                                                                                                                                                                        <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                                                                            </li>
-                                                                                                                                                                                                                        </ol>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                </nav> -->
+                                                                                                                                                                                                                        <div class="container">
+                                                                                                                                                                                                                            <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                                                <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                                                    <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                                                </li>
+                                                                                                                                                                                                                            </ol>
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                    </nav> -->
 
         <!-- Images Section -->
         @php
@@ -482,10 +482,10 @@
 
                             <!-- Month & Year Selectors -->
                             <div class="col-12 col-md-5 d-flex gap-2">
-                                <select id="monthSelect" class="default-select w-50">
+                                <select id="monthSelect" class="form-select w-50" style="font-size: 1rem;">
                                     <!-- Populated via JS -->
                                 </select>
-                                <select id="yearSelect" class="default-select w-50">
+                                <select id="yearSelect" class="form-select w-50" style="font-size: 1rem;">
                                     <!-- Populated via JS -->
                                 </select>
                             </div>
@@ -594,9 +594,9 @@
                         <i class="fab fa-whatsapp me-1"></i> WhatsApp Web
                     </a>
                     <!-- <a href="{{ route('business.booking', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                                                                                    class="btn btn-primary w-100">
-                                                                                                    Book Now
-                                                                                                </a> -->
+                                                                                                        class="btn btn-primary w-100">
+                                                                                                        Book Now
+                                                                                                    </a> -->
                     @if (!empty($organizer->social_links))
                         @php
                             $socials = is_array($organizer->social_links)
@@ -770,7 +770,7 @@
         const currentMonthDisplay = document.getElementById("currentMonth");
         const prevMonthBtn = document.getElementById("prevMonth");
         const nextMonthBtn = document.getElementById("nextMonth");
-
+        const maxBookingOffset = @json($package->max_booking_year_offset ?? 2);
         // console.log(vendorOffDays);
         let currentDate = new Date();
 
@@ -817,6 +817,7 @@
 
                 // Highlight today
                 const today = new Date();
+                const maxDate = new Date(today.getFullYear() + maxBookingOffset, 11);
                 today.setHours(0, 0, 0, 0); // Normalize time
                 currentLoopDate.setHours(0, 0, 0, 0);
                 if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
@@ -861,6 +862,13 @@
                     (year === today.getFullYear() && month <= today.getMonth());
 
                 prevMonthBtn.disabled = isPrevMonthBeforeToday;
+
+                // Disable next button if going beyond maxDate (e.g. Dec 2027)
+                const isNextMonthAfterLimit =
+                    currentDate.getFullYear() > maxDate.getFullYear() ||
+                    (currentDate.getFullYear() === maxDate.getFullYear() && currentDate.getMonth() >= maxDate.getMonth());
+
+                nextMonthBtn.disabled = isNextMonthAfterLimit;
 
                 td.addEventListener("click", () => {
                     document.querySelectorAll("#calendarBody td").forEach(cell => cell.classList.remove("selected"));
@@ -944,7 +952,7 @@
 
         // Populate year dropdown (current year to next 2 years)
         const currentYear = today.getFullYear();
-        for (let y = currentYear; y <= currentYear + 2; y++) {
+        for (let y = currentYear; y <= currentYear + maxBookingOffset; y++) {
             const option = document.createElement("option");
             option.value = y;
             option.textContent = y;

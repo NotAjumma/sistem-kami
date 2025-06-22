@@ -20,14 +20,16 @@ class Package extends Model
         'status',
         'valid_from',
         'valid_until',
+        'max_booking_year_offset',
     ];
 
     protected $casts = [
-        'base_price' => 'decimal:2',
-        'final_price' => 'decimal:2',
-        'discount_percentage' => 'integer',
-        'valid_from' => 'datetime',
-        'valid_until' => 'datetime',
+        'base_price'                => 'decimal:2',
+        'final_price'               => 'decimal:2',
+        'discount_percentage'       => 'integer',
+        'max_booking_year_offset'   => 'integer',
+        'valid_from'                => 'datetime',
+        'valid_until'               => 'datetime',
     ];
 
     public function organizer(): BelongsTo

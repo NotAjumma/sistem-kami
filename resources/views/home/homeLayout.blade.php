@@ -118,6 +118,10 @@
 		.bi-linkedin {
 			color: #0A66C2;
 		}
+
+		.form-select {
+			background-color: #fff !important;
+		}
 	</style>
 	@stack('styles')
 </head>
