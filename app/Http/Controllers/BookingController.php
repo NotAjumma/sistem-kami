@@ -361,7 +361,7 @@ class BookingController extends Controller
             return redirect()->back()->with('success', 'Please select date first.');
         }
 
-        return view('home.business.checkoutPackage', compact('page_title', 'package', 'selected_date', 'subtotal', 'serviceCharge', 'total', 'serviceChargeLabel'));
+        return view('home.business.checkoutPackage', compact('page_title', 'package', 'selected_date', 'subtotal', 'serviceCharge', 'basePrice', 'total', 'serviceChargeLabel', 'discountAmount'));
     }
 
     public function webFormBooking(Request $request)

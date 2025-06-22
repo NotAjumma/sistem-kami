@@ -187,7 +187,8 @@
     <main class="container my-4 mt-5">
         <div class="row gx-4">
             <section class="col-lg-8">
-                <form aria-label="Billing Details Form" class="mb-5" method="post" action="{{ route('webform.booking_package') }}">
+                <form aria-label="Billing Details Form" class="mb-5" method="post"
+                    action="{{ route('webform.booking_package') }}">
                     @csrf
                     <h2 class="section-title" style="font-size: 1.5rem;">Billing Details</h2>
                     <div class="row gx-3 gy-3 section-ticket">
@@ -394,8 +395,8 @@
                         $coverImage = collect($package->images)->firstWhere('is_cover', true) ?? $package->images[0];
                     @endphp
                     <img src="{{ asset('images/organizers/' . $package->organizer->id . '/packages/' . $package->id . '/' . $coverImage['url']) }}"
-                        alt="{{ $coverImage['alt_text'] }}" width="200" class="me-3 object-fit-cover" loading="lazy" decoding="async"
-                        style="border-radius: 20px; height: 150px; " />
+                        alt="{{ $coverImage['alt_text'] }}" width="200" class="me-3 object-fit-cover" loading="lazy"
+                        decoding="async" style="border-radius: 20px; height: 150px; " />
                 @endif
 
 
@@ -403,8 +404,7 @@
                     <h2 class="mb-1 fw-bold text-uppercase text-primary" style="font-size: 1.5rem;">
                         {{ $package->name }}
                     </h2>
-                    <span class="badge"
-                        style="background-color: #3736af; padding: 0.5em 1em; letter-spacing: 0.2em;">
+                    <span class="badge" style="background-color: #3736af; padding: 0.5em 1em; letter-spacing: 0.2em;">
                         {{ $package->category->name }}
                     </span>
                     <p class="mb-0 text-secondary d-flex align-items-center gap-1" style="font-style: italic;">
@@ -423,8 +423,14 @@
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span>Package Price</span>
-                    <span>RM{{ number_format($subtotal, 2) }}</span>
+                    <span>RM{{ number_format($basePrice, 2) }}</span>
                 </div>
+                @if($discountAmount)
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Discount Price</span>
+                        <span class="text-danger">- RM{{ number_format($discountAmount, 2) }}</span>
+                    </div>
+                @endif
                 <div class="d-flex justify-content-between mb-3">
                     <span>Subtotal</span>
                     <span>RM{{ number_format($subtotal, 2) }}</span>

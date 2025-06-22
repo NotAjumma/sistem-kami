@@ -305,20 +305,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                                                                                            <div class="container">
-                                                                                                                                                                                                                                                <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                                                                                                    <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                                                                                        <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                                                                                                    </li>
-                                                                                                                                                                                                                                                </ol>
-                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                        </nav> -->
+                                                                                                                                                                                                                                                                            <div class="container">
+                                                                                                                                                                                                                                                                                <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                                                                                                        <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                                                                                                    </li>
+                                                                                                                                                                                                                                                                                </ol>
+                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                        </nav> -->
 
         <!-- Images Section -->
         @php
@@ -399,22 +399,27 @@
                         @else
                             <!-- <span class="negotiable-badge">Negotiable</span> -->
                         @endif
+                        <hr class="mb-4" />
                     </p>
                 </div>
 
                 <!-- Package Details -->
                 @if(!empty($package->items) && count($package->items) > 0)
                     <section class="mb-4">
-                        <h5 class="fw-semibold mb-3">Package Item List</h5>
+                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Package Item List</h6>
+                        <hr class="mb-4" />
                         <ul class="list-unstyled property-details-list">
                             @foreach ($package->items ?? [] as $item)
-                                <li>
+                                <li class="mb-0">
                                     <i class="fa-solid fa-check text-success me-2"></i>
                                     <strong class="mr-1">{{ $item['title'] }}</strong>
-                                    @if(!empty($item['description']))
-                                        : <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
-                                    @endif
                                 </li>
+                                @if(!empty($item['description']))
+                                    <li class="mb-3">
+                                        <i class="fa-solid fa-bars-staggered"></i>
+                                        <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
+                                    </li>
+                                @endif
                             @endforeach
                         </ul>
                     </section>
@@ -422,18 +427,22 @@
 
                 @if(!empty($package->addons) && count($package->addons) > 0)
                     <section class="mb-4">
-                        <h5 class="fw-semibold mb-3">Optional Add-ons</h5>
+                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Optional Add-ons</h6>
+                        <hr class="mb-4" />
                         <ul class="list-unstyled property-details-list">
                             @foreach ($package->addons as $addon)
                                 <li>
                                     <i class="fa-solid fa-plus text-primary me-2"></i>
                                     <strong class="mr-1">{{ $addon['name'] }}</strong>
-                                    @if(!empty($addon['description']))
-                                        : <span class="text-muted d-block small ml-1">{{ $addon['description'] }}</span>
-                                    @endif
                                     <span class="badge bg-light text-dark mt-1 ml-1">RM
                                         {{ number_format($addon['price'], 2) }}</span>
                                 </li>
+                                @if(!empty($addon['description']))
+                                    <li>
+                                        <i class="fa-solid fa-bars-staggered"></i>
+                                        <span class="text-muted d-block small ml-1">{{ $addon['description'] }}</span>
+                                    </li>
+                                @endif
                             @endforeach
                         </ul>
                     </section>
@@ -441,7 +450,8 @@
 
                 <!-- About Package -->
                 <section>
-                    <h5 class="fw-semibold mb-3">Description</h5>
+                    <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Description</h6>
+                    <hr class="mb-4" />
                     <p class="about-property">
                         {{ $package->description }}
                     </p>
@@ -452,21 +462,21 @@
             <div class="col-lg-5 col-md-5">
                 <!-- Shortlist and Share Buttons -->
                 <!-- <div class="d-flex justify-content-between gap-3 flex-wrap position-relative">
-                        <button type="button"
-                            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
-                            onclick="copyCurrentUrl()" aria-label="Share property">
-                            <i class="fa-solid fa-share"></i> Share
-                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
+                                                            onclick="copyCurrentUrl()" aria-label="Share property">
+                                                            <i class="fa-solid fa-share"></i> Share
+                                                        </button>
 
-                        {{-- Bootstrap alert (hidden by default) --}}
-                        {{-- Top-right fixed alert --}}
-                        <div id="copyAlert"
-                            class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
-                            role="alert" style="z-index: 1060; min-width: 200px;">
-                            Link copied!
-                            <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
-                        </div>
-                    </div> -->
+                                                        {{-- Bootstrap alert (hidden by default) --}}
+                                                        {{-- Top-right fixed alert --}}
+                                                        <div id="copyAlert"
+                                                            class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
+                                                            role="alert" style="z-index: 1060; min-width: 200px;">
+                                                            Link copied!
+                                                            <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
+                                                        </div>
+                                                    </div> -->
 
                 <!-- Organizer Contact Card -->
                 <section class="col-12 mt-5 mb-5 ticket-box ">
