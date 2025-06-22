@@ -415,11 +415,12 @@
                                     <strong class="mr-1">{{ $item['title'] }}</strong>
                                 </li>
                                 @if(!empty($item['description']))
-                                    <li class="mb-3">
-                                        <i class="fa-solid fa-bars-staggered"></i>
-                                        <span class="text-muted d-block small ml-1">{{ $item['description'] }}</span>
+                                    <li class="d-flex align-items-start gap-2 mb-4">
+                                        <i class="fa-solid fa-bars-staggered mt-1"></i>
+                                        <span class="text-muted small">{{ $item['description'] }}</span>
                                     </li>
                                 @endif
+
                             @endforeach
                         </ul>
                     </section>
@@ -438,9 +439,9 @@
                                         {{ number_format($addon['price'], 2) }}</span>
                                 </li>
                                 @if(!empty($addon['description']))
-                                    <li>
-                                        <i class="fa-solid fa-bars-staggered"></i>
-                                        <span class="text-muted d-block small ml-1">{{ $addon['description'] }}</span>
+                                    <li class="d-flex align-items-start gap-2 mb-4">
+                                        <i class="fa-solid fa-bars-staggered mt-1"></i>
+                                        <span class="text-muted small">{{ $addon['description'] }}</span>
                                     </li>
                                 @endif
                             @endforeach
