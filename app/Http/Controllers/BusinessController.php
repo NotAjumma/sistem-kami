@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Participant;
-use App\Models\Booking;
+use App\Models\PackageCategory;
 use App\Models\VendorOffDay;
 use App\Models\VendorTimeSlot;
 use App\Models\BookingVendorTimeSlot;
@@ -20,7 +20,7 @@ use Carbon\Carbon;
 class BusinessController extends Controller
 {
 
-    public function showProfile($slug)
+    public function showProfile(Request $request, $slug)
     {
         $organizer = Organizer::with([
             'activePackages.addons',
@@ -32,15 +32,53 @@ class BusinessController extends Controller
             'gallery',
         ])->where('slug', $slug)->firstOrFail();
 
-        \Log::info($organizer);
+        // \Log::info($organizer);
 
         if ($organizer->type !== 'business') {
             abort(403, 'Unauthorized access to non-business type');
         }
 
+        $allActivePackages = $organizer->activePackages()->get();
+
+        $packageCategories = \App\Models\PackageCategory::whereIn(
+            'id',
+            $allActivePackages->pluck('category_id')->unique()
+        )->get();
+        
+        $packagesQuery = $organizer->activePackages()->with([
+            'addons',
+            'items',
+            'discounts',
+            'category',
+            'images'
+        ]);
+
+        // Filter by keyword (searching name or description)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $packagesQuery->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%$keyword%")
+                    ->orWhere('description', 'like', "%$keyword%");
+            });
+        }
+
+        // Filter by package category
+        if ($request->filled('package_category')) {
+            $category = PackageCategory::where('slug', $request->package_category)->first();
+            if ($category) {
+                $packagesQuery->where('category_id', $category->id);
+            }
+        }
+
+        $packages = $packagesQuery->get();
         $page_title = $organizer->name;
 
-        return view('home.business.profile', compact('organizer', 'page_title'));
+        return view('home.business.profile', compact(
+            'organizer',
+            'packages',
+            'packageCategories',
+            'page_title'
+        ));
     }
 
     public function showPackage($organizerSlug, $packageSlug)

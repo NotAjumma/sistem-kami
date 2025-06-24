@@ -282,8 +282,6 @@
                             width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
                         </iframe>
                     </div>
-
-
                 @endif
 
             </div>

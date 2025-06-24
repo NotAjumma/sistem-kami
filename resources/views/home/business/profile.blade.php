@@ -165,7 +165,25 @@
             font-family: 'Playfair Display', serif !important;
         }
 
+        @media (max-width: 991.98px) { /* tablets and below */
+            .carousel-caption {
+                bottom: 200px !important;
+            }
 
+            .caption_alt_text{
+                font-size: 1rem !important;
+            }
+        }
+
+        @media (min-width: 992px) { /* tablets and below */
+            .carousel-caption {
+                bottom: 50px !important;
+            }
+
+            .caption_alt_text{
+                font-size: 1rem !important;
+            }
+        }
 
         .carousel-caption {
             bottom: 20px;
@@ -173,12 +191,34 @@
             right: 0;
             text-align: center;
         }
+
+        #galleryModal .modal-content {
+            height: 80vh;
+            max-height: 80vh;
+            background-color: #d3cccc85;
+            border: none;
+            box-shadow: none;
+        }
+
+        #galleryModal .modal-body {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        .gallery-img {
+            height: 80vh;
+            object-fit: contain;
+            background-color: transparent;
+        }
+
+        .carousel-control-prev{
+            background-color: transparent;
+        }
     </style>
 @endpush
 
 @section('content')
     <div class="container">
-
 
         {{-- Carousel --}}
         <!-- Size banner 1500px x 350px -->
@@ -200,7 +240,6 @@
                 </button>
             @endif
         </div>
-
 
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
@@ -303,12 +342,34 @@
                                                                                                     </div>
                                                                                                 </section> -->
 
+        <!-- Filter Search -->
+        <form method="GET" class="row g-2 mb-4">
+            <div class="col-md-6">
+                <input type="text" name="keyword" class="form-control"
+                    placeholder="Search packages..." value="{{ request('keyword') }}">
+            </div>
+            <div class="col-md-4">
+                <select name="package_category" class="default-select w-100">
+                    <option value="">All Categories</option>
+                    @foreach ($packageCategories as $category)
+                        <option value="{{ $category->slug }}" {{ request('package_category') == $category->slug ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+
+
         <!-- Packages Section -->
         <!-- Size package img 1024px x 1024px -->
         <section id="portfolio" class="mb-5">
             <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Packages</h3>
             <div class="row g-4">
-                @foreach($organizer->activePackages as $package)
+                @foreach($packages as $package)
                     <div class="col-12 col-md-6 col-xl-6">
                         <article class="portfolio-item">
                             {{-- Package image --}}
@@ -341,7 +402,12 @@
                                 <div class="portfolio-content">
                                     {{-- Package Name --}}
                                     <h4 class="portfolio-title">{{ $package->name }}</h4>
-
+                                    <h6>
+                                        <span class="badge mb-2"
+                                            style="background-color: #3736af; margin-right: 8px; padding: 0.5em 1em; letter-spacing: 0.2em;">
+                                            {{ $package->category->name }}
+                                        </span>
+                                    </h6>
                                     {{-- Discount Info --}}
                                     @if($validDiscount && $validDiscount->is_active)
                                         <p class="text-danger mb-1">
@@ -406,6 +472,7 @@
 
         <!-- Gallery Section -->
         <!-- Size gallery img 1024px x 1024px -->
+        @if(!request('package_category') && !request('keyword'))
         <section id="portfolio" class="mb-5">
             <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Gallery</h3>
             <div class="row g-4">
@@ -430,26 +497,41 @@
                 @endforeach
             </div>
         </section>
+        @endif
+
+        {{-- Google Map --}}
+        @if($organizer->latitude && $organizer->longitude)
+            <div style="margin-top: 50px;">
+                <iframe
+                    src="https://www.google.com/maps?q={{ urlencode($organizer->office_name) }}%20{{ $organizer->latitude }},{{ $organizer->longitude }}&output=embed"
+                    width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                </iframe>
+            </div>
+        @endif
 
     </div>
     <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content bg-dark">
+            <div class="modal-content" style="max-height: 100vh; overflow: hidden;">
                 <div class="modal-body p-0">
+                    <button type="button" class="btn position-absolute top-0 end-0 z-3" style="height: 2.5rem; margin: 1rem !important;" data-bs-dismiss="modal"><i class="fa-solid fa-xmark fa-2xl"></i></button>
+
                     <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             @foreach($organizer->gallery as $index => $gallery)
                                 @php $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name); @endphp
                                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                    <img src="{{ $imgUrl }}" class="d-block w-100"
+                                    <img src="{{ $imgUrl }}" class="d-block w-100 gallery-img"
                                         alt="{{ $gallery->alt_text ?? 'Gallery Image' }}">
 
                                     {{-- Caption Text Inside Modal --}}
-                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 p-3 rounded">
-                                        <h5>{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
-                                        @if($gallery->created_at)
-                                            <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
-                                        @endif
+                                    <div class="mx-auto w-100 d-none d-md-block">
+                                        <div class="carousel-caption w-50 mx-auto text-center bg-dark bg-opacity-75 p-3 rounded">
+                                            <h5 class="caption_alt_text">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
+                                            @if($gallery->created_at)
+                                                <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -457,11 +539,14 @@
 
                         <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel"
                             data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon"></span>
+                            <i class="fa-solid fa-square-caret-left text-primary d-none d-sm-inline" style="font-size: 5rem;"></i>
+                            <i class="fa-solid fa-square-caret-left text-primary d-inline d-sm-none" style="font-size: 3rem;"></i>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel"
                             data-bs-slide="next">
-                            <span class="carousel-control-next-icon"></span>
+                            <i class="fa-solid fa-square-caret-right text-primary d-none d-sm-inline" style="font-size: 5rem;"></i>
+                            <i class="fa-solid fa-square-caret-right text-primary d-inline d-sm-none" style="font-size: 3rem;"></i>
+
                         </button>
                     </div>
                 </div>
