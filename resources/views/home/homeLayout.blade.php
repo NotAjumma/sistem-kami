@@ -128,6 +128,12 @@
 		.form-select {
 			background-color: #fff !important;
 		}
+		
+        @media (max-width: 600px) {
+            .btn-primary {
+                padding: 1rem 1rem !important;
+            }
+        }
 	</style>
 	@stack('styles')
 </head>

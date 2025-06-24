@@ -119,6 +119,13 @@
             border-bottom-right-radius: 0;
         }
 
+        @media (min-width: 601px) and (max-width: 1440px) {
+            .portfolio-image,
+            .package-carousel img {
+                height: 250px;
+            }
+        }
+
         @media (max-width: 600px) {
 
             .portfolio-image,
@@ -213,6 +220,17 @@
 
         .carousel-control-prev{
             background-color: transparent;
+        }
+
+        .job-count {
+            font-size: 0.9rem;
+            color: #001f4d;
+            font-weight: 600;
+            border: 2px solid #1a3e85;
+            padding: 0.2rem 0.9rem;
+            border-radius: 50px;
+            background: white;
+            user-select: none;
         }
     </style>
 @endpush
@@ -363,12 +381,18 @@
             </div>
         </form>
 
-
         <!-- Packages Section -->
         <!-- Size package img 1024px x 1024px -->
         <section id="portfolio" class="mb-5">
-            <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Packages</h3>
-            <div class="row g-4">
+            @if(request('package_category') || request('keyword'))
+                <span class="job-count mb-4 mt-3" aria-live="polite" aria-atomic="true">
+                    {{ trans_choice(':count result|:count results', $packages->count(), ['count' => $packages->count()]) }}
+                </span>
+                <div class="row g-4 mt-2">
+            @else
+                <h3 class="mb-4 fw-bold mt-3" style="font-size: 1.3rem;">Packages</h3>
+                <div class="row g-4">
+            @endif
                 @foreach($packages as $package)
                     <div class="col-12 col-md-6 col-xl-6">
                         <article class="portfolio-item">
@@ -480,7 +504,7 @@
                     @php
                         $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name);
                     @endphp
-                    <div class="col-6 col-md-6 col-xl-4">
+                    <div class="col-6 col-md-4 col-xl-4">
                         <article class="portfolio-item">
                             <img src="{{ $imgUrl }}" alt="{{ $gallery->alt_text ?? 'Gallery Image' }}" class="portfolio-image"
                                 loading="lazy" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#galleryModal"
