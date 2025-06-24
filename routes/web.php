@@ -70,6 +70,8 @@ Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyy
 Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->name('toyyibpay.status');
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
 Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
+Route::get('/booking/success/{booking_code}', [BookingController::class, 'success'])->name('booking.success');
+Route::get('/booking/failed', [BookingController::class, 'failed'])->name('booking.failed');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');

@@ -361,7 +361,7 @@
 
         <!-- Sidebar Section -->
         <aside class="row">
-            <div class="col-lg-7 col-md-7">
+            <div class="col-lg-7 col-md-12">
                 <!-- Package Title & Price -->
                 @php
                     $basePrice = (float) $package->base_price;
@@ -460,7 +460,7 @@
 
 
             </div>
-            <div class="col-lg-5 col-md-5">
+            <div class="col-lg-5 col-md-12">
                 <!-- Shortlist and Share Buttons -->
                 <!-- <div class="d-flex justify-content-between gap-3 flex-wrap position-relative">
                                                         <button type="button"
@@ -586,6 +586,7 @@
                             @csrf
 
                             <input type="hidden" name="package_id" value="{{ $package->id }}">
+                            <input type="hidden" name="organizer_id" value="{{ $organizer->id }}">
 
                             <input type="hidden" name="selected_date" id="selected_date">
 

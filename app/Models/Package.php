@@ -66,5 +66,4 @@ class Package extends Model
     {
         return $this->hasMany(VendorTimeSlot::class, 'package_id');
     }
-
 }

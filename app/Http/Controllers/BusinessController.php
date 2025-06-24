@@ -135,6 +135,7 @@ class BusinessController extends Controller
                     });
             })
             ->whereNotNull('booked_date_start')
+            ->whereNotIn('status', ['failed', 'pending'])
             ->select('package_id', 'package_category_id', 'booked_date_start') // ✅ Now includes category
             ->get();
 

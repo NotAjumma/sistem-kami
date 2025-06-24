@@ -268,124 +268,118 @@
                             <textarea id="address" name="address" placeholder="Address" class="form-control"
                                 required>{{ old('address') }}</textarea>
                         </div>
+
+                            <div class="">
+                                @php
+                                    $packageInputs = session('package_inputs') ?? [];
+                                    $globalIndex = 1;
+                                @endphp
+
+                                <div class="row gx-3 gy-3">
+                                    @foreach ($packageInputs as $parent => $inputs)
+                                        @if ($parent !== 'General')
+                                            <div class="col-12 mb-2 parent-ticket">
+                                                <h6 class="text-primary" style="font-size: 0.8rem;">{{ $parent }}</h6>
+                                            </div>
+                                        @endif
+
+
+                                        @foreach ($inputs as $input)
+                                            <div class="col-sm-6">
+                                                <label for="input_{{ $input['id'] }}_{{ $globalIndex }}" class="form-label">
+                                                    {{ $input['label'] }}{{ $input['is_required'] ? ' *' : '' }}
+                                                </label>
+
+                                                @switch($input['input_type'])
+                                                    @case('text')
+                                                        <input type="text"
+                                                            id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            value="{{ old("package_inputs.$globalIndex." . $input['id']) }}"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            {{ $input['is_required'] ? 'required' : '' }} />
+                                                        @break
+
+                                                    @case('textarea')
+                                                        <textarea id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            {{ $input['is_required'] ? 'required' : '' }}>{{ old("package_inputs.$globalIndex." . $input['id']) }}</textarea>
+                                                        @break
+
+                                                    @case('select')
+                                                        <select id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            {{ $input['is_required'] ? 'required' : '' }}>
+                                                            <option disabled {{ old("package_inputs.$globalIndex." . $input['id']) ? '' : 'selected' }}>Select {{ $input['label'] }}</option>
+                                                            @foreach ($input['options'] as $option)
+                                                                <option value="{{ $option }}"
+                                                                    {{ old("package_inputs.$globalIndex." . $input['id']) == $option ? 'selected' : '' }}>
+                                                                    {{ $option }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        @break
+
+                                                    @case('radio')
+                                                        <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
+                                                            @foreach ($input['options'] as $option)
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio"
+                                                                        name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                                        id="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
+                                                                        value="{{ $option }}"
+                                                                        {{ old("package_inputs.$globalIndex." . $input['id']) == $option ? 'checked' : '' }}
+                                                                        {{ $input['is_required'] ? 'required' : '' }} />
+                                                                    <label class="form-check-label"
+                                                                        for="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
+                                                                        {{ $option }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
+
+                                                    @case('checkbox')
+                                                        <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
+                                                            @foreach ($input['options'] as $option)
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}][]"
+                                                                        id="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
+                                                                        value="{{ $option }}"
+                                                                        {{ is_array(old("package_inputs.$globalIndex." . $input['id'])) && in_array($option, old("package_inputs.$globalIndex." . $input['id'])) ? 'checked' : '' }}
+                                                                        {{ $input['is_required'] ? 'required' : '' }} />
+                                                                    <label class="form-check-label"
+                                                                        for="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
+                                                                        {{ $option }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
+
+                                                    @case('date')
+                                                        <input type="date"
+                                                            id="input_{{ $input['id'] }}_{{ $globalIndex }}"
+                                                            name="package_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
+                                                            class="form-control"
+                                                            value="{{ old("package_inputs.$globalIndex." . $input['id']) }}"
+                                                            placeholder="{{ $input['placeholder'] ?? '' }}"
+                                                            min="{{ now()->toDateString() }}" {{-- ✅ Prevent past date selection --}}
+                                                            {{ $input['is_required'] ? 'required' : '' }} />
+                                                        @break
+                                                @endswitch
+                                            </div>
+                                        @endforeach
+
+                                    @endforeach
+                                </div>
+                            </div>
                     </div>
-
-
-                    {{-- @php
-                    $totalSelected = collect($tickets)->sum('quantity');
-                    $globalIndex = 1;
-                    @endphp
-
-                    <h2 class="section-title mt-10">Ticket Details ({{ $totalSelected }}
-                        {{ Str::plural('ticket', $totalSelected) }})
-                    </h2>
-
-                    @foreach ($tickets as $ticket)
-                    @for ($i = 1; $i <= $ticket['quantity']; $i++) <div class="section-ticket">
-                        <p class="ticket-info" style="font-size: 1rem;">
-                            {{ $globalIndex }}. {{ strtoupper($ticket['name']) }} - #{{ $i }}
-                        </p>
-
-                        @php
-                        $ticketInputs = session('selected_ticket_inputs')[$ticket['ticket_id']] ?? [];
-                        @endphp
-
-                        <div class="row gx-3 gy-3">
-                            @foreach ($ticketInputs as $parent => $inputs)
-                            @if ($parent !== 'General')
-                            <div class="col-12 mb-2 parent-ticket">
-                                <h6 class="text-primary" style="font-size: 0.8rem;">{{ $parent }}</h6>
-                            </div>
-                            @endif
-
-
-                            @foreach ($inputs as $input)
-                            <div class="col-sm-6">
-                                <label for="input_{{ $input['id'] }}_{{ $globalIndex }}" class="form-label">
-                                    {{ $input['label'] }}{{ $input['is_required'] ? ' *' : '' }}
-                                </label>
-
-                                @switch($input['input_type'])
-                                @case('text')
-                                <input type="text" id="input_{{ $input['id'] }}_{{ $globalIndex }}"
-                                    name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]" class="form-control"
-                                    value="{{ old(" ticket_inputs.$globalIndex." . $input['id']) }}"
-                                    placeholder="{{ $input['placeholder'] ?? '' }}" {{ $input['is_required'] ? 'required'
-                                    : '' }} />
-                                @break
-
-                                @case('textarea')
-                                <textarea id="input_{{ $input['id'] }}_{{ $globalIndex }}"
-                                    name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]" class="form-control"
-                                    placeholder="{{ $input['placeholder'] ?? '' }}" {{ $input['is_required'] ? 'required'
-                                    : '' }}>{{ old("ticket_inputs.$globalIndex." . $input['id']) }}</textarea>
-                                @break
-
-                                @case('select')
-                                <select id="input_{{ $input['id'] }}_{{ $globalIndex }}"
-                                    name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]" class="form-control" {{
-                                    $input['is_required'] ? 'required' : '' }}>
-                                    <option disabled {{ old("ticket_inputs.$globalIndex." . $input['id']) ? '' : 'selected'
-                                        }}>Select {{ $input['label'] }}</option>
-                                    @foreach ($input['options'] as $option)
-                                    <option value="{{ $option }}" {{ old("ticket_inputs.$globalIndex." .
-                                        $input['id'])==$option ? 'selected' : '' }}>
-                                        {{ $option }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @break
-
-                                @case('radio')
-                                <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
-                                    @foreach ($input['options'] as $option)
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio"
-                                            name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}]"
-                                            id="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
-                                            value="{{ $option }}" {{ old("ticket_inputs.$globalIndex." .
-                                            $input['id'])==$option ? 'checked' : '' }} {{ $input['is_required'] ? 'required'
-                                            : '' }} />
-                                        <label class="form-check-label"
-                                            for="radio_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
-                                            {{ $option }}
-                                        </label>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                @break
-
-                                @case('checkbox')
-                                <div id="input_{{ $input['id'] }}_{{ $globalIndex }}">
-                                    @foreach ($input['options'] as $option)
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                            name="ticket_inputs[{{ $globalIndex }}][{{ $input['id'] }}][]"
-                                            id="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}"
-                                            value="{{ $option }}" {{ is_array(old("ticket_inputs.$globalIndex." .
-                                            $input['id'])) && in_array($option, old("ticket_inputs.$globalIndex." .
-                                            $input['id'])) ? 'checked' : '' }} {{ $input['is_required'] ? 'required' : ''
-                                            }} />
-                                        <label class="form-check-label"
-                                            for="checkbox_{{ $input['id'] }}_{{ $globalIndex }}_{{ $loop->index }}">
-                                            {{ $option }}
-                                        </label>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                @break
-                                @endswitch
-                            </div>
-                            @endforeach
-
-                            @endforeach
-                        </div>
-        </div>
-
-        @php $globalIndex++; @endphp
-        @endfor
-        @endforeach --}}
-
         </section>
 
         <aside class="col-lg-4 mt-4 mt-lg-0 p-3">

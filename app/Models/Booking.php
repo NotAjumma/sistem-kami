@@ -50,5 +50,14 @@ class Booking extends Model
     {
         return $this->hasOne(Payment::class);
     }
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function vendorTimeSlots()
+    {
+        return $this->hasMany(BookingsVendorTimeSlot::class);
+    }
 
 }

@@ -9,6 +9,8 @@ use App\Models\Participant;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\TicketInput;
+use App\Models\PackageInput;
+use App\Models\VendorOffDay;
 use App\Models\Event;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
@@ -19,6 +21,8 @@ use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
 use App\Services\ToyyibPayService;
+use Carbon\Carbon;
+use App\Models\PackageInputAnswer;
 
 class BookingController extends Controller
 {
@@ -268,7 +272,6 @@ class BookingController extends Controller
 
         return redirect()->route('checkout');
     }
-
     public function showCheckout()
     {
         $event = session('selected_event');
@@ -286,30 +289,84 @@ class BookingController extends Controller
 
     public function storeSelectionPackage(Request $request)
     {
-        // Validate the form input
         $validated = $request->validate([
             'package_id' => 'required|exists:packages,id',
+            'organizer_id' => 'required|exists:organizers,id',
             'selected_date' => 'required|date',
         ]);
 
-        // Get the selected package
-        $package = Package::where('id', $validated['package_id'])
-            ->with([
-                'addons',
-                'items',
-                'discounts',
-                'category',
-                'images',
-                'organizer',
-                'vendorTimeSlots',
-            ])
-            ->firstOrFail();
+        // For testing
+        // $package_date = "2025-07-04";
+        // $packageDate = Carbon::parse( $package_date)->startOfDay();
 
+        // ✅ Check if the selected date is already booked for this package
+        $packageDate = Carbon::parse($validated['selected_date'])->startOfDay();
+        $today = now()->startOfDay();
 
-        // Store in session for later use (e.g. checkout page)
+        // ✅ 1. Reject if in the past
+        if ($packageDate->lt($today)) {
+            \Log::info($packageDate . 'The selected date is in the past.');
+            return back()->withErrors(['selected_date' => 'The selected date is in the past.']);
+        }
+
+        // ✅ 2. Reject if in organizer off days
+        $offDays = VendorOffDay::where('organizer_id', $validated['organizer_id'])
+            ->whereDate('off_date', '>=', $today)
+            ->pluck('off_date')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->toArray();
+
+        if (in_array($packageDate->format('Y-m-d'), $offDays)) {
+            \Log::info($packageDate . 'The selected date falls on an organizer off day.');
+            return back()->withErrors(['selected_date' => 'The selected date falls on an organizer off day.']);
+        }
+
+        // ✅ 3. Reject if already booked for that package
+        $dateTaken = BookingsVendorTimeSlot::where('package_id', $validated['package_id'])
+            ->whereDate('booked_date_start', '<=', $packageDate)
+            ->whereDate('booked_date_end', '>=', $packageDate)
+            ->whereNotIn('status', ['failed', 'pending']) // ✅ Only consider paid/full_payment/deposit.
+            ->exists();
+
+        if ($dateTaken) {
+            \Log::info($packageDate . 'The selected date is already booked for this package.');
+            return back()->withErrors(['selected_date' => 'The selected date is already booked for this package.']);
+        }
+
+        // \Log::info($validated['package_id']);
+        // \Log::info($validated['selected_date']);
+
+        $package = Package::with([
+            'addons',
+            'items',
+            'discounts',
+            'category',
+            'images',
+            'organizer',
+            'vendorTimeSlots',
+        ])->findOrFail($validated['package_id']);
+
+        $packageInputs = PackageInput::where('package_id', $validated['package_id'])
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(fn($input) => $input->parent ?? 'General');
+
+        $packageInputsArray = $packageInputs->map(function ($inputs) {
+            return $inputs->map(fn($input) => [
+                'id' => $input->id,
+                'label' => $input->label,
+                'input_type' => $input->input_type,
+                'options' => $input->options,
+                'is_required' => $input->is_required,
+                'sort_order' => $input->sort_order,
+                'placeholder' => $input->placeholder,
+            ]);
+        });
+
         session([
             'selected_package' => $package,
             'selected_date' => $validated['selected_date'],
+            'package_inputs' => $packageInputsArray,
         ]);
 
         return redirect()->route('business.checkout_package');
@@ -321,6 +378,13 @@ class BookingController extends Controller
         $page_title = "Checkout Package";
         $package = session('selected_package');
         $selected_date = session('selected_date');
+        $package_inputs = session('package_inputs');
+
+        if (!$package || !$selected_date || !$package_inputs) {
+            return back()->withErrors([
+                'message' => 'Package selection session has expired. Please select a package again.'
+            ]);
+        }
 
         $basePrice = (float) $package['base_price']; // or base_price if needed
         $discountAmount = 0;
@@ -513,6 +577,14 @@ class BookingController extends Controller
 
     public function webFormBookingPackage(Request $request)
     {
+        $package = session('selected_package');
+        $selected_date = session('selected_date');
+        $package_inputs = session('package_inputs');
+        if (!$package || !$selected_date || !$package_inputs) {
+            return back()->withErrors([
+                'message' => 'Package selection session has expired. Please select a package again.'
+            ]);
+        }
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
@@ -527,7 +599,9 @@ class BookingController extends Controller
         ]);
 
         DB::beginTransaction();
-
+        $inputAnswers = $request->input('package_inputs', []);
+        \Log::info("inputAnswers");
+        \Log::info($inputAnswers);
         try {
             \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
@@ -544,13 +618,12 @@ class BookingController extends Controller
                 'address',
             ]));
 
-            $package = session('selected_package');
-            $selected_date = session('selected_date');
-
             if (!$package || !$selected_date) {
                 \Log::warning('Session expired or incomplete', ['package' => $package, 'selected_date' => $selected_date]);
                 throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
             }
+
+            \Log::info($package_inputs);
 
             $packageCode = strtoupper($package['package_code'] ?? 'DFT');
             $totalPrice = $package['base_price'];
@@ -576,9 +649,20 @@ class BookingController extends Controller
                 'organizer_id' => $package['organizer_id'],
                 'booked_time_start' => null, // unless passed
                 'booked_time_end' => null,
-                'status' => 'full_payment',
+                'status' => 'pending',
                 'notes' => null,
             ]);
+
+            foreach ($inputAnswers as $groupIndex => $answers) {
+                foreach ($answers as $inputId => $answer) {
+                    PackageInputAnswer::create([
+                        'package_input_id' => $inputId,
+                        'package_id' => $package['id'],   // from session or earlier logic
+                        'booking_id' => $booking->id,   // from booking creation logic
+                        'answer' => is_array($answer) ? json_encode($answer) : $answer,
+                    ]);
+                }
+            }
 
             $discountAmount = 0;
             if (!empty($package['discounts'])) {
@@ -687,17 +771,44 @@ class BookingController extends Controller
         ]);
 
         if ($status === 'paid') {
+            $booking = $payment->booking;
             $payment->booking->update(['status' => 'paid']);
+            if ($booking->package_id) {
+                BookingsVendorTimeSlot::where('booking_id', $booking->id)
+                    ->update(['status' => 'full_payment']);
+            }
             \Log::info('Booking marked as paid:', ['booking_id' => $payment->booking->id]);
+            return redirect()->route('booking.success', $booking->booking_code);
         } else {
+            $booking = $payment->booking;
             $payment->booking->update(['status' => 'failed']);
+            if ($booking->package_id) {
+                BookingsVendorTimeSlot::where('booking_id', $booking->id)
+                    ->update(['status' => 'failed']);
+            }
             \Log::warning('Booking marked as failed:', [
                 'booking_id' => $payment->booking->id,
                 'reason' => $request->description ?? 'No reason given'
             ]);
+            return redirect()->route('booking.failed');
         }
+    }
 
-        return response()->json(['success' => true]);
+    public function success($booking_code)
+    {
+        $page_title = 'Success Make Booking';
+        $booking = Booking::with(['package', 'vendorTimeSlots'])
+            ->where('booking_code', $booking_code)
+            ->firstOrFail();
+
+        return view('home.success', compact('booking', 'page_title'));
+    }
+
+    public function failed()
+    {
+        $page_title = 'Failed Make Booking';
+
+        return view('home.failed',compact('page_title'));
     }
 
 }
