@@ -157,7 +157,6 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
     public function validatePayment(Request $request, $id)
     {
         $booking = Booking::with(['participant', 'bookingTickets'])->findOrFail($id);
@@ -272,6 +271,7 @@ class BookingController extends Controller
 
         return redirect()->route('checkout');
     }
+
     public function showCheckout()
     {
         $event = session('selected_event');
@@ -636,6 +636,7 @@ class BookingController extends Controller
                 'booking_code' => $packageCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
                 'status' => 'pending',
                 'total_price' => 0,
+                'paid_amount' => 0,
                 'payment_method' => 'sistemkami-toyyibpay',
             ]);
 
@@ -695,6 +696,7 @@ class BookingController extends Controller
 
             $booking->update([
                 'total_price' => $totalPrice,
+                'paid_amount' => $grandTotal,
                 'service_charge' => $serviceCharge
             ]);
 
@@ -794,21 +796,13 @@ class BookingController extends Controller
         }
     }
 
-    public function success($booking_code)
+    public function bookingReceipt($booking_code)
     {
-        $page_title = 'Success Make Booking';
-        $booking = Booking::with(['package', 'vendorTimeSlots'])
+        $page_title = 'Your Booking Receipt';
+        $booking = Booking::with(['package', 'event', 'vendorTimeSlot'])
             ->where('booking_code', $booking_code)
             ->firstOrFail();
 
-        return view('home.success', compact('booking', 'page_title'));
+        return view('home.booking.receipt', compact('booking', 'page_title'));
     }
-
-    public function failed()
-    {
-        $page_title = 'Failed Make Booking';
-
-        return view('home.failed',compact('page_title'));
-    }
-
 }

@@ -128,12 +128,16 @@
 		.form-select {
 			background-color: #fff !important;
 		}
-		
-        @media (max-width: 600px) {
-            .btn-primary {
-                padding: 1rem 1rem !important;
-            }
-        }
+
+		@media (max-width: 600px) {
+			.btn-primary {
+				padding: 1rem 1rem !important;
+			}
+		}
+
+		.bg-primary-dark {
+			background-color: rgba(0, 31, 77, 1);
+		}
 	</style>
 	@stack('styles')
 </head>
@@ -276,7 +280,8 @@
 							<li><a href="{{ url('/') }}" class="text-light text-decoration-none">Home</a></li>
 							<!-- <li><a href="{{ url('/about') }}" class="text-light text-decoration-none">About</a></li> -->
 							<!-- <li><a href="{{ url('/events') }}" class="text-light text-decoration-none">Events</a></li> -->
-							<li><a href="{{ route('organizer.login') }}" class="text-light text-decoration-none">Organizer Login</a></li>
+							<li><a href="{{ route('organizer.login') }}"
+									class="text-light text-decoration-none">Organizer Login</a></li>
 						</ul>
 					</div>
 
