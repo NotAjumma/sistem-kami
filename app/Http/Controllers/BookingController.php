@@ -795,11 +795,18 @@ class BookingController extends Controller
     {
         \Log::info('ToyyibPay callback received:', $request->all());
 
+        if (!$request->billcode) {
+            \Log::warning('Callback tanpa payment (invalid bill_code):', $request->all());
+            // return response()->json(['error' => 'Invalid bill code'], 404);
+            abort(400, 'Invalid bill code');
+        }
+        
         $payment = Payment::where('bill_code', $request->billcode)->first();
 
         if (!$payment) {
             \Log::warning('Callback tanpa payment (invalid bill_code):', $request->all());
-            return response()->json(['error' => 'Invalid bill code'], 404);
+            // return response()->json(['error' => 'Invalid bill code'], 404);
+            abort(400, 'Invalid bill code');
         }
 
         $status = $request->status_id == 1 ? 'paid' : 'failed';
