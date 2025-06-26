@@ -405,18 +405,30 @@ class BookingController extends Controller
 
         $subtotal = max(0, $basePrice - $discountAmount); // Ensure non-negative subtotal
 
-        $fixed = (float) $package['service_charge_fixed'] ?? 0;
-        $percentage = (float) $package['service_charge_percentage'] ?? 0;
-        $serviceCharge = ($percentage > 0 ? $subtotal * ($percentage / 100) : $fixed);
+        $fixed          = (float) $package['service_charge_fixed'] ?? 0;
+        $percentage     = (float) $package['service_charge_percentage'] ?? 0;
+        $serviceCharge  = ($percentage > 0 ? $subtotal * ($percentage / 100) : $fixed);
 
         $total = $subtotal + $serviceCharge;
+        
+        // calc deposit amount
+        $depositFixed       = (float) $package['deposit_fixed'] ?? 0;
+        $depositPercentage  = (float) $package['deposit_percentage'] ?? 0;
+        $depositAmount      = ($depositPercentage > 0 ? $total * ($depositPercentage / 100) : $depositFixed);
 
         // Label for UI
         $serviceChargeLabel = 'Service Charge';
         if ($percentage) {
-            $serviceChargeLabel .= " (" . number_format($percentage, 2) . "%)";
+            $serviceChargeLabel .= " (" . $percentage . "%)";
         } elseif ($fixed) {
             $serviceChargeLabel .= " (RM" . number_format($fixed, 2) . ")";
+        }
+
+        $depositLabel = '';
+        if ($depositPercentage) {
+            $depositLabel = " (" .$depositPercentage . "%)";
+        } elseif($depositFixed){
+            $depositLabel .= " (RM" . number_format($depositFixed, 2) . ")";
         }
 
         // \Log::info($package);
@@ -425,21 +437,33 @@ class BookingController extends Controller
             return redirect()->back()->with('success', 'Please select date first.');
         }
 
-        return view('home.business.checkoutPackage', compact('page_title', 'package', 'selected_date', 'subtotal', 'serviceCharge', 'basePrice', 'total', 'serviceChargeLabel', 'discountAmount'));
+        return view('home.business.checkoutPackage', compact(
+            'page_title',
+            'package', 
+            'selected_date', 
+            'subtotal', 
+            'serviceCharge', 
+            'basePrice', 
+            'total', 
+            'serviceChargeLabel', 
+            'discountAmount',
+            'depositAmount',
+            'depositLabel'
+            ));
     }
 
     public function webFormBooking(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'no_ic' => 'required|string',
-            'phone' => 'nullable|string',
-            'country' => 'nullable|string',
-            'state' => 'nullable|string',
-            'city' => 'nullable|string',
-            'postcode' => 'nullable|string',
-            'address' => 'nullable|string',
+            'name'          => 'required|string',
+            'email'         => 'required|email',
+            'no_ic'         => 'required|string',
+            'phone'         => 'nullable|string',
+            'country'       => 'nullable|string',
+            'state'         => 'nullable|string',
+            'city'          => 'nullable|string',
+            'postcode'      => 'nullable|string',
+            'address'       => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -467,18 +491,18 @@ class BookingController extends Controller
                 throw new \Exception('Session expired or incomplete. Sila pilih tiket semula.');
             }
 
-            $eventCode = strtoupper($event['shortcode'] ?? 'DFT');
+            $eventCode  = strtoupper($event['shortcode'] ?? 'DFT');
             $totalPrice = 0;
 
             $booking = Booking::create([
-                'participant_id' => $participant->id,
-                'event_id' => $event['id'],
-                'organizer_id' => $event['organizer_id'] ?? null,
-                'booking_code' => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
-                'status' => 'pending',
-                'total_price' => 0,
-                'payment_method' => 'sistemkami-toyyibpay',
-                'extra_info' => ['shirt_size' => $request->shirt_size],
+                'participant_id'    => $participant->id,
+                'event_id'          => $event['id'],
+                'organizer_id'      => $event['organizer_id'] ?? null,
+                'booking_code'      => $eventCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status'            => 'pending',
+                'total_price'       => 0,
+                'payment_method'    => 'sistemkami-toyyibpay',
+                'extra_info'        => ['shirt_size' => $request->shirt_size],
             ]);
 
             foreach ($tickets as $ticket) {
@@ -487,22 +511,22 @@ class BookingController extends Controller
 
                 for ($i = 0; $i < $quantity; $i++) {
                     BookingTicket::create([
-                        'booking_id' => $booking->id,
-                        'ticket_id' => $ticket['ticket_id'],
-                        'price' => $price,
-                        'participant_name' => $request->name,
+                        'booking_id'        => $booking->id,
+                        'ticket_id'         => $ticket['ticket_id'],
+                        'price'             => $price,
+                        'participant_name'  => $request->name,
                         'participant_email' => $request->email,
                         'participant_no_ic' => $request->no_ic,
                         'participant_phone' => $request->phone,
-                        'ticket_code' => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
-                        'status' => 'paid',
+                        'ticket_code'       => $eventCode . '-' . now()->format('His') . '-' . strtoupper(Str::random(6)),
+                        'status'            => 'paid',
                     ]);
                 }
 
                 $totalPrice += $price * $quantity;
             }
 
-            $fixed = $event['service_charge_fixed'] ?? null;
+            $fixed      = $event['service_charge_fixed'] ?? null;
             $percentage = $event['service_charge_percentage'] ?? null;
 
             if (!is_null($percentage) && $percentage != 0) {
@@ -516,27 +540,27 @@ class BookingController extends Controller
             $grandTotal = $totalPrice + $serviceCharge;
 
             \Log::info('Booking totals calculated', [
-                'booking_id' => $booking->id,
-                'total_price' => $totalPrice,
-                'service_charge' => $serviceCharge,
-                'grand_total' => $grandTotal
+                'booking_id'        => $booking->id,
+                'total_price'       => $totalPrice,
+                'service_charge'    => $serviceCharge,
+                'grand_total'       => $grandTotal
             ]);
 
             $booking->update([
-                'total_price' => $totalPrice,
-                'service_charge' => $serviceCharge
+                'total_price'       => $totalPrice,
+                'service_charge'    => $serviceCharge
             ]);
 
             // === ToyyibPay integration ===
             $toyyibPay = new ToyyibPayService();
             $bill = $toyyibPay->createBill([
-                'name' => Str::limit('Payment for ' . $event['title'], 30),
-                'description' => 'Booked by ' . $participant->name,
-                'amount' => $grandTotal,
-                'ref_no' => $booking->booking_code,
-                'to' => $participant->name,
-                'email' => $participant->email,
-                'phone' => $participant->phone,
+                'name'          => Str::limit('Payment for ' . $event['title'], 30),
+                'description'   => 'Booked by ' . $participant->name,
+                'amount'        => $grandTotal,
+                'ref_no'        => $booking->booking_code,
+                'to'            => $participant->name,
+                'email'         => $participant->email,
+                'phone'         => $participant->phone,
             ]);
 
             \Log::info('ToyyibPay bill response', ['bill' => $bill]);
@@ -546,16 +570,16 @@ class BookingController extends Controller
             }
 
             Payment::create([
-                'booking_id' => $booking->id,
-                'bill_code' => $bill[0]['BillCode'],
-                'ref_no' => $booking->booking_code,
-                'amount' => $grandTotal,
-                'status' => 'pending',
+                'booking_id'    => $booking->id,
+                'bill_code'     => $bill[0]['BillCode'],
+                'ref_no'        => $booking->booking_code,
+                'amount'        => $grandTotal,
+                'status'        => 'pending',
             ]);
 
             \Log::info('Payment record created', [
-                'booking_id' => $booking->id,
-                'bill_code' => $bill[0]['BillCode'],
+                'booking_id'    => $booking->id,
+                'bill_code'     => $bill[0]['BillCode'],
             ]);
 
             DB::commit();
@@ -567,8 +591,8 @@ class BookingController extends Controller
             DB::rollBack();
 
             \Log::error('Web form booking failed', [
-                'message' => $e->getMessage(),
-                'input' => $request->all()
+                'message'   => $e->getMessage(),
+                'input'     => $request->all()
             ]);
 
             return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
@@ -577,8 +601,8 @@ class BookingController extends Controller
 
     public function webFormBookingPackage(Request $request)
     {
-        $package = session('selected_package');
-        $selected_date = session('selected_date');
+        $package        = session('selected_package');
+        $selected_date  = session('selected_date');
         $package_inputs = session('package_inputs');
         if (!$package || !$selected_date || !$package_inputs) {
             return back()->withErrors([
@@ -586,22 +610,24 @@ class BookingController extends Controller
             ]);
         }
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'no_ic' => 'required|string',
-            'phone' => 'nullable|string',
-            'whatsapp_number' => 'nullable|string',
-            'country' => 'nullable|string',
-            'state' => 'nullable|string',
-            'city' => 'nullable|string',
-            'postcode' => 'nullable|string',
-            'address' => 'nullable|string',
+            'name'              => 'required|string',
+            'email'             => 'required|email',
+            'no_ic'             => 'required|string',
+            'phone'             => 'nullable|string',
+            'whatsapp_number'   => 'nullable|string',
+            'country'           => 'nullable|string',
+            'state'             => 'nullable|string',
+            'city'              => 'nullable|string',
+            'postcode'          => 'nullable|string',
+            'address'           => 'nullable|string',
+            'notes'             => 'nullable|string',
+            'payment_type'      => 'nullable|string',
         ]);
 
         DB::beginTransaction();
         $inputAnswers = $request->input('package_inputs', []);
-        \Log::info("inputAnswers");
-        \Log::info($inputAnswers);
+        // \Log::info("inputAnswers");
+        // \Log::info($inputAnswers);
         try {
             \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
@@ -623,44 +649,47 @@ class BookingController extends Controller
                 throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
             }
 
-            \Log::info($package_inputs);
+            // \Log::info($package_inputs);
 
-            $packageCode = strtoupper($package['package_code'] ?? 'DFT');
-            $totalPrice = $package['base_price'];
-
+            $packageCode    = strtoupper($package['package_code'] ?? 'DFT');
+            $totalPrice     = $package['base_price'];
+            $paymentType    = $request->input('payment_type');
+            \Log::info("paymentType");
+            \Log::info($paymentType);
             $booking = Booking::create([
-                'participant_id' => $participant->id,
-                'event_id' => null,
-                'package_id' => $package['id'],
-                'organizer_id' => $package['organizer_id'],
-                'booking_code' => $packageCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
-                'status' => 'pending',
-                'total_price' => 0,
-                'paid_amount' => 0,
-                'payment_method' => 'sistemkami-toyyibpay',
+                'participant_id'    => $participant->id,
+                'event_id'          => null,
+                'package_id'        => $package['id'],
+                'organizer_id'      => $package['organizer_id'],
+                'booking_code'      => $packageCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status'            => 'pending',
+                'total_price'       => 0,
+                'paid_amount'       => 0,
+                'payment_method'    => 'sistemkami-toyyibpay',
+                'payment_type'       => $paymentType,
             ]);
 
             BookingsVendorTimeSlot::create([
-                'booking_id' => $booking->id,
-                'vendor_time_slot_id' => $package['vendorTimeSlots'][0]['id'],
-                'booked_date_start' => $selected_date,
-                'booked_date_end' => $selected_date,
-                'package_id' => $package['id'],
-                'package_category_id' => $package['category_id'],
-                'organizer_id' => $package['organizer_id'],
-                'booked_time_start' => null, // unless passed
-                'booked_time_end' => null,
-                'status' => 'pending',
-                'notes' => null,
+                'booking_id'            => $booking->id,
+                'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'],
+                'booked_date_start'     => $selected_date,
+                'booked_date_end'       => $selected_date,
+                'package_id'            => $package['id'],
+                'package_category_id'   => $package['category_id'],
+                'organizer_id'          => $package['organizer_id'],
+                'booked_time_start'     => null, // unless passed
+                'booked_time_end'       => null,
+                'status'                => 'pending',
+                'notes'                 => $request->input('notes') ?? null,
             ]);
 
             foreach ($inputAnswers as $groupIndex => $answers) {
                 foreach ($answers as $inputId => $answer) {
                     PackageInputAnswer::create([
-                        'package_input_id' => $inputId,
-                        'package_id' => $package['id'],   // from session or earlier logic
-                        'booking_id' => $booking->id,   // from booking creation logic
-                        'answer' => is_array($answer) ? json_encode($answer) : $answer,
+                        'package_input_id'  => $inputId,
+                        'package_id'        => $package['id'],
+                        'booking_id'        => $booking->id,
+                        'answer'            => is_array($answer) ? json_encode($answer) : $answer,
                     ]);
                 }
             }
@@ -681,35 +710,49 @@ class BookingController extends Controller
 
             $totalPrice = max(0, $totalPrice - $discountAmount);
 
-            $fixed = (float) ($package['service_charge_fixed'] ?? 0);
-            $percentage = (float) ($package['service_charge_percentage'] ?? 0);
-            $serviceCharge = $fixed + ($percentage > 0 ? $totalPrice * ($percentage / 100) : 0);
+            $fixed          = (float) ($package['service_charge_fixed'] ?? 0);
+            $percentage     = (float) ($package['service_charge_percentage'] ?? 0);
+            $serviceCharge  = ($percentage > 0 ? $totalPrice * ($percentage / 100) : $fixed);
 
-            $grandTotal = $totalPrice + $serviceCharge;
+            $grandTotal     = round($totalPrice + $serviceCharge, 2);
 
+            // calc deposit amount
+            $depositFixed       = (float) $package['deposit_fixed'] ?? 0;
+            $depositPercentage  = (float) $package['deposit_percentage'] ?? 0;
+            $depositAmount      = ($depositPercentage > 0 ? $grandTotal * ($depositPercentage / 100) : $depositFixed);
+
+            if($paymentType == 'deposit'){
+                $paidAmount = $depositAmount;
+            }else{
+                $paidAmount = $grandTotal;
+            }
             \Log::info('Booking package totals calculated', [
-                'booking_id' => $booking->id,
-                'total_price' => $totalPrice,
-                'service_charge' => $serviceCharge,
-                'grand_total' => $grandTotal
+                'booking_id'        => $booking->id,
+                'total_price'       => $totalPrice,
+                'service_charge'    => $serviceCharge,
+                'grand_total'       => $grandTotal,
+                'deposit_amount'    => $depositAmount,
+                'paid_amount'       => $paidAmount,
+                'percentage'        => $percentage,
+                'depositPercentage' => $depositPercentage,
             ]);
 
             $booking->update([
-                'total_price' => $totalPrice,
-                'paid_amount' => $grandTotal,
-                'service_charge' => $serviceCharge
+                'total_price'       => $totalPrice,
+                'paid_amount'       => $paidAmount,
+                'service_charge'    => $serviceCharge
             ]);
 
             // === ToyyibPay integration ===
             $toyyibPay = new ToyyibPayService();
             $bill = $toyyibPay->createBill([
-                'name' => substr('Payment: ' . $package['name'], 0, 30),
-                'description' => 'Booked by ' . $participant->name,
-                'amount' => $grandTotal,
-                'ref_no' => $booking->booking_code,
-                'to' => $participant->name,
-                'email' => $participant->email,
-                'phone' => $participant->phone,
+                'name'          => substr('Payment: ' . $package['name'], 0, 30),
+                'description'   => 'Booked by ' . $participant->name,
+                'amount'        => $paidAmount,
+                'ref_no'        => $booking->booking_code,
+                'to'            => $participant->name,
+                'email'         => $participant->email,
+                'phone'         => $participant->phone,
             ]);
 
             \Log::info('ToyyibPay bill response', ['bill' => $bill]);
@@ -719,16 +762,16 @@ class BookingController extends Controller
             }
 
             Payment::create([
-                'booking_id' => $booking->id,
-                'bill_code' => $bill[0]['BillCode'],
-                'ref_no' => $booking->booking_code,
-                'amount' => $grandTotal,
-                'status' => 'pending',
+                'booking_id'    => $booking->id,
+                'bill_code'     => $bill[0]['BillCode'],
+                'ref_no'        => $booking->booking_code,
+                'amount'        => $paidAmount,
+                'status'        => 'pending',
             ]);
 
             \Log::info('Payment record created', [
-                'booking_id' => $booking->id,
-                'bill_code' => $bill[0]['BillCode'],
+                'booking_id'    => $booking->id,
+                'bill_code'     => $bill[0]['BillCode'],
             ]);
 
             DB::commit();
@@ -740,8 +783,8 @@ class BookingController extends Controller
             DB::rollBack();
 
             \Log::error('Web form booking failed', [
-                'message' => $e->getMessage(),
-                'input' => $request->all()
+                'message'   => $e->getMessage(),
+                'input'     => $request->all()
             ]);
 
             return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
@@ -762,37 +805,48 @@ class BookingController extends Controller
         $status = $request->status_id == 1 ? 'paid' : 'failed';
 
         $payment->update([
-            'status' => $status,
-            'paid_at' => now(),
-            'raw_response' => $request->all(),
+            'status'        => $status,
+            'paid_at'       => now(),
+            'raw_response'  => $request->all(),
         ]);
 
         \Log::info('Payment updated:', [
-            'payment_id' => $payment->id,
-            'status' => $status,
+            'payment_id'    => $payment->id,
+            'status'        => $status,
         ]);
 
         if ($status === 'paid') {
+
             $booking = $payment->booking;
             $payment->booking->update(['status' => 'paid']);
+
             if ($booking->package_id) {
-                BookingsVendorTimeSlot::where('booking_id', $booking->id)
-                    ->update(['status' => 'full_payment']);
+                if ($booking->payment_type == 'deposit') {
+                    BookingsVendorTimeSlot::where('booking_id', $booking->id)
+                        ->update(['status' => 'deposit']);
+                } else {
+                    BookingsVendorTimeSlot::where('booking_id', $booking->id)
+                        ->update(['status' => 'full_payment']);
+                }
             }
+
             \Log::info('Booking marked as paid:', ['booking_id' => $payment->booking->id]);
-            return redirect()->route('booking.success', $booking->booking_code);
+            return redirect()->route('booking.receipt', $booking->booking_code);
         } else {
+
             $booking = $payment->booking;
             $payment->booking->update(['status' => 'failed']);
+
             if ($booking->package_id) {
                 BookingsVendorTimeSlot::where('booking_id', $booking->id)
                     ->update(['status' => 'failed']);
             }
+
             \Log::warning('Booking marked as failed:', [
                 'booking_id' => $payment->booking->id,
                 'reason' => $request->description ?? 'No reason given'
             ]);
-            return redirect()->route('booking.failed');
+            return redirect()->route('booking.receipt');
         }
     }
 

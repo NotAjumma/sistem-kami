@@ -17,12 +17,14 @@ class Booking extends Model
         'total_price',
         'resit_path',
         'payment_method',
+        'payment_type',
         'status',
         'coupon_code',
         'discount',
         'service_charge',
         'final_price',
         'extra_info',
+        'paid_amount',
     ];
 
     protected $casts = [
