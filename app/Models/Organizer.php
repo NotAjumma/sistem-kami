@@ -13,11 +13,32 @@ class Organizer extends Authenticatable
 
     protected $fillable = [
         'name',
+        'slug',
+        'description',
+        'type',
+        'category',
         'email',
         'phone',
+        'website',
+        'social_links',
+        'address_line1',
+        'address_line2',
+        'office_name',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'latitude',
+        'longitude',
+        'logo_path',
+        'banner_path',
+        'wallet_balance',
+        'wallet_currency',
+        'wallet_history',
+        'is_active',
+        'visibility',
         'user_id',
     ];
-
     protected $casts = [
         'banner_path' => 'array',
     ];

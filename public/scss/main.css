@@ -17909,6 +17909,15 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
   .show-pass.active .fa-eye {
     display: inline-block; }
 
+.show-pass-confirm {
+  cursor: pointer; }
+  .show-pass-confirm .fa-eye {
+    display: none; }
+  .show-pass-confirm.active .fa-eye-slash {
+    display: none; }
+  .show-pass-confirm.active .fa-eye {
+    display: inline-block; }
+
 .asColorPicker-dropdown {
   max-width: 26rem; }
 

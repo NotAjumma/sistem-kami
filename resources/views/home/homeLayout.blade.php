@@ -210,18 +210,29 @@
 				<div class="font-bold text-xl select-none">
 					Sistem Kami
 				</div>
-				<ul class="flex space-x-6 text-xs font-normal text-gray-900">
-					<!-- <li>
-						<a class="hover:underline" href="#">
-							Contact us
-						</a>
-					</li> -->
-					<li>
-						<a class="hover:underline" href="{{ route('organizer.login') }}">
-							Organizer Login
-						</a>
-					</li>
-				</ul>
+				<div class="relative inline-block text-left">
+					<button type="button"
+						class="inline-flex justify-center w-full text-xs font-normal text-gray-900 hover:underline"
+						id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
+						Organizer
+						<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd"
+								d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+								clip-rule="evenodd" />
+						</svg>
+					</button>
+
+					<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+						id="organizer-menu">
+						<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
+							aria-labelledby="organizer-menu-button">
+							<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
+								role="menuitem">Login</a>
+							<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
+								role="menuitem">Register</a>
+						</div>
+					</div>
+				</div>
 			</nav>
 		</header>
 		<!--**********************************
@@ -373,6 +384,21 @@
 
 
 	@stack('scripts')
+	<script>
+		const button = document.getElementById('organizer-menu-button');
+		const menu = document.getElementById('organizer-menu');
+
+		button.addEventListener('click', () => {
+			menu.classList.toggle('hidden');
+		});
+
+		// Optional: close when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!button.contains(e.target) && !menu.contains(e.target)) {
+				menu.classList.add('hidden');
+			}
+		});
+	</script>
 </body>
 
 </html>

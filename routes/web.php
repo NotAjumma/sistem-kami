@@ -100,6 +100,8 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
 
 // Organizer Route
 Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
+Route::get('/organizer/register', [AuthController::class, 'showRegisterOrganizer'])->name('organizer.register');
+Route::post('/organizer/register', [AuthController::class, 'submitRegisterOrganizer'])->name('organizer.submit_register');
 Route::post('/{role}/login', [AuthController::class, 'login'])->name('role.login');
 
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
