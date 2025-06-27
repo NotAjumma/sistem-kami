@@ -37,16 +37,22 @@ class EventController extends Controller
         // End filter Ticket
 
         $now = Carbon::now();
-        if ($now->lt($event->registration_deadline)) {
+        if($event->status){
+            if ($now->lt($event->registration_deadline)) {
+                $event->status_label = 'Coming Soon';
+                $event->status = 0;
+            } elseif ($now->lt($event->end_date)) {
+                $event->status_label = 'Book Now';
+                $event->status = 1;
+            } else {
+                $event->status_label = 'Event has ended';
+                $event->status = 0;
+            }
+        }else{
             $event->status_label = 'Coming Soon';
             $event->status = 0;
-        } elseif ($now->lt($event->end_date)) {
-            $event->status_label = 'Book Now';
-            $event->status = 1;
-        } else {
-            $event->status_label = 'Event has ended';
-            $event->status = 0;
         }
+        
         // Format start_date
         $startDate = Carbon::parse($event->start_date);
         $startDay = str_pad($startDate->format('j'), 2, '0', STR_PAD_LEFT);
