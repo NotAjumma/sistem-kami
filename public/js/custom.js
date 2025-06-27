@@ -357,6 +357,17 @@
 			}
 		});
 	}
+
+	var handleshowPassConfirm = function(){
+		jQuery('.show-pass-confirm').on('click',function(){
+			jQuery(this).toggleClass('active');
+			if(jQuery('#dlab-password-confirm').attr('type') == 'password'){
+				jQuery('#dlab-password-confirm').attr('type','text');
+			}else if(jQuery('#dlab-password-confirm').attr('type') == 'text'){
+				jQuery('#dlab-password-confirm').attr('type','password');
+			}
+		});
+	}
 	
 	var heartBlast = function (){
 		$(".heart").on("click", function() {
@@ -633,6 +644,7 @@
 			handleDzChatUser();
 			handleDzFullScreen();
 			handleshowPass();
+			handleshowPassConfirm();
 			heartBlast();
 			handleThemeMode();
 			handleDzLoadMore();

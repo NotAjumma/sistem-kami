@@ -149,7 +149,36 @@
         }
 
         li {
-            list-style-type: inherit !important; 
+            list-style-type: inherit !important;
+        }
+
+        .btn-qty {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            font-size: 1.25rem;
+            line-height: 1;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .price-current {
+            font-weight: 600;
+            color: #4b5563;
+            /* gray-700 */
+        }
+
+        .price-current-bold {
+            font-weight: 600;
+            color: #1f2937;
+            /* gray-900 */
+        }
+
+        .price-old {
+            text-decoration: line-through;
+            color: #9ca3af;
+            /* gray-400 */
+            margin-left: 0.5rem;
         }
     </style>
 @endpush
@@ -247,11 +276,12 @@
 
                 {{-- Google Map --}}
                 @if($event->latitude && $event->longitude)
-                    <iframe
-                        src="https://www.google.com/maps?q={{ urlencode($event->venue_name) }}%20{{ $event->latitude }},{{ $event->longitude }}&output=embed"
-                        width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
-                    </iframe>
-
+                    <div style="margin-top: 50px;">
+                        <iframe
+                            src="https://www.google.com/maps?q={{ urlencode($event->venue_name) }}%20{{ $event->latitude }},{{ $event->longitude }}&output=embed"
+                            width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                        </iframe>
+                    </div>
                 @endif
 
             </div>
@@ -268,7 +298,7 @@
                             <p class="fw-semibold mb-1" style="font-size: 1rem; line-height: 1.2;">
                                 {{ $event->organizer->name }}
                             </p>
-                            <p class="mb-1" style="font-size: 0.875rem; color: #dc2626;">
+                            <p class="mb-0" style="font-size: 0.875rem; color: #dc2626; font-weight: 600;">
                                 Email: <a href="mailto:{{ $event->organizer->email }}"
                                     class="link-red">{{ $event->organizer->email }}</a>
                             </p>
@@ -291,54 +321,97 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                                        <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                            <i class="fas fa-calendar-alt me-2"></i>
-                                            Add to Calendar
-                                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                        </p> -->
+                                                                                        <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                                                                            <i class="fas fa-calendar-alt me-2"></i>
+                                                                                            Add to Calendar
+                                                                                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                                                                        </p> -->
                     <hr class="mb-4" />
-                    <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
-                    <hr class="mb-4" />
-                    @if ($event->status == 1 && $event->buy_link)
-                        @foreach ($filteredTickets as $ticket)
-                            <div class="mb-4 p-3 border rounded shadow-sm bg-light" style="background-color: #fff !important;">
-                                <p class="fw-bold mb-1">
-                                    {{ $ticket->name }} -
-                                    <span class="text-primary">{{ $event->currency }}
-                                        {{ number_format($ticket->price, 2) }}</span>
-                                </p>
+                    <form method="POST" action="{{ route('tickets.select') }}">
+                        @csrf
 
-                                @if ($ticket->children->isNotEmpty())
-                                    <ul class="list-group mt-2">
-                                        @foreach ($ticket->children as $subTicket)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ $subTicket->name }}
-                                                <span class="badge bg-primary">RM {{ number_format($subTicket->price, 2) }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                            </div>
-                        @endforeach
-                        <a href="{{ $event->buy_link }}" target="_blank" rel="noopener noreferrer"
-                            style="text-decoration: none;">
-                            <h6 class="event-started" style="font-size: 0.75em;">
+                        <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
+                        <hr class="mb-4" />
+
+                        <!-- Check event register deadline or event_date end -->
+                        @if ($event->status == 1)
+                            @if($event->id == 1)
+                                @foreach ($filteredTickets as $ticket)
+                                    <div class="mb-4 p-3 border rounded shadow-sm bg-light" style="background-color: #fff !important;">
+                                        <p class="fw-bold mb-1">
+                                            {{ $ticket->name }} -
+                                            <span class="text-primary">{{ $event->currency }}
+                                                {{ number_format($ticket->price, 2) }}</span>
+                                        </p>
+
+                                        @if ($ticket->children->isNotEmpty())
+                                            <ul class="list-group mt-2">
+                                                @foreach ($ticket->children as $subTicket)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        {{ $subTicket->name }}
+                                                        <span class="badge bg-primary">RM {{ number_format($subTicket->price, 2) }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                <a href="{{ $event->buy_link }}" target="_blank" rel="noopener noreferrer"
+                                    style="text-decoration: none;">
+                                    <h6 class="event-started" style="font-size: 0.75em;">
+                                        {{ $event->status_label }}
+                                    </h6>
+                                </a>
+                            @else
+                                <input type="hidden" name="event_id" value="{{ $event->id }}" />
+
+                                @foreach ($filteredTickets as $ticket)
+                                    <div class="p-4 mb-1" style="border: 2px rgb(235, 237, 241) dashed;">
+                                        <h6 class="text-pink fw-semibold mb-1" style="font-size: 1rem;">
+                                            {{ strtoupper($ticket->name) }}
+                                        </h6>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h6 class="mb-3" style="font-size: 0.85rem;">
+                                                    <span class="price-current-bold">{{ $event->currency }}
+                                                        {{ number_format($ticket->price, 2) }}</span>
+                                                </h6>
+                                            </div>
+                                            <h6>
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <button type="button" class="btn btn-outline-secondary btn-qty"
+                                                        data-ticket="{{ $ticket->id }}" data-action="minus">−</button>
+                                                    <input type="text" name="tickets[{{ $ticket->id }}][quantity]"
+                                                        id="qty-input-{{ $ticket->id }}" value="0" readonly
+                                                        class="form-control text-center mx-2"
+                                                        style="max-width: 50px; font-weight: 600;" />
+                                                    <input type="hidden" name="tickets[{{ $ticket->id }}][id]"
+                                                        value="{{ $ticket->id }}">
+                                                    <button type="button" class="btn btn-outline-secondary btn-qty"
+                                                        data-ticket="{{ $ticket->id }}" data-action="plus">+</button>
+                                                </div>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                @endforeach
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <p class="fw-semibold mb-0" style="font-size: 1rem;">Total Price</p>
+                                    <p class="fw-bold mb-0" style="font-size: 1.5rem; color: #111827;">{{ $event->currency }} <span
+                                            id="total-price">0.00</span>
+                                    </p>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mt-3">Book Now</button>
+                            @endif
+                        @else
+                            <h6 class="event-ended" style="font-size: 0.75em;">
                                 {{ $event->status_label }}
                             </h6>
-                        </a>
-                    @else
-                        <h6 class="event-ended" style="font-size: 0.75em;">
-                            {{ $event->status_label }}
-                        </h6>
-                    @endif
+                        @endif
+                    </form>
                 </div>
-
             </div>
 
         </div>
-
-    </div>
-    <div style="height: 200px;">
 
     </div>
 
@@ -346,5 +419,34 @@
 
 @push('scripts')
     <script>
+        document.querySelectorAll('.btn-qty').forEach(button => {
+            button.addEventListener('click', () => {
+                const ticketId = button.getAttribute('data-ticket');
+                const action = button.getAttribute('data-action');
+                const input = document.getElementById(`qty-input-${ticketId}`);
+                const price = parseFloat(button.closest('.p-4').querySelector('.price-current-bold').textContent.replace(/[^\d.]/g, '')) || 0;
+
+                let currentValue = parseInt(input.value) || 0;
+
+                if (action === 'plus' && currentValue < 10) currentValue++;
+                if (action === 'minus' && currentValue > 0) currentValue--;
+
+                input.value = currentValue;
+
+                calculateTotal();
+            });
+        });
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('input[id^="qty-input-"]').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                const container = input.closest('.p-4');
+                const price = parseFloat(container.querySelector('.price-current-bold').textContent.replace(/[^\d.]/g, '')) || 0;
+                total += qty * price;
+            });
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
     </script>
+
 @endpush

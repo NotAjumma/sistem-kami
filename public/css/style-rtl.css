@@ -19580,6 +19580,19 @@ form-control[type="file"] {
   .show-pass-1.active .fa-eye {
     display: inline-block; }
 
+.show-pass-confirm,
+.show-pass-confirm-1 {
+  cursor: pointer; }
+  .show-pass-confirm .fa-eye,
+  .show-pass-confirm-1 .fa-eye {
+    display: none; }
+  .show-pass-confirm.active .fa-eye-slash,
+  .show-pass-confirm-1.active .fa-eye-slash {
+    display: none; }
+  .show-pass-confirm.active .fa-eye,
+  .show-pass-confirm-1.active .fa-eye {
+    display: inline-block; }
+
 .asColorPicker-dropdown {
   max-width: 26rem; }
 

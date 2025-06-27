@@ -20,6 +20,8 @@ class Event extends Model
         'images',
         'image_cover',
         'shortcode',
+        'service_charge_fixed',
+        'service_charge_percentage',
     ];
 
     protected $casts = [

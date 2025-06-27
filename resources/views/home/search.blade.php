@@ -478,7 +478,7 @@
         <section class="container pb-16">
             <div>
                 <span class="job-count" aria-live="polite" aria-atomic="true">
-                    {{ number_format($events->count()) }} results
+                    {{ trans_choice(':count result|:count results', $events->count(), ['count' => $events->count()]) }}
                 </span>
 
                 <div class="row g-4 justify-content-start">
@@ -489,10 +489,10 @@
                             <a href="{{ route('event.slug', ['slug' => $event->slug]) }}">
                                 <div class="card position-relative">
                                     <!-- <div class="bookmark-icon" title="Bookmark">
-                                                                                                                                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                                                                                                                                                                                        <path d="M6 4a2 2 0 0 0-2 2v16l7-5 7 5V6a2 2 0 0 0-2-2H6z" />
-                                                                                                                                                                                                                    </svg>
-                                                                                                                                                                                                                </div> -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M6 4a2 2 0 0 0-2 2v16l7-5 7 5V6a2 2 0 0 0-2-2H6z" />
+                                        </svg>
+                                    </div> -->
                                     @if (!empty($event->image_cover))
                                         <img src="{{ asset('images/events/' . $event->id . '/' . $event->image_cover) }}"
                                             class="d-block w-100" alt="Event Image">

@@ -17,6 +17,7 @@
             height: 160px;
             box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
             overflow: hidden;
+            
         }
 
         .ticket::before,

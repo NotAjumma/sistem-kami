@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Organizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 class AuthController extends Controller
 {
 
@@ -32,7 +36,64 @@ class AuthController extends Controller
         return view('organizer.auth.login', compact('role'));
     }
 
-     public function login(Request $request, $role = null)
+    public function showRegisterOrganizer(Request $request)
+    {
+        if (auth('organizer')->check()) {
+            return redirect()->route('organizer.dashboard');
+        }
+        // dd(auth('organizer')->user());
+        $role = $request->route('role') ?? 'participant';
+        return view('organizer.auth.register', compact('role'));
+    }
+
+    public function submitRegisterOrganizer(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:100|unique:users',
+            'email' => 'required|email|unique:organizers,email',
+            'phone' => 'required|string|max:50',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $user = User::create([
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'role' => 'organizer',
+            ]);
+
+            // Check if name is provided before slugging
+            $slug = Str::slug($request->name ?? 'organizer-' . Str::random(5));
+
+            Organizer::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'user_id' => $user->id,
+                'slug' => $slug,
+                'is_active' => 0,
+                'visibility' => 'public',
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('organizer.login')->with('success', 'Organizer registered successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Log error and input
+            Log::error('Registration failed', [
+                'error' => $e->getMessage(),
+                'input' => $request->except(['password', 'password_confirmation']) // Avoid logging passwords
+            ]);
+            Log::error('Registration failed', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Something went wrong. Please try again.')->withInput();
+        }
+    }
+
+    public function login(Request $request, $role = null)
     {
         $request->validate([
             'username' => 'required|string',
@@ -91,7 +152,7 @@ class AuthController extends Controller
      * @param string $role
      * @return \Illuminate\Http\JsonResponse
      */
-   
+
 
 
     public function register(Request $request)

@@ -12,6 +12,10 @@ class EventController extends Controller
     {
         $event = Event::with(['category', 'organizer', 'tickets'])->where('slug', $slug)->firstOrFail();
 
+        if (!$event->organizer || $event->organizer->type !== 'event') {
+            abort(403, 'Unauthorized access to non-event type');
+        }
+
         $page_title = $event->title;
 
         // Filter Ticket

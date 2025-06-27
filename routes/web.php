@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\ToyyibpayController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JiadeAdminController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
@@ -63,10 +66,28 @@ Route::get('/db-check', function () {
 
 
 // Used route
+Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
+Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->name('toyyibpay.status');
+Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
+Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
+Route::get('/booking/receipt/{booking_code}', [BookingController::class, 'bookingReceipt'])->name('booking.receipt');
+Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
+Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
+Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::prefix('business')->group(function () {
+    // Public profile
+    Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
+    Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
+    Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');
+    Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
+    Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
+    Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
+});
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
 Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
@@ -79,6 +100,8 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
 
 // Organizer Route
 Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
+Route::get('/organizer/register', [AuthController::class, 'showRegisterOrganizer'])->name('organizer.register');
+Route::post('/organizer/register', [AuthController::class, 'submitRegisterOrganizer'])->name('organizer.submit_register');
 Route::post('/{role}/login', [AuthController::class, 'login'])->name('role.login');
 
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {

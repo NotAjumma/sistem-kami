@@ -11,16 +11,20 @@ class Booking extends Model
     protected $fillable = [
         'participant_id',
         'event_id',
+        'package_id',
         'organizer_id',
         'booking_code',
         'total_price',
         'resit_path',
         'payment_method',
+        'payment_type',
         'status',
         'coupon_code',
         'discount',
+        'service_charge',
         'final_price',
         'extra_info',
+        'paid_amount',
     ];
 
     protected $casts = [
@@ -42,6 +46,20 @@ class Booking extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function vendorTimeSlot()
+    {
+        return $this->hasOne(BookingsVendorTimeSlot::class);
     }
 
 }

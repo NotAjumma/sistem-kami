@@ -6,15 +6,41 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
 class Organizer extends Authenticatable
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
+        'slug',
+        'description',
+        'type',
+        'category',
         'email',
         'phone',
+        'website',
+        'social_links',
+        'address_line1',
+        'address_line2',
+        'office_name',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'latitude',
+        'longitude',
+        'logo_path',
+        'banner_path',
+        'wallet_balance',
+        'wallet_currency',
+        'wallet_history',
+        'is_active',
+        'visibility',
         'user_id',
+    ];
+    protected $casts = [
+        'banner_path' => 'array',
     ];
 
     public function user()
@@ -37,5 +63,36 @@ class Organizer extends Authenticatable
         return asset('images/organizers/default-organizer-logo.jpg');
     }
 
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
+    }
+
+    public function activePackages()
+    {
+        return $this->hasMany(Package::class)
+            ->where('status', 'active')
+            ->orderBy('order_by');
+    }
+
+    public function gallery()
+    {
+        return $this->hasMany(BusinessGallery::class);
+    }
+
+    public function timeSlots()
+    {
+        return $this->hasMany(VendorTimeSlot::class);
+    }
+
+    public function offDays()
+    {
+        return $this->hasMany(VendorOffDay::class);
+    }
+
+    public function bookedTimeSlots()
+    {
+        return $this->hasMany(BookingsVendorTimeSlot::class, 'organizer_id');
+    }
 
 }

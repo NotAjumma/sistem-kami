@@ -59,9 +59,11 @@
 	<link rel="stylesheet"
 		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
 	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-	<script src="https://cdn.tailwindcss.com">
-	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 	<style>
 		.content-body {
@@ -83,6 +85,58 @@
 			border: none;
 			border-top: 1px dashed #999;
 			/* or your preferred color */
+		}
+
+		.text-pink {
+			color: #c2185b;
+		}
+
+		.social-links a i {
+			font-size: 2rem;
+			transition: color 0.2s;
+		}
+
+		.social-links a:hover i {
+			color: var(--bs-primary);
+		}
+
+		/* Always apply brand colors */
+		.bi-facebook {
+			color: #1877F2;
+		}
+
+		.bi-instagram {
+			color: #E1306C;
+		}
+
+		.bi-tiktok {
+			color: #000000;
+		}
+
+		.bi-twitter {
+			color: #1DA1F2;
+		}
+
+		.bi-youtube {
+			color: #FF0000;
+		}
+
+		.bi-linkedin {
+			color: #0A66C2;
+		}
+
+		.form-select {
+			background-color: #fff !important;
+		}
+
+		@media (max-width: 600px) {
+			.btn-primary {
+				padding: 1rem 1rem !important;
+			}
+		}
+
+		.bg-primary-dark {
+			background-color: rgba(0, 31, 77, 1);
 		}
 	</style>
 	@stack('styles')
@@ -156,18 +210,29 @@
 				<div class="font-bold text-xl select-none">
 					Sistem Kami
 				</div>
-				<ul class="flex space-x-6 text-xs font-normal text-gray-900">
-					<!-- <li>
-						<a class="hover:underline" href="#">
-							Contact us
-						</a>
-					</li> -->
-					<li>
-						<a class="hover:underline" href="{{ route('organizer.login') }}">
-							Organizer Login
-						</a>
-					</li>
-				</ul>
+				<div class="relative inline-block text-left">
+					<button type="button"
+						class="inline-flex justify-center w-full text-xs font-normal text-gray-900 hover:underline"
+						id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
+						Organizer
+						<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd"
+								d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+								clip-rule="evenodd" />
+						</svg>
+					</button>
+
+					<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+						id="organizer-menu">
+						<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
+							aria-labelledby="organizer-menu-button">
+							<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
+								role="menuitem">Login</a>
+							<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
+								role="menuitem">Register</a>
+						</div>
+					</div>
+				</div>
 			</nav>
 		</header>
 		<!--**********************************
@@ -205,7 +270,7 @@
             Footer start
         ***********************************-->
 		<footer
-			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto">
+			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto mt-5">
 			<div class="container">
 				<div class="row">
 					<!-- About Section -->
@@ -226,7 +291,8 @@
 							<li><a href="{{ url('/') }}" class="text-light text-decoration-none">Home</a></li>
 							<!-- <li><a href="{{ url('/about') }}" class="text-light text-decoration-none">About</a></li> -->
 							<!-- <li><a href="{{ url('/events') }}" class="text-light text-decoration-none">Events</a></li> -->
-							<li><a href="{{ route('organizer.login') }}" class="text-light text-decoration-none">Organizer Login</a></li>
+							<li><a href="{{ route('organizer.login') }}"
+									class="text-light text-decoration-none">Organizer Login</a></li>
 						</ul>
 					</div>
 
@@ -294,7 +360,45 @@
 		@endforeach
 	@endif
 
+	@if(session('success'))
+		<script>
+			toastr.info("{{ session('success') }}", "Success", {
+				timeOut: 5000,
+				closeButton: true,
+				progressBar: true,
+				positionClass: "toast-top-right",
+				newestOnTop: true,
+				preventDuplicates: true,
+				tapToDismiss: false,
+				showDuration: "300",
+				hideDuration: "1000",
+				extendedTimeOut: "1000",
+				showEasing: "swing",
+				hideEasing: "linear",
+				showMethod: "fadeIn",
+				hideMethod: "fadeOut"
+			});
+		</script>
+	@endif
+
+
+
 	@stack('scripts')
+	<script>
+		const button = document.getElementById('organizer-menu-button');
+		const menu = document.getElementById('organizer-menu');
+
+		button.addEventListener('click', () => {
+			menu.classList.toggle('hidden');
+		});
+
+		// Optional: close when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!button.contains(e.target) && !menu.contains(e.target)) {
+				menu.classList.add('hidden');
+			}
+		});
+	</script>
 </body>
 
 </html>
