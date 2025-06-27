@@ -321,11 +321,11 @@
                         {{ implode(', ', $place) }}
                     </p>
                     <!-- <hr class="mb-4" />
-                                                                                    <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
-                                                                                        <i class="fas fa-calendar-alt me-2"></i>
-                                                                                        Add to Calendar
-                                                                                        <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                                                                    </p> -->
+                                                                                        <p class="fw-semibold d-flex align-items-center mb-4" style="font-size: 0.875rem; cursor: pointer;">
+                                                                                            <i class="fas fa-calendar-alt me-2"></i>
+                                                                                            Add to Calendar
+                                                                                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                                                                                        </p> -->
                     <hr class="mb-4" />
                     <form method="POST" action="{{ route('tickets.select') }}">
                         @csrf
@@ -333,43 +333,75 @@
                         <h6 class="fw-semibold mb-2" style="font-size: 0.7rem;">Select Tickets</h6>
                         <hr class="mb-4" />
 
+                        <!-- Check event register deadline or event_date end -->
                         @if ($event->status == 1)
-                            <input type="hidden" name="event_id" value="{{ $event->id }}" />
+                            @if($event->id == 1)
+                                @foreach ($filteredTickets as $ticket)
+                                    <div class="mb-4 p-3 border rounded shadow-sm bg-light" style="background-color: #fff !important;">
+                                        <p class="fw-bold mb-1">
+                                            {{ $ticket->name }} -
+                                            <span class="text-primary">{{ $event->currency }}
+                                                {{ number_format($ticket->price, 2) }}</span>
+                                        </p>
 
-                            @foreach ($filteredTickets as $ticket)
-                                <div class="p-4 mb-1" style="border: 2px rgb(235, 237, 241) dashed;">
-                                    <h6 class="text-pink fw-semibold mb-1" style="font-size: 1rem;">
-                                        {{ strtoupper($ticket->name) }}
+                                        @if ($ticket->children->isNotEmpty())
+                                            <ul class="list-group mt-2">
+                                                @foreach ($ticket->children as $subTicket)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        {{ $subTicket->name }}
+                                                        <span class="badge bg-primary">RM {{ number_format($subTicket->price, 2) }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                <a href="{{ $event->buy_link }}" target="_blank" rel="noopener noreferrer"
+                                    style="text-decoration: none;">
+                                    <h6 class="event-started" style="font-size: 0.75em;">
+                                        {{ $event->status_label }}
                                     </h6>
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h6 class="mb-3" style="font-size: 0.85rem;">
-                                                <span class="price-current-bold">{{ $event->currency }}
-                                                    {{ number_format($ticket->price, 2) }}</span>
+                                </a>
+                            @else
+                                <input type="hidden" name="event_id" value="{{ $event->id }}" />
+
+                                @foreach ($filteredTickets as $ticket)
+                                    <div class="p-4 mb-1" style="border: 2px rgb(235, 237, 241) dashed;">
+                                        <h6 class="text-pink fw-semibold mb-1" style="font-size: 1rem;">
+                                            {{ strtoupper($ticket->name) }}
+                                        </h6>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h6 class="mb-3" style="font-size: 0.85rem;">
+                                                    <span class="price-current-bold">{{ $event->currency }}
+                                                        {{ number_format($ticket->price, 2) }}</span>
+                                                </h6>
+                                            </div>
+                                            <h6>
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <button type="button" class="btn btn-outline-secondary btn-qty"
+                                                        data-ticket="{{ $ticket->id }}" data-action="minus">−</button>
+                                                    <input type="text" name="tickets[{{ $ticket->id }}][quantity]"
+                                                        id="qty-input-{{ $ticket->id }}" value="0" readonly
+                                                        class="form-control text-center mx-2"
+                                                        style="max-width: 50px; font-weight: 600;" />
+                                                    <input type="hidden" name="tickets[{{ $ticket->id }}][id]"
+                                                        value="{{ $ticket->id }}">
+                                                    <button type="button" class="btn btn-outline-secondary btn-qty"
+                                                        data-ticket="{{ $ticket->id }}" data-action="plus">+</button>
+                                                </div>
                                             </h6>
                                         </div>
-                                        <h6>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <button type="button" class="btn btn-outline-secondary btn-qty"
-                                                data-ticket="{{ $ticket->id }}" data-action="minus">−</button>
-                                            <input type="text" name="tickets[{{ $ticket->id }}][quantity]"
-                                                id="qty-input-{{ $ticket->id }}" value="0" readonly
-                                                class="form-control text-center mx-2" style="max-width: 50px; font-weight: 600;" />
-                                            <input type="hidden" name="tickets[{{ $ticket->id }}][id]" value="{{ $ticket->id }}">
-                                            <button type="button" class="btn btn-outline-secondary btn-qty"
-                                                data-ticket="{{ $ticket->id }}" data-action="plus">+</button>
-                                        </div>
-                                        </h6>
                                     </div>
+                                @endforeach
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <p class="fw-semibold mb-0" style="font-size: 1rem;">Total Price</p>
+                                    <p class="fw-bold mb-0" style="font-size: 1.5rem; color: #111827;">{{ $event->currency }} <span
+                                            id="total-price">0.00</span>
+                                    </p>
                                 </div>
-                            @endforeach
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <p class="fw-semibold mb-0" style="font-size: 1rem;">Total Price</p>
-                                <p class="fw-bold mb-0" style="font-size: 1.5rem; color: #111827;">{{ $event->currency }} <span
-                                        id="total-price">0.00</span>
-                                </p>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-3">Book Now</button>
+                                <button type="submit" class="btn btn-primary w-100 mt-3">Book Now</button>
+                            @endif
                         @else
                             <h6 class="event-ended" style="font-size: 0.75em;">
                                 {{ $event->status_label }}
