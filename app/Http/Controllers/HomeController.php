@@ -19,8 +19,8 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Only fetch events that are available (e.g. status = 2 = active)
-        $events = Event::with(['organizer', 'tickets'])
+        // Only fetch events that are available (e.g. status = 1 = active, 0 = coming soon, 3 = ended)
+        $events = Event::with(['organizer', 'category', 'tickets'])
             ->where('status', '1') //todo remove 
             ->get();
 
