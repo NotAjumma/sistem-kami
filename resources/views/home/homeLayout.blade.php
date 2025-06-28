@@ -190,51 +190,65 @@
 		</div> -->
 		<header class="w-full border-b border-gray-200">
 			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-				<ul class="flex space-x-6 text-xs font-normal text-gray-900">
-					<li>
-						<a class="hover:underline" href="/">
-							Home
-						</a>
-					</li>
-					<!-- <li>
-						<a class="hover:underline" href="#">
-							Search
-						</a>
-					</li> -->
-					<!-- <li>
-                    <a class="hover:underline" href="#">
-                        Schedule
-                    </a>
-                </li> -->
-				</ul>
+				<!-- Logo -->
 				<div class="font-bold text-xl select-none">
 					Sistem Kami
 				</div>
-				<div class="relative inline-block text-left">
-					<button type="button"
-						class="inline-flex justify-center w-full text-xs font-normal text-gray-900 hover:underline"
-						id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
-						Organizer
-						<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd"
-								d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-								clip-rule="evenodd" />
+
+				<!-- Hamburger button (Mobile only) -->
+				<div class="lg:hidden">
+					<button id="menu-toggle" class="text-gray-800 focus:outline-none">
+						<!-- Hamburger Icon -->
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
 						</svg>
 					</button>
+				</div>
 
-					<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-						id="organizer-menu">
-						<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
-							aria-labelledby="organizer-menu-button">
-							<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
-								role="menuitem">Login</a>
-							<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
-								role="menuitem">Register</a>
+				<div class="hidden lg:flex gap-5 align-items-center">
+					<!-- Desktop Menu -->
+					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900">
+						<li><a class="hover:underline" href="/">Home</a></li>
+					</ul>
+
+					<!-- Organizer Menu (Desktop) -->
+					<div class="hidden lg:block relative">
+						<button type="button"
+							class="btn btn-primary inline-flex justify-center text-xs font-normal text-gray-900"
+							id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
+							Organizer
+							<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd"
+									d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+									clip-rule="evenodd" />
+							</svg>
+						</button>
+
+						<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+							id="organizer-menu">
+							<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
+								aria-labelledby="organizer-menu-button">
+								<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
+									role="menuitem">Login</a>
+								<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
+									role="menuitem">Register</a>
+							</div>
 						</div>
 					</div>
 				</div>
+
 			</nav>
+
+			<!-- Mobile Menu -->
+			<div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
+				<ul class="space-y-2 text-sm text-gray-700">
+					<li><a href="/" class="block py-2">Home</a></li>
+					<li><a href="{{ route('organizer.login') }}" class="block py-2">Organizer Login</a></li>
+					<li><a href="{{ route('organizer.register') }}" class="block py-2">Organizer Register</a></li>
+				</ul>
+			</div>
 		</header>
+
 		<!--**********************************
             Nav header end
         ***********************************-->
@@ -293,6 +307,8 @@
 							<!-- <li><a href="{{ url('/events') }}" class="text-light text-decoration-none">Events</a></li> -->
 							<li><a href="{{ route('organizer.login') }}"
 									class="text-light text-decoration-none">Organizer Login</a></li>
+							<li><a href="{{ route('organizer.register') }}"
+									class="text-light text-decoration-none">Organizer Register</a></li>
 						</ul>
 					</div>
 
@@ -397,6 +413,16 @@
 			if (!button.contains(e.target) && !menu.contains(e.target)) {
 				menu.classList.add('hidden');
 			}
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toggleButton = document.getElementById('menu-toggle');
+			const mobileMenu = document.getElementById('mobile-menu');
+
+			toggleButton.addEventListener('click', function () {
+				mobileMenu.classList.toggle('hidden');
+			});
 		});
 	</script>
 </body>
