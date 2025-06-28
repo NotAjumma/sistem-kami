@@ -34,7 +34,7 @@ class BusinessController extends Controller
 
         // \Log::info($organizer);
 
-        if ($organizer->type !== 'business') {
+        if ($organizer->type !== 'service' || $organizer->visibility !== 'public' || !$organizer->is_active) {
             abort(403, 'Unauthorized access to non-business type');
         }
 

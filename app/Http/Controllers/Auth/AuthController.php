@@ -49,33 +49,38 @@ class AuthController extends Controller
     public function submitRegisterOrganizer(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:100|unique:users',
-            'email' => 'required|email|unique:organizers,email',
-            'phone' => 'required|string|max:50',
-            'password' => 'required|string|min:8|confirmed',
+            'name'          => 'required|string|max:255|unique:organizers',
+            'username'      => 'required|string|max:100|unique:users',
+            'email'         => 'required|email|unique:organizers,email',
+            'phone'         => 'required|string|max:50',
+            'business_type' => 'required|string',
+            'service_type'  => 'nullable|string',
+            'password'      => 'required|string|min:8|confirmed',
         ]);
 
         try {
             DB::beginTransaction();
 
             $user = User::create([
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
-                'role' => 'organizer',
+                'username'  => $request->username,
+                'password'  => Hash::make($request->password),
+                'role'      => 'organizer',
             ]);
 
             // Check if name is provided before slugging
             $slug = Str::slug($request->name ?? 'organizer-' . Str::random(5));
 
             Organizer::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'user_id' => $user->id,
-                'slug' => $slug,
-                'is_active' => 0,
-                'visibility' => 'public',
+                'name'            => $request->name,
+                'email'           => $request->email,
+                'phone'           => $request->phone,
+                'user_id'         => $user->id,
+                'slug'            => $slug,
+                'is_active'       => 0,
+                'type'            => $request->business_type,
+                'category'        => $request->service_type,
+                'visibility'      => 'private',
+                'wallet_currency' => 'RM',
             ]);
 
             DB::commit();
