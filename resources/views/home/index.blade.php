@@ -713,7 +713,7 @@
                         <div class="card position-relative h-100">
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <i class="fa-solid fa-briefcase fa-2x text-success"></i>
+                                    <i class="fa-solid fa-briefcase fa-2x text-primary"></i>
                                 </div>
                                 <h5 class="card-title">For Service Vendors</h5>
                                 <p class="card-text">
@@ -729,7 +729,7 @@
                         <div class="card position-relative h-100">
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <i class="fa-solid fa-user-check fa-2x text-warning"></i>
+                                    <i class="fa-solid fa-user-check fa-2x text-primary"></i>
                                 </div>
                                 <h5 class="card-title">For Customers</h5>
                                 <p class="card-text">
