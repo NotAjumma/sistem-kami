@@ -62,6 +62,13 @@ return [
 					'vendor/toastr/css/toastr.min.css'
 
 				],
+				'WorkerController_ticketsConfirmed' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
+				],
 				'JiadeAdminController_dashboard' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
 					
@@ -324,6 +331,16 @@ return [
 					'js/plugins-init/toastr-init.js',
 				],
 				'OrganizerController_ticketsConfirmed' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+				],
+				'WorkerController_ticketsConfirmed' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',
 					'vendor/datatables/responsive/responsive.js',
 					'js/plugins-init/datatables.init.js',

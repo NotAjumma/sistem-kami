@@ -50,6 +50,11 @@ return [
             'provider' => 'organizers',
         ],
 
+        'worker' => [
+            'driver' => 'session',
+            'provider' => 'workers',
+        ],
+
         'marshal' => [
             'driver' => 'session',
             'provider' => 'users',
@@ -94,9 +99,9 @@ return [
         //     'table' => 'users',
         // ],
 
-        'organizers' => [
+        'workers' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Organizer::class, // your organizer model here
+            'model' => App\Models\Worker::class, // your organizer model here
         ],
     ],
 

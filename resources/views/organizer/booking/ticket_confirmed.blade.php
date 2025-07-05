@@ -107,18 +107,34 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($eachBookingTicket->booking->payment_method === 'gform' && !is_null($eachBookingTicket->booking->resit_path) && $eachBookingTicket->status !== 'checkin')
-                                                    <form action="{{ route('organizer.ticket.checkin', $eachBookingTicket->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="button"
-                                                            class="btn btn-secondary shadow btn-xs sharp btn-verify-payment"
-                                                            data-ticket-code="{{ $eachBookingTicket->ticket_code }}">
-                                                            <span style="padding-left: 5px;">Check In</span>
-                                                        </button>
-                                                    </form>
+                                                @if ($authUser->user->role == "organizer")
+                                                    @if($eachBookingTicket->booking->payment_method === 'gform' && !is_null($eachBookingTicket->booking->resit_path) && $eachBookingTicket->status !== 'checkin')
+                                                        <form action="{{ route('organizer.ticket.checkin', $eachBookingTicket->id) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="button"
+                                                                class="btn btn-secondary shadow btn-xs sharp btn-verify-payment"
+                                                                data-ticket-code="{{ $eachBookingTicket->ticket_code }}">
+                                                                <span style="padding-left: 5px;">Check In</span>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @elseif($authUser->user->role == "worker")
+                                                    @if($eachBookingTicket->booking->payment_method === 'gform' && !is_null($eachBookingTicket->booking->resit_path) && $eachBookingTicket->status !== 'checkin')
+                                                        <form action="{{ route('worker.ticket.checkin', $eachBookingTicket->id) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="button"
+                                                                class="btn btn-secondary shadow btn-xs sharp btn-verify-payment"
+                                                                data-ticket-code="{{ $eachBookingTicket->ticket_code }}">
+                                                                <span style="padding-left: 5px;">Check In</span>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
+                                                
                                             </td>
                                         </tr>
                                     @endforeach

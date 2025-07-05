@@ -9,6 +9,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
@@ -100,10 +101,16 @@ Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->
 
 // Organizer Route
 Route::get('/organizer/login', [AuthController::class, 'showLoginOrganizer'])->name('organizer.login');
+Route::get('/worker/login', [AuthController::class, 'showLoginOrganizerWorker'])->name('organizer.worker.login');
 Route::get('/organizer/register', [AuthController::class, 'showRegisterOrganizer'])->name('organizer.register');
 Route::post('/organizer/register', [AuthController::class, 'submitRegisterOrganizer'])->name('organizer.submit_register');
 Route::post('/{role}/login', [AuthController::class, 'login'])->name('role.login');
 
+Route::prefix('worker')->middleware('auth:worker')->controller(WorkerController::class)->group(function () {
+    Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('worker.tickets.confirmed');
+    Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('worker.ticket.checkin');
+
+});
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.logout');

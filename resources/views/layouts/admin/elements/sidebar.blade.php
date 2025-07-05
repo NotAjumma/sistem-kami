@@ -71,6 +71,7 @@
                 $isBookingRoute = in_array($currentRoute, $bookingRoutes);
             @endphp
 
+            @if($authUser->user->role == "organizer")
             <ul class="metismenu" id="menu">
                 <li>
                     <a href="{{ route('organizer.dashboard') }}"
@@ -80,6 +81,18 @@
                     </a>
                 </li>
 
+                @if($authUser->type == "service")
+                <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                        <i class="material-symbols-outlined">table_chart</i>
+                        <span class="nav-text">Packages</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('organizer.packages.create') }}">Create Package</a></li>
+                        <li><a href="{{ route('table_datatable_basic') }}">Packages List</a></li>
+                    </ul>
+                </li>
+                @endif
+                
                 <li class="{{ $isBookingRoute ? 'mm-active' : '' }}">
                     <a class="has-arrow" href="javascript:void(0);"
                         aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
@@ -91,16 +104,39 @@
                         aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
                         <li class="{{ $currentRoute === 'organizer.bookings' ? 'mm-active' : '' }}">
                             <a href="{{ route('organizer.bookings') }}"
-                                class="{{ $currentRoute === 'organizer.bookings' ? 'active mm-active' : '' }}">Bookings List</a>
+                                class="{{ $currentRoute === 'organizer.bookings' ? 'active mm-active' : '' }}">Bookings
+                                List</a>
                         </li>
-                        <li class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'mm-active' : '' }}">
-                            <a href="{{ route('organizer.tickets.confirmed') }}"
-                                class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'active mm-active' : '' }}">Tickets
+                        @if($authUser->type == "event")
+                            <li class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'mm-active' : '' }}">
+                                <a href="{{ route('organizer.tickets.confirmed') }}"
+                                    class="{{ $currentRoute === 'organizer.tickets.confirmed' ? 'active mm-active' : '' }}">Tickets
+                                    List Confirmed</a>
+                            </li>
+                        @endif
+                    </ul>
+                </li>
+            </ul>
+            @elseif($authUser->user->role == "worker")
+            <ul class="metismenu" id="menu">
+                <li class="{{ $isBookingRoute ? 'mm-active' : '' }}">
+                    <a class="has-arrow" href="javascript:void(0);"
+                        aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
+                        <i class="material-symbols-outlined">calendar_month</i>
+                        <span class="nav-text">Bookings</span>
+                    </a>
+
+                    <ul class="{{ $isBookingRoute ? 'mm-show' : '' }}"
+                        aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
+                        <li class="{{ $currentRoute === 'worker.tickets.confirmed' ? 'mm-active' : '' }}">
+                            <a href="{{ route('worker.tickets.confirmed') }}"
+                                class="{{ $currentRoute === 'worker.tickets.confirmed' ? 'active mm-active' : '' }}">Tickets
                                 List Confirmed</a>
                         </li>
                     </ul>
                 </li>
             </ul>
+            @endif
 
         </div>
     </div>

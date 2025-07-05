@@ -14,6 +14,30 @@ use Illuminate\Support\Facades\DB;
 class AuthController extends Controller
 {
 
+    protected function getGuardConfig($role)
+    {
+        $map = [
+            'organizer' => [
+                'guard' => 'organizer',
+                'model' => \App\Models\Organizer::class,
+                'relation_field' => 'user_id',
+            ],
+            'worker' => [
+                'guard' => 'worker',
+                'model' => \App\Models\Worker::class,
+                'relation_field' => 'user_id',
+            ],
+            // 'participant' => [
+            //     'guard' => 'web', // assuming default
+            //     'model' => \App\Models\User::class,
+            //     'relation_field' => 'id',
+            // ],
+            // add more roles as needed
+        ];
+
+        return $map[$role] ?? null;
+    }
+
     /**
      * Show the login page for admin.
      * 
@@ -98,6 +122,16 @@ class AuthController extends Controller
         }
     }
 
+    public function showLoginOrganizerWorker(Request $request)
+    {
+        if (auth('worker')->check()) {
+            return redirect()->route('organizer.tickets.confirmed');
+        }
+        // dd(auth('organizer')->user());
+        $role = $request->route('role') ?? 'participant';
+        return view('worker.auth.login', compact('role'));
+    }
+
     public function login(Request $request, $role = null)
     {
         $request->validate([
@@ -105,51 +139,81 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        \Log::info("Triggered login for role: {$role}");
+
         $user = User::where('username', $request->username)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', 'Invalid username or password');
+            return back()->withInput()->with('error', 'Invalid username or password');
         }
-        // Role check
+
+        // Role match check
         if ($role) {
             if ($role === 'admin' && $user->role !== 'superadmin') {
-                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
+                return back()->withInput()->with('error', 'Unauthorized (admin)');
             }
 
             if ($role !== 'admin' && $user->role !== $role) {
-                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
+                return back()->withInput()->with('error', 'Unauthorized (role mismatch)');
             }
         } else {
             if ($user->role !== 'participant') {
-                return redirect()->back()->withInput()->with('error', 'Invalid username or password');
+                return back()->withInput()->with('error', 'Unauthorized (non-participant)');
             }
         }
 
-        $organizer = \App\Models\Organizer::where('user_id', $user->id)->first();
+        // Map role to model and guard
+        $map = [
+            'organizer' => [
+                'model' => \App\Models\Organizer::class,
+                'guard' => 'organizer',
+            ],
+            'worker' => [
+                'model' => \App\Models\Worker::class,
+                'guard' => 'worker',
+            ],
+            // 'participant' => [
+            //     'model' => \App\Models\User::class,
+            //     'guard' => 'web',
+            // ],
+            // 'admin' => [
+            //     'model' => \App\Models\User::class,
+            //     'guard' => 'web',
+            // ],
+            // 'marshal' => [
+            //     'model' => \App\Models\Marshal::class,
+            //     'guard' => 'marshal',
+            // ],
+        ];
 
-        if (!$organizer) {
-            return redirect()->back()->withInput()->with('error', 'Invalid username or password');
+        $guard = $map[$role]['guard'] ?? 'web';
+        $modelClass = $map[$role]['model'] ?? \App\Models\User::class;
+
+        // Use user_id unless it's the base User model
+        $authUser = $modelClass === \App\Models\User::class
+            ? $user
+            : $modelClass::where('user_id', $user->id)->first();
+
+        if (!$authUser) {
+            return back()->withInput()->with('error', 'Related role model not found');
         }
 
-        Auth::guard('organizer')->login($organizer);
+        Auth::guard($guard)->login($authUser);
 
+        // Save last login time
         $user->last_login = now();
         $user->save();
 
-        // Redirect based on role
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($role === 'organizer') {
-            return redirect()->route('organizer.dashboard');
-        } elseif ($role === 'marshal') {
-            return redirect()->route('marshal.dashboard');
-        } else {
-            return redirect()->route('participant.dashboard');
-        }
+        // Redirect
+        return match ($role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'organizer' => redirect()->route('organizer.dashboard'),
+            'marshal' => redirect()->route('marshal.dashboard'),
+            'worker' => redirect()->route('worker.tickets.confirmed'),
+            default => redirect()->route('participant.dashboard'),
+        };
     }
+
     /**
      * Handle login for given role.
      * 
@@ -186,28 +250,44 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $user = auth()->guard('organizer')->user()->load('user');
-        $redirectUrl = '/login';
+        $guards = ['web', 'admin', 'organizer', 'worker', 'marshal']; // list your active guards
+        $activeGuard = null;
+        $user = null;
 
-        if ($user) {
-            switch ($user->user->role) {
-                case 'admin':
-                    $redirectUrl = '/admin/login';
-                    break;
-                case 'organizer':
-                    $redirectUrl = '/organizer/login';
-                    break;
-                case 'marshal':
-                    $redirectUrl = '/marshal/login';
-                    break;
-                case 'user':
-                    $redirectUrl = '/login';
-                    break;
-                // Add other roles as needed
+        // Detect which guard is currently authenticated
+        foreach ($guards as $guard) {
+            if (auth()->guard($guard)->check()) {
+                $activeGuard = $guard;
+                $user = auth()->guard($guard)->user();
+                break;
             }
         }
 
-        Auth::logout();
+        // Default redirect
+        $redirectUrl = '/login';
+
+        if ($user) {
+            // If user is a related model like Worker or Organizer, load the base User model
+            if (method_exists($user, 'user') && $user->relationLoaded('user') === false) {
+                $user->load('user');
+            }
+
+            $baseUser = $user->user ?? $user; // either related user or self
+
+            $role = $baseUser->role ?? null;
+
+            $redirectMap = [
+                'admin' => '/admin/login',
+                'organizer' => '/organizer/login',
+                'marshal' => '/marshal/login',
+                'worker' => '/worker/login',
+                'participant' => '/login',
+            ];
+
+            $redirectUrl = $redirectMap[$role] ?? '/login';
+
+            Auth::guard($activeGuard)->logout();
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
