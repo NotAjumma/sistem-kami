@@ -1,17 +1,25 @@
-@extends('layouts.admin.default')
+@extends('home.homeLayout')
 @push('styles')
     <style>
-        .btn-verify-payment {
-            gap: 5px;
-            width: auto !important;
-            padding: 0 10px !important;
+        .event-title {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: black;
+            margin-bottom: 0.25rem;
         }
     </style>
 @endpush
-<!-- Include Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid" style="background: rgba(0, 31, 77, 1); padding-bottom: 150px;">
+        <div class="container" style="margin-top: 0px;">
+            <div class="d-flex justify-content-center py-5">
+                <div style="background: rgba(255, 255, 255, 1); padding: 25px; text-align: center; border-radius: 10px;">
+                    <h2 class="event-title m-0">{{ $event->title }} - Leaderboard</h2>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             @foreach ($leaderboardResults as $set)
                 @php
@@ -22,7 +30,7 @@
                 <div class="col-12 col-md-6">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ $leaderboard->name }} - Results</h5>
+                            <h5 style="font-weight: bold; font-size: large" class="mb-0">{{ $leaderboard->name }} - Results</h5>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">

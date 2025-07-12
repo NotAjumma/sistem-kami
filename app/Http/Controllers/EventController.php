@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use App\Models\Event;
+use App\Models\FishingLeaderboard;
+use App\Models\FishingLeaderboardResult;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -37,7 +39,7 @@ class EventController extends Controller
         // End filter Ticket
 
         $now = Carbon::now();
-        if($event->status){
+        if ($event->status) {
             if ($now->lt($event->registration_deadline)) {
                 $event->status_label = 'Coming Soon';
                 $event->status = 0;
@@ -48,11 +50,11 @@ class EventController extends Controller
                 $event->status_label = 'Event has ended';
                 $event->status = 0;
             }
-        }else{
+        } else {
             $event->status_label = 'Coming Soon';
             $event->status = 0;
         }
-        
+
         // Format start_date
         $startDate = Carbon::parse($event->start_date);
         $startDay = str_pad($startDate->format('j'), 2, '0', STR_PAD_LEFT);
@@ -83,6 +85,45 @@ class EventController extends Controller
         $event->date_days = ($startDay === $endDay) ? $startDay : ($startDay . ' - ' . $endDay);
 
         return view('home.event.index', compact('event', 'filteredTickets', 'page_title'));
+    }
+
+    public function showFishingLeaderboard($slug)
+    {
+        $event = Event::with(['category', 'organizer', 'tickets'])->where('slug', $slug)->firstOrFail();
+
+        if (!$event->organizer || $event->organizer->type !== 'event' 
+        // || !$event->starts_at || Carbon::parse($event->starts_at)->toDateString() !== now()->toDateString()
+        ) 
+        {
+            abort(403, 'Unauthorized access to non-event type');
+        }
+
+        $page_title = $event->title . ' Leaderboard';
+        $authUser = auth()->guard('worker')->user()->load('user');
+
+        $allLeaderboards = FishingLeaderboard::with('rank')->orderByDesc('starts_at')->get();
+
+        // Fetch results for all leaderboards
+        $leaderboardResults = [];
+        foreach ($allLeaderboards as $leaderboard) {
+            $results = FishingLeaderboardResult::where('fishing_leaderboard_id', $leaderboard->id)
+                ->with('participant')
+                ->orderBy('rank')
+                ->get();
+
+            $leaderboardResults[] = [
+                'leaderboard' => $leaderboard,
+                'results' => $results
+            ];
+        }
+
+        return view('home.event.fishing.leaderboard', compact(
+            'leaderboardResults',
+            'allLeaderboards',
+            'authUser',
+            'page_title',
+            'event'
+        ));
     }
 
 

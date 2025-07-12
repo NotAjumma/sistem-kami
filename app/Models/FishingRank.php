@@ -11,7 +11,8 @@ class FishingRank extends Model
         'type',
         'target_weight',
         'time_mode',
-        'calculation_mode' //'calculation_mode', ['single', 'total']
+        'calculation_mode', // 'calculation_mode', ['single', 'total']
+        'sub_type',         // 'sub_type', ['heaviest', 'most_catch', 'other']
     ];
 
     public function leaderboards()

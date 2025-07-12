@@ -117,87 +117,132 @@ class WorkerController extends Controller
         // If POST submission
         if ($request->isMethod('post')) {
             $request->validate([
-                'participant_id' => 'required|exists:participants,id',
-                'weight' => 'required|numeric|min:0.1|max:999.99',
                 'event_id' => 'required|exists:events,id',
+                'weight' => 'required|numeric|min:0.1|max:999.99',
+                // Conditional validation
+                'participant_id' => $request->event_id == 1 ? 'nullable' : 'required|exists:participants,id',
+                'participant_name' => $request->event_id == 1 ? 'required|string|max:255' : 'nullable',
+                'caught_time' => $request->event_id == 1 ? 'required|date_format:H:i' : 'nullable',
+                'participant_manual_id' => $request->event_id == 1 ? 'required|string|max:255' : 'nullable',
             ]);
 
-            $leaderboard = FishingLeaderboard::where('event_id', $request->event_id)->with('rank')->first();
+            $eventId = $request->event_id;
+            if ($request->event_id == 1) {
+                $today = now()->format('Y-m-d');
+                $caughtAt = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->caught_time);
+            } else {
+                $caughtAt = now();
+            }
 
-            if (!$leaderboard) {
+            // 👤 Create new participant if event_id == 1
+            if ($eventId == 1) {
+                // Create participant dynamically from form
+                $participant = Participant::create([
+                    'name' => $request->participant_name,
+                    'email' => "",
+                    'phone' => "",
+                    'no_ic' => $request->participant_manual_id, // form participant_id becomes no_ic
+                ]);
+                $participantId = $participant->id;
+            } else {
+                $participantId = $request->participant_id;
+            }
+
+            $leaderboards = FishingLeaderboard::where('event_id', $request->event_id)
+                ->with('rank')
+                ->get();
+
+            if ($leaderboards->isEmpty()) {
                 return back()->withErrors(['event_id' => 'No leaderboard found for selected event.']);
             }
 
-            // Save catch
-            FishingCatch::create([
-                'participant_id' => $request->participant_id,
-                'fishing_leaderboard_id' => $leaderboard->id,
-                'weight' => $request->weight,
-                'caught_at' => now(),
-            ]);
-
-            // Determine whether to use total or single catch
-            $aggregateFunction = $leaderboard->rank->calculation_mode === 'single' ? 'MAX' : 'SUM';
-
-            $catches = FishingCatch::where('fishing_leaderboard_id', $leaderboard->id)
-                ->select('id', 'participant_id', 'weight as total_weight', 'caught_at as first_catch', 'caught_at as last_catch')
-                ->get()
-                ->map(function ($row) use ($leaderboard) {
-                    $diff = null;
-
-                    if ($leaderboard->rank->type === 'closest_to_target') {
-                        $diff = abs($row->total_weight - $leaderboard->rank->target_weight);
-                    }
-
-                    return (object) [
-                        'participant_id' => $row->participant_id,
-                        'total_weight' => $row->total_weight,
-                        'difference' => $diff,
-                        'first_catch' => $row->first_catch,
-                        'last_catch' => $row->last_catch,
-                    ];
-                });
-
-            // Sort participants based on ranking rules
-            $sorted = $catches->sort(function ($a, $b) use ($leaderboard) {
-                $rankType = $leaderboard->rank->type;
-                $timeMode = $leaderboard->rank->time_mode ?? 'none';
-
-                if ($rankType === 'heaviest') {
-                    $cmp = $b->total_weight <=> $a->total_weight;
-                } elseif ($rankType === 'closest_to_target') {
-                    $cmp = $a->difference <=> $b->difference;
-                } else {
-                    $cmp = 0;
-                }
-
-                // Apply time tiebreaker if needed
-                if ($cmp === 0 && $timeMode !== 'none') {
-                    if ($timeMode === 'fastest') {
-                        return strtotime($a->first_catch) <=> strtotime($b->first_catch);
-                    } elseif ($timeMode === 'slowest') {
-                        return strtotime($b->last_catch) <=> strtotime($a->last_catch);
-                    }
-                }
-
-                return $cmp;
-            })->values();
-
-            // Refresh leaderboard results
-            FishingLeaderboardResult::where('fishing_leaderboard_id', $leaderboard->id)->delete();
-
-            foreach ($sorted as $i => $result) {
-                FishingLeaderboardResult::create([
+            foreach ($leaderboards as $leaderboard) {
+                // Save catch into all leaderboards under this event
+                FishingCatch::create([
+                    'participant_id' => $participantId,
                     'fishing_leaderboard_id' => $leaderboard->id,
-                    'participant_id' => $result->participant_id,
-                    'total_weight' => $result->total_weight,
-                    'difference' => $result->difference,
-                    'rank' => $i + 1,
-                    'caught_at' => $result->first_catch,
+                    'weight' => $request->weight,
+                    'caught_at' => $caughtAt,
                 ]);
-            }
 
-            return redirect()->back()->with('success', 'Catch successfully recorded and leaderboard updated!');
+                // Re-aggregate all results for that leaderboard
+                $catches = FishingCatch::where('fishing_leaderboard_id', $leaderboard->id)
+                    ->select('id', 'participant_id', 'weight as total_weight', 'caught_at as first_catch', 'caught_at as last_catch')
+                    ->get()
+                    ->map(function ($row) use ($leaderboard) {
+                        $diff = null;
+
+                        if ($leaderboard->rank->type === 'closest_to_target') {
+                            $target = $leaderboard->rank->target_weight;
+                            $limit = $leaderboard->rank->target_weight_limit;
+
+                            $weight = $row->total_weight;
+
+                            // Filter based on target_weight_limit
+                            if (
+                                ($limit === 'above' && $weight < $target) ||
+                                ($limit === 'below' && $weight > $target)
+                            ) {
+                                $diff = null; // Disqualified
+                            } else {
+                                $diff = abs($weight - $target);
+                            }
+                        }
+
+                        return (object) [
+                            'participant_id' => $row->participant_id,
+                            'total_weight' => $row->total_weight,
+                            'difference' => $diff,
+                            'first_catch' => $row->first_catch,
+                            'last_catch' => $row->last_catch,
+                        ];
+                    });
+
+                $sorted = $catches->sort(function ($a, $b) use ($leaderboard) {
+                    $rankType = $leaderboard->rank->type;
+                    $timeMode = $leaderboard->rank->time_mode ?? 'none';
+
+                    if ($rankType === 'heaviest') {
+                        $cmp = $b->total_weight <=> $a->total_weight;
+                    } elseif ($rankType === 'closest_to_target') {
+                        if ($a->difference === null && $b->difference === null) {
+                            $cmp = 0;
+                        } elseif ($a->difference === null) {
+                            $cmp = 1;
+                        } elseif ($b->difference === null) {
+                            $cmp = -1;
+                        } else {
+                            $cmp = $a->difference <=> $b->difference;
+                        }
+                    } else {
+                        $cmp = 0;
+                    }
+
+                    if ($cmp === 0 && $timeMode !== 'none') {
+                        if ($timeMode === 'fastest') {
+                            return strtotime($a->first_catch) <=> strtotime($b->first_catch);
+                        } elseif ($timeMode === 'slowest') {
+                            return strtotime($b->last_catch) <=> strtotime($a->last_catch);
+                        }
+                    }
+
+                    return $cmp;
+                })->values();
+
+                // Save new leaderboard results
+                FishingLeaderboardResult::where('fishing_leaderboard_id', $leaderboard->id)->delete();
+
+                foreach ($sorted as $i => $result) {
+                    FishingLeaderboardResult::create([
+                        'fishing_leaderboard_id' => $leaderboard->id,
+                        'participant_id' => $result->participant_id,
+                        'total_weight' => $result->total_weight,
+                        'difference' => $result->difference,
+                        'rank' => $i + 1,
+                        'caught_at' => $result->first_catch,
+                    ]);
+                }
+            }
         }
 
         // Fetch participants (optional: filter by event or organizer)
@@ -213,25 +258,32 @@ class WorkerController extends Controller
 
     public function showFishingLeaderboard(Request $request)
     {
-        $page_title = 'Leadboard';
+        $page_title = 'Leaderboard';
         $authUser = auth()->guard('worker')->user()->load('user');
 
         $allLeaderboards = FishingLeaderboard::with('rank')->orderByDesc('starts_at')->get();
-        $leaderboard = null;
-        $results = collect();
 
-        if ($request->leaderboard_id) {
-            $leaderboard = FishingLeaderboard::with('rank')->find($request->leaderboard_id);
+        // Fetch results for all leaderboards
+        $leaderboardResults = [];
+        foreach ($allLeaderboards as $leaderboard) {
+            $results = FishingLeaderboardResult::where('fishing_leaderboard_id', $leaderboard->id)
+                ->with('participant')
+                ->orderBy('rank')
+                ->get();
 
-            if ($leaderboard) {
-                $results = FishingLeaderboardResult::where('fishing_leaderboard_id', $leaderboard->id)
-                    ->with('participant')
-                    ->orderBy('rank')
-                    ->get();
-            }
+            $leaderboardResults[] = [
+                'leaderboard' => $leaderboard,
+                'results' => $results
+            ];
         }
 
-        return view('organizer.fishing.leaderboard', compact('leaderboard', 'results', 'allLeaderboards', 'authUser', 'page_title'));
+        return view('organizer.fishing.leaderboard', compact(
+            'leaderboardResults',
+            'allLeaderboards',
+            'authUser',
+            'page_title'
+        ));
     }
+
 
 }
