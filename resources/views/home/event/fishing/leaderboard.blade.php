@@ -7,6 +7,23 @@
             color: black;
             margin-bottom: 0.25rem;
         }
+
+        .title-container {
+            background: rgba(255, 255, 255, 1);
+            padding: 25px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 576px) {
+            .event-title {
+                font-size: 1rem;
+            }
+
+            .title-container {
+                padding: 15px;
+            }
+        }
     </style>
 @endpush
 
@@ -14,7 +31,7 @@
     <div class="container-fluid" style="background: rgba(0, 31, 77, 1); padding-bottom: 150px;">
         <div class="container" style="margin-top: 0px;">
             <div class="d-flex justify-content-center py-5">
-                <div style="background: rgba(255, 255, 255, 1); padding: 25px; text-align: center; border-radius: 10px;">
+                <div class="title-container">
                     <h2 class="event-title m-0">{{ $event->title }} - Leaderboard</h2>
                 </div>
             </div>
