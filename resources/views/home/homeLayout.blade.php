@@ -232,8 +232,8 @@
 									role="menuitem">Login</a>
 								<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
 									role="menuitem">Register</a>
-								<a href="{{ route('organizer.worker.login') }}" class="block px-4 py-2 hover:bg-gray-100"
-									role="menuitem">Worker Login</a>
+								<a href="{{ route('organizer.worker.login') }}"
+									class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Worker Login</a>
 							</div>
 						</div>
 					</div>
@@ -243,11 +243,22 @@
 
 			<!-- Mobile Menu -->
 			<div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
-				<ul class="space-y-2 text-sm text-gray-700">
-					<li><a href="/" class="block py-2">Home</a></li>
-					<li><a href="{{ route('organizer.login') }}" class="block py-2">Organizer Login</a></li>
-					<li><a href="{{ route('organizer.register') }}" class="block py-2">Organizer Register</a></li>
-				</ul>
+				<button class="btn btn-primary" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
+					<a class="dropdown-item" href="/">Home</a>
+				</button>
+
+				<div class="dropdown mt-3">
+					<button class="btn btn-primary dropdown-toggle" type="button" id="menuDropdown"
+						data-bs-toggle="dropdown" aria-expanded="false" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
+						Organizer
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="menuDropdown">
+						<li><a class="dropdown-item" href="{{ route('organizer.login') }}">Login</a></li>
+						<li><a class="dropdown-item" href="{{ route('organizer.register') }}">Register</a>
+						</li>
+						<li><a class="dropdown-item" href="{{ route('organizer.worker.login') }}">Worker Login</a></li>
+					</ul>
+				</div>
 			</div>
 		</header>
 
