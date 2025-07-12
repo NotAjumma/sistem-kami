@@ -34,15 +34,39 @@
                                     </select>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="participant_id" class="form-label">Participant:</label>
-                                    <select name="participant_id" id="participant_id" class="form-select select2" required
-                                        data-placeholder="Search Name">
-                                        <option value="">-- Choose Participant --</option>
-                                        @foreach ($participants as $participant)
-                                            <option value="{{ $participant->id }}">{{ $participant->name }}</option>
-                                        @endforeach
-                                    </select>
+
+                                {{-- Section shown if event_id == 1 --}}
+                                <div id="manual-input-fields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="participant_user_id" class="form-label">Participant User ID:</label>
+                                        <input type="text" name="participant_manual_id" id="participant_user_id"
+                                            class="form-control">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="participant_name" class="form-label">Participant Name:</label>
+                                        <input type="text" name="participant_name" id="participant_name"
+                                            class="form-control">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="caught_time" class="form-label">Time Caught:</label>
+                                        <input type="time" name="caught_time" id="caught_time" class="form-control">
+                                    </div>
+                                </div>
+
+                                {{-- Section shown if event_id != 1 --}}
+                                <div id="participant-select-field">
+                                    <div class="mb-3">
+                                        <label for="participant_id" class="form-label">Participant:</label>
+                                        <select name="participant_id" id="participant_id_select" class="form-select select2"
+                                            required data-placeholder="Search Name">
+                                            <option value="">-- Choose Participant --</option>
+                                            @foreach ($participants as $participant)
+                                                <option value="{{ $participant->id }}">{{ $participant->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -77,6 +101,29 @@
                     },
                     allowClear: true
                 });
+            });
+        </script>
+        <script>
+            function toggleParticipantFields() {
+                const selectedEventId = document.getElementById('event_id').value;
+                const manualSection = document.getElementById('manual-input-fields');
+                const selectSection = document.getElementById('participant-select-field');
+                const participantSelect = document.getElementById('participant_id_select');
+
+                if (parseInt(selectedEventId) === 1) {
+                    manualSection.style.display = 'block';
+                    selectSection.style.display = 'none';
+                    participantSelect.removeAttribute('required'); // remove required when hidden
+                } else {
+                    manualSection.style.display = 'none';
+                    selectSection.style.display = 'block';
+                    participantSelect.setAttribute('required', 'required'); // add required when shown
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                toggleParticipantFields(); // initialize on load
+                document.getElementById('event_id').addEventListener('change', toggleParticipantFields);
             });
         </script>
     @endpush

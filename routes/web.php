@@ -77,6 +77,7 @@ Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->na
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
+Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -112,6 +113,12 @@ Route::prefix('worker')->middleware('auth:worker')->controller(WorkerController:
     Route::match(['get', 'post'], '/fishing/keyinweight', 'fishingKeyInWeight')->name('worker.fishing.key_in_weight');
     Route::get('/fishing/leaderboard', 'showFishingLeaderboard')->name('worker.fishing.leaderboard');
 });
+Route::get('/fishing/leaderboard/latest-update', function () {
+    $timestamp = \App\Models\FishingLeaderboardResult::max('updated_at');
+    return response()->json(['updated_at' => $timestamp]);
+});
+Route::get('/fishing/leaderboard/partial', 'App\Http\Controllers\Worker\FishingController@renderLeaderboardPartial');
+
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.logout');
