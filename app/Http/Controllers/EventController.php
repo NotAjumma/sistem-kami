@@ -99,7 +99,6 @@ class EventController extends Controller
         }
 
         $page_title = $event->title . ' Leaderboard';
-        $authUser = auth()->guard('worker')->user()->load('user');
 
         $allLeaderboards = FishingLeaderboard::with('rank')->orderByDesc('starts_at')->get();
 
@@ -120,7 +119,6 @@ class EventController extends Controller
         return view('home.event.fishing.leaderboard', compact(
             'leaderboardResults',
             'allLeaderboards',
-            'authUser',
             'page_title',
             'event'
         ));
