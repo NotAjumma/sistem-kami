@@ -69,6 +69,13 @@
                 ];
 
                 $isBookingRoute = in_array($currentRoute, $bookingRoutes);
+
+                $fishingRoutes = [
+                    'worker.fishing.key_in_weight',
+                    'worker.fishing.leaderboard',
+                ];
+
+                $isFishingRoute = in_array($currentRoute, $fishingRoutes);
             @endphp
 
             @if($authUser->user->role == "organizer")
@@ -132,6 +139,28 @@
                             <a href="{{ route('worker.tickets.confirmed') }}"
                                 class="{{ $currentRoute === 'worker.tickets.confirmed' ? 'active mm-active' : '' }}">Tickets
                                 List Confirmed</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="{{ $isFishingRoute ? 'mm-active' : '' }}">
+                    <a class="has-arrow" href="javascript:void(0);"
+                        aria-expanded="{{ $isFishingRoute ? 'true' : 'false' }}">
+                        <i class="material-symbols-outlined">crown</i>
+                        <span class="nav-text">Leaderboard</span>
+                    </a>
+
+                    <ul class="{{ $isFishingRoute ? 'mm-show' : '' }}"
+                        aria-expanded="{{ $isFishingRoute ? 'true' : 'false' }}">
+                        <li class="{{ $currentRoute === 'worker.fishing.key_in_weight' ? 'mm-active' : '' }}">
+                            <a href="{{ route('worker.fishing.key_in_weight') }}"
+                                class="{{ $currentRoute === 'worker.fishing.key_in_weight' ? 'active mm-active' : '' }}">Key In Weight</a>
+                        </li>
+                    </ul>
+                    <ul class="{{ $isFishingRoute ? 'mm-show' : '' }}"
+                        aria-expanded="{{ $isFishingRoute ? 'true' : 'false' }}">
+                        <li class="{{ $currentRoute === 'worker.fishing.leaderboard' ? 'mm-active' : '' }}">
+                            <a href="{{ route('worker.fishing.leaderboard') }}"
+                                class="{{ $currentRoute === 'worker.fishing.leaderboard' ? 'active mm-active' : '' }}">Leaderboard</a>
                         </li>
                     </ul>
                 </li>
