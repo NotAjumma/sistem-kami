@@ -341,7 +341,7 @@
 							Ipoh<br>
 							Perak, Malaysia<br>
 							Phone: 011-2406-9291<br>
-							Email: <a href="mailto:admin@sistemkami.com" class="text-light">admin@sistemkami.com</a>
+							Email: <a href="mailto:salessistemkami@gmail.com" class="text-light">salessistemkami@gmail.com</a>
 						</address>
 					</div>
 				</div>
@@ -353,7 +353,7 @@
 					<div>
 						<a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
 						<a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
-						<a href="#" class="text-light me-3"><i class="fab fa-instagram"></i></a>
+						<a href="https://www.instagram.com/sistem.kami/" target="_blank" class="text-light me-3"><i class="fab fa-instagram"></i></a>
 						<a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
 					</div>
 				</div>
