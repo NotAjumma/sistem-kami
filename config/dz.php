@@ -38,6 +38,11 @@ return [
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
 					'vendor/toastr/css/toastr.min.css'
 				],
+				'WorkerController_fishingKeyInWeight' => [
+					'vendor/swiper/css/swiper-bundle.min.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+				],
 				'BookingController_showCheckoutPackage' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
@@ -302,6 +307,11 @@ return [
 					'js/plugins-init/sweetalert.init.js',
 				],
 				'BookingController_showPackage' => [
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
+				],
+				'WorkerController_fishingKeyInWeight' => [
 					'vendor/toastr/js/toastr.min.js',
 					'js/plugins-init/toastr-init.js',
 					'js/plugins-init/sweetalert.init.js',

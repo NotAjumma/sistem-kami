@@ -109,7 +109,8 @@ Route::post('/{role}/login', [AuthController::class, 'login'])->name('role.login
 Route::prefix('worker')->middleware('auth:worker')->controller(WorkerController::class)->group(function () {
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('worker.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('worker.ticket.checkin');
-
+    Route::match(['get', 'post'], '/fishing/keyinweight', 'fishingKeyInWeight')->name('worker.fishing.key_in_weight');
+    Route::get('/fishing/leaderboard', 'showFishingLeaderboard')->name('worker.fishing.leaderboard');
 });
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');

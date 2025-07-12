@@ -51,6 +51,8 @@
 	<link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
 	<link rel="stylesheet"
 		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
+	<!-- Include Select2 CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<!-- Bootstrap CSS -->
 	<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
@@ -406,6 +408,10 @@
     ***********************************-->
 	<!-- Required vendors -->
 
+	<!-- Include jQuery & Select2 JS -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 	@if(!empty(config('dz.public.global.js.top')))
 		@foreach(config('dz.public.global.js.top') as $script)
 			<script src="{{ asset($script) }}" type="text/javascript"></script>
@@ -453,7 +459,16 @@
 			updateLogo();
 		});
 	</script>
-
+	<!-- Initialize Select2 -->
+	<script>
+		$(document).ready(function () {
+			$('.select2').select2({
+				width: '100%',
+				placeholder: 'Select an option',
+				allowClear: true
+			});
+		});
+	</script>
 	@if(session('success'))
 		<script>
 			toastr.info("{{ session('success') }}", "Success", {

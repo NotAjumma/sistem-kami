@@ -24,4 +24,9 @@ class Participant extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function leaderboardResults()
+    {
+        return $this->hasMany(FishingLeaderboardResult::class);
+    }
 }
