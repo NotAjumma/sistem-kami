@@ -100,7 +100,9 @@ class EventController extends Controller
 
         $page_title = $event->title . ' Leaderboard';
 
-        $allLeaderboards = FishingLeaderboard::with('rank')->orderByDesc('starts_at')->get();
+        $allLeaderboards = FishingLeaderboard::with(['rank', 'event'])
+        ->orderByDesc('starts_at')
+        ->get();
 
         // Fetch results for all leaderboards
         $leaderboardResults = [];
