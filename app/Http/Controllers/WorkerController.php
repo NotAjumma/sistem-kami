@@ -262,8 +262,9 @@ class WorkerController extends Controller
         $authUser = auth()->guard('worker')->user()->load('user');
 
         $allLeaderboards = FishingLeaderboard::with(['rank', 'event'])
-        ->orderByDesc('starts_at')
-        ->get();
+            ->where('event_id', $authUser->event_id)
+            ->orderByDesc('starts_at')
+            ->get();
 
         // Fetch results for all leaderboards
         $leaderboardResults = [];
