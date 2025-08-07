@@ -9,9 +9,15 @@ class FishingLeaderboard extends Model
     protected $fillable = [
         'name',
         'fishing_rank_id',
+        'event_id',
         'starts_at',
         'ends_at'
     ];
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
+    }
 
     public function rank()
     {

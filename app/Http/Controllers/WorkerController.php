@@ -127,7 +127,7 @@ class WorkerController extends Controller
             ]);
 
             $eventId = $request->event_id;
-            if ($request->event_id == 1) {
+            if ($request->event_id == 2) {
                 $today = now()->format('Y-m-d');
                 $caughtAt = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->caught_time);
             } else {
@@ -135,7 +135,7 @@ class WorkerController extends Controller
             }
 
             // 👤 Create new participant if event_id == 1
-            if ($eventId == 1) {
+            if ($eventId == 2) {
                 // Create participant dynamically from form
                 $participant = Participant::create([
                     'name' => $request->participant_name,
@@ -261,7 +261,9 @@ class WorkerController extends Controller
         $page_title = 'Leaderboard';
         $authUser = auth()->guard('worker')->user()->load('user');
 
-        $allLeaderboards = FishingLeaderboard::with('rank')->orderByDesc('starts_at')->get();
+        $allLeaderboards = FishingLeaderboard::with(['rank', 'event'])
+        ->orderByDesc('starts_at')
+        ->get();
 
         // Fetch results for all leaderboards
         $leaderboardResults = [];
