@@ -127,7 +127,7 @@ class WorkerController extends Controller
             ]);
 
             $eventId = $request->event_id;
-            if ($request->event_id == 2) {
+            if ($request->event_id == 4) {
                 $today = now()->format('Y-m-d');
                 $caughtAt = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->caught_time);
             } else {
@@ -135,7 +135,7 @@ class WorkerController extends Controller
             }
 
             // 👤 Create new participant if event_id == 1
-            if ($eventId == 2) {
+            if ($eventId == 4) {
                 // Create participant dynamically from form
                 $participant = Participant::create([
                     'name' => $request->participant_name,

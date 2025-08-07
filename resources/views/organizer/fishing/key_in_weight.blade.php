@@ -110,7 +110,7 @@
                 const selectSection = document.getElementById('participant-select-field');
                 const participantSelect = document.getElementById('participant_id_select');
 
-                if (parseInt(selectedEventId) === 2) {
+                if (parseInt(selectedEventId) === 4) {
                     manualSection.style.display = 'block';
                     selectSection.style.display = 'none';
                     participantSelect.removeAttribute('required'); // remove required when hidden
