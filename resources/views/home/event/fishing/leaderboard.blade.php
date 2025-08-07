@@ -56,7 +56,7 @@
                                         <tr>
                                             <th>Rank</th>
                                             <th>Participant</th>
-                                            @if ($leaderboard->event_id == 1)
+                                            @if ($leaderboard->event_id == 4)
                                                 <th>User ID</th>
                                             @else
                                                 <th>Phone</th>
