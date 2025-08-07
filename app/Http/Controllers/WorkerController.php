@@ -120,10 +120,10 @@ class WorkerController extends Controller
                 'event_id' => 'required|exists:events,id',
                 'weight' => 'required|numeric|min:0.1|max:999.99',
                 // Conditional validation
-                'participant_id' => $request->event_id == 1 ? 'nullable' : 'required|exists:participants,id',
-                'participant_name' => $request->event_id == 1 ? 'required|string|max:255' : 'nullable',
-                'caught_time' => $request->event_id == 1 ? 'required|date_format:H:i' : 'nullable',
-                'participant_manual_id' => $request->event_id == 1 ? 'required|string|max:255' : 'nullable',
+                'participant_id' => $request->event_id == 4 ? 'nullable' : 'required|exists:participants,id',
+                'participant_name' => $request->event_id == 4 ? 'required|string|max:255' : 'nullable',
+                'caught_time' => $request->event_id == 4 ? 'required|date_format:H:i' : 'nullable',
+                'participant_manual_id' => $request->event_id == 4 ? 'required|string|max:255' : 'nullable',
             ]);
 
             $eventId = $request->event_id;
