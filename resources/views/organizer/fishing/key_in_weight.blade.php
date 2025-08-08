@@ -38,19 +38,19 @@
                                 {{-- Section shown if event_id == 1 --}}
                                 <div id="manual-input-fields" style="display: none;">
                                     <div class="mb-3">
-                                        <label for="participant_user_id" class="form-label">Participant User ID:</label>
+                                        <label for="participant_user_id" class="form-label">Nombor Joran:</label>
                                         <input type="text" name="participant_manual_id" id="participant_user_id"
                                             class="form-control">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="participant_name" class="form-label">Participant Name:</label>
+                                        <label for="participant_name" class="form-label">Nama Peserta:</label>
                                         <input type="text" name="participant_name" id="participant_name"
                                             class="form-control">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="caught_time" class="form-label">Time Caught:</label>
+                                        <label for="caught_time" class="form-label">Masa Tangkapan:</label>
                                         <input type="time" name="caught_time" id="caught_time" class="form-control">
                                     </div>
                                 </div>
@@ -70,7 +70,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="weight" class="form-label">Weight (kg):</label>
+                                    <label for="weight" class="form-label">Berat Ikan (kg):</label>
                                     <input type="number" step="0.01" min="0.1" name="weight" id="weight"
                                         class="form-control" required>
                                 </div>
