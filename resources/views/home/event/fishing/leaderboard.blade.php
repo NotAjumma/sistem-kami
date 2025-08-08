@@ -56,7 +56,7 @@
                                         <tr>
                                             <th>Rank</th>
                                             <th>Participant</th>
-                                            @if ($leaderboard->event_id == 4)
+                                            @if ($leaderboard->event_id == $event_id_manual)
                                                 <th>User ID</th>
                                             @else
                                                 <th>Phone</th>
@@ -84,7 +84,7 @@
                                                 </td>
                                                 <td>{{ $result->participant->name ?? 'Unknown' }}</td>
                                                 <td>
-                                                    @if ($leaderboard->event_id == 1)
+                                                    @if ($leaderboard->event_id == $event_id_manual)
                                                         {{ $result->participant->no_ic ?? 'Unknown' }}
                                                     @else
                                                         {{ $result->participant->phone ?? 'Unknown' }}

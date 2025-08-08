@@ -24,7 +24,7 @@ class WorkerController extends Controller
     public function ticketsConfirmed(Request $request)
     {
         $page_title = 'Tickets List Confirmed';
-        $authUser = auth()->guard('worker')->user()->load('user');
+        $authUser   = auth()->guard('worker')->user()->load('user');
 
         // Fetch events for the current organizer to populate dropdown
         $events = DB::table('events')
@@ -101,8 +101,9 @@ class WorkerController extends Controller
 
     public function fishingKeyInWeight(Request $request)
     {
-        $page_title = 'Key In Weight';
-        $authUser = auth()->guard('worker')->user()->load('user');
+        $page_title      = 'Key In Weight';
+        $authUser        = auth()->guard('worker')->user()->load('user');
+        $event_id_manual = 4;
 
         // Fetch events for dropdown
         $events = DB::table('events')
@@ -117,17 +118,17 @@ class WorkerController extends Controller
         // If POST submission
         if ($request->isMethod('post')) {
             $request->validate([
-                'event_id' => 'required|exists:events,id',
-                'weight' => 'required|numeric|min:0.1|max:999.99',
+                'event_id'  => 'required|exists:events,id',
+                'weight'    => 'required|numeric|min:0.1|max:999.99',
                 // Conditional validation
-                'participant_id' => $request->event_id == 4 ? 'nullable' : 'required|exists:participants,id',
-                'participant_name' => $request->event_id == 4 ? 'required|string|max:255' : 'nullable',
-                'caught_time' => $request->event_id == 4 ? 'required|date_format:H:i' : 'nullable',
-                'participant_manual_id' => $request->event_id == 4 ? 'required|string|max:255' : 'nullable',
+                'participant_id'        => $request->event_id == $event_id_manual ? 'nullable' : 'required|exists:participants,id',
+                'participant_name'      => $request->event_id == $event_id_manual ? 'required|string|max:255' : 'nullable',
+                'caught_time'           => $request->event_id == $event_id_manual ? 'required|date_format:H:i' : 'nullable',
+                'participant_manual_id' => $request->event_id == $event_id_manual ? 'required|string|max:255' : 'nullable',
             ]);
 
             $eventId = $request->event_id;
-            if ($request->event_id == 4) {
+            if ($request->event_id == $event_id_manual) {
                 $today = now()->format('Y-m-d');
                 $caughtAt = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->caught_time);
             } else {
@@ -135,10 +136,10 @@ class WorkerController extends Controller
             }
 
             // 👤 Create new participant if event_id == 1
-            if ($eventId == 4) {
+            if ($eventId == $event_id_manual) {
                 // Create participant dynamically from form
                 $participant = Participant::create([
-                    'name' => $request->participant_name,
+                    'name'  => $request->participant_name,
                     'email' => "",
                     'phone' => "",
                     'no_ic' => $request->participant_manual_id, // form participant_id becomes no_ic
@@ -159,10 +160,10 @@ class WorkerController extends Controller
             foreach ($leaderboards as $leaderboard) {
                 // Save catch into all leaderboards under this event
                 FishingCatch::create([
-                    'participant_id' => $participantId,
-                    'fishing_leaderboard_id' => $leaderboard->id,
-                    'weight' => $request->weight,
-                    'caught_at' => $caughtAt,
+                    'participant_id'            => $participantId,
+                    'fishing_leaderboard_id'    => $leaderboard->id,
+                    'weight'                    => $request->weight,
+                    'caught_at'                 => $caughtAt,
                 ]);
 
                 // Re-aggregate all results for that leaderboard
@@ -174,8 +175,7 @@ class WorkerController extends Controller
 
                         if ($leaderboard->rank->type === 'closest_to_target') {
                             $target = $leaderboard->rank->target_weight;
-                            $limit = $leaderboard->rank->target_weight_limit;
-
+                            $limit  = $leaderboard->rank->target_weight_limit;
                             $weight = $row->total_weight;
 
                             // Filter based on target_weight_limit
@@ -190,11 +190,11 @@ class WorkerController extends Controller
                         }
 
                         return (object) [
-                            'participant_id' => $row->participant_id,
-                            'total_weight' => $row->total_weight,
-                            'difference' => $diff,
-                            'first_catch' => $row->first_catch,
-                            'last_catch' => $row->last_catch,
+                            'participant_id'    => $row->participant_id,
+                            'total_weight'      => $row->total_weight,
+                            'difference'        => $diff,
+                            'first_catch'       => $row->first_catch,
+                            'last_catch'        => $row->last_catch,
                         ];
                     });
 
@@ -234,12 +234,12 @@ class WorkerController extends Controller
 
                 foreach ($sorted as $i => $result) {
                     FishingLeaderboardResult::create([
-                        'fishing_leaderboard_id' => $leaderboard->id,
-                        'participant_id' => $result->participant_id,
-                        'total_weight' => $result->total_weight,
-                        'difference' => $result->difference,
-                        'rank' => $i + 1,
-                        'caught_at' => $result->first_catch,
+                        'fishing_leaderboard_id'    => $leaderboard->id,
+                        'participant_id'            => $result->participant_id,
+                        'total_weight'              => $result->total_weight,
+                        'difference'                => $result->difference,
+                        'rank'                      => $i + 1,
+                        'caught_at'                 => $result->first_catch,
                     ]);
                 }
             }
@@ -258,8 +258,9 @@ class WorkerController extends Controller
 
     public function showFishingLeaderboard(Request $request)
     {
-        $page_title = 'Leaderboard';
-        $authUser = auth()->guard('worker')->user()->load('user');
+        $page_title      = 'Leaderboard';
+        $authUser        = auth()->guard('worker')->user()->load('user');
+        $event_id_manual = 4;
 
         $allLeaderboards = FishingLeaderboard::with(['rank', 'event'])
             ->whereIn('event_id', $authUser->event_ids)
@@ -275,8 +276,8 @@ class WorkerController extends Controller
                 ->get();
 
             $leaderboardResults[] = [
-                'leaderboard' => $leaderboard,
-                'results' => $results
+                'leaderboard'   => $leaderboard,
+                'results'       => $results
             ];
         }
 
@@ -284,7 +285,8 @@ class WorkerController extends Controller
             'leaderboardResults',
             'allLeaderboards',
             'authUser',
-            'page_title'
+            'page_title',
+            'event_id_manual'
         ));
     }
 
