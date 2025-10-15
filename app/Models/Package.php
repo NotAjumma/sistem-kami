@@ -44,7 +44,7 @@ class Package extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(PackageItem::class);
+        return $this->hasMany(PackageItem::class)->orderBy('sort_order', 'asc');
     }
 
     public function addons(): HasMany
@@ -54,7 +54,7 @@ class Package extends Model
 
     public function images()
     {
-        return $this->hasMany(PackageImage::class)->orderBy('sort_order');
+        return $this->hasMany(PackageImage::class)->orderBy('sort_order')->orderBy('sort_order', 'asc');
     }
 
     public function discounts(): HasMany
