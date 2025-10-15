@@ -154,6 +154,7 @@
         .about-property {
             color: #4b5563;
             line-height: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         /* Responsive Adjustments */
@@ -297,6 +298,25 @@
             vertical-align: middle;
             border-radius: 4px;
         }
+        .about-property ul {
+            margin-left: 20px;
+            list-style: disc;
+        }
+        .about-property p {
+            margin-bottom: 10px;
+        }
+
+         ol {
+            display: block !important;
+            list-style-type: lower-roman !important;
+            margin: 1em 0 !important;
+            padding-left: 40px !important;
+        }
+
+        li {
+            list-style-type: inherit !important;
+        }
+
     </style>
 @endpush
 
@@ -407,9 +427,9 @@
                 <section>
                     <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Description</h6>
                     <hr class="mb-4" />
-                    <p class="about-property">
+                    <div class="about-property">
                        {!! $package->description !!}
-                    </p>
+                    </div>
                 </section>
 
                 <!-- Package Details -->
@@ -456,6 +476,16 @@
                             @endforeach
                         </ul>
                     </section>
+                @endif
+
+                 {{-- Google Map --}}
+                @if($organizer->latitude && $organizer->longitude)
+                    <div style="margin-top: 50px;">
+                        <iframe
+                            src="https://www.google.com/maps?q={{ urlencode($organizer->office_name) }}%20{{ $organizer->latitude }},{{ $organizer->longitude }}&output=embed"
+                            width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                        </iframe>
+                    </div>
                 @endif
             </div>
             <div class="col-lg-5 col-md-12">
