@@ -11,7 +11,7 @@
             </div>
             <div class="card-body">
                 <div class="basic-form">
-                    <form action="{{ route('organizer.packages.submit_create') }}" method="POST">
+                    <form action="{{ route('organizer.business.package.create') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="mb-3 col-md-6">

@@ -305,20 +305,20 @@
 
         <!-- Breadcrumb Navigation -->
         <!-- <nav aria-label="breadcrumb" class="py-2">
-                                                                                                                                                                                                                                                                            <div class="container">
-                                                                                                                                                                                                                                                                                <ol class="breadcrumb mb-0 px-0">
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
-                                                                                                                                                                                                                                                                                    <li class="breadcrumb-item active" aria-current="page">
-                                                                                                                                                                                                                                                                                        <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
-                                                                                                                                                                                                                                                                                    </li>
-                                                                                                                                                                                                                                                                                </ol>
-                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                        </nav> -->
+                                                                                                                                                                                                                                                                                    <div class="container">
+                                                                                                                                                                                                                                                                                        <ol class="breadcrumb mb-0 px-0">
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Home</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Condominium</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Kuala Lumpur</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KL City Centre</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">KLCC</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Desa Kudalari</a></li>
+                                                                                                                                                                                                                                                                                            <li class="breadcrumb-item active" aria-current="page">
+                                                                                                                                                                                                                                                                                                <a href="#" class="breadcrumb-link text-decoration-underline text-muted">For Sale</a>
+                                                                                                                                                                                                                                                                                            </li>
+                                                                                                                                                                                                                                                                                        </ol>
+                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                                </nav> -->
 
         <!-- Images Section -->
         @php
@@ -463,21 +463,21 @@
             <div class="col-lg-5 col-md-12">
                 <!-- Shortlist and Share Buttons -->
                 <!-- <div class="d-flex justify-content-between gap-3 flex-wrap position-relative">
-                                                        <button type="button"
-                                                            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
-                                                            onclick="copyCurrentUrl()" aria-label="Share property">
-                                                            <i class="fa-solid fa-share"></i> Share
-                                                        </button>
+                                                                <button type="button"
+                                                                    class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 mt-3"
+                                                                    onclick="copyCurrentUrl()" aria-label="Share property">
+                                                                    <i class="fa-solid fa-share"></i> Share
+                                                                </button>
 
-                                                        {{-- Bootstrap alert (hidden by default) --}}
-                                                        {{-- Top-right fixed alert --}}
-                                                        <div id="copyAlert"
-                                                            class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
-                                                            role="alert" style="z-index: 1060; min-width: 200px;">
-                                                            Link copied!
-                                                            <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
-                                                        </div>
-                                                    </div> -->
+                                                                {{-- Bootstrap alert (hidden by default) --}}
+                                                                {{-- Top-right fixed alert --}}
+                                                                <div id="copyAlert"
+                                                                    class="alert alert-primary alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 shadow d-none"
+                                                                    role="alert" style="z-index: 1060; min-width: 200px;">
+                                                                    Link copied!
+                                                                    <button type="button" class="btn-close" onclick="hideCopyAlert()" aria-label="Close"></button>
+                                                                </div>
+                                                            </div> -->
 
                 <!-- Organizer Contact Card -->
                 <section class="col-12 mt-5 mb-5 ticket-box ">
@@ -566,7 +566,7 @@
                                 </div>
                             </div>
                         </div>
-                        <table class="calendar table table-bordered">
+                        <table class="calendar table table-bordered mb-3">
                             <thead>
                                 <tr>
                                     <th>Mo</th>
@@ -582,6 +582,45 @@
                                 <!-- Calendar will be dynamically generated here -->
                             </tbody>
                         </table>
+
+                        <!-- Time Slots -->
+                        @if($timeSlots && $timeSlots->isNotEmpty())
+                            <div id="timeSlots" class="d-none">
+                                <hr class="my-4" />
+                                <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select Time Slots</h6>
+                                <hr class="mb-4" />
+                                <!-- Legend -->
+                                <div class="mt-0">
+                                    <h5 class="fw-semibold mb-1">Time Slots Indicator:</h5>
+                                    <ul class="list-inline row gx-2 gy-2">
+                                        <li class="list-inline-item col-6 col-md-auto">
+                                            <span class="legend-box bg-success"></span> Booked Time
+                                        </li>
+                                        <li class="list-inline-item col-6 col-md-auto">
+                                            <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span>
+                                            Available
+                                        </li>
+                                        <li class="list-inline-item col-6 col-md-auto">
+                                            <span class="legend-box bg-primary"></span> Selected Date
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="table-responsive mt-2" style="overflow-x: auto;">
+                                    <table class="table table-bordered text-center align-middle" id="slotTable">
+                                        <thead class="">
+                                            <tr id="slotHeader">
+                                                <th></th>
+                                                <!-- JS will append time slots here -->
+                                            </tr>
+                                        </thead>
+                                        <tbody id="slotBody">
+                                            <!-- JS will append courts + time slot checkboxes here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+
                         <form action="{{ route('business.select_package') }}" method="post">
                             @csrf
 
@@ -589,6 +628,7 @@
                             <input type="hidden" name="organizer_id" value="{{ $organizer->id }}">
 
                             <input type="hidden" name="selected_date" id="selected_date">
+                            <input type="hidden" name="selected_time" id="selected_time">
 
                             <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book
                                 Now</button>
@@ -596,46 +636,6 @@
                 </section>
             </div>
         </aside>
-
-        <!-- Modal Gallery -->
-        <div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content bg-dark">
-                    <div class="modal-body p-0">
-                        <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                @foreach($package->images as $index => $gallery)
-                                    @php $imgUrl = asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $gallery->url); @endphp
-                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                        <img src="{{ $imgUrl }}" class="d-block w-100"
-                                            alt="{{ $gallery->alt_text ?? 'Gallery Image' }}">
-
-                                        {{-- Caption Text Inside Modal --}}
-                                        @if($gallery->alt_text)
-                                            <div class="carousel-caption d-block d-md-block bg-dark bg-opacity-75 p-3 rounded">
-                                                <h5 class="fs-6 fs-md-5">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
-                                                @if($gallery->created_at)
-                                                    <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel"
-                                data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel"
-                                data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </div>
 @endsection
@@ -662,54 +662,6 @@
         </script>
     @endif
 
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('imageGalleryModal');
-            modal.addEventListener('show.bs.modal', function (event) {
-                const trigger = event.relatedTarget;
-                const index = trigger.getAttribute('data-img-index');
-
-                const carousel = bootstrap.Carousel.getInstance(document.getElementById('galleryCarousel')) ||
-                    new bootstrap.Carousel(document.getElementById('galleryCarousel'));
-
-                carousel.to(parseInt(index));
-            });
-        });
-    </script>
-    <script>
-        function toggleDesc(id) {
-            const preview = document.getElementById(`desc-preview-${id}`);
-            const full = document.getElementById(`desc-full-${id}`);
-
-            if (preview.style.display === "none") {
-                preview.style.display = "inline";
-                full.style.display = "none";
-            } else {
-                preview.style.display = "none";
-                full.style.display = "inline";
-            }
-        }
-    </script>
-    <script>
-        function copyCurrentUrl() {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
-                const alertEl = document.getElementById('copyAlert');
-                alertEl.classList.remove('d-none');
-                setTimeout(() => {
-                    hideCopyAlert();
-                }, 3000);
-            }).catch(err => {
-                console.error("Failed to copy URL:", err);
-            });
-        }
-
-        function hideCopyAlert() {
-            const alertEl = document.getElementById('copyAlert');
-            alertEl.classList.add('d-none');
-        }
-    </script>
 
     <!-- calendar script -->
     <script>
@@ -839,7 +791,12 @@
 
                     // Set the hidden input value
                     document.getElementById("selected_date").value = formattedDate;
-                    checkDateSelected();
+                    
+                    if(vendorTimeSlots.length > 0){
+                        renderTimeSlot(formattedDate);
+                    }else{
+                        checkDateSelected();
+                    }
                 });
 
                 row.appendChild(td);
@@ -882,7 +839,8 @@
         renderCalendar(currentDate);
 
         const selectedDateInput = document.getElementById('selected_date');
-        const bookNowBtn = document.getElementById('bookNowBtn');
+        const bookNowBtn        = document.getElementById('bookNowBtn');
+        const selectedTimeInput = document.getElementById("selected_time");
 
         function checkDateSelected() {
             if (selectedDateInput.value) {
@@ -891,6 +849,27 @@
                 bookNowBtn.setAttribute('disabled', true);
             }
         }
+
+        function checkTimeSlotSelected() {
+            const selectedTimeInput = document.getElementById("selected_time");
+            const bookNowBtn        = document.getElementById("bookNowBtn");
+
+            // Parse JSON safely
+            let selected = [];
+            try {
+                selected = JSON.parse(selectedTimeInput.value || "[]");
+            } catch (e) {
+                selected = [];
+            }
+
+            // Enable if there are selected slots, disable otherwise
+            if (Array.isArray(selected) && selected.length > 0) {
+                bookNowBtn.removeAttribute("disabled");
+            } else {
+                bookNowBtn.setAttribute("disabled", true);
+            }
+        }
+
     </script>
     <script>
         const monthSelect = document.getElementById("monthSelect");
@@ -962,5 +941,124 @@
         });
     </script>
 
-    <!-- Calendar script -->
+    <!-- END Calendar script -->
+
+
+    <!-- Time Slot script -->
+    <script>
+        function renderTimeSlot(date) {
+            console.log("Render time slot for:", date);
+
+            const slotHeader = document.getElementById("slotHeader");
+            const slotBody = document.getElementById("slotBody");
+            const timeSlotSection = document.getElementById("timeSlots");
+
+            // Array to store all selected time objects
+            let selectedTimes = [];
+
+            // Always show the table section and clear previous content
+            timeSlotSection.classList.remove("d-none");
+            slotHeader.innerHTML = "<th></th>";
+            slotBody.innerHTML = `
+            <tr>
+                <td colspan="100%" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2 text-muted small">Loading available time slots...</div>
+                </td>
+            </tr>
+        `;
+
+            fetch(`/api/packages/{{ $package->id }}/available-slots?date=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Clear old content again after loading
+                    slotHeader.innerHTML = "<th></th>";
+                    slotBody.innerHTML = "";
+
+                    // Handle no slots
+                    if (!data.slots || data.slots.length === 0) {
+                        slotBody.innerHTML = `
+                        <tr>
+                            <td colspan="100%" class="text-muted py-3">
+                                No available time slots for this date.
+                            </td>
+                        </tr>`;
+                        return;
+                    }
+
+                    // Add time header
+                    const timeLabels = data.slots[0].times;
+                    timeLabels.forEach(time => {
+                        const [hourPart, ampm] = time.split(" "); // e.g. "9:00 AM" -> ["9:00", "AM"]
+                        const th = document.createElement("th");
+                        th.innerHTML = `<div style="font-size: 15px;" class="text-muted">${hourPart}</div><div style="font-size: 15px;" class="text-muted">${ampm || ""}</div>`;
+                        th.style.lineHeight = "1.1";
+                        th.style.padding = "10px";
+                        slotHeader.appendChild(th);
+                    });
+
+
+                    // Create table body rows
+                    data.slots.forEach(slot => {
+                        const tr = document.createElement("tr");
+
+                        const courtCell = document.createElement("td");
+                        courtCell.textContent = slot.court;
+                        tr.appendChild(courtCell);
+
+                        slot.times.forEach(time => {
+                            const td = document.createElement("td");
+                            td.classList.add("p-2");
+
+                            const checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.classList.add("form-check-input");
+                            checkbox.value = `${slot.court}|${time}`;
+
+                            // Mark booked slots
+                            if (slot.bookedTimes && slot.bookedTimes.includes(time)) {
+                                checkbox.disabled = true;
+                                td.classList.add("bg-success", "bg-opacity-50");
+                            }
+
+                            // On selection toggle
+                            checkbox.addEventListener("change", () => {
+                               const slotObj = { date, id: slot.id, time };
+
+                                if (checkbox.checked) {
+                                    td.classList.add("bg-primary", "text-white");
+                                    selectedTimes.push(slotObj);
+                                } else {
+                                    td.classList.remove("bg-primary", "text-white");
+                                    selectedTimes = selectedTimes.filter(
+                                        s => !(s.date === slotObj.date && s.id === slotObj.id && s.time === slotObj.time)
+                                    );
+                                }
+                                selectedTimeInput.value = JSON.stringify(selectedTimes);
+                                checkTimeSlotSelected();
+                                console.log("Selected times:", selectedTimes);
+                            });
+
+                            td.appendChild(checkbox);
+                            tr.appendChild(td);
+                        });
+
+                        slotBody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading time slots:", err);
+                    slotBody.innerHTML = `
+                    <tr>
+                        <td colspan="100%" class="text-danger py-3">
+                            Failed to load time slots. Please try again.
+                        </td>
+                    </tr>`;
+                });
+        }
+
+    </script>
+
 @endpush

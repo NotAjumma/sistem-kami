@@ -136,7 +136,7 @@
 
                             @if ($booking->vendorTimeSlot && $booking->vendorTimeSlot->booked_date_start)
                                 <div class="col-auto h-100 d-flex flex-column justify-content-center text-end">
-                                    <p class="mb-1 small" style="color: #7cb6cc; !important">Your Event Date</p>
+                                    <p class="mb-1 small" style="color: #7cb6cc; !important">Your Booked Date</p>
                                     <small class="text-white">
                                         {{ \Carbon\Carbon::parse($booking->vendorTimeSlot->booked_date_start)->format('d M Y') }}
                                     </small>

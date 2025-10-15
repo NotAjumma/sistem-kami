@@ -207,6 +207,32 @@
                 <form aria-label="Billing Details Form" class="mb-5" method="post"
                     action="{{ route('webform.booking_package') }}">
                     @csrf
+
+                    {{-- Success Message --}}
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    {{-- Error Message --}}
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    {{-- Validation Errors --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <h2 class="section-title" style="font-size: 1.5rem;">Billing Details</h2>
                     <div class="row gx-3 gy-3 section-ticket">
                         <div class="col-sm-6">
@@ -216,23 +242,33 @@
                         </div>
 
                         <div class="col-sm-6">
+                            <label for="city" class="form-label">City *</label>
+                            <input type="text" id="city" name="city" placeholder="City" class="form-control"
+                                value="{{ old('city') }}" required />
+                        </div>
+                        <!-- <div class="col-sm-6">
                             <label for="phone" class="form-label">No IC *</label>
                             <input type="tel" id="phone" name="no_ic" placeholder="IC Number" class="form-control"
                                 value="{{ old('no_ic') }}" required />
-                        </div>
+                        </div> -->
 
                         <div class="col-sm-6">
                             <label for="email" class="form-label">Email *</label>
-                            <input type="email" id="email" name="email" placeholder="Enter Your Email" class="form-control"
-                                value="{{ old('email') }}" required />
+                            <input type="email" id="email" name="email" placeholder="Enter Your Email"
+                                class="form-control" value="{{ old('email') }}" required />
                         </div>
 
-                        <div class="col-sm-6">
-                            <label for="emailConfirm" class="form-label">Email Confirmation *</label>
-                            <input type="email" id="emailConfirm" name="emailConfirm" placeholder="Reconfirm your email"
-                                class="form-control" value="{{ old('emailConfirm') }}" required />
+                       <div class="col-sm-6">
+                            <label for="email_confirmation" class="form-label">Email Confirmation *</label>
+                            <input type="email" id="email_confirmation" name="email_confirmation"
+                                placeholder="Reconfirm your email" class="form-control"
+                                value="{{ old('email_confirmation') }}" required />
                         </div>
 
+                        @error('email')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
+                        
                         <div class="col-sm-6">
                             <label for="phone" class="form-label">Phone *</label>
                             <input type="tel" id="phone" name="phone" placeholder="Phone Number" class="form-control"
@@ -245,7 +281,7 @@
                                 class="form-control" value="{{ old('whatsapp_number') }}" required />
                         </div>
 
-                        <div class="col-sm-6">
+                        <!-- <div class="col-sm-6">
                             <label for="country" class="form-label">Country *</label>
                             <select id="country" name="country" class="default-select form-control" required>
                                 @foreach (config('value.countries') as $code => $name)
@@ -284,7 +320,7 @@
                             <label for="address" class="form-label">Address *</label>
                             <textarea id="address" name="address" placeholder="Address" rows="4" class="form-control"
                                 required>{{ old('address') }}</textarea>
-                        </div>
+                        </div> -->
 
                         <div class="col-12">
                             <label for="notes" class="form-label">Notes</label>
@@ -432,16 +468,46 @@
 
             <h3 class="fw-semibold" style="font-size: 0.875rem; margin-bottom: 0.5rem;">Booking Summary</h3>
             <div class="order-summary mb-3">
-                <p class="mb-1"><strong>Package Info</strong></p>
+
+                @if($selected_time)
+                    @if(!empty($selected_time) && is_array($selected_time))
+                        <div class="">
+                            {{-- Display the date (from first item) --}}
+                            <div class="fw-semibold text-primary">
+                                {{ \Carbon\Carbon::parse($selected_time[0]['date'])->format('d F Y') }}
+                            </div>
+
+                            {{-- List all selected slots --}}
+                                @foreach($selected_time as $time)
+                                    @php
+                                        // Parse start/end from 24h format stored in session
+                                        $start = \Carbon\Carbon::parse($time['booked_time_start']);
+                                        $end   = \Carbon\Carbon::parse($time['booked_time_end']);
+                                    @endphp
+
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span>{{ $start->format('g:i A') }} - {{ $end->format('g:i A') }}<span class="small text-muted">{{ $time['slot_name'] }}</span></span>
+                                        
+                                        <span class="">RM{{ number_format($eachSlotPrice, 2) }}</span>
+                                    </div>
+                                @endforeach
+                        </div>
+                    @endif
+                @else
 
                 <div class="d-flex justify-content-between mb-3">
                     <span class="fw-semibold ">Selected Date</span>
                     <span class="fw-semibold ">{{ \Carbon\Carbon::parse($selected_date)->format('d F Y') }}</span>
                 </div>
+                @endif
+
+                @if(!$selected_time)
                 <div class="d-flex justify-content-between mb-3">
                     <span>Package Price</span>
                     <span>RM{{ number_format($basePrice, 2) }}</span>
                 </div>
+                @endif
+
                 @if($discountAmount)
                     <div class="d-flex justify-content-between mb-3">
                         <span>Discount Price</span>
@@ -524,7 +590,7 @@
                 {!! $package->tnc !!}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
                 <button type="button" id="confirm-tc" class="btn btn-primary">I Agree & Continue</button>
             </div>
             </div>

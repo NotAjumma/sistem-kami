@@ -9,6 +9,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\OrganizerBusinessController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\DB;
@@ -128,6 +129,34 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.ticket.checkin');
     Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.booking.cancel');
+
+
+    Route::get('/preview-ticket/{booking}', function ($bookingId) {
+        $booking = Booking::findOrFail($bookingId);
+
+        $pdf = PDF::loadView('emails.ticket_pdf', ['booking' => $booking]);
+
+        return $pdf->stream('ticket.pdf'); // open inline in browser
+    });
+    // Similar for organizer, marshal, participant...
+});
+
+Route::prefix('organizer/business')->middleware('auth:organizer')->controller(OrganizerBusinessController::class)->group(function () {
+    Route::get('/dashboard', 'dashboard')->name('organizer.business.dashboard');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.business.logout');
+    Route::get('/bookings', 'bookings')->name('organizer.business.bookings');
+
+    // Package
+    Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
+    Route::post('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
+    Route::get('/packages', 'showPackages')->name('organizer.business.packages');
+
+    Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
+    Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.business.booking.verify');
+    Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.business.tickets.confirmed');
+    Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.business.ticket.checkin');
+    Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
+
 
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {

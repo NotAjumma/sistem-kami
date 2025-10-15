@@ -290,9 +290,10 @@ class BookingController extends Controller
     public function storeSelectionPackage(Request $request)
     {
         $validated = $request->validate([
-            'package_id' => 'required|exists:packages,id',
-            'organizer_id' => 'required|exists:organizers,id',
-            'selected_date' => 'required|date',
+            'package_id'        => 'required|exists:packages,id',
+            'organizer_id'      => 'required|exists:organizers,id',
+            'selected_date'     => 'required|date',
+            'selected_time'     => 'nullable|string',
         ]);
 
         // For testing
@@ -363,10 +364,46 @@ class BookingController extends Controller
             ]);
         });
 
+        // Decode selected times
+        $selectedTimes = [];
+        if (!empty($validated['selected_time'])) {
+            $selectedTimes = json_decode($validated['selected_time'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'Invalid selected_time format'], 422);
+            }
+        }
+
+        // Load package with vendor_time_slots
+        $package = Package::with('vendorTimeSlots')->findOrFail($validated['package_id']);
+
+        // Map selected times to include start/end time
+        $bookedTimes = collect($selectedTimes)->map(function ($time) use ($package) {
+            // Find the matching vendor_time_slot by ID
+            $slot = $package->vendorTimeSlots->firstWhere('id', $time['id']);
+
+            if (!$slot) {
+                return null; // skip if slot not found
+            }
+
+            $start = Carbon::parse($time['time']);
+            $end = (clone $start)->addMinutes($slot->slot_duration_minutes);
+
+            return [
+                'date'               => $time['date'],
+                'court'              => $time['court'] ?? null,
+                'slot_id'            => $time['id'],
+                'slot_name'          => $slot->name ?? null,
+                'booked_time_start'  => $start->format('H:i:s'),
+                'booked_time_end'    => $end->format('H:i:s'),
+            ];
+        })->filter()->values()->all();
+
+        // Store in session
         session([
             'selected_package' => $package,
-            'selected_date' => $validated['selected_date'],
-            'package_inputs' => $packageInputsArray,
+            'selected_date'    => $validated['selected_date'],
+            'selected_time'    => $bookedTimes ?? [],
+            'package_inputs'   => $packageInputsArray ?? [],
         ]);
 
         return redirect()->route('business.checkout_package');
@@ -375,10 +412,11 @@ class BookingController extends Controller
     public function showCheckoutPackage()
     {
 
-        $page_title = "Checkout Package";
-        $package = session('selected_package');
-        $selected_date = session('selected_date');
-        $package_inputs = session('package_inputs');
+        $page_title         = "Checkout Package";
+        $package            = session('selected_package');
+        $selected_date      = session('selected_date');
+        $selected_time      = session('selected_time');
+        $package_inputs     = session('package_inputs');
 
         if (!$package || !$selected_date || !$package_inputs) {
             return back()->withErrors([
@@ -386,7 +424,17 @@ class BookingController extends Controller
             ]);
         }
 
-        $basePrice = (float) $package['base_price']; // or base_price if needed
+        $basePrice      = 0;
+        $eachSlotPrice  = 0;
+        
+        if (!empty($selected_time)){
+            $selectedCount  = count($selected_time);
+            $basePrice      = $selectedCount * (float) $package['base_price'];
+            $eachSlotPrice  = (float) $package['base_price'];
+        } else{
+            $basePrice = (float) $package['base_price']; // or base_price if needed
+        }
+        
         $discountAmount = 0;
 
         // Check if there's an active discount
@@ -432,7 +480,8 @@ class BookingController extends Controller
         }
 
         // \Log::info($package);
-        // \Log::info($selected_date);
+        // \Log::info("selected_time");
+        // \Log::info(print_r($selected_time, true));
         if (!$package || !$selected_date) {
             return redirect()->back()->with('success', 'Please select date first.');
         }
@@ -441,6 +490,8 @@ class BookingController extends Controller
             'page_title',
             'package', 
             'selected_date', 
+            'selected_time', 
+            'eachSlotPrice',
             'subtotal', 
             'serviceCharge', 
             'basePrice', 
@@ -603,6 +654,7 @@ class BookingController extends Controller
     {
         $package        = session('selected_package');
         $selected_date  = session('selected_date');
+        $selected_time  = session('selected_time');
         $package_inputs = session('package_inputs');
         if (!$package || !$selected_date || !$package_inputs) {
             return back()->withErrors([
@@ -611,10 +663,11 @@ class BookingController extends Controller
         }
         $request->validate([
             'name'              => 'required|string',
-            'email'             => 'required|email',
-            'no_ic'             => 'required|string',
-            'phone'             => 'nullable|string',
-            'whatsapp_number'   => 'nullable|string',
+            'email'             => 'required|email|confirmed',
+            'email_confirmation' => 'required|email',
+            'no_ic'             => 'nullable|string',
+            'phone'             => 'required|string',
+            'whatsapp_number'   => 'required|string',
             'country'           => 'nullable|string',
             'state'             => 'nullable|string',
             'city'              => 'nullable|string',
@@ -626,8 +679,8 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         $inputAnswers = $request->input('package_inputs', []);
-        // \Log::info("inputAnswers");
-        // \Log::info($inputAnswers);
+        \Log::info("selected_time");
+        \Log::info($selected_time);
         try {
             \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
@@ -652,10 +705,16 @@ class BookingController extends Controller
             // \Log::info($package_inputs);
 
             $packageCode    = strtoupper($package['package_code'] ?? 'DFT');
-            $totalPrice     = $package['base_price'];
+            if (!empty($selected_time)){
+                $selectedCount  = count($selected_time);
+                $totalPrice      = $selectedCount * (float) $package['base_price'];
+                $eachSlotPrice  = (float) $package['base_price'];
+            } else{
+                $totalPrice = (float) $package['base_price']; // or base_price if needed
+            }
             $paymentType    = $request->input('payment_type');
-            \Log::info("paymentType");
-            \Log::info($paymentType);
+            // \Log::info("paymentType");
+            // \Log::info($paymentType);
             $booking = Booking::create([
                 'participant_id'    => $participant->id,
                 'event_id'          => null,
@@ -669,19 +728,38 @@ class BookingController extends Controller
                 'payment_type'       => $paymentType,
             ]);
 
-            BookingsVendorTimeSlot::create([
-                'booking_id'            => $booking->id,
-                'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'],
-                'booked_date_start'     => $selected_date,
-                'booked_date_end'       => $selected_date,
-                'package_id'            => $package['id'],
-                'package_category_id'   => $package['category_id'],
-                'organizer_id'          => $package['organizer_id'],
-                'booked_time_start'     => null, // unless passed
-                'booked_time_end'       => null,
-                'status'                => 'pending',
-                'notes'                 => $request->input('notes') ?? null,
-            ]);
+            if (!empty($selected_time)) {
+                foreach ($selected_time as $slot) {
+                    BookingsVendorTimeSlot::create([
+                        'booking_id'            => $booking->id,
+                        'vendor_time_slot_id'   => $slot['slot_id'] ?? ($package['vendorTimeSlots'][0]['id'] ?? null),
+                        'booked_date_start'     => $slot['date'] ?? $selected_date,
+                        'booked_date_end'       => $slot['date'] ?? $selected_date,
+                        'package_id'            => $package['id'],
+                        'package_category_id'   => $package['category_id'],
+                        'organizer_id'          => $package['organizer_id'],
+                        'booked_time_start'     => $slot['booked_time_start'] ?? null,
+                        'booked_time_end'       => $slot['booked_time_end'] ?? null,
+                        'status'                => 'pending',
+                        'notes'                 => $request->input('notes') ?? null,
+                    ]);
+                }
+            } else {
+                // fallback if no selected_time passed
+                BookingsVendorTimeSlot::create([
+                    'booking_id'            => $booking->id,
+                    'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'],
+                    'booked_date_start'     => $selected_date,
+                    'booked_date_end'       => $selected_date,
+                    'package_id'            => $package['id'],
+                    'package_category_id'   => $package['category_id'],
+                    'organizer_id'          => $package['organizer_id'],
+                    'booked_time_start'     => null,
+                    'booked_time_end'       => null,
+                    'status'                => 'pending',
+                    'notes'                 => $request->input('notes') ?? null,
+                ]);
+            }
 
             foreach ($inputAnswers as $groupIndex => $answers) {
                 foreach ($answers as $inputId => $answer) {
