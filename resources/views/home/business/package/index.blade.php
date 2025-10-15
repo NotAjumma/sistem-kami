@@ -403,6 +403,15 @@
                     </p>
                 </div>
 
+                 <!-- About Package -->
+                <section>
+                    <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Description</h6>
+                    <hr class="mb-4" />
+                    <p class="about-property">
+                       {!! $package->description !!}
+                    </p>
+                </section>
+
                 <!-- Package Details -->
                 @if(!empty($package->items) && count($package->items) > 0)
                     <section class="mb-4">
@@ -448,17 +457,6 @@
                         </ul>
                     </section>
                 @endif
-
-                <!-- About Package -->
-                <section>
-                    <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Description</h6>
-                    <hr class="mb-4" />
-                    <p class="about-property">
-                        {{ $package->description }}
-                    </p>
-                </section>
-
-
             </div>
             <div class="col-lg-5 col-md-12">
                 <!-- Shortlist and Share Buttons -->

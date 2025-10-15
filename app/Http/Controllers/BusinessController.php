@@ -99,14 +99,10 @@ class BusinessController extends Controller
             ->where('slug', $packageSlug)
             ->with([
                 'addons',
-                'items' => function ($query) {
-                    $query->orderBy('sort_order', 'asc');
-                },
+                'items',
                 'discounts',
                 'category',
-                'images' => function ($query) {
-                    $query->orderBy('sort_order', 'asc');
-                },
+                'images',
                 'organizer',
             ])
             ->firstOrFail();
