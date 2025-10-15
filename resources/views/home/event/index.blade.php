@@ -148,6 +148,13 @@
             padding-left: 40px !important;
         }
 
+        ul {
+            display: block !important;
+            list-style-type:disc !important;
+            margin: 1em 0 !important;
+            padding-left: 40px !important;
+        }
+
         li {
             list-style-type: inherit !important;
         }

@@ -157,7 +157,14 @@
             display: block !important;
             list-style-type: lower-roman !important;
             margin: 1em 0 !important;
-            padding-left: 40px !important;
+            padding-left: 20px !important;
+        }
+
+        ul {
+            display: block !important;
+            list-style-type:disc !important;
+            margin: 1em 0 !important;
+            padding-left: 30px !important;
         }
 
         li {
@@ -585,8 +592,8 @@
                 <h5 class="modal-title" id="tncModalLabel">Terms & Conditions</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <p>Please read and accept our terms and conditions before proceeding with your payment.</p>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
+                <p class="mb-3">Please read and accept our terms and conditions before proceeding with your payment.</p>
                 {!! $package->tnc !!}
             </div>
             <div class="modal-footer">

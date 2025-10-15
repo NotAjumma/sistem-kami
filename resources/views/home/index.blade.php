@@ -612,7 +612,7 @@
                                             {{ Str::limit(($package->name), 25) }}
                                         </div>
                                         <div class="event-desc">
-                                            {{ Str::limit(strip_tags($package->description), 80) }}
+                                            {{ Str::limit(strip_tags($package->description), 140) }}
                                         </div>
                                         <hr class="dashed-hr mb-2 mt-4" />
                                         @php
