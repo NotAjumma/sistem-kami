@@ -32,8 +32,6 @@ class BusinessController extends Controller
             'gallery',
         ])->where('slug', $slug)->firstOrFail();
 
-        // \Log::info($organizer);
-
         if ($organizer->type !== 'service' || $organizer->visibility !== 'public' || !$organizer->is_active) {
             abort(403, 'Unauthorized access to non-business type');
         }
@@ -107,22 +105,92 @@ class BusinessController extends Controller
             ])
             ->firstOrFail();
 
-        // \Log::info($package);
-
         if (!$package) {
             abort(404, 'Package not found for this business.');
         }
-
         $bookedDates = DB::table('bookings_vendor_time_slot')
             ->where('organizer_id', $organizer->id)
             ->where('package_id', $package->id)
-            ->whereIn('bookings_vendor_time_slot.status', ['deposit_paid', 'full_payment'])
+            ->whereIn('status', ['deposit_paid', 'full_payment'])
             ->whereDate('booked_date_start', '>=', now())
-            ->pluck('booked_date_start')
-            ->map(function ($date) {
-                return Carbon::parse($date)->format('Y-m-d');
+            ->select('vendor_time_slot_id', 'booked_date_start', 'booked_date_end', 'booked_time_start', 'booked_time_end')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'date_start' => Carbon::parse($row->booked_date_start)->format('Y-m-d'),
+                    'date_end'   => Carbon::parse($row->booked_date_end)->format('Y-m-d'),
+                    'time_start' => $row->booked_time_start,
+                    'time_end'   => $row->booked_time_end,
+                    'vendor_time_slot_id' => $row->vendor_time_slot_id,
+                ];
+            });
+
+        $timeSlots = VendorTimeSlot::where('organizer_id', $organizer->id)
+            ->where(function ($q) use ($package) {
+                $q->whereNull('package_id')
+                    ->orWhere('package_id', $package->id);
             })
-            ->toArray();
+            ->where('is_active', 1)
+            ->orderBy('start_time')
+            ->get();
+
+        $totalSlotCount = 0;
+
+        foreach ($timeSlots as $slot) {
+            if ($slot->is_full_day) {
+                $totalSlotCount += 1;
+                continue;
+            }
+
+            $start  = Carbon::parse($slot->start_time);
+            $end    = Carbon::parse($slot->end_time);
+
+            if (!$slot->slot_duration_minutes || $end->lessThanOrEqualTo($start)) {
+                continue;
+            }
+
+            // Compute how many intervals fit between start and end
+            $diffInMinutes      = $end->diffInMinutes($start);
+            $slotsInThisPeriod  = intdiv($diffInMinutes, $slot->slot_duration_minutes);
+
+            $totalSlotCount += $slotsInThisPeriod;
+        }
+
+        $fullyBookedDates       = [];
+        $groupedByDate          = collect($bookedDates)->groupBy('date_start');
+
+        foreach ($groupedByDate as $date => $bookingsForDate) {
+            $groupedBySlot = collect($bookingsForDate)->groupBy('vendor_time_slot_id');
+            $fullyBookedSlotsForDate = [];
+
+            foreach ($groupedBySlot as $slotId => $slotBookings) {
+                $slot = $timeSlots->firstWhere('id', $slotId);
+                if (!$slot) continue;
+
+                $start          = Carbon::parse($slot->start_time);
+                $end            = Carbon::parse($slot->end_time);
+                $duration       = $slot->slot_duration_minutes;
+                $totalSegments  = floor($start->diffInMinutes($end) / $duration);
+
+                $bookedSegments = 0;
+                foreach ($slotBookings as $booking) {
+                    $bStart = Carbon::parse($booking['time_start']);
+                    $bEnd   = Carbon::parse($booking['time_end']);
+                    $bookedSegments += floor($bStart->diffInMinutes($bEnd) / $duration);
+                }
+
+                if ($bookedSegments >= $totalSegments) {
+                    $fullyBookedSlotsForDate[] = $slotId;
+                }
+            }
+
+            if ($timeSlots->count() > 0 && count($fullyBookedSlotsForDate) === $timeSlots->count()) {
+                // $fullyBookedDates[] = $date;
+                $fullyBookedDates[] = [
+                    'date_start' => $date
+                ];
+            }
+        }
 
         $confirmedBookings = DB::table('bookings_vendor_time_slot')
             ->where('organizer_id', $organizer->id)
@@ -154,9 +222,8 @@ class BusinessController extends Controller
             })
             ->get();
 
-        $limitReachedDays = [];        // To disable dates in frontend
-        $bookedDatesFormatted = [];
-        $weekRangeBlock = [];
+        $limitReachedDays   = [];      
+        $weekRangeBlock     = [];
 
         foreach ($slotLimits as $limit) {
             $grouped = $confirmedBookings
@@ -189,22 +256,11 @@ class BusinessController extends Controller
 
                         if (!in_array($day, $bookedDaysInThisWeek)) {
                             $limitReachedDays[] = $day;
-                        } else {
-                            $bookedDatesFormatted[] = $day;
-                        }
+                        } 
                     }
                 }
             }
         }
-
-        $timeSlots = VendorTimeSlot::where('organizer_id', $organizer->id)
-            ->where(function ($q) use ($package) {
-                $q->whereNull('package_id')
-                    ->orWhere('package_id', $package->id);
-            })
-            ->where('is_active', 1)
-            ->orderBy('start_time')
-            ->get();
 
         $offDays = VendorOffDay::where('organizer_id', $organizer->id)
             ->whereDate('off_date', '>=', now())
@@ -213,25 +269,39 @@ class BusinessController extends Controller
         $page_title = $package->name;
 
         return view('home.business.package.index', [
-            'organizer' => $organizer,
-            'package' => $package,
-            'page_title' => $page_title,
-            'timeSlots' => $timeSlots,
-            'offDays' => $offDays,
-            'bookedDates' => $bookedDates,
-            'limitReachedDays' => $limitReachedDays,
-            'bookedDatesFormatted' => $bookedDatesFormatted,
-            'weekRangeBlock' => $weekRangeBlock,
+            'organizer'         => $organizer,
+            'package'           => $package,
+            'page_title'        => $page_title,
+            'timeSlots'         => $timeSlots,
+            'offDays'           => $offDays,
+            'bookedDates'       => $bookedDates,
+            'fullyBookedDates'  => $fullyBookedDates,
+            'limitReachedDays'  => $limitReachedDays,
+            'weekRangeBlock'    => $weekRangeBlock,
         ]);
     }
 
     public function getAvailableSlots(Request $request, $packageId)
     {
         $date       = $request->get('date');
-        $package    = Package::with('vendorTimeSlots')->findOrFail($packageId);
+        $package    = Package::with('vendorTimeSlots', 'organizer')->findOrFail($packageId);
+        $slots      = [];
 
-        $slots = [];
+        
+        $bookedDates = DB::table('bookings_vendor_time_slot')
+            ->where('organizer_id', $package->organizer->id)
+            ->where('package_id', $package->id)
+            ->whereIn('status', ['deposit_paid', 'full_payment'])
+            ->whereDate('booked_date_start', '=', $date) // ✅ match exact date
+            ->select('vendor_time_slot_id', 'booked_time_start', 'booked_time_end')
+            ->get();
 
+        $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id')->map(function ($bookings) {
+            return $bookings->map(function ($b) {
+                return Carbon::parse($b->booked_time_start)->format('g:i A');
+            })->toArray();
+        });
+        
         foreach ($package->vendorTimeSlots as $timeSlot) {
             $start      = Carbon::parse($timeSlot->start_time);
             $end        = Carbon::parse($timeSlot->end_time);
@@ -244,16 +314,16 @@ class BusinessController extends Controller
             }
 
             $slots[] = [
-                'court' => 'Theme ' . $timeSlot->id,
-                'times' => $times,
-                'id'    => $timeSlot->id,
-
+                'id'            => $timeSlot->id,
+                'court'         => $slot->name ?? 'Slot '.$timeSlot->id,
+                'times'         => $times,
+                'bookedTimes'   => $groupedBookings[$timeSlot->id] ?? []
             ];
         }
 
         return response()->json([
-            'date' => $date,
-            'slots' => $slots,
+            'date'   => $date,
+            'slots'  => $slots,
         ]);
     }
 

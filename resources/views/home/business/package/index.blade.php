@@ -696,8 +696,8 @@
         const vendorTimeSlots = @json($timeSlots);
         const vendorOffDays = @json($offDays);
         const bookedVendorDates = @json($bookedDates);
+        const fullyBookedDates = @json($fullyBookedDates);
         const limitReachedDays = @json($limitReachedDays);
-        const bookedDatesFormatted = @json($bookedDatesFormatted);
         const weekRangeBlock = @json($weekRangeBlock);
         const calendarBody = document.getElementById("calendarBody");
         const currentMonthDisplay = document.getElementById("currentMonth");
@@ -715,8 +715,16 @@
             const firstWeekday = (firstDay.getDay() + 6) % 7; // Make Monday = 0
             const totalDays = lastDay.getDate();
             const offDaysFormatted = vendorOffDays.map(off => off.off_date);
-            const bookedDatesFormatted = bookedVendorDates.map(date => String(date));
+            
+            let bookedDatesFormatted = [];
 
+            if (vendorTimeSlots.length > 0) {
+                bookedDatesFormatted = [...new Set(fullyBookedDates.map(b => b.date_start))];
+            } else {
+                bookedDatesFormatted = [...new Set(bookedVendorDates.map(b => b.date_start))];
+            }
+
+            
             // Update header
             const monthNames = [
                 "January", "February", "March", "April", "May", "June",
@@ -823,7 +831,7 @@
                     if(vendorTimeSlots.length > 0){
                         renderTimeSlot(formattedDate);
                     }else{
-                        checkDateSelected();
+                        checkDateSelected(bookedDatesFormatted, offDaysFormatted, currentLoopDate, formattedDate);
                     }
                 });
 
@@ -870,11 +878,19 @@
         const bookNowBtn        = document.getElementById('bookNowBtn');
         const selectedTimeInput = document.getElementById("selected_time");
 
-        function checkDateSelected() {
-            if (selectedDateInput.value) {
-                bookNowBtn.removeAttribute('disabled');
-            } else {
+        function checkDateSelected(bookedDatesFormatted, offDaysFormatted, currentLoopDate, formattedDate) {
+            if (selectedDateInput.value && bookedDatesFormatted.includes(formattedDate)) {
                 bookNowBtn.setAttribute('disabled', true);
+            } else if (limitReachedDays.includes(formattedDate)) {
+                bookNowBtn.setAttribute('disabled', true);
+            } else if (offDaysFormatted.includes(formattedDate)) {
+                bookNowBtn.setAttribute('disabled', true);
+            } else if (currentLoopDate.getTime() < today.getTime()) {
+                td.classList.add("past-day");
+                td.title = "Cannot book past date";
+            } else {
+                bookNowBtn.removeAttribute('disabled');
+
             }
         }
 
@@ -1029,31 +1045,35 @@
 
 
                     // Create table body rows
+                    // Build each slot row
                     data.slots.forEach(slot => {
                         const tr = document.createElement("tr");
 
+                        // Court / Slot Name
                         const courtCell = document.createElement("td");
                         courtCell.textContent = slot.court;
+                        courtCell.style.fontWeight = "600";
                         tr.appendChild(courtCell);
 
+                        // Each time column
                         slot.times.forEach(time => {
                             const td = document.createElement("td");
-                            td.classList.add("p-2");
+                            td.classList.add("p-2", "text-center");
 
                             const checkbox = document.createElement("input");
                             checkbox.type = "checkbox";
                             checkbox.classList.add("form-check-input");
-                            checkbox.value = `${slot.court}|${time}`;
+                            checkbox.value = `${slot.id}|${time}`;
 
-                            // Mark booked slots
+                            // Mark booked slots (disable + green highlight)
                             if (slot.bookedTimes && slot.bookedTimes.includes(time)) {
                                 checkbox.disabled = true;
                                 td.classList.add("bg-success", "bg-opacity-50");
                             }
 
-                            // On selection toggle
+                            // On user selection
                             checkbox.addEventListener("change", () => {
-                               const slotObj = { date, id: slot.id, time };
+                                const slotObj = { date, id: slot.id, time };
 
                                 if (checkbox.checked) {
                                     td.classList.add("bg-primary", "text-white");
@@ -1064,6 +1084,7 @@
                                         s => !(s.date === slotObj.date && s.id === slotObj.id && s.time === slotObj.time)
                                     );
                                 }
+
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
                                 checkTimeSlotSelected();
                                 console.log("Selected times:", selectedTimes);

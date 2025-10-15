@@ -12,6 +12,7 @@ use App\Models\TicketInput;
 use App\Models\PackageInput;
 use App\Models\VendorOffDay;
 use App\Models\Event;
+use App\Models\VendorTimeSlot;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
 use App\Models\Package;
@@ -278,8 +279,8 @@ class BookingController extends Controller
         $tickets = session('selected_tickets');
         $ticketInputs = session('selected_ticket_inputs');
 
-        \Log::info($event);
-        \Log::info($tickets);
+        // \Log::info($event);
+        // \Log::info($tickets);
         if (!$event || !$tickets) {
             return redirect('/')->with('error', 'Please select tickets first.');
         }
@@ -322,16 +323,24 @@ class BookingController extends Controller
             return back()->withErrors(['selected_date' => 'The selected date falls on an organizer off day.']);
         }
 
-        // ✅ 3. Reject if already booked for that package
-        $dateTaken = BookingsVendorTimeSlot::where('package_id', $validated['package_id'])
-            ->whereDate('booked_date_start', '<=', $packageDate)
-            ->whereDate('booked_date_end', '>=', $packageDate)
-            ->whereNotIn('status', ['failed', 'pending']) // ✅ Only consider paid/full_payment/deposit.
-            ->exists();
+        $timeSlots = VendorTimeSlot::where('organizer_id', $validated['organizer_id'])
+            ->where('organizer_id', $validated['package_id'])
+            ->where('is_active', 1)
+            ->orderBy('start_time')
+            ->get();
 
-        if ($dateTaken) {
-            \Log::info($packageDate . 'The selected date is already booked for this package.');
-            return back()->withErrors(['selected_date' => 'The selected date is already booked for this package.']);
+        if ($timeSlots && $timeSlots->count() > 0) {
+            // ✅ 3. Reject if already booked for that package
+            $dateTaken = BookingsVendorTimeSlot::where('package_id', $validated['package_id'])
+                ->whereDate('booked_date_start', '<=', $packageDate)
+                ->whereDate('booked_date_end', '>=', $packageDate)
+                ->whereNotIn('status', ['failed', 'pending']) // ✅ Only consider paid/full_payment/deposit.
+                ->exists();
+
+            if ($dateTaken) {
+                \Log::info($packageDate . 'The selected date is already booked for this package.');
+                return back()->withErrors(['selected_date' => 'The selected date is already booked for this package.']);
+            }
         }
 
         // \Log::info($validated['package_id']);
@@ -681,6 +690,7 @@ class BookingController extends Controller
         $inputAnswers = $request->input('package_inputs', []);
         \Log::info("selected_time");
         \Log::info($selected_time);
+        \Log::info($package);
         try {
             \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
 
@@ -702,7 +712,7 @@ class BookingController extends Controller
                 throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
             }
 
-            // \Log::info($package_inputs);
+            \Log::info($package);
 
             $packageCode    = strtoupper($package['package_code'] ?? 'DFT');
             if (!empty($selected_time)){
@@ -748,7 +758,7 @@ class BookingController extends Controller
                 // fallback if no selected_time passed
                 BookingsVendorTimeSlot::create([
                     'booking_id'            => $booking->id,
-                    'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'],
+                    'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'] ?? null,
                     'booked_date_start'     => $selected_date,
                     'booked_date_end'       => $selected_date,
                     'package_id'            => $package['id'],
@@ -908,7 +918,7 @@ class BookingController extends Controller
             if ($booking->package_id) {
                 if ($booking->payment_type == 'deposit') {
                     BookingsVendorTimeSlot::where('booking_id', $booking->id)
-                        ->update(['status' => 'deposit']);
+                        ->update(['status' => 'deposit_paid']);
                 } else {
                     BookingsVendorTimeSlot::where('booking_id', $booking->id)
                         ->update(['status' => 'full_payment']);
