@@ -60,6 +60,24 @@ return [
 					'vendor/toastr/css/toastr.min.css'
 
 				],
+				'OrganizerBusinessController_bookings' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
+				],
+				'OrganizerBusinessController_showPackages' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
+				],
+				'OrganizerBusinessController_showCreatePackage' => [
+					'vendor/jquery-smartwizard/dist/css/smart_wizard.min.css',
+					'vendor/dropzone/dist/dropzone.css',
+				],
 				'OrganizerController_ticketsConfirmed' => [
 					'vendor/datatables/css/jquery.dataTables.min.css',
 					'vendor/datatables/responsive/responsive.css',
@@ -340,6 +358,26 @@ return [
 					'vendor/toastr/js/toastr.min.js',
 					'js/plugins-init/toastr-init.js',
 				],
+				'OrganizerBusinessController_bookings' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+				],
+				'OrganizerBusinessController_showPackages' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+				],
 				'OrganizerController_ticketsConfirmed' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',
 					'vendor/datatables/responsive/responsive.js',
@@ -349,6 +387,14 @@ return [
 					'js/plugins-init/sweetalert.init.js',
 					'vendor/toastr/js/toastr.min.js',
 					'js/plugins-init/toastr-init.js',
+				],
+				'OrganizerBusinessController_showCreatePackage' => [
+					'vendor/jquery-steps/build/jquery.steps.min.js',
+					'vendor/jquery-validation/jquery.validate.min.js',
+					'js/plugins-init/jquery.validate-init.js',
+					'vendor/jquery-smartwizard/dist/js/jquery.smartWizard.js',
+					'vendor/dropzone/dist/dropzone.js',
+					
 				],
 				'WorkerController_ticketsConfirmed' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',

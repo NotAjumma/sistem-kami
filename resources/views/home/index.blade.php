@@ -124,28 +124,31 @@
         .bookmark-icon {
             position: absolute;
             top: 12px;
-            right: 12px;
-            width: 28px;
+            right: 5px;
+            padding: 10px;
+            color: #fff;
+            font-weight: 500;
+            /* width: 28px; */
             height: 28px;
-            background-color: rgba(211, 34, 34, 0.95);
+            background-color: #001f4d;
             border-radius: 0.35rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            /* cursor: pointer; */
             z-index: 10;
             transition: background-color 0.3s ease;
         }
 
-        .bookmark-icon:hover {
+        /* .bookmark-icon:hover {
             background-color: #a31313;
-        }
+        } */
 
-        .bookmark-icon svg {
+        /* .bookmark-icon svg {
             fill: white;
             width: 16px;
             height: 16px;
-        }
+        } */
 
         .card-img-top {
             border-bottom-left-radius: 0;
@@ -178,6 +181,34 @@
         }
 
         .event-date-time div svg {
+            width: 16px;
+            height: 16px;
+            fill: #d32222;
+        }
+
+        .package-date-time {
+            font-size: 0.85rem;
+            background-color: white;
+            border-radius: 0.45rem;
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+            padding: 6px 12px;
+            /* display: flex; */
+            justify-content: space-around;
+            gap: 8px;
+            margin-top: -50px;
+            /* margin-bottom: 12px; */
+            position: relative;
+            z-index: 2;
+        }
+
+        .package-date-time div {
+            /* display: flex; */
+            align-items: center;
+            gap: 6px;
+            color: #6c757d;
+        }
+
+        .package-date-time div svg {
             width: 16px;
             height: 16px;
             fill: #d32222;
@@ -529,6 +560,90 @@
             </div>
         </section>
 
+        <!-- Business Custom Section -->
+        <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
+            <div>
+                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 1.2rem;">Packages</h2>
+                <div class="row g-4 justify-content-center">
+                    <!-- Card 1 -->
+                    @foreach ($packages as $package)
+
+                        <div class="col-12 col-sm-6 col-xl-3 col-lg-4 col-md-6">
+                             <a href="{{ route('business.package', ['organizerSlug' => $package->organizer->slug, 'packageSlug' => $package->slug]) }}">
+                                <div class="card position-relative">
+                                    <div class="bookmark-icon" title="Bookmark">
+                                         {{ $package->category->name }}
+                                    </div>
+                                    @if ($package->images->isNotEmpty())
+                                        <img src="{{ asset('images/organizers/' . $package->organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url) }}"
+                                            class="d-block w-100" alt="Package Image">
+                                    @endif
+
+                                    @if ($package->valid_from && $package->valid_until)
+                                        <div class="package-date-time text-center mx-3">
+                                            <div class="fw-bold small text-dark mb-2">
+                                                Available From
+                                            </div>
+
+                                            <div class="fs-6 text-primary fw-semibold">
+                                                <i class="far fa-calendar-alt me-2 text-primary"></i>
+                                                {{ \Carbon\Carbon::parse($package->valid_from)->format('d M Y') }} 
+                                                – 
+                                                {{ \Carbon\Carbon::parse($package->valid_until)->format('d M Y') }}
+                                            </div>
+
+                                            @if (\Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($package->valid_until)))
+                                                <div class="text-success small fw-semibold mt-2">
+                                                    <i class="fas fa-check-circle me-1"></i> Booking is open now!
+                                                </div>
+                                            @else
+                                                <div class="text-danger small fw-semibold mt-2">
+                                                    <i class="fas fa-times-circle me-1"></i> Booking period has ended.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+    
+                                    <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">
+                                        <div class="event-organizer text-primary" title="Organizer">By
+                                            {{ $package->organizer->name }}
+                                        </div>
+                                        <div class="event-title mb-2" title="{{ $package->name }}">
+                                            {{ Str::limit(($package->name), 25) }}
+                                        </div>
+                                        <div class="event-desc">
+                                            {{ Str::limit(strip_tags($package->description), 80) }}
+                                        </div>
+                                        <hr class="dashed-hr mb-2 mt-4" />
+                                        @php
+                                            $location = collect([
+                                                $package->organizer->city,
+                                                $package->organizer->state,
+                                                $package->organizer->country
+                                            ])->filter()->implode(', ');
+
+                                        @endphp
+
+                                        @if ($location)
+                                            <div class="event-footer">
+                                                <div class="location" title="Location"><i
+                                                        class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
+                                                @if (!is_null($package->final_price))
+                                                    <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
+                                                @else
+                                                    <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
         <!-- Events Custom Section -->
         <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <div>
@@ -554,12 +669,6 @@
                                             <i
                                                 class="far fa-calendar-alt me-2 text-primary"></i>{{ \Carbon\Carbon::parse($event->start_date)->format('d M') }}
                                         </div>
-                                        <!-- <div>
-                                                                                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                                                                                                                                            <path
-                                                                                                                                                                                d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm0 18a7.985 7.985 0 0 1-6.33-13.054l9.402 9.401A7.957 7.957 0 0 1 12 20zm6.33-2.946-9.402-9.4A7.963 7.963 0 0 1 18.33 17.054z" />
-                                                                                                                                                                        </svg> 1d 11h 59m
-                                                                                                                                                                    </div> -->
                                         <div class="text-primary">
                                             <i
                                                 class="far fa-clock me-2 text-primary"></i>{{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
@@ -591,7 +700,7 @@
                                                 <div class="location" title="Location"><i
                                                         class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
                                                 @if (!is_null($lowestPrice))
-                                                    <div class="event-price">MYR{{ number_format($lowestPrice, 2) }} <sup>*</sup></div>
+                                                    <div class="event-price">RM{{ number_format($lowestPrice, 2) }} <sup>*</sup></div>
                                                 @else
                                                     <div class="event-price text-muted">Free*</div>
                                                 @endif
@@ -605,9 +714,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Business Custom Section -->
-        <!-- TODO BUSINESS CARD -->
 
         <!-- Opinions Section -->
         <div class="container-fluid courses overflow-hidden py-5">

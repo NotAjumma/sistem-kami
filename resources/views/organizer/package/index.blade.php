@@ -20,40 +20,26 @@
                                 <option value="">All</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
                                 </option>
-                                <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active
                                 </option>
                                 <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                                 </option>
                             </select>
 
-                            @if ($events)
-                            <select name="event_search" onchange="document.getElementById('filterForm').submit()"
+                            <select name="category_search" onchange="document.getElementById('filterForm').submit()"
                                 class="form-select" style="width: 250px;">
-                                <option value="">All Events</option>
-                                @foreach ($events as $event)
-                                    <option value="{{ $event->title }}" {{ request('event_search') == $event->title ? 'selected' : '' }}>
-                                        {{ $event->title }}
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->name }}" {{ request('category_search') == $category->name ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
-                            @endif
-
-                            @if($packages)
-                            <select name="event_search" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All Packages</option>
-                                @foreach ($packages as $package)
-                                    <option value="{{ $package->name }}" {{ request('event_search') == $package->name ? 'selected' : '' }}>
-                                        {{ $package->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @endif
 
 
                             {{-- Search input --}}
                             <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                                placeholder="Search bookings..." style="width: 250px;">
+                                placeholder="Search package..." style="width: 250px;">
 
                             {{-- Buttons wrapper --}}
                             <div class="d-flex gap-2 flex-grow-1 flex-wrap flex-md-nowrap"
@@ -68,120 +54,59 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Booking Code</th>
-                                        
-                                        @if ($packages)
-                                            <th>Package</th>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Status</th>
-                                            <th>Payment Type</th>
-                                            <th>Paid</th>
-                                            <th>Total</th>
-                                            <th>Balance</th>
-                                            <th>Receipt</th>
-                                            <th>Date/Time</th>
-                                            <th>Action</th>
-                                        @else
-                                            <th>Event</th>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>No IC</th>
-                                            <th>Phone</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            <th>Receipt</th>
-                                            <th>Date/Time</th>
-                                            <th>Action</th>
-                                        @endif
+                                        <th>Category</th>
+                                        <th>Package</th>
+                                        <th>Base Price</th>
+                                        <th>Discount</th>
+                                        <th>Final Price</th>
+                                        <th>Deposit</th>
+                                        <th>Last Paid</th>
+                                        <th>Status</th>
+                                        <th>Date/Time</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($bookings as $index => $booking)
-                                        <tr data-status="{{ $booking->status }}">
-                                            <td>{{ $bookings->firstItem() + $index }}</td>
-                                            <td>{{ $booking->booking_code }}</td>
+                                    @foreach ($packages as $index => $package)
+                                        <tr >
+                                            <td>{{ $packages->firstItem() + $index }}</td>
+                                            <td>{{ $package->category->name }}</td>
+                                            <td>{{ $package->name }}</td>
+                                            <td>RM{{ $package->base_price }}</td>
+                                            <td>
+                                                @if ($package->discount_percentage)
+                                                {{ $package->discount_percentage  }}%
+                                                @else
+                                                -
+                                                @endif
+                                            </td>
+                                            <td>RM{{ $package->final_price }}</td>
+                                            <td>
+                                                @if ($package->deposit_percentage)
+                                                {{ (int) $package->deposit_percentage }}%
+                                                @elseif($package->deposit_fixed)
+                                                RM{{ (int) $package->deposit_fixed }}
+                                                @else
+                                                -
+                                                @endif
+                                                
+                                            </td>
+                                            <td>{{ $package->last_paid_date }}</td>
 
-                                            @if ($packages)
-                                            <td>{{ $booking->package->name }}</td>
-                                            @else
-                                            <td>{{ $booking->event->title }}</td>
-                                            @endif
-
-                                            <td>{{ $booking->participant->name }}</td>
-                                            <td>{{ $booking->participant->email }}</td>
-
-                                            @if($events)
-                                            <td>{{ $booking->participant->no_ic }}</td>
-                                            @endif
-
-                                            <td>{{ $booking->participant->phone }}</td>
                                             <td>
                                                 @php
-                                                    $statusClass = match ($booking->status) {
+                                                    $statusClass = match ($package->status) {
                                                         'pending' => 'warning',
-                                                        'confirmed' => 'success',
+                                                        'active' => 'success',
                                                         'cancelled' => 'danger',
                                                         default => 'secondary',
                                                     };
                                                 @endphp
                                                 <span class="badge bg-{{ $statusClass }}">
-                                                    {{ ucfirst($booking->status) }}
+                                                    {{ ucfirst($package->status) }}
                                                 </span>
                                             </td>
-
-                                            @if($packages)
-                                            <td>
-                                                @php
-                                                    $statusClass = match ($booking->payment_type) {
-                                                        'deposit' => 'warning',
-                                                        'full_payment' => 'success',
-                                                        default => 'secondary',
-                                                    };
-                                                    $balance = 0;
-                                                @endphp
-                                                <span class="badge bg-{{ $statusClass }}">
-                                                    {{ ucfirst($booking->payment_type) }}
-                                                </span>
-                                            @endif
-
-                                            <td>RM{{ number_format($booking->paid_amount, 2) }}</td>
-                                            <td>RM{{ number_format($booking->final_price, 2) }}</td>
-                                            <td>
-                                                @if ($booking->payment_type == "deposit")
-                                                    @php    
-                                                    $balance = $booking->final_price - $booking->paid_amount;
-                                                    @endphp
-                                                    RM{{ number_format($balance, 2) }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-
-                                            <td>
-                                                @php
-                                                    $filename = $booking->resit_path; // e.g., 'resit.pdf' or 'resit.png'
-                                                    $encoded = rawurlencode($filename);
-                                                    $url = asset('images/receipts/' . $encoded);
-
-                                                    $isPdf = Str::endsWith(strtolower($filename), '.pdf');
-                                                @endphp
-
-                                                @if ($isPdf)
-                                                    <!-- PDF Button -->
-                                                    <button class="btn btn-primary" data-bs-toggle="modal"
-                                                        data-bs-target="#receiptPdfModal" data-pdf-url="{{ $url }}">
-                                                        View PDF Receipt
-                                                    </button>
-                                                @else
-                                                    <!-- Image Thumbnail -->
-                                                    <img src="{{ $url }}" alt="Receipt" style="width: 100px; cursor: pointer;"
-                                                        data-bs-toggle="modal" data-bs-target="#receiptImageModal"
-                                                        data-img-url="{{ $url }}" />
-                                                @endif
-                                            </td>
-                                            <td>{{ $booking->created_at->format('j M Y, H:iA') }}</td>
+                                            <td>{{ $package->created_at->format('j M Y, H:iA') }}</td>
                                             <td>
                                                 <div class="dropdown">
                                                     <button class="btn btn-primary btn-sm dropdown-toggle" type="button"
@@ -189,29 +114,29 @@
                                                         Actions
                                                     </button>
                                                     <ul class="dropdown-menu">
-                                                        @if($booking->payment_method === 'gform' && $booking->status == 'pending' && !is_null($booking->resit_path))
+                                                        @if($package->payment_method === 'gform' && $package->status == 'pending' && !is_null($package->resit_path))
                                                             <li>
-                                                                <form action="{{ route('organizer.booking.verify', $booking->id) }}"
+                                                                <form action="{{ route('organizer.booking.verify', $package->id) }}"
                                                                     method="POST" class="d-inline">
                                                                     @csrf
                                                                     @method('PATCH')
                                                                     <button type="button"
                                                                         class="dropdown-item text-success btn-verify-payment"
-                                                                        data-booking-code="{{ $booking->booking_code }}">
+                                                                        data-booking-code="{{ $package->booking_code }}">
                                                                         <i class="fas fa-check"></i> Verify Payment
                                                                     </button>
                                                                 </form>
                                                             </li>
                                                         @endif
-                                                        @if($booking->payment_method === 'gform' && $booking->status !== 'cancelled')
+                                                        @if($package->payment_method === 'gform' && $package->status !== 'cancelled')
                                                             <li>
-                                                                <form action="{{ route('organizer.booking.cancel', $booking->id) }}"
+                                                                <form action="{{ route('organizer.booking.cancel', $package->id) }}"
                                                                     method="POST" class="d-inline">
                                                                     @csrf
                                                                     @method('PATCH')
                                                                     <button type="button"
                                                                         class="dropdown-item text-danger btn-cancel"
-                                                                        data-booking-code="{{ $booking->booking_code }}">
+                                                                        data-booking-code="{{ $package->booking_code }}">
                                                                         <i class="fas fa-times"></i> Cancel
                                                                     </button>
                                                                 </form>
@@ -225,7 +150,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        {{ $bookings->withQueryString()->links('vendor.pagination.custom') }}
+                        {{ $packages->withQueryString()->links('vendor.pagination.custom') }}
                     </div>
                 </div>
             </div>

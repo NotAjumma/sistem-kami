@@ -68,7 +68,13 @@
                     'organizer.tickets.confirmed',
                 ];
 
+                $packageRoutes = [
+                    'organizer.packages',
+                    'organizer.package.create',
+                ];
+
                 $isBookingRoute = in_array($currentRoute, $bookingRoutes);
+                $isPackageRoute = in_array($currentRoute, $packageRoutes);
 
                 $fishingRoutes = [
                     'worker.fishing.key_in_weight',
@@ -93,9 +99,16 @@
                         <i class="material-symbols-outlined">table_chart</i>
                         <span class="nav-text">Packages</span>
                     </a>
-                    <ul aria-expanded="false">
-                        <li><a href="{{ route('organizer.packages.create') }}">Create Package</a></li>
-                        <li><a href="{{ route('table_datatable_basic') }}">Packages List</a></li>
+                    <ul class="{{ $isPackageRoute ? 'mm-show' : '' }}"
+                        aria-expanded="{{ $isPackageRoute ? 'true' : 'false' }}">
+                        <li class="{{ $currentRoute === 'organizer.business.package.create' ? 'mm-active' : '' }}">
+                            <a href="{{ route('organizer.business.package.create') }}"
+                                class="{{ $currentRoute === 'organizer.business.package.create' ? 'active mm-active' : '' }}">Create Package</a>
+                        </li>
+                        <li class="{{ $currentRoute === 'organizer.business.packages' ? 'mm-active' : '' }}">
+                            <a href="{{ route('organizer.business.packages') }}"
+                                class="{{ $currentRoute === 'organizer.business.packages' ? 'active mm-active' : '' }}">Packages List</a>
+                        </li>
                     </ul>
                 </li>
                 @endif
@@ -110,7 +123,7 @@
                     <ul class="{{ $isBookingRoute ? 'mm-show' : '' }}"
                         aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
                         <li class="{{ $currentRoute === 'organizer.bookings' ? 'mm-active' : '' }}">
-                            <a href="{{ route('organizer.bookings') }}"
+                            <a href="{{ route('organizer.business.bookings') }}"
                                 class="{{ $currentRoute === 'organizer.bookings' ? 'active mm-active' : '' }}">Bookings
                                 List</a>
                         </li>

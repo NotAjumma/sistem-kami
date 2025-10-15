@@ -107,7 +107,7 @@ class BusinessController extends Controller
             ])
             ->firstOrFail();
 
-        \Log::info($package);
+        // \Log::info($package);
 
         if (!$package) {
             abort(404, 'Package not found for this business.');
@@ -224,6 +224,39 @@ class BusinessController extends Controller
             'weekRangeBlock' => $weekRangeBlock,
         ]);
     }
+
+    public function getAvailableSlots(Request $request, $packageId)
+    {
+        $date       = $request->get('date');
+        $package    = Package::with('vendorTimeSlots')->findOrFail($packageId);
+
+        $slots = [];
+
+        foreach ($package->vendorTimeSlots as $timeSlot) {
+            $start      = Carbon::parse($timeSlot->start_time);
+            $end        = Carbon::parse($timeSlot->end_time);
+            $interval   = $timeSlot->slot_duration_minutes;
+
+            $times = [];
+            while ($start < $end) {
+                $times[] = $start->format('g:i A');
+                $start->addMinutes($interval);
+            }
+
+            $slots[] = [
+                'court' => 'Theme ' . $timeSlot->id,
+                'times' => $times,
+                'id'    => $timeSlot->id,
+
+            ];
+        }
+
+        return response()->json([
+            'date' => $date,
+            'slots' => $slots,
+        ]);
+    }
+
 
     public function showBooking($organizerSlug, $packageSlug)
     {

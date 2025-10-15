@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Category;
 use App\Models\PackageCategory;
-use App\Models\Ticket;
+use App\Models\Package;
 use App\Models\Event;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -21,15 +21,27 @@ class HomeController extends Controller
     {
         // Only fetch events that are available (e.g. status = 1 = active, 0 = coming soon, 3 = ended)
         $events = Event::with(['organizer', 'category', 'tickets'])
-            ->where('status', '1') //todo remove 
+            ->where('status', '1')
+            ->orderByDesc('id')
             ->get();
+
+        $packages = Package::with([
+            'organizer',
+            'category',
+            'images' => function ($query) {
+                $query->where('is_cover', true);
+            },
+        ])
+        ->where('status', 'active')
+        ->orderByDesc('order_by')
+        ->get();
 
         $eventCategories = Category::whereNull('parent_id')
             ->orderBy('order_by')
             ->get();
         // $packageTypes = PackageCategory::all();
 
-        return view('home.index', compact('events', 'eventCategories'));
+        return view('home.index', compact('events', 'packages', 'eventCategories'));
     }
 
     public function search(Request $request)

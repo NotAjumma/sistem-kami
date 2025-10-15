@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\BusinessController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,3 +39,5 @@ Route::post('/marshal/login', function(Request $request) {
 Route::post('/login', function(Request $request) {
     return app(AuthController::class)->login($request, null);
 });
+
+Route::get('/packages/{package}/available-slots', [BusinessController::class, 'getAvailableSlots']);
