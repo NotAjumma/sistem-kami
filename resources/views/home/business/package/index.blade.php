@@ -706,6 +706,7 @@
         const maxBookingOffset = @json($package->max_booking_year_offset ?? 2);
         // console.log(vendorOffDays);
         let currentDate = new Date();
+        const timeSlotSection = document.getElementById("timeSlots");
 
         function renderCalendar(date) {
             const year = date.getFullYear();
@@ -777,9 +778,6 @@
                 } else if (currentLoopDate.getTime() < today.getTime()) {
                     td.classList.add("past-day");
                     td.title = "Cannot book past date";
-                } else if (bookedDatesFormatted.includes(formattedDate)) {
-                    td.classList.add("booked-day");
-                    td.title = "Unavailable (Fully Booked)";
                 } else {
                     // Check if in a blocked week
                     const weekWithBooking = weekRangeBlock.find(range => {
@@ -828,11 +826,20 @@
                     // Set the hidden input value
                     document.getElementById("selected_date").value = formattedDate;
                     
-                    if(vendorTimeSlots.length > 0){
-                        renderTimeSlot(formattedDate);
-                    }else{
+                    if (vendorTimeSlots.length > 0) {
+                        const shouldHide =
+                            currentLoopDate.getTime() < today.getTime() ||
+                            offDaysFormatted.includes(formattedDate) ||
+                            limitReachedDays.includes(formattedDate);
+
+                        if (shouldHide) {
+                            timeSlotSection.classList.add("d-none");
+                        } else {
+                            renderTimeSlot(formattedDate, currentLoopDate);
+                        }
+                    } else {
                         checkDateSelected(bookedDatesFormatted, offDaysFormatted, currentLoopDate, formattedDate);
-                    }
+                    }   
                 });
 
                 row.appendChild(td);
@@ -894,7 +901,7 @@
             }
         }
 
-        function checkTimeSlotSelected() {
+        function checkTimeSlotSelected(currentLoopDate) {
             const selectedTimeInput = document.getElementById("selected_time");
             const bookNowBtn        = document.getElementById("bookNowBtn");
 
@@ -990,12 +997,11 @@
 
     <!-- Time Slot script -->
     <script>
-        function renderTimeSlot(date) {
+        function renderTimeSlot(date, currentLoopDate) {
             console.log("Render time slot for:", date);
 
             const slotHeader = document.getElementById("slotHeader");
             const slotBody = document.getElementById("slotBody");
-            const timeSlotSection = document.getElementById("timeSlots");
 
             // Array to store all selected time objects
             let selectedTimes = [];
@@ -1086,8 +1092,8 @@
                                 }
 
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
-                                checkTimeSlotSelected();
-                                console.log("Selected times:", selectedTimes);
+                                checkTimeSlotSelected(currentLoopDate);
+                                // console.log("Selected times:", selectedTimes);
                             });
 
                             td.appendChild(checkbox);
