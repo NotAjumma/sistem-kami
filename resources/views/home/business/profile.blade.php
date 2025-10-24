@@ -308,7 +308,7 @@
             <div class="carousel-inner">
                 @foreach($organizer->banner_path ?? [] as $index => $image)
                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}" loading="lazy"
+                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}" 
                             class="d-block w-100 carousel-image" alt="Slide {{ $index + 1 }}">
                     </div>
                 @endforeach
@@ -326,7 +326,7 @@
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
             <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
-                class="profile-pic shadow" loading="lazy"/>
+                class="profile-pic shadow" />
             <div class="card-profile profile-card">
                 <div class="profile-intro">
                     <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
@@ -472,7 +472,7 @@
                                 <div class="carousel-inner">
                                     @foreach($package->images ?? [] as $index => $image)
                                         <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}" loading="lazy"
+                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}" 
                                                 class="d-block w-100" alt="{{ $image->alt_text ?? 'Slide ' . ($index + 1) }}">
                                         </div>
                                     @endforeach
