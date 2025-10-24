@@ -232,6 +232,61 @@
             background: white;
             user-select: none;
         }
+
+        .card {
+            border-radius: 12px;
+            border: 1.5px solid var(--primary);
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgb(55 54 175 / 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-profile {
+            border-radius: 12px;
+            border: 1.5px solid var(--primary);
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgb(55 54 175 / 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgb(55 54 175 / 0.75);
+        }
+
+        .event-desc {
+            font-size: 0.9rem;
+            color: #545454;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            user-select: text;
+        }
+
+        .event-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            user-select: text;
+        }
+
+        .bookmark-icon {
+            position: absolute;
+            top: 12px;
+            right: 5px;
+            padding: 10px;
+            color: #fff;
+            font-weight: 500;
+            /* width: 28px; */
+            height: 28px;
+            background-color: #001f4d;
+            border-radius: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* cursor: pointer; */
+            z-index: 10;
+            transition: background-color 0.3s ease;
+        }
     </style>
 @endpush
 
@@ -244,7 +299,7 @@
             <div class="carousel-inner">
                 @foreach($organizer->banner_path ?? [] as $index => $image)
                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}"
+                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}" loading="lazy"
                             class="d-block w-100 carousel-image" alt="Slide {{ $index + 1 }}">
                     </div>
                 @endforeach
@@ -300,7 +355,7 @@
 
                     <p class="profile-intro-desc mb-2">
                         <span id="desc-preview-{{ $organizer->id }}">
-                            {{ $excerpt }}
+                            {!! $excerpt !!}
                             @if($isLong)
                                 <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Read more</a>
                             @endif
@@ -308,7 +363,7 @@
 
                         @if($isLong)
                             <span id="desc-full-{{ $organizer->id }}" style="display: none;">
-                                {{ $organizer->description }}
+                                {!! $organizer->description !!}
                                 <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Show less</a>
                             </span>
                         @endif
@@ -395,7 +450,10 @@
             @endif
                 @foreach($packages as $package)
                     <div class="col-12 col-md-6 col-xl-6">
-                        <article class="portfolio-item">
+                        <article class="card portfolio-item">
+                            <div class="bookmark-icon" title="Bookmark">
+                                {{ $package->category->name }}
+                            </div>
                             {{-- Package image --}}
                             @php
                                 $validDiscount = $package->discounts[0] ?? null;
@@ -405,7 +463,7 @@
                                 <div class="carousel-inner">
                                     @foreach($package->images ?? [] as $index => $image)
                                         <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}"
+                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}" loading="lazy"
                                                 class="d-block w-100" alt="{{ $image->alt_text ?? 'Slide ' . ($index + 1) }}">
                                         </div>
                                     @endforeach
@@ -424,14 +482,11 @@
 
                             <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}">
                                 <div class="portfolio-content">
+                                    <!-- <div class="event-organizer text-primary" title="Organizer">By
+                                        {{ $organizer->name }}
+                                    </div> -->
                                     {{-- Package Name --}}
-                                    <h4 class="portfolio-title">{{ $package->name }}</h4>
-                                    <h6>
-                                        <span class="badge mb-2"
-                                            style="background-color: #3736af; margin-right: 8px; padding: 0.5em 1em; letter-spacing: 0.2em;">
-                                            {{ $package->category->name }}
-                                        </span>
-                                    </h6>
+                                    <h4 class="event-title portfolio-title">{{ $package->name }}</h4>
                                     {{-- Discount Info --}}
                                     @if($validDiscount && $validDiscount->is_active)
                                         <p class="text-danger mb-1">
@@ -457,7 +512,7 @@
                                         }
                                     @endphp
 
-                                    <p class="portfolio-price">
+                                    <p class="event-title portfolio-price">
                                         @if($finalPrice < $originalPrice)
                                             <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
                                         @endif
@@ -477,11 +532,15 @@
                                         </time>
                                     @endif
 
+                                    <div class="event-desc mt-2">
+                                        {{ Str::limit(strip_tags($package->description), 340) }}
+                                    </div>
+
                                     {{-- Quick Booking Button --}}
                                     <div class="mt-3">
                                         <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
-                                            class="btn btn-primary w-100">
-                                            Details
+                                            class="btn btn-primary w-100" style="background-color: #001f4d !important;">
+                                            Read more
                                         </a>
                                     </div>
 

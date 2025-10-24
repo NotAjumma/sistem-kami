@@ -33,7 +33,7 @@ class HomeController extends Controller
             },
         ])
         ->where('status', 'active')
-        ->orderByDesc('order_by')
+        ->orderBy('order_by')
         ->get();
 
         $eventCategories = Category::whereNull('parent_id')
