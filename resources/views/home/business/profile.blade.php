@@ -20,11 +20,12 @@
             height: 96px;
             object-fit: cover;
             border-radius: 50%;
-            border: 4px solid white;
+            border: 2px solid var(--primary);
+            box-shadow: 0 6px 14px rgb(55 54 175 / 0.45);
             position: absolute;
             top: 30px;
             left: 1.5rem;
-            background-color: #e9ecef;
+            background-color: var(--primary);
             z-index: 100;
         }
 
@@ -58,6 +59,14 @@
         .profile-intro .location .material-icons {
             font-size: 1rem;
             color: #6c757d;
+        }
+
+        .event-organizer {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #d32222;
+            margin-bottom: 0.2rem;
+            user-select: text;
         }
 
         .service-card {
@@ -318,12 +327,12 @@
         <section id="profile" class="position-relative mb-5 mt-5">
             <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
                 class="profile-pic shadow" loading="lazy"/>
-            <div class="profile-card">
+            <div class="card-profile profile-card">
                 <div class="profile-intro">
                     <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
                         <div>
                             <h2 class="mb-0">{{ $organizer->name }}</h2>
-                            <p class="mb-1 fst-italic text-muted">{{ $organizer->category }}</p>
+                            <p class="mb-1 fst-italic text-primary">{{ $organizer->category }}</p>
                         </div>
 
                         @if (!empty($organizer->social_links))
@@ -355,7 +364,7 @@
 
                     <p class="profile-intro-desc mb-2">
                         <span id="desc-preview-{{ $organizer->id }}">
-                            {!! $excerpt !!}
+                            {{ $excerpt }}
                             @if($isLong)
                                 <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Read more</a>
                             @endif
@@ -363,7 +372,7 @@
 
                         @if($isLong)
                             <span id="desc-full-{{ $organizer->id }}" style="display: none;">
-                                {!! $organizer->description !!}
+                                {{ $organizer->description }}
                                 <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Show less</a>
                             </span>
                         @endif
@@ -381,7 +390,7 @@
                     @endphp
 
                     @if (!empty($addressParts))
-                        <div class="location d-flex align-items-start text-muted">
+                        <div class="event-organizer text-primary d-flex align-items-start">
                             <span>{{ implode(', ', $addressParts) }}</span>
                         </div>
                     @endif
