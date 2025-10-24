@@ -513,8 +513,8 @@
                         <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Service Provider</h6>
                         <hr class="mb-4" />
                         <div class="d-flex align-items-center mb-2 gap-3">
-                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a58ec3c2-1752-4c8a-9f9c-9ef970723935.png"
-                                alt=" logo" class="agent-avatar" />
+                            <img src="{{ $package->organizer->logo_url }}" alt="{{ $package->organizer->name }} logo"
+                                class="agent-avatar" />
                             <div>
                                 <p class="fw-semibold mb-1" style="font-size: 1rem; line-height: 1.2;">
                                     {{ $organizer->name }}
@@ -523,7 +523,7 @@
 
                                 <p class="mb-0" style="font-size: 0.875rem; color: #3736af; ">
                                     Email: <a href="mailto:{{ $organizer->email }}" class="link-red"
-                                        style="font-weight: 600;">{{ $organizer->email }}</a>
+                                        style="font-weight: 600;">{{ $organizer->email }}</a>a
                                 </p>
                                 <p class="mb-1" style="font-size: 0.875rem; color: #3736af;">
                                     Phone: <span style="font-weight: 600;">{{ $organizer->phone }}</span>

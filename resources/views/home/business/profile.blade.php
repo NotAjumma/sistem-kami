@@ -261,8 +261,8 @@
 
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
-            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5d987ede-c9f0-4c63-a837-e2fef063a538.png"
-                alt="Portrait of Emma Williams, wedding planner smiling" class="profile-pic shadow" loading="lazy" />
+            <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
+                class="profile-pic shadow" loading="lazy"/>
             <div class="profile-card">
                 <div class="profile-intro">
                     <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
