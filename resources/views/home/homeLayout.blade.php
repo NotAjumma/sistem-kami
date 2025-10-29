@@ -17,36 +17,41 @@
 
 	gtag('config', 'G-WF0W2KJX24');
 	</script>
-	<!--Title-->
-	<title>
-		@if (request()->is('/'))
-			{{ config('dz.name') }}
-		@else
-			{{ $page_title ?? '' }}
-		@endif
-	</title>
-
 
 	<!-- Meta -->
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="author" content="Sistem Kami">
+	<meta name="author" content="{{ config('app.name', 'Sistem Kami') }}">
 	<meta name="robots" content="index, follow">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="keywords"
-		content="Sistem Kami, Business Software, Custom Software, Web Applications, Ready-made Systems, Laravel, Tailor-made Solutions, Business Tools, Productivity Software, Admin Dashboard, CRM, ERP, POS, Custom Web Development, Business Automation, Scalable Software, Business Platform, UI Kit, Responsive Design, Software as a Service, Custom Dashboards, Web UI, SaaS Platform, Software for SMEs, Business Management, Cloud Solutions">
-	<meta name="description"
-		content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-	<meta property="og:title" content="Sistem Kami | Smart, Simple, Custom Business Software">
-	<meta property="og:description"
-		content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-	<meta property="og:image" content="">
-	<meta name="format-detection" content="telephone=no">
-	<meta name="twitter:title" content="Sistem Kami | Smart, Simple, Custom Business Software">
-	<meta name="twitter:description"
-		content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-	<meta name="twitter:image" content="">
+
+	@php
+		// Default meta values
+		$appName = config('app.name', 'Sistem Kami');
+		$defaultDescription = "$appName provides a platform for event organizers to host and manage events, and for vendors to list and manage their services and bookings — all in one place.";
+		$defaultKeywords = "$appName, Event Organizer System, Vendor Management, Event Booking, Vendor Services, Event Platform, Booking System, Event Tools, Custom Software, Business Platform, Online Booking, Event Management, Vendor Marketplace, SaaS Event Platform, Business Automation, Cloud Solutions";
+		$defaultTitle = "$appName | Event Organizer & Vendor Booking Platform";
+		$defaultImage = asset('images/og-default.jpg');
+
+		// If $seo exists, extract it for convenience
+		$seoTitle = $seo['title'] ?? ($page_title ?? $defaultTitle);
+		$seoDescription = $seo['description'] ?? ($page_description ?? $defaultDescription);
+		$seoKeywords = $seo['keywords'] ?? ($page_keywords ?? $defaultKeywords);
+		$seoImage = $seo['image'] ?? ($page_image ?? $defaultImage);
+	@endphp
+
+	<meta name="keywords" content="{{ $seoKeywords }}">
+	<meta name="description" content="{{ $seoDescription }}">
+	<meta property="og:title" content="{{ $seoTitle }}">
+	<meta property="og:description" content="{{ $seoDescription }}">
+	<meta property="og:image" content="{{ $seoImage }}">
+	<meta name="format-detection" content="@yield('page_phone', $page_phone ?? 'telephone=no')">
+	<meta name="twitter:title" content="{{ $seoTitle }}">
+	<meta name="twitter:description" content="{{ $seoDescription }}">
+	<meta name="twitter:image" content="{{ $seoImage }}">
 	<meta name="twitter:card" content="summary_large_image">
+
+	<title>{{ $seoTitle }}</title>
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">

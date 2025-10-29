@@ -20,8 +20,65 @@ use Carbon\Carbon;
 class BusinessController extends Controller
 {
 
+    private function page_seo($organizer, $package = null)
+    {
+        $appName = config('app.name');
+        $isPackage = !is_null($package);
+
+        $organizerName = $organizer->name ?? '';
+        $organizerCity = $organizer->city ?? '';
+        $organizerCategory = $organizer->category ?? '';
+        $organizerType = $organizer->type ?? '';
+
+        $imageSource = $package->image_url ?? $organizer->banner_path ?? $organizer->logo_path;
+
+        if (is_array($imageSource)) {
+            $imageSource = $imageSource[0] ?? null;
+        }
+
+        $seoImage = $imageSource
+            ? asset('storage/' . $imageSource)
+            : asset('images/og-default.jpg');
+
+        if ($isPackage) {
+            return [
+                'title' => "{$package->name} by {$organizerName} | {$appName}",
+                'description' => Str::limit(strip_tags($package->description ?? $organizer->description), 160),
+                'keywords' => implode(', ', array_filter([
+                    $package->name,
+                    "{$package->name} package",
+                    "{$organizerName} {$package->name}",
+                    "{$organizerName} package",
+                    strtolower($organizerCategory),
+                    "{$organizerType} in {$organizerCity}",
+                    "affordable {$organizerCategory} Malaysia",
+                    "best {$organizerCategory} in {$organizerCity}",
+                    "{$appName} vendor",
+                ])),
+                'image' => $seoImage,
+            ];
+        }
+
+        return [
+            'title' => "{$organizerName} | {$organizerCategory} in {$organizerCity} | {$appName}",
+            'description' => Str::limit(strip_tags($organizer->description), 160),
+            'keywords' => implode(', ', array_filter([
+                $organizerName,
+                "{$organizerName} profile",
+                "{$organizerName} services",
+                "{$organizerCategory} in {$organizerCity}",
+                "{$organizerType} Malaysia",
+                "best {$organizerCategory} vendor",
+                "wedding {$organizerType} Malaysia",
+                "{$appName} vendor",
+            ])),
+            'image' => $seoImage,
+        ];
+    }
+
     public function showProfile(Request $request, $slug)
     {
+        
         $organizer = Organizer::with([
             'activePackages.addons',
             'activePackages.items',
@@ -36,6 +93,8 @@ class BusinessController extends Controller
             abort(403, 'Unauthorized access to non-business type');
         }
 
+        $seo = $this->page_seo($organizer);
+        
         $allActivePackages = $organizer->activePackages()->get();
 
         $packageCategories = \App\Models\PackageCategory::whereIn(
@@ -75,7 +134,8 @@ class BusinessController extends Controller
             'organizer',
             'packages',
             'packageCategories',
-            'page_title'
+            'page_title',
+            'seo'
         ));
     }
 
@@ -267,6 +327,7 @@ class BusinessController extends Controller
             ->get();
 
         $page_title = $package->name;
+        $seo = $this->page_seo($organizer, $package);
 
         return view('home.business.package.index', [
             'organizer'         => $organizer,
@@ -278,6 +339,7 @@ class BusinessController extends Controller
             'fullyBookedDates'  => $fullyBookedDates,
             'limitReachedDays'  => $limitReachedDays,
             'weekRangeBlock'    => $weekRangeBlock,
+            'seo'               => $seo,
         ]);
     }
 
