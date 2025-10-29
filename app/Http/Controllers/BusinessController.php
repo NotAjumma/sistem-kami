@@ -25,26 +25,27 @@ class BusinessController extends Controller
         $appName = config('app.name');
         $isPackage = !is_null($package);
 
-        $organizerName = $organizer->name ?? '';
-        $organizerCity = $organizer->city ?? '';
-        $organizerCategory = $organizer->category ?? '';
-        $organizerType = $organizer->type ?? '';
+        $organizerName      = $organizer->name ?? '';
+        $organizerCity      = $organizer->city ?? '';
+        $organizerState     = $organizer->state ?? '';
+        $organizerCategory  = $organizer->category ?? '';
+        $organizerType      = $organizer->type ?? '';
 
-        $imageSource = $package->image_url ?? $organizer->banner_path ?? $organizer->logo_path;
+        $imageSource        = $package->image_url ?? $organizer->banner_path ?? $organizer->logo_path;
 
         if (is_array($imageSource)) {
             $imageSource = $imageSource[0] ?? null;
         }
 
         $seoImage = $imageSource
-            ? asset('storage/' . $imageSource)
+            ? asset('images/organizers/' . $organizer->id . '/' . $imageSource)
             : asset('images/og-default.jpg');
 
         if ($isPackage) {
             return [
-                'title' => "{$package->name} by {$organizerName} | {$appName}",
-                'description' => Str::limit(strip_tags($package->description ?? $organizer->description), 160),
-                'keywords' => implode(', ', array_filter([
+                'title'         => "{$package->name} by {$organizerName} | {$appName}",
+                'description'   => strip_tags($package->description ?? $organizer->description),
+                'keywords'      => implode(', ', array_filter([
                     $package->name,
                     "{$package->name} package",
                     "{$organizerName} {$package->name}",
@@ -55,24 +56,28 @@ class BusinessController extends Controller
                     "best {$organizerCategory} in {$organizerCity}",
                     "{$appName} vendor",
                 ])),
-                'image' => $seoImage,
+                'image'         => $package->images->first()
+                    ? asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url)
+                    : asset('images/logo-blue-full.png'),
+
             ];
         }
 
         return [
-            'title' => "{$organizerName} | {$organizerCategory} in {$organizerCity} | {$appName}",
-            'description' => Str::limit(strip_tags($organizer->description), 160),
-            'keywords' => implode(', ', array_filter([
+            'title'             => "{$organizerName} | {$organizerCategory} in {$organizerCity}, {$organizerState}  | {$appName}",
+            'description'       => strip_tags($organizer->description),
+            'keywords'          => implode(', ', array_filter([
                 $organizerName,
                 "{$organizerName} profile",
                 "{$organizerName} services",
                 "{$organizerCategory} in {$organizerCity}",
+                "{$organizerCategory} in {$organizerState}",
                 "{$organizerType} Malaysia",
                 "best {$organizerCategory} vendor",
                 "wedding {$organizerType} Malaysia",
                 "{$appName} vendor",
             ])),
-            'image' => $seoImage,
+            'image'             => $seoImage,
         ];
     }
 
