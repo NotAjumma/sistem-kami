@@ -523,7 +523,7 @@
 
                                 <p class="mb-0" style="font-size: 0.875rem; color: #3736af; ">
                                     Email: <a href="mailto:{{ $organizer->email }}" class="link-red"
-                                        style="font-weight: 600;">{{ $organizer->email }}</a>a
+                                        style="font-weight: 600;">{{ $organizer->email }}</a>
                                 </p>
                                 <p class="mb-1" style="font-size: 0.875rem; color: #3736af;">
                                     Phone: <span style="font-weight: 600;">{{ $organizer->phone }}</span>
