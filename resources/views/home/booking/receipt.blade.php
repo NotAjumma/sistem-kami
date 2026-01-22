@@ -174,15 +174,6 @@
                                 <h5 class="text-white mb-0 medium">{{ $booking->package->name }}</h5>
                                 <small class="text-white mb-0">by {{ $booking->package->organizer->name }}</small>
                             </div>
-
-                            @if ($booking->vendorTimeSlot && $booking->vendorTimeSlot->booked_date_start)
-                                <div class="col-auto h-100 d-flex flex-column justify-content-center text-end">
-                                    <p class="mb-1 small" style="color: #7cb6cc; !important">Your Booked Date</p>
-                                    <small class="text-white">
-                                        {{ \Carbon\Carbon::parse($booking->vendorTimeSlot->booked_date_start)->format('d M Y') }}
-                                    </small>
-                                </div>
-                            @endif
                         </div>
 
 
@@ -203,17 +194,35 @@
                     {{-- Details --}}
                     <div class="payment-detail-row"><span>Receipt Number</span><strong>{{ $booking->booking_code }}</strong>
                     </div>
-                    <div class="payment-detail-row"><span>Payment Date &
-                            Time</span><strong>{{ format_payment_datetime($booking->created_at) }}</strong></div>
+                    <div class="payment-detail-row"><span>Payment Date</span><strong>{{ format_payment_datetime($booking->created_at) }}</strong></div>
                     <div class="payment-detail-row"><span>Payment
                             Type</span><strong>{{ get_payment_type_label($booking->payment_type) }}</strong></div>
                     <div class="payment-detail-row"><span>Payment
                             Method</span><strong>{{ get_payment_method_label($booking->payment_method) }}</strong></div>
+                    <hr class="dashed-line" style="margin-bottom: 10px;"/>
+                    
                     <div class="payment-detail-row"><span>Booked Name</span><strong>{{ $booking->participant->name }}</strong>
                     </div>
                     <div class="payment-detail-row"><span>Booked
                             Phone</span><strong>{{ format_my_phone($booking->participant->phone, $booking->participant->country) }}</strong>
                     </div>
+                    @if($booking->vendorTimeSlots && $booking->vendorTimeSlots->count())
+                        @foreach ($booking->vendorTimeSlots as $slot)
+                            <div class="payment-detail-row"><span>Booked Date</span><strong>{{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}</strong>
+                            </div>
+                            @if($slot->booked_time_start)
+                            <div class="payment-detail-row"><span>Booked Time</span>
+                                <strong>
+                                    {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A') }}
+                                    @if($slot->booked_time_end)
+                                    -
+                                    {{ \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A') }}
+                                    @endif
+                                </strong>
+                            </div>
+                            @endif
+                        @endforeach
+                    @endif
 
                     <hr class="dashed-line" />
 

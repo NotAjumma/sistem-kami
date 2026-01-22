@@ -73,7 +73,7 @@ Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
 Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
 Route::get('/booking/receipt/{booking_code}', [BookingController::class, 'bookingReceipt'])->name('booking.receipt');
-Route::get('/receipt/package/{booking_code}', [BookingController::class, 'bookingReceiptPackage'])->name('booking.receipt.package');
+Route::get('/receipt/{booking_code}', [BookingController::class, 'bookingReceiptPackage'])->name('booking.receipt.package');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');

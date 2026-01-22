@@ -978,7 +978,7 @@ class BookingController extends Controller
                 'status'            => 'paid',
                 'total_price'       => 0,
                 'paid_amount'       => 0,
-                'payment_method'    => 'sistemkami-QR-PAY',
+                'payment_method'    => 'sistemkami',
                 'payment_type'      => $paymentType,
             ]);
 
@@ -1137,7 +1137,41 @@ class BookingController extends Controller
             DB::commit();
 
             // return redirect()->route('booking.receipt.package', $booking->booking_code);
-            return redirect()->back()->with('success', 'Booking for ' . $data['name'] . ' created successfully!');
+            $receiptUrl = route('booking.receipt.package', $booking->booking_code);
+
+            $phone = $data['whatsapp_number'];
+
+            // Mulakan mesej
+            $text = "Hai " . $data['name'] . ",\n\n";
+            $text .= "Tempahan anda telah berjaya dibuat untuk Pakej " . $booking->package->name . " by " . $authUser->name . "!\n\n";
+
+            // Tambah tarikh & masa setiap slot
+            foreach ($booking->vendorTimeSlots as $slot) {
+                $slotName  = $slot->timeSlot->slot_name;
+                $startDate = \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y');
+                $startTime = \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A');
+                $endTime   = \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A');
+
+                $text .= "📌 Slot: " . $slotName . "\n";
+                $text .= "🗓 Tarikh: " . $startDate . "\n";
+                $text .= "⏰ Masa: " . $startTime . " - " . $endTime . "\n\n";
+            }
+
+            // Tambah pautan resit
+            $text .= "Anda boleh muat turun resit dalam bentuk PDF di pautan berikut:\n";
+            $text .= $receiptUrl . "\n\n";
+            $text .= "Terima kasih kerana menggunakan perkhidmatan kami.";
+
+            // Link WhatsApp (tanpa '+')
+            $whatsappUrl = 'https://api.whatsapp.com/send?phone=6' . $phone
+                . '&text=' . urlencode($text);
+
+            return redirect()->back()->with([
+                'success' => 'Tempahan untuk ' . $data['name'] . ' berjaya dibuat!',
+                'whatsapp_url' => $whatsappUrl,
+            ]);
+
+
 
         } catch (\Exception $e) {
             DB::rollBack();
