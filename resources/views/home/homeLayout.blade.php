@@ -174,9 +174,9 @@
 	<!--**********************************
         Main wrapper start
     ***********************************-->
-	<div id="main-wrapper" class="{{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
+	<div id="main-wrapper" class="bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
 		
-		<header class="w-full border-b border-gray-200">
+		<header class="header-bg w-full border-b border-gray-200">
 			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 				<!-- Logo -->
 				<a href="/">

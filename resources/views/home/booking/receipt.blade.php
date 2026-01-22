@@ -98,13 +98,44 @@
             border: none;
             border-top: 2px dashed white;
         }
+        .img-bg {
+            position: relative;
+            min-height: 100vh; /* full viewport height */
+            overflow: hidden;
+        }
+
+        .img-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0; /* top:0; left:0; right:0; bottom:0; */
+            background-image: url(https://staging.sistemkami.com/images/organizers/3/packages/4/gold-cover.png);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(5px);
+            transform: scale(1.05); /* optional, prevents edges showing */
+            z-index: 0;
+        }
+
+        .img-bg > * {
+            position: relative;
+            z-index: 1; /* content above blurred background */
+        }
+
+        .header-bg{
+            background-color: #fff;
+        }
+
+        .bg-base{
+            background-color: rgba(0, 31, 77, 1);
+        }
     </style>
 @endpush
 
 @section('content')
     @if ($booking->status === 'paid')
         {{-- Payment Success Card --}}
-        <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="img-bg d-flex justify-content-center align-items-center min-vh-100">
             <div class="card shadow-sm bg-primary-dark">
                 <div class="check-circle bg-primary-dark" aria-label="Success">
                     <i class="fa-regular fa-circle-check fa-beat text-success" style="font-size: 4rem;"></i>
