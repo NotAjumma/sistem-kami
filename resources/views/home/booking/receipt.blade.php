@@ -113,8 +113,18 @@
                     <h3>Payment Success!</h3>
                     <p class="mb-3">Your payment has been successfully done.</p>
                     <hr class="dashed-line mb-2" />
-                    <p class="mb-1" style="font-size:1rem;">Total Payment</p>
-                    <h4 class="text-white fw-bold mb-4">RM {{ $booking->paid_amount }}</h4>
+                    @if($booking->payment_type == 'deposit')
+                    <div style="display: flex; text-align: center; gap: 10px; align-items: center; justify-content: center;">
+                        <p class="" style="font-size:1rem;">Deposit Paid</p>
+                        <h4 class="text-white fw-bold" style="margin-right: 15px;">RM {{ $booking->paid_amount }}</h4>
+                        <p class="" style="font-size:1rem;">Remaining Balance</p>
+                        <h4 class="text-white fw-bold">RM {{ $booking->final_price - $booking->paid_amount }}</h4>
+                    </div>
+                    @else
+                        <p class="mb-1" style="font-size:1rem;">Total Payment</p>
+                        <h4 class="text-white fw-bold mb-4">RM {{ $booking->paid_amount }}</h4>
+                    @endif
+                    
                     @if ($booking->package_id && $booking->package)
                         <div class="mt-4 mb-4 row align-items-stretch justify-content-center text-start border rounded p-2">
                             @if (!empty($booking->package->images) && count($booking->package->images) > 0)
@@ -168,9 +178,9 @@
                             Type</span><strong>{{ get_payment_type_label($booking->payment_type) }}</strong></div>
                     <div class="payment-detail-row"><span>Payment
                             Method</span><strong>{{ get_payment_method_label($booking->payment_method) }}</strong></div>
-                    <div class="payment-detail-row"><span>Sender Name</span><strong>{{ $booking->participant->name }}</strong>
+                    <div class="payment-detail-row"><span>Booked Name</span><strong>{{ $booking->participant->name }}</strong>
                     </div>
-                    <div class="payment-detail-row"><span>Sender
+                    <div class="payment-detail-row"><span>Booked
                             Phone</span><strong>{{ format_my_phone($booking->participant->phone, $booking->participant->country) }}</strong>
                     </div>
 

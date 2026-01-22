@@ -57,9 +57,10 @@ class Booking extends Model
         return $this->belongsTo(Package::class);
     }
 
-    public function vendorTimeSlot()
+    public function vendorTimeSlots()
     {
-        return $this->hasOne(BookingsVendorTimeSlot::class);
+        return $this->hasMany(BookingsVendorTimeSlot::class, 'booking_id');
     }
+
 
 }

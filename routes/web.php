@@ -73,6 +73,7 @@ Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
 Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
 Route::get('/booking/receipt/{booking_code}', [BookingController::class, 'bookingReceipt'])->name('booking.receipt');
+Route::get('/receipt/package/{booking_code}', [BookingController::class, 'bookingReceiptPackage'])->name('booking.receipt.package');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
@@ -134,22 +135,29 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);
 
+        \Log::info($booking);
         $pdf = PDF::loadView('emails.ticket_pdf', ['booking' => $booking]);
 
         return $pdf->stream('ticket.pdf'); // open inline in browser
     });
     // Similar for organizer, marshal, participant...
 });
+Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
 
 Route::prefix('organizer/business')->middleware('auth:organizer')->controller(OrganizerBusinessController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.business.dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.business.logout');
     Route::get('/bookings', 'bookings')->name('organizer.business.bookings');
+    Route::get('/calender', 'calender')->name('organizer.business.calender');
+    Route::get('/booking/create', 'showCreateBooking')->name('organizer.business.booking.create');
+    Route::post('/booking/create', [BookingController::class, 'webFormBookingPackageByAdmin'])->name('organizer.business.booking.create.send');
+    Route::get('/bookings/json', [OrganizerBusinessController::class, 'getBookingsJson']);
 
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
     Route::post('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
     Route::get('/packages', 'showPackages')->name('organizer.business.packages');
+    Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
 
     Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.business.booking.verify');

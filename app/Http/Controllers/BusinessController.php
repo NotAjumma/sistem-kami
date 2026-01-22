@@ -382,7 +382,7 @@ class BusinessController extends Controller
 
             $slots[] = [
                 'id'            => $timeSlot->id,
-                'court'         => $slot->name ?? 'Slot '.$timeSlot->id,
+                'court'         => $timeSlot->slot_name ?? 'Slot '.$timeSlot->id,
                 'times'         => $times,
                 'bookedTimes'   => $groupedBookings[$timeSlot->id] ?? []
             ];

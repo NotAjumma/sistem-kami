@@ -879,6 +879,279 @@ class BookingController extends Controller
         }
     }
 
+    // ADMIN CREATE BOOKING
+    public function webFormBookingPackageByAdmin(Request $request)
+    {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        \Log::info("Start webFormBookingPackageByAdmin");
+
+        $package_id     = $request->input('package_id');
+        $selected_date  = $request->input('selected_date');
+        $selected_time  = json_decode($request->input('selected_time'), true) ?? [];
+        // $discountAmount  = $request->input('discount');
+        $deposit_amount  = $request->input('deposit_amount');
+        // $package_inputs = session('package_inputs');
+        if (!$package_id || !$selected_date) {
+            \Log::info("tendang back");
+            return back()->withErrors([
+                'message' => 'Package selection session has expired. Please select a package again.'
+            ]);
+        }
+        $request->validate([
+            'name'              => 'required|string',
+            'email'             => 'nullable|email',
+            'email_confirmation' => 'nullable|email',
+            'no_ic'             => 'nullable|string',
+            'phone'             => 'nullable|string',
+            'whatsapp_number'   => 'required|string',
+            'country'           => 'nullable|string',
+            'state'             => 'nullable|string',
+            'city'              => 'nullable|string',
+            'postcode'          => 'nullable|string',
+            'address'           => 'nullable|string',
+            'notes'             => 'nullable|string',
+            'payment_type'      => 'required|string',
+            'reference'         => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        // $inputAnswers = $request->input('package_inputs', []);
+        try {
+            \Log::info('Web form booking initiated', $request->only(['name', 'email', 'no_ic']));
+
+            $package = Package::whereHas('organizer', function ($query) use ($authUser) {
+                $query->where('id', $authUser->id);
+            })
+                ->where('id', $package_id)
+                ->with([
+                    'addons',
+                    'items',
+                    'discounts',
+                    'category',
+                    'images',
+                    'organizer',
+                    'vendorTimeSlots',
+                ])
+                ->firstOrFail();
+
+                $data = $request->only([
+                    'name',
+                    'email',
+                    'no_ic',
+                    'phone',
+                    'whatsapp_number',
+                    'country',
+                    'state',
+                    'city',
+                    'postcode',
+                    'address',
+                ]);
+
+                // If phone is empty, use whatsapp_number
+                $data['phone'] = $data['whatsapp_number'];
+                $data['email'] = $authUser->email;
+
+                $participant = Participant::create($data);
+
+
+            if (!$package_id || !$selected_date) {
+                \Log::warning('Session expired or incomplete', ['package' => $package, 'selected_date' => $selected_date]);
+                throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
+            }
+
+            $packageCode    = strtoupper($package['package_code'] ?? 'DFT');
+            if (!empty($selected_time)){
+                $selectedCount  = count($selected_time);
+                $totalPrice      = $selectedCount * (float) $package['base_price'];
+                $eachSlotPrice  = (float) $package['base_price'];
+            } else{
+                $totalPrice = (float) $package['base_price']; // or base_price if needed
+            }
+            $paymentType    = $request->input('payment_type');
+            $booking = Booking::create([
+                'participant_id'    => $participant->id,
+                'event_id'          => null,
+                'package_id'        => $package['id'],
+                'organizer_id'      => $package['organizer_id'],
+                'booking_code'      => $packageCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
+                'status'            => 'paid',
+                'total_price'       => 0,
+                'paid_amount'       => 0,
+                'payment_method'    => 'sistemkami-QR-PAY',
+                'payment_type'      => $paymentType,
+            ]);
+
+            $depositAmount = $deposit_amount;
+
+
+            $discountAmount = (float) $request->input('discount', 0);
+
+            $totalPrice = max(0, $totalPrice - $discountAmount);
+            $grandTotal     = round($totalPrice, 2);
+
+            if($paymentType == 'deposit'){
+                $paidAmount = $depositAmount;
+                $paymentTypeStatus = 'deposit_paid';
+            }else{
+                $paidAmount = $grandTotal;
+                $paymentTypeStatus = 'full_payment';
+            }
+
+            $slotDurations = collect($package->vendorTimeSlots)->pluck('slot_duration_minutes', 'id');
+            if (!empty($selected_time)) {
+                foreach ($selected_time as $slot) {
+
+                    $duration = $slotDurations[$slot['id']] ?? 0;
+
+                    $start = Carbon::createFromFormat('g:i A', $slot['time']);
+                    $end   = $duration > 0
+                        ? $start->copy()->addMinutes($duration)
+                        : null;
+
+                    BookingsVendorTimeSlot::create([
+                        'booking_id'          => $booking->id,
+                        'vendor_time_slot_id' => $slot['id'],
+                        'booked_date_start'   => $slot['date'],
+                        'booked_date_end'     => $slot['date'],
+                        'package_id'          => $package->id,
+                        'package_category_id' => $package->category_id,
+                        'organizer_id'        => $package->organizer_id,
+                        'booked_time_start'   => $start->format('H:i:s'),
+                        'booked_time_end'     => $end?->format('H:i:s'),
+                        'status'              => $paymentTypeStatus,
+                        'notes'               => $request->input('notes'),
+                    ]);
+                }
+            } else {
+                // fallback if no selected_time passed
+                BookingsVendorTimeSlot::create([
+                    'booking_id'            => $booking->id,
+                    'vendor_time_slot_id'   => $package['vendorTimeSlots'][0]['id'] ?? null,
+                    'booked_date_start'     => $selected_date,
+                    'booked_date_end'       => $selected_date,
+                    'package_id'            => $package['id'],
+                    'package_category_id'   => $package['category_id'],
+                    'organizer_id'          => $package['organizer_id'],
+                    'booked_time_start'     => null,
+                    'booked_time_end'       => null,
+                    'status'                => 'pending',
+                    'notes'                 => $request->input('notes') ?? null,
+                ]);
+            }
+
+            // foreach ($inputAnswers as $groupIndex => $answers) {
+            //     foreach ($answers as $inputId => $answer) {
+            //         PackageInputAnswer::create([
+            //             'package_input_id'  => $inputId,
+            //             'package_id'        => $package['id'],
+            //             'booking_id'        => $booking->id,
+            //             'answer'            => is_array($answer) ? json_encode($answer) : $answer,
+            //         ]);
+            //     }
+            // }
+
+
+            // $fixed          = (float) ($package['service_charge_fixed'] ?? 0);
+            // $percentage     = (float) ($package['service_charge_percentage'] ?? 0);
+            // $serviceCharge  = ($percentage > 0 ? $totalPrice * ($percentage / 100) : $fixed);
+
+            // $grandTotal     = round($totalPrice + $serviceCharge, 2);
+
+            // calc deposit amount
+            // $depositFixed       = (float) $package['deposit_fixed'] ?? 0;
+            // $depositPercentage  = (float) $package['deposit_percentage'] ?? 0;
+            // $depositAmount      = ($depositPercentage > 0 ? $grandTotal * ($depositPercentage / 100) : $depositFixed);
+            
+            \Log::info('Booking package totals calculated', [
+                'booking_id'        => $booking->id,
+                'total_price'       => $totalPrice,
+                // 'service_charge'    => $serviceCharge,
+                'grand_total'       => $grandTotal,
+                'deposit_amount'    => $depositAmount,
+                'paid_amount'       => $paidAmount,
+                // 'percentage'        => $percentage,
+                // 'depositPercentage' => $depositPercentage,
+            ]);
+
+            $booking->update([
+                'total_price'       => $totalPrice + $discountAmount,
+                'discount'          => $discountAmount,
+                'paid_amount'       => $paidAmount,
+                // 'service_charge'    => $serviceCharge
+            ]);
+
+            // === ToyyibPay integration ===
+            // $toyyibPay = new ToyyibPayService();
+            // $bill = $toyyibPay->createBill([
+            //     'name'          => substr('Payment: ' . $package['name'], 0, 30),
+            //     'description'   => 'Booked by ' . $participant->name,
+            //     'amount'        => $paidAmount,
+            //     'ref_no'        => $booking->booking_code,
+            //     'to'            => $participant->name,
+            //     'email'         => $participant->email,
+            //     'phone'         => $participant->phone,
+            // ]);
+
+            // \Log::info('ToyyibPay bill response', ['bill' => $bill]);
+
+            // if (!isset($bill[0]['BillCode'])) {
+            //     throw new \Exception('ToyyibPay: BillCode gagal dicipta');
+            // }
+
+            $billCode = $this->generateUniqueBillCode();
+
+            Payment::create([
+                'booking_id'    => $booking->id,
+                'bill_code'     => $billCode,
+                'ref_no'        => $booking->booking_code,
+                'amount'        => $paidAmount,
+                'status'        => $paymentTypeStatus,
+            ]);
+
+            \Log::info('Payment record created', [
+                'booking_id'    => $booking->id,
+                'bill_code'     => $billCode,
+            ]);
+
+
+            $booking = Booking::where('id', $booking->id)
+                    ->with([
+                        'package',
+                        'vendorTimeSlots',
+                    ])
+                    ->firstOrFail();
+
+            // Send email to booking's email
+            // Mail::to($booking->participant->email)->send(new PaymentConfirmed($booking));
+
+            // EmailLog::create([
+            //     'to_email' => $booking->participant->email,
+            //     'type' => 'payment_confirmed',
+            //     'sent_at' => now(),
+            // ]);
+
+            // $baseUrl = config('toyyibpay.sandbox') ? 'https://dev.toyyibpay.com' : 'https://toyyibpay.com';
+            // return redirect()->away($baseUrl . '/' . $bill[0]['BillCode']);
+
+            DB::commit();
+
+            // return redirect()->route('booking.receipt.package', $booking->booking_code);
+            return redirect()->back()->with('success', 'Booking for ' . $data['name'] . ' created successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Web form booking failed', [
+                'message'   => $e->getMessage(),
+                'input'     => $request->all()
+            ]);
+            return redirect()->back()->with('error', 'Booking failed!');
+
+            // return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
+        }
+    }
+
     public function handleCallback(Request $request)
     {
         \Log::info('ToyyibPay callback received:', $request->all());
@@ -953,5 +1226,25 @@ class BookingController extends Controller
             ->firstOrFail();
 
         return view('home.booking.receipt', compact('booking', 'page_title'));
+    }
+
+    public function bookingReceiptPackage($booking_code)
+    {
+        $page_title = 'Your Booking Receipt';
+        $booking = Booking::with(['package', 'package', 'vendorTimeSlots'])
+            ->where('booking_code', $booking_code)
+            ->firstOrFail();
+
+        return view('home.booking.receipt', compact('booking', 'page_title'));
+    }
+
+    private function generateUniqueBillCode(): string
+    {
+        do {
+            // Example: BILL-8F3K2A9X
+            $billCode = 'BILL-' . strtoupper(Str::random(8));
+        } while (Payment::where('bill_code', $billCode)->exists());
+
+        return $billCode;
     }
 }

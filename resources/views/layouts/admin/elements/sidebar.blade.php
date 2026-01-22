@@ -134,6 +134,18 @@
                                     List Confirmed</a>
                             </li>
                         @endif
+                        @if($authUser->type == "service")
+                            <li class="{{ $currentRoute === 'organizer.business.booking.create' ? 'mm-active' : '' }}">
+                                <a href="{{ route('organizer.business.booking.create') }}"
+                                    class="{{ $currentRoute === 'organizer.business.booking.create' ? 'active mm-active' : '' }}">
+                                    Create Booking</a>
+                            </li>
+                            <li class="{{ $currentRoute === 'organizer.business.calender' ? 'mm-active' : '' }}">
+                                <a href="{{ route('organizer.business.calender') }}"
+                                    class="{{ $currentRoute === 'organizer.business.calender' ? 'active mm-active' : '' }}">
+                                    Calender</a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             </ul>

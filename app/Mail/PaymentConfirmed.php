@@ -26,27 +26,20 @@ class PaymentConfirmed extends Mailable
 
     public function build()
     {
-        $event = $this->booking->event;
-
-        $isEligibleForShirt = Booking::where('event_id', $this->booking->event_id)
-        ->where('status', 'confirmed')
-        ->orderBy('created_at', 'asc')
-        ->limit(100)
-        ->pluck('id')
-        ->contains($this->booking->id);
+        $package = $this->booking->package;
 
         // Now generate PDF and email view with these formatted fields
-        $pdf = Pdf::loadView('emails.ticket_pdf', ['booking' => $this->booking]);
+        // $pdf = Pdf::loadView('emails.ticket_pdf', ['booking' => $this->booking]);
 
+        \Log::info($this->booking);
         return $this->subject('Payment Confirmation')
-            ->view('emails.payment_confirmed')
+            ->view('emails.payment_confirmed_package')
             ->with([
                 'booking' => $this->booking,
-                'isEligibleForShirt' => $isEligibleForShirt,
-            ])
-            ->attachData($pdf->output(), 'tickets.pdf', [
-                'mime' => 'application/pdf',
             ]);
+            // ->attachData($pdf->output(), 'tickets.pdf', [
+            //     'mime' => 'application/pdf',
+            // ]);
     }
 
     /**
