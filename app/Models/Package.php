@@ -66,4 +66,8 @@ class Package extends Model
     {
         return $this->hasMany(VendorTimeSlot::class, 'package_id');
     }
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

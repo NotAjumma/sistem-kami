@@ -10,6 +10,8 @@ use App\Models\BookingTicket;
 use App\Models\EmailLog;
 use App\Models\Ticket;
 use App\Models\Event;
+use App\Models\Package;
+use App\Models\BookingsVendorTimeSlot;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -58,8 +60,8 @@ class OrganizerController extends Controller
         $ticketSold = BookingTicket::whereIn('status', ['printed', 'checkin'])
             ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'confirmed'))
             ->count();
-        $totalBookings = Booking::where('organizer_id', $organizerId)->count();
-        $totalIncome = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->sum('final_price');
+        $totalBookings = Booking::where('organizer_id', $organizerId)->where('status', 'paid')->count();
+        $totalIncome = Booking::where('organizer_id', $organizerId)->where('status', 'paid')->sum('final_price');
         $pendingBookings = Booking::where('organizer_id', $organizerId)->where('status', 'pending')->count();
         $confirmBookings = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->count();
 
@@ -86,6 +88,43 @@ class OrganizerController extends Controller
             ];
         }
 
+        $totalPackages = Package::where('organizer_id', $organizerId)->count();
+
+        $totalSlotBooked = BookingsVendorTimeSlot::whereIn('status', ['deposit', 'full_payment'])
+            ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'paid'))
+            ->count();
+
+        $totalUpcomingSlots = BookingsVendorTimeSlot::whereIn('status', ['deposit', 'full_payment'])
+            ->whereHas('booking', fn($q) => 
+                $q->where('organizer_id', $organizerId)
+                ->where('status', 'paid')
+            )
+            ->where('booked_date_start', '>=', Carbon::today()) // only future or today slots
+            ->count();
+
+        $topPackages = Package::where('organizer_id', $organizerId)
+            ->withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->take(3)
+            ->get();
+
+        $salesChartData = [];
+
+        foreach ($topPackages as $package) {
+            $monthlySales = Booking::selectRaw('MONTH(created_at) as month, SUM(final_price) as total')
+                ->where('package_id', $package->id)
+                ->where('status', 'paid')
+                ->groupBy(DB::raw('MONTH(created_at)'))
+                ->pluck('total', 'month');
+
+            $salesChartData[] = [
+                'name' => $package->name,
+                'className' => 'bg-success', // or any color
+                'data' => collect(range(1, 12))->map(fn($m) => (int) ($monthlySales[$m] ?? 0))->toArray()
+            ];
+        }
+
+
         return view('organizer.index', compact(
             'page_title',
             'authUser',
@@ -96,9 +135,10 @@ class OrganizerController extends Controller
             'confirmBookings',
             'pendingBookings',
             'salesChartData',
-            'shirtSizes',
-            'shirtCounts',
-            'shirtSizeData'
+            'shirtSizeData',
+            'totalSlotBooked',
+            'totalPackages',
+            'totalUpcomingSlots',
         ));
     }
 

@@ -30,31 +30,31 @@ class OrganizerBusinessController extends Controller
         $organizerId = $authUser->id;
 
         // Get first 100 confirmed bookings with shirt_size info
-        $shirtSizeData = Booking::where('organizer_id', $authUser->id)
-            ->where('status', 'confirmed')
-            ->take(100)
-            ->get()
-            ->map(function ($booking) {
-                $extraRaw = $booking->extra_info;
+        // $shirtSizeData = Booking::where('organizer_id', $authUser->id)
+        //     ->where('status', 'confirmed')
+        //     ->take(100)
+        //     ->get()
+        //     ->map(function ($booking) {
+        //         $extraRaw = $booking->extra_info;
 
-                // Skip if null or empty
-                if (empty($extraRaw))
-                    return null;
+        //         // Skip if null or empty
+        //         if (empty($extraRaw))
+        //             return null;
 
-                // Decode if it's a string (JSON)
-                $extra = is_string($extraRaw) ? json_decode($extraRaw, true) : (array) $extraRaw;
+        //         // Decode if it's a string (JSON)
+        //         $extra = is_string($extraRaw) ? json_decode($extraRaw, true) : (array) $extraRaw;
 
-                // Skip if not array or doesn't contain shirt_size
-                if (!is_array($extra) || empty($extra['shirt_size']))
-                    return null;
+        //         // Skip if not array or doesn't contain shirt_size
+        //         if (!is_array($extra) || empty($extra['shirt_size']))
+        //             return null;
 
-                return $extra['shirt_size'];
-            })
-            ->filter()
-            ->countBy();
+        //         return $extra['shirt_size'];
+        //     })
+        //     ->filter()
+        //     ->countBy();
 
-        $shirtSizes = $shirtSizeData->keys();
-        $shirtCounts = $shirtSizeData->values();
+        // $shirtSizes = $shirtSizeData->keys();
+        // $shirtCounts = $shirtSizeData->values();
 
         // Basic stats
         $totalEvents = Event::where('organizer_id', $organizerId)->count();
@@ -89,6 +89,29 @@ class OrganizerBusinessController extends Controller
             ];
         }
 
+        $topPackages = Package::where('organizer_id', $organizerId)
+            ->withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->take(3)
+            ->get();
+
+        $salesChartData = [];
+
+        foreach ($topPackages as $package) {
+            $monthlySales = Booking::selectRaw('MONTH(created_at) as month, SUM(final_price) as total')
+                ->where('package_id', $package->id)
+                ->where('status', 'paid')
+                ->groupBy(DB::raw('MONTH(created_at)'))
+                ->pluck('total', 'month');
+
+            $salesChartData[] = [
+                'name' => $package->name,
+                'className' => 'bg-success', // or any color
+                'data' => collect(range(1, 12))->map(fn($m) => (int) ($monthlySales[$m] ?? 0))->toArray()
+            ];
+        }
+
+
         return view('organizer.index', compact(
             'page_title',
             'authUser',
@@ -99,9 +122,6 @@ class OrganizerBusinessController extends Controller
             'confirmBookings',
             'pendingBookings',
             'salesChartData',
-            'shirtSizes',
-            'shirtCounts',
-            'shirtSizeData'
         ));
     }
 

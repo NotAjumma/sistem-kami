@@ -39,7 +39,7 @@ var skeletonEl = document.getElementById('calendar-skeleton');
 
     slotDuration: '00:20:00',
     slotLabelInterval: '00:20:00',
-
+    slotEventOverlap: false,
     eventTimeFormat: {
       hour: 'numeric',
       minute: '2-digit',

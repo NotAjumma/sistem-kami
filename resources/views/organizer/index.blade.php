@@ -51,8 +51,7 @@
                                     </div>
                                 </div>
                             </div>
-
-
+                            @if($authUser->type == "event")
                             <div class="swiper-slide">
                                 <div class="card card-box bg-pink">
                                     <div class="card-header border-0 pb-0">
@@ -85,6 +84,41 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if($authUser->type == "service")
+                            <div class="swiper-slide">
+                                <div class="card card-box bg-pink">
+                                    <div class="card-header border-0 pb-0">
+                                        <div class="chart-num">
+                                            <p>
+                                                <i class="fa-solid fa-sort-down me-2"></i>
+                                                Total Packages Created
+                                            </p>
+                                            <h2 class="font-w600 mb-0">{{ $totalPackages }}</h2>
+                                        </div>
+                                        <div class="dlab-swiper-circle">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
+                                                viewBox="0 0 24 24">
+                                                <!-- White circular background -->
+                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
+
+                                                <!-- Group to scale and center the path -->
+                                                <g transform="translate(3.6, 3.6) scale(0.7)">
+                                                    <path
+                                                        d="M15 14V17.6C15 18.4401 15 18.8601 14.8365 19.181C14.6927 19.4632 14.4632 19.6927 14.181 19.8365C13.8601 20 13.4401 20 12.6 20H7.40001C6.55994 20 6.1399 20 5.81903 19.8365C5.53679 19.6927 5.30731 19.4632 5.1635 19.181C5.00001 18.8601 5.00001 18.4401 5.00001 17.6V10M19 10V20M5.00001 16H15M5.55778 4.88446L3.5789 8.84223C3.38722 9.22559 3.29138 9.41727 3.3144 9.57308C3.3345 9.70914 3.40976 9.8309 3.52246 9.90973C3.65153 10 3.86583 10 4.29444 10H19.7056C20.1342 10 20.3485 10 20.4776 9.90973C20.5903 9.8309 20.6655 9.70914 20.6856 9.57308C20.7086 9.41727 20.6128 9.22559 20.4211 8.84223L18.4422 4.88446C18.2817 4.5634 18.2014 4.40287 18.0817 4.28558C17.9758 4.18187 17.8482 4.10299 17.7081 4.05465C17.5496 4 17.3701 4 17.0112 4H6.98887C6.62991 4 6.45043 4 6.29198 4.05465C6.15185 4.10299 6.02422 4.18187 5.91833 4.28558C5.79858 4.40287 5.71832 4.5634 5.55778 4.88446Z"
+                                                        fill="none" stroke="#ac4cbc" stroke-width="1.8"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </g>
+                                            </svg>
+
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="widgetChart6" class="chart-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             <div class="swiper-slide">
                                 <div class="card card-box bg-warning">
                                     <div class="card-header border-0 pb-0">
@@ -117,6 +151,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @if($authUser->type == "event")
                             <div class="swiper-slide">
                                 <div class="card card-box bg-dark">
                                     <div class="card-header border-0 pb-0">
@@ -148,7 +183,81 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if($authUser->type == "service")
                             <div class="swiper-slide">
+                                <div class="card card-box bg-dark">
+                                    <div class="card-header border-0 pb-0">
+                                        <div class="chart-num">
+                                            <p>
+                                                <i class="fa-solid fa-sort-down me-2"></i>
+                                                Total Slot Booked
+                                            </p>
+                                            <h2 class="font-w600 mb-0">{{ $totalSlotBooked }}</h2>
+                                        </div>
+                                        <div class="dlab-swiper-circle">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
+                                                viewBox="0 0 24 24">
+                                                <!-- White circular background -->
+                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
+
+                                                <!-- Group to scale and center the path -->
+                                                <g transform="translate(3.6, 3.6) scale(0.7)">
+                                                    <path
+                                                        d="M20.75,5 C21.4403559,5 22,5.55964406 22,6.250043 L22,8.50884316 C22,8.90254021 21.6954171,9.22920669 21.3026979,9.25693735 C19.8694655,9.35814067 18.75,10.5545175 18.75,12 C18.75,13.4454825 19.8694655,14.6418593 21.3026979,14.7430626 C21.6954171,14.7707933 22,15.0974598 22,15.4911568 L22,17.75 C22,18.4403559 21.4403559,19 20.75,19 L3.25,19 C2.55964406,19 2,18.4403559 2.00000001,17.7500876 L1.99973613,15.4913152 C1.99973613,15.0975356 2.30418767,14.7707771 2.69699233,14.7430845 C4.13036194,14.6420325 5.25,13.4455976 5.25,12 C5.25,10.5544024 4.13036194,9.3579675 2.69699233,9.2569155 C2.30418767,9.22922292 1.99973613,8.90246439 1.99973613,8.50868478 L2,6.25 C2,5.55964406 2.55964406,5 3.25,5 L20.75,5 Z"
+                                                        fill="none" stroke="#5b5e81" stroke-width="1.8"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="widgetChart2" class="chart-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card card-box bg-info">
+                                    <div class="card-header border-0 pb-0">
+                                        <div class="chart-num">
+                                            <p>
+                                                <i class="fa-solid fa-sort-down me-2"></i>
+                                                Total Upcoming Slots
+                                            </p>
+                                            <h2 class="font-w600 mb-0">{{ $totalUpcomingSlots }}</h2>
+                                        </div>
+                                        <div class="dlab-swiper-circle">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
+                                                viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
+
+                                                <g transform="translate(6.6,6.6) scale(0.45)">
+                                                    <path
+                                                        d="M10,1h6a0,0,0,0,1,0,0V6.13a.87.87,0,0,1-.87.87H10.87A.87.87,0,0,1,10,6.13V1A0,0,0,0,1,10,1Z"
+                                                        fill="#00ADA3" />
+                                                    <path
+                                                        d="M11,26H3a3,3,0,0,1-3-3V3A3,3,0,0,1,3,0H23a3,3,0,0,1,3,3v8a1,1,0,0,1-2,0V3a1,1,0,0,0-1-1H3A1,1,0,0,0,2,3V23a1,1,0,0,0,1,1h8a1,1,0,0,1,0,2Z"
+                                                        fill="#00ADA3" />
+                                                    <path d="M7,22H5a1,1,0,0,1,0-2H7a1,1,0,0,1,0,2Z" fill="#00ADA3" />
+                                                    <path
+                                                        d="M23,32a9,9,0,1,1,9-9A9,9,0,0,1,23,32Zm0-16a7,7,0,1,0,7,7A7,7,0,0,0,23,16Z"
+                                                        fill="#00ADA3" />
+                                                    <circle class="cls-1" cx="23" cy="23" r="5" fill="#FFFA6F"></circle>
+                                                    <path
+                                                        d="M23,26a1,1,0,0,1-.71-.29l-2-2a1,1,0,0,1,1.42-1.42L23,23.59l3.29-3.3a1,1,0,0,1,1.42,1.42l-4,4A1,1,0,0,1,23,26Z"
+                                                        fill="#00ADA3" />
+                                                </g>
+                                            </svg>
+
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="widgetChart3" class="chart-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                            <!-- <div class="swiper-slide">
                                 <div class="card card-box bg-info">
                                     <div class="card-header border-0 pb-0">
                                         <div class="chart-num">
@@ -161,10 +270,8 @@
                                         <div class="dlab-swiper-circle">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
                                                 viewBox="0 0 24 24">
-                                                <!-- White background circle -->
                                                 <circle cx="12" cy="12" r="12" fill="#ffffff" />
 
-                                                <!-- Icon content from new SVG scaled and centered -->
                                                 <g transform="translate(6.6,6.6) scale(0.45)">
                                                     <path
                                                         d="M10,1h6a0,0,0,0,1,0,0V6.13a.87.87,0,0,1-.87.87H10.87A.87.87,0,0,1,10,6.13V1A0,0,0,0,1,10,1Z"
@@ -188,8 +295,8 @@
                                         <div id="widgetChart3" class="chart-primary"></div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="swiper-slide">
+                            </div> -->
+                            <!-- <div class="swiper-slide">
                                 <div class="card card-box bg-danger">
                                     <div class="card-header border-0 pb-0">
                                         <div class="chart-num">
@@ -202,10 +309,8 @@
                                         <div class="dlab-swiper-circle">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
                                                 viewBox="0 0 24 24">
-                                                <!-- White circular background -->
                                                 <circle cx="12" cy="12" r="12" fill="#ffffff" />
 
-                                                <!-- Group to scale and center the path -->
                                                 <g transform="translate(6.6,6.6) scale(0.45)">
                                                     <path
                                                         d="M10,1h6a0,0,0,0,1,0,0V6.13a.87.87,0,0,1-.87.87H10.87A.87.87,0,0,1,10,6.13V1A0,0,0,0,1,10,1Z"
@@ -229,12 +334,13 @@
                                         <div id="widgetChart4" class="chart-primary"></div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-6">
+
+                    <!-- <div class="col-xl-6">
                         <div class="card crypto-chart">
                             <div class="card-header pb-0 border-0 flex-wrap">
                                 <div class="mb-0">
@@ -270,7 +376,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="col-xl-6">
                         <div class="card crypto-chart">
