@@ -1167,11 +1167,9 @@ class BookingController extends Controller
                 . '&text=' . urlencode($text);
 
             return redirect()->back()->with([
-                'success' => 'Tempahan untuk ' . $data['name'] . ' berjaya dibuat!',
+                'success' => 'Booking for ' . $data['name'] . ' was created successfully!',
                 'whatsapp_url' => $whatsappUrl,
             ]);
-
-
 
         } catch (\Exception $e) {
             DB::rollBack();

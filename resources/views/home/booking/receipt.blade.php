@@ -208,6 +208,8 @@
                     </div>
                     @if($booking->vendorTimeSlots && $booking->vendorTimeSlots->count())
                         @foreach ($booking->vendorTimeSlots as $slot)
+                            <div class="payment-detail-row"><span>Booked Slot</span><strong>{{ $slot->timeSlot->slot_name }}</strong>
+                            </div>
                             <div class="payment-detail-row"><span>Booked Date</span><strong>{{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}</strong>
                             </div>
                             @if($slot->booked_time_start)
@@ -226,15 +228,14 @@
 
                     <hr class="dashed-line" />
 
-                    <button class="btn-pdf" aria-label="Get PDF Receipt" type="button">
-                        {{-- Icon --}}
+                    <a href="{{ url('/receipt/pdf/' . $booking->booking_code) }}" class="btn-pdf" download>
                         Get PDF Receipt
-                    </button>
+                    </a>
 
                     <div class="row mt-5">
                         <small class="text-small">
                             Thank you for choosing us <a href="{{ config('app.url') }}"
-                                class="text-info">{{ config('app.url') }}</a>
+                                class="text-info">www.sistemkami.com</a>
                         </small>
                     </div>
                 </div>

@@ -62,5 +62,10 @@ class Booking extends Model
         return $this->hasMany(BookingsVendorTimeSlot::class, 'booking_id');
     }
 
+    public function organizer()
+    {
+        return $this->belongsTo(Organizer::class);
+    }
+
 
 }

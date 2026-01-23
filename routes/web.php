@@ -82,6 +82,18 @@ Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/receipt/pdf/{booking_code}', function ($booking_code) {
+
+    $booking = Booking::with('vendorTimeSlots')
+        ->where('booking_code', $booking_code)
+        ->firstOrFail();
+
+    $pdf = PDF::loadView('emails.package_pdf', [
+        'booking' => $booking
+    ]);
+
+    return $pdf->stream($booking_code . '_receipt.pdf');
+});
 
 Route::prefix('business')->group(function () {
     // Public profile
