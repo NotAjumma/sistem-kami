@@ -1141,35 +1141,62 @@ class BookingController extends Controller
 
             $phone = $data['whatsapp_number'];
 
-            // Mulakan mesej
-            $text = "Hai " . $data['name'] . ",\n\n";
-            $text .= "Tempahan anda telah berjaya dibuat untuk Pakej " . $booking->package->name . " by " . $authUser->name . "!\n\n";
+           // Mulakan mesej
+$text = "Hai " . $data['name'] . ",\n\n";
+$text .= "Tempahan anda telah berjaya dibuat untuk Pakej "
+       . $booking->package->name
+       . " oleh "
+       . $authUser->name
+       . ".\n\n";
 
-            // Tambah tarikh & masa setiap slot
-            foreach ($booking->vendorTimeSlots as $slot) {
-                $slotName  = $slot->timeSlot->slot_name;
-                $startDate = \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y');
-                $startTime = \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A');
-                $endTime   = \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A');
-
-                $text .= "📌 Slot: " . $slotName . "\n";
-                $text .= "🗓 Tarikh: " . $startDate . "\n";
-                $text .= "⏰ Masa: " . $startTime . " - " . $endTime . "\n\n";
+        // Info pembayaran
+        if ($booking->payment_type === 'deposit') {
+            if ($booking->paid_amount > 0) {
+                $text .= "*Status Pembayaran*: Deposit diterima\n";
+                $text .= "Jumlah Deposit: RM" . number_format($booking->paid_amount, 2) . "\n";
+            } else {
+                $text .= "*Status Pembayaran*: Tiada deposit dibayar\n";
             }
+            $text .= "Baki Perlu Dibayar: RM" . number_format(
+                ($booking->total_price + ($booking->service_charge ?? 0) - ($booking->discount ?? 0)) - $booking->paid_amount,
+                2
+            ) . "\n\n";
+        } else {
+            $text .= "*Status Pembayaran*: Penuh (Selesai)\n";
+            $text .= "Jumlah Dibayar: RM" . number_format($booking->paid_amount, 2) . "\n\n";
+        }
 
-            // Tambah pautan resit
-            $text .= "Anda boleh muat turun resit dalam bentuk PDF di pautan berikut:\n";
-            $text .= $receiptUrl . "\n\n";
-            $text .= "Terima kasih kerana menggunakan perkhidmatan kami.";
+        // Tambah tarikh & masa setiap slot
+        foreach ($booking->vendorTimeSlots as $slot) {
+            $slotName  = $slot->timeSlot->slot_name ?? '-';
+            $startDate = \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y');
+            $startTime = \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A');
+            $endTime   = \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A');
 
-            // Link WhatsApp (tanpa '+')
-            $whatsappUrl = 'https://api.whatsapp.com/send?phone=6' . $phone
-                . '&text=' . urlencode($text);
+            $text .= "📌 Slot: " . $slotName . "\n";
+            $text .= "🗓 Tarikh: " . $startDate . "\n";
+            $text .= "⏰ Masa: " . $startTime . " - " . $endTime . "\n\n";
+        }
 
-            return redirect()->back()->with([
-                'success' => 'Booking for ' . $data['name'] . ' was created successfully!',
-                'whatsapp_url' => $whatsappUrl,
-            ]);
+        // Tambah pautan resit
+        if ($booking->payment_type === 'deposit') {
+            $text .= "📄 Resit Deposit boleh dimuat turun di sini:\n";
+        } else {
+            $text .= "📄 Resit Pembayaran Penuh boleh dimuat turun di sini:\n";
+        }
+
+        $text .= $receiptUrl . "\n\n";
+        $text .= "Terima kasih kerana menggunakan perkhidmatan kami 🙏";
+
+        // Link WhatsApp (tanpa '+')
+        $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $phone
+            . '&text=' . urlencode($text);
+
+        return redirect()->back()->with([
+            'success' => 'Booking for ' . $data['name'] . ' was created successfully!',
+            'whatsapp_url' => $whatsappUrl,
+        ]);
+
 
         } catch (\Exception $e) {
             DB::rollBack();

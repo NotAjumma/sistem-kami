@@ -148,94 +148,30 @@
                                 <div id="calendarSection" class="d-none">
                                     <hr class="mb-4" />
 
-                                    <!-- 🔽 ALL your calendar HTML goes here 🔽 -->
-                                    <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select a Date</h6>
-                                    <!-- Legend -->
-                                    <div class="mt-0">
-                                        <h5 class="fw-semibold mb-1">Calendar Indicator:</h5>
-                                        <ul class="list-inline row gx-2 gy-2">
-                                            <li class="list-inline-item col-6 col-md-auto">
-                                                <span class="legend-box bg-secondary"></span> Today
-                                            </li>
-                                            <li class="list-inline-item col-6 col-md-auto">
-                                                <span class="legend-box bg-success"></span> Booked Date
-                                            </li>
-                                            <li class="list-inline-item col-6 col-md-auto">
-                                                <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not
-                                                Available
-                                            </li>
-                                            <li class="list-inline-item col-6 col-md-auto">
-                                                <span class="legend-box bg-primary"></span> Selected Date
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <!-- Calendar Navigation Controls -->
-                                    <div class="calendar-navigation mt-3">
-                                        <div class="row g-2 col-12">
-                                            <!-- Previous Button -->
-                                            <div class="col-12 col-md-12">
-                                                <button id="prevMonth" class="btn btn-primary w-100"
-                                                    style="text-align: center; display: flex; justify-content: center;">
-                                                    <div>
-                                                        <i class="fa-regular fa-square-caret-left me-2"></i>
-                                                    </div>
-                                                    <div>Previous</div>
-                                                </button>
+                                    <div id="calendarLoading" class="d-none d-flex justify-content-center align-items-center" style="height: 150px;">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                                                <span class="visually-hidden">Loading...</span>
                                             </div>
-
-                                            <!-- Month & Year Selectors -->
-                                            <div class="col-12 col-md-12 d-flex gap-2">
-                                                <select id="monthSelect" class="form-select w-50" style="font-size: 1rem;">
-                                                    <!-- Populated via JS -->
-                                                </select>
-                                                <select id="yearSelect" class="form-select w-50" style="font-size: 1rem;">
-                                                    <!-- Populated via JS -->
-                                                </select>
-                                            </div>
-
-                                            <!-- Today and Next Button -->
-                                            <div class="col-12 col-md-12">
-                                                <div class="d-flex flex-column flex-md-row gap-2">
-                                                    <button id="todayBtn" class="btn btn-secondary w-100">Today</button>
-                                                    <button id="nextMonth" class="btn btn-primary w-100"
-                                                        style="text-align: center; display: flex; justify-content: center;">
-                                                        <div>Next</div>
-                                                        <div><i class="fa-regular fa-square-caret-right ms-2"></i></div>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <div class="mt-2 text-muted small">Loading calendar time slots...</div>
                                         </div>
                                     </div>
-                                    <table class="calendar table table-bordered mb-3">
-                                        <thead>
-                                            <tr>
-                                                <th>Mo</th>
-                                                <th>Tu</th>
-                                                <th>We</th>
-                                                <th>Th</th>
-                                                <th>Fr</th>
-                                                <th>Sa</th>
-                                                <th style="text-align:center !important;">Su</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="calendarBody">
-                                            <!-- Calendar will be dynamically generated here -->
-                                        </tbody>
-                                    </table>
 
-                                    <!-- Time Slots -->
-                                    <div id="timeSlots" class="d-none">
-                                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select Time Slots</h6>
+                                    <div id="calendarContent" class="d-none">
+                                        <!-- 🔽 ALL your calendar HTML goes here 🔽 -->
+                                        <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select a Date</h6>
                                         <!-- Legend -->
                                         <div class="mt-0">
-                                            <h5 class="fw-semibold mb-1">Time Slots Indicator:</h5>
+                                            <h5 class="fw-semibold mb-1">Calendar Indicator:</h5>
                                             <ul class="list-inline row gx-2 gy-2">
                                                 <li class="list-inline-item col-6 col-md-auto">
-                                                    <span class="legend-box bg-success"></span> Booked Time
+                                                    <span class="legend-box bg-secondary"></span> Today
                                                 </li>
                                                 <li class="list-inline-item col-6 col-md-auto">
-                                                    <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span>
+                                                    <span class="legend-box bg-success"></span> Booked Date
+                                                </li>
+                                                <li class="list-inline-item col-6 col-md-auto">
+                                                    <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span> Not
                                                     Available
                                                 </li>
                                                 <li class="list-inline-item col-6 col-md-auto">
@@ -243,22 +179,96 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                        <div class="table-responsive mt-2" style="overflow-x: auto;">
-                                            <table class="table table-bordered text-center align-middle" id="slotTable">
-                                                <thead class="">
-                                                    <tr id="slotHeader">
-                                                        <th></th>
-                                                        <!-- JS will append time slots here -->
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="slotBody">
-                                                    <!-- JS will append courts + time slot checkboxes here -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
 
-                                    <hr class="mb-4" />
+                                        <!-- Calendar Navigation Controls -->
+                                        <div class="calendar-navigation mt-3">
+                                            <div class="row g-2 col-12">
+                                                <!-- Previous Button -->
+                                                <div class="col-12 col-md-12">
+                                                    <button id="prevMonth" class="btn btn-primary w-100"
+                                                        style="text-align: center; display: flex; justify-content: center;">
+                                                        <div>
+                                                            <i class="fa-regular fa-square-caret-left me-2"></i>
+                                                        </div>
+                                                        <div>Previous</div>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Month & Year Selectors -->
+                                                <div class="col-12 col-md-12 d-flex gap-2">
+                                                    <select id="monthSelect" class="form-select w-50" style="font-size: 1rem;">
+                                                        <!-- Populated via JS -->
+                                                    </select>
+                                                    <select id="yearSelect" class="form-select w-50" style="font-size: 1rem;">
+                                                        <!-- Populated via JS -->
+                                                    </select>
+                                                </div>
+
+                                                <!-- Today and Next Button -->
+                                                <div class="col-12 col-md-12">
+                                                    <div class="d-flex flex-column flex-md-row gap-2">
+                                                        <button id="todayBtn" class="btn btn-secondary w-100">Today</button>
+                                                        <button id="nextMonth" class="btn btn-primary w-100"
+                                                            style="text-align: center; display: flex; justify-content: center;">
+                                                            <div>Next</div>
+                                                            <div><i class="fa-regular fa-square-caret-right ms-2"></i></div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <table class="calendar table table-bordered mb-3">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mo</th>
+                                                    <th>Tu</th>
+                                                    <th>We</th>
+                                                    <th>Th</th>
+                                                    <th>Fr</th>
+                                                    <th>Sa</th>
+                                                    <th style="text-align:center !important;">Su</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="calendarBody">
+                                                <!-- Calendar will be dynamically generated here -->
+                                            </tbody>
+                                        </table>
+
+                                        <!-- Time Slots -->
+                                        <div id="timeSlots" class="d-none">
+                                            <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Select Time Slots</h6>
+                                            <!-- Legend -->
+                                            <div class="mt-0">
+                                                <h5 class="fw-semibold mb-1">Time Slots Indicator:</h5>
+                                                <ul class="list-inline row gx-2 gy-2">
+                                                    <li class="list-inline-item col-6 col-md-auto">
+                                                        <span class="legend-box bg-success"></span> Booked Time
+                                                    </li>
+                                                    <li class="list-inline-item col-6 col-md-auto">
+                                                        <span class="legend-box" style="background-color: rgb(205, 205, 207);"></span>
+                                                        Available
+                                                    </li>
+                                                    <li class="list-inline-item col-6 col-md-auto">
+                                                        <span class="legend-box bg-primary"></span> Selected Date
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="table-responsive mt-2" style="overflow-x: auto;">
+                                                <table class="table table-bordered text-center align-middle" id="slotTable">
+                                                    <thead class="">
+                                                        <tr id="slotHeader">
+                                                            <th></th>
+                                                            <!-- JS will append time slots here -->
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="slotBody">
+                                                        <!-- JS will append courts + time slot checkboxes here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <hr class="mb-4" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -539,7 +549,7 @@
         });
 
         // Initial render
-        renderCalendar(currentDate);
+        // renderCalendar(currentDate);
 
         const selectedDateInput = document.getElementById('selected_date');
         const bookNowBtn        = document.getElementById('bookNowBtn');
@@ -807,15 +817,29 @@
             fetchCalendarData(packageId);
         });
         function fetchCalendarData(packageId) {
+            const calendarSection = document.getElementById('calendarSection');
+            const loading = document.getElementById('calendarLoading');
+            const content = document.getElementById('calendarContent');
+
+            calendarSection.classList.remove('d-none');
+
+            // show loading
+            loading.classList.remove('d-none');
+            content.classList.add('d-none');
+
             fetch(`/organizer/business/packages/${packageId}/calendar-data`)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('calendarSection').classList.remove('d-none');
                     let currentDate = new Date();
                     renderCalendar(currentDate, data, packageId);
+
+                    // hide loading, show content
+                    loading.classList.add('d-none');
+                    content.classList.remove('d-none');
                 })
                 .catch(err => {
                     console.error(err);
+                    loading.classList.add('d-none');
                     alert('Failed to load calendar');
                 });
         }

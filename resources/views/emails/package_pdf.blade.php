@@ -1,18 +1,19 @@
 @php
-    $slotCount = $booking->vendorTimeSlots->count() ?: 1; // avoid division by zero
+    $slotCount = max($booking->vendorTimeSlots->count(), 1);
     $slotPrice = $booking->total_price / $slotCount;
+
     $subtotal = $booking->total_price;
-    $discount = $booking->discount;
+    $discount = $booking->discount ?? 0;
     $serviceCharge = $booking->service_charge ?? 0;
     $grandTotal = $subtotal + $serviceCharge - $discount;
 
-    $paidAmount = $booking->paid_amount;
-    $balance = 0;
+    $paidAmount = $booking->paid_amount ?? 0;
 
-    if($booking->payment_type === 'deposit') {
-        $balance = $grandTotal - $paidAmount;
+    if ($booking->payment_type === 'deposit') {
+        $balance = max($grandTotal - $paidAmount, 0);
     } else {
-        $paidAmount = $grandTotal; // full_payment
+        // full payment
+        $paidAmount = $grandTotal;
         $balance = 0;
     }
 @endphp
@@ -127,29 +128,60 @@ body {
 
 <div class="container">
 
-    <div class="invoice-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <a href="https://www.sistemkami.com" class="invoice-logo">www.sistemkami.com</a>
-        <div class="address">
-            {{ $booking->organizer->name ?? 'Organizer Name' }}<br>
-            {{ $booking->organizer->phone ?? 'Organizer Address' }}<br>
-            {{ $booking->organizer->address_line1 ?? '' }}<br>
-            {{ $booking->organizer->address_line2 ?? '' }}<br>
-            {{ $booking->organizer->postal_code ?? '' }}, {{ $booking->organizer->city ?? '' }},
-            {{ $booking->organizer->state ?? '' }}
-        </div>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <!-- HEADER -->
+        <tr>
+            <td style="vertical-align:top;">
+                <a href="https://www.sistemkami.com" class="invoice-logo">
+                    www.sistemkami.com
+                </a>
+            </td>
 
-    <div class="invoice-details" style="display: flex; justify-content: space-between;">
-        <div>
-            <strong>Customer:</strong><br>
-            {{ $booking->participant->name ?? 'Customer Name' }}<br>
-            {{ $booking->participant->phone ?? 'Customer Address' }}
-        </div>
-        <div class="invoice-num">
-            Invoice #{{ $booking->booking_code }}<br>
-            {{ \Carbon\Carbon::parse($booking->created_at)->format('d M Y') }}
-        </div>
-    </div>
+            <td style="vertical-align:top; text-align:right; font-size:0.7rem; color:#9fa8b9;">
+                {{ $booking->organizer->name ?? 'Organizer Name' }}<br>
+                {{ $booking->organizer->phone ?? '' }}<br>
+                {{ $booking->organizer->address_line1 ?? '' }}<br>
+                {{ $booking->organizer->address_line2 ?? '' }}<br>
+                {{ $booking->organizer->postal_code ?? '' }},
+                {{ $booking->organizer->city ?? '' }},
+                {{ $booking->organizer->state ?? '' }}
+            </td>
+        </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6fa; padding:10px; margin-bottom:10px;">
+        <!-- DETAILS -->
+        <tr>
+            <td style="vertical-align:top; font-size:0.8rem;">
+                <strong>Customer:</strong><br>
+                {{ $booking->participant->name ?? 'Customer Name' }}<br>
+                {{ $booking->participant->phone ?? '' }}
+            </td>
+
+            <td style="vertical-align:top; text-align:right; font-size:0.7rem;">
+                @if($booking->payment_type === 'deposit')
+                    <strong>Receipt (Deposit Payment)</strong><br>
+                @else
+                    <strong>Receipt (Full Payment)</strong><br>
+                @endif
+
+                Ref #{{ $booking->booking_code }}<br>
+                {{ \Carbon\Carbon::parse($booking->created_at)->format('d M Y') }}
+
+                <div style="margin-top:8px;">
+                    @if($booking->payment_type === 'deposit')
+                        <span style="color:#eab308; font-weight:bold;">
+                            PARTIALLY PAID
+                        </span>
+                    @else
+                        <span style="color:#05cd4bff; font-weight:bold;">
+                            PAID
+                        </span>
+                    @endif
+                </div>
+            </td>
+        </tr>
+    </table>
 
     <div class="invoice-body">
         <div class="table-container">
@@ -195,7 +227,16 @@ body {
 					</tr>
 
 					<tr>
-						<td colspan="4"><strong>Paid Amount</strong></td>
+						<td colspan="4">
+                            <strong>
+                                @if($booking->payment_type === 'deposit')
+                                    Deposit Paid
+                                @else
+                                    Total Paid
+                                @endif
+                            </strong>
+                        </td>
+
 						<td class="text-bold"><strong>RM{{ number_format($paidAmount, 2) }}</strong></td>
 					</tr>
 

@@ -122,6 +122,13 @@
 
                     <ul class="{{ $isBookingRoute ? 'mm-show' : '' }}"
                         aria-expanded="{{ $isBookingRoute ? 'true' : 'false' }}">
+                        @if($authUser->type == "service")
+                            <li class="{{ $currentRoute === 'organizer.business.booking.create' ? 'mm-active' : '' }}">
+                                <a href="{{ route('organizer.business.booking.create') }}"
+                                    class="{{ $currentRoute === 'organizer.business.booking.create' ? 'active mm-active' : '' }}">
+                                    Create Booking</a>
+                            </li>
+                        @endif
                         <li class="{{ $currentRoute === 'organizer.bookings' ? 'mm-active' : '' }}">
                             <a href="{{ route('organizer.business.bookings') }}"
                                 class="{{ $currentRoute === 'organizer.bookings' ? 'active mm-active' : '' }}">Bookings
@@ -135,15 +142,10 @@
                             </li>
                         @endif
                         @if($authUser->type == "service")
-                            <li class="{{ $currentRoute === 'organizer.business.booking.create' ? 'mm-active' : '' }}">
-                                <a href="{{ route('organizer.business.booking.create') }}"
-                                    class="{{ $currentRoute === 'organizer.business.booking.create' ? 'active mm-active' : '' }}">
-                                    Create Booking</a>
-                            </li>
                             <li class="{{ $currentRoute === 'organizer.business.calender' ? 'mm-active' : '' }}">
                                 <a href="{{ route('organizer.business.calender') }}"
                                     class="{{ $currentRoute === 'organizer.business.calender' ? 'active mm-active' : '' }}">
-                                    Calender</a>
+                                    Calendar</a>
                             </li>
                         @endif
                     </ul>

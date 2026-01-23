@@ -93,6 +93,8 @@ Route::get('/receipt/pdf/{booking_code}', function ($booking_code) {
     ]);
 
     return $pdf->stream($booking_code . '_receipt.pdf');
+    // return view('emails.package_pdf', compact('booking'));
+
 });
 
 Route::prefix('business')->group(function () {
