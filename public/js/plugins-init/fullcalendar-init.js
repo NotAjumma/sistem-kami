@@ -36,7 +36,7 @@ var skeletonEl = document.getElementById('calendar-skeleton');
     editable: false,
     droppable: false,
     dayMaxEvents: true,
-
+    slotMinTime: '07:00:00',
     slotDuration: '00:20:00',
     slotLabelInterval: '00:20:00',
     slotEventOverlap: false,
@@ -71,10 +71,10 @@ var skeletonEl = document.getElementById('calendar-skeleton');
 
 
 
-   datesSet: function (info) {
-    currentViewType = info.view.type;
-    calendar.refetchEvents();
-  },
+    datesSet: function (info) {
+      currentViewType = info.view.type;
+      calendar.refetchEvents();
+    },
 
     // ------------------------------------------------------------
     // Custom event rendering
@@ -96,25 +96,64 @@ var skeletonEl = document.getElementById('calendar-skeleton');
       }
 
       // WEEK / DAY VIEW → detailed
-      const customer = arg.event.extendedProps.customer || '';
-      const phone    = arg.event.extendedProps.phone || '';
-      const title    = arg.event.title;
+      const customer    = arg.event.extendedProps.customer || '';
+      const phone       = arg.event.extendedProps.phone || '';
+      const title       = arg.event.title;
+      const slotName    = arg.event.extendedProps.slot || '';
+      const isDeposit  = arg.event.extendedProps.is_deposit === true;
+      const balance     = arg.event.extendedProps.balance || '';
+      
+      let paymentHtml = '';
+      if (isDeposit) {
+        paymentHtml = `<div class="fc-event-customer-name">
+                          Deposit | Balance: RM${balance}
+                        </div>`;
+      } else {
+        paymentHtml = `<div class="fc-event-customer-name">
+                        Full Payment
+                      </div>`;
+      }
+      
+
 
       return {
         html: `
-          <div class="fc-event-custom">
-            <div class="fc-event-info">
-              <div class="fc-event-time">${arg.timeText}</div>
-              <div class="fc-event-title">${title}</div>
+          <div class="fc-event-custom" style="
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px;
+            font-size: 11px;
+          ">
+
+            <!-- Top row: time + title + slot -->
+            <div style="display: flex; justify-content: space-between; font-weight: bold;">
+              <span>${arg.timeText}</span>
+              ${paymentHtml}
+              <span>${title} - ${slotName}</span>
             </div>
-            <div class="fc-event-customer-info">
-              <div class="fc-event-customer-name">${customer}</div>
-              ${phone ? `<div class="fc-event-customer-phone">${phone}</div>` : ''}
-            </div>
+
+            <!-- Bottom row: customer + phone + payment -->
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+              <span>Customer Info: </span>
+              <span>${customer} - ${phone}</span>
+
           </div>
         `
       };
-    }
+
+    },
+    eventClick: function(info) {
+      // Prevent default browser behavior
+      info.jsEvent.preventDefault();
+
+      // Get booking code or ID from extendedProps
+      const bookingCode = info.event.extendedProps.booking_id; // or id
+
+      if (bookingCode) {
+        // Redirect to booking details page
+        window.open(`/booking/details/${bookingCode}`, '_blank');
+      }
+    },
   });
 
   calendar.render();

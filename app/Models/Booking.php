@@ -31,6 +31,11 @@ class Booking extends Model
         'extra_info' => 'array',
     ];
 
+    protected $appends = [
+        'is_deposit',
+    ];
+
+
     // Relasi ke participant
     public function participant()
     {
@@ -66,6 +71,26 @@ class Booking extends Model
     {
         return $this->belongsTo(Organizer::class);
     }
+
+    public function getBalanceAttribute(): float
+    {
+        if ($this->payment_type !== 'deposit') {
+            return 0.00;
+        }
+
+        return round(
+            $this->final_price - ($this->paid_amount ?? 0),
+            2
+        );
+    }
+
+    public function getIsDepositAttribute(): bool
+    {
+        return $this->payment_type === 'deposit';
+    }
+
+
+
 
 
 }

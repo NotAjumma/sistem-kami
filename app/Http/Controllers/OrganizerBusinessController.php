@@ -208,9 +208,9 @@ class OrganizerBusinessController extends Controller
             ->pluck('booking_id');
 
         // Step 3: Get all booking IDs from booking_tickets
-        $bookingIds = DB::table('bookings')
-            ->whereIn('id', $bookingVendorTimeSlots)
-            ->pluck('id');
+        // $bookingIds = DB::table('bookings')
+        //     ->whereIn('id', $bookingVendorTimeSlots)
+        //     ->pluck('id');
 
         // Step 4: Fetch bookings with optional status & search filters
         $packages = Package::with(['items', 'category', 'addons'])
@@ -701,13 +701,18 @@ class OrganizerBusinessController extends Controller
 
         $events = [];
 
-        $bookings = Booking::with(['vendorTimeSlots', 'participant', 'package'])
+        $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package'])
             ->whereHas('vendorTimeSlots')
             ->get();
 
         foreach ($bookings as $booking) {
             foreach ($booking->vendorTimeSlots as $slot) {
 
+                $slotName = $slot->timeSlot?->slot_name;
+
+                if($booking->is_deposit){
+                    $balance = $booking->final_price - $booking->paid_amount;
+                }
                 $color = match ($booking->status) {
                     'paid' => '#16a34a',
                     'deposit' => '#f59e0b',
@@ -723,10 +728,14 @@ class OrganizerBusinessController extends Controller
                     'backgroundColor' => $color,
                     'borderColor'     => $color,
                     'extendedProps' => [
-                        'customer' => $booking->participant?->name ?? 'Unknown',
-                        'phone'    => $booking->participant?->phone ?? '',
-                        'status'   => $booking->status,
-                        'code'     => $booking->booking_code,
+                        'customer'      => $booking->participant?->name ?? 'Unknown',
+                        'phone'         => $booking->participant?->phone ?? '',
+                        'status'        => $booking->status,
+                        'code'          => $booking->booking_code,
+                        'slot'          => $slotName,
+                        'is_deposit'    => $booking->is_deposit,
+                        'balance'       => $booking->balance,
+                        'booking_id'    => $booking->id,
                     ],
                 ];
             }

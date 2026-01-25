@@ -68,6 +68,15 @@
   border-radius: 10px;
   display: inline-block;
 }
+/* Disable "grab" cursor on all events */
+.fc-event {
+  cursor: default !important;
+}
+
+/* Optional: if you want pointer on click instead */
+.fc-event {
+  cursor: pointer !important;
+}
 
 </style>
 @endpush
@@ -84,13 +93,7 @@
                         position: absolute;
                         top: 0; left: 0;
                         width: 100%; height: 100%;
-                        background: repeating-linear-gradient(
-                        135deg,
-                        #f0f0f0,
-                        #f0f0f0 10px,
-                        #e0e0e0 10px,
-                        #e0e0e0 20px
-                        );
+                        background-color: #fff;
                         z-index: 1000;
                         display: flex;
                         align-items: center;
@@ -98,7 +101,14 @@
                         font-size: 18px;
                         color: #888;
                     ">
-                        Loading calender...
+                        <div id="calendarLoading" class="d-flex justify-content-center align-items-center" style="height: 150px;">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2 text-muted small">Loading calendar...</div>
+                            </div>
+                        </div>
                     </div>
                     <div id="calendar" class="app-fullcalendar"></div>
                 </div>
