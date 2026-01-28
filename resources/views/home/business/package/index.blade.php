@@ -649,18 +649,37 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('business.select_package') }}" method="post">
-                            @csrf
-
+                        @if($package->is_manual)
                             <input type="hidden" name="package_id" value="{{ $package->id }}">
                             <input type="hidden" name="organizer_id" value="{{ $organizer->id }}">
 
                             <input type="hidden" name="selected_date" id="selected_date">
                             <input type="hidden" name="selected_time" id="selected_time">
+                            <input type="hidden" name="selected_slot" id="selected_slot">
 
-                            <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book
-                                Now</button>
-                        </form>
+                            <!-- Manual package → WhatsApp -->
+                            <a href="#" 
+                                class="btn btn-success mt-5 w-100" 
+                                id="whatsappNowBtn" 
+                                style="pointer-events: none; opacity: 0.5;">
+                                WhatsApp Now
+                            </a>
+                        @else
+                            <!-- Normal package → Form submission -->
+                            <form id="packageForm" action="{{ route('business.select_package') }}" method="post">
+                                @csrf
+
+                                <input type="hidden" name="package_id" value="{{ $package->id }}">
+                                <input type="hidden" name="organizer_id" value="{{ $organizer->id }}">
+
+                                <input type="hidden" name="selected_date" id="selected_date">
+                                <input type="hidden" name="selected_time" id="selected_time">
+                                <input type="hidden" name="selected_slot" id="selected_slot">
+
+                                <button type="submit" class="btn btn-primary mt-5 w-100" id="bookNowBtn" disabled>Book Now</button>
+                            </form>
+                        @endif
+
                 </section>
             </div>
         </aside>
@@ -883,27 +902,47 @@
 
         const selectedDateInput = document.getElementById('selected_date');
         const bookNowBtn        = document.getElementById('bookNowBtn');
+        const whatsappNowBtn    = document.getElementById('whatsappNowBtn');
         const selectedTimeInput = document.getElementById("selected_time");
 
         function checkDateSelected(bookedDatesFormatted, offDaysFormatted, currentLoopDate, formattedDate) {
             if (selectedDateInput.value && bookedDatesFormatted.includes(formattedDate)) {
-                bookNowBtn.setAttribute('disabled', true);
+                // Disable 
+                if (bookNowBtn) bookNowBtn.setAttribute('disabled', true);
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'none';
+                    whatsappNowBtn.style.opacity = 0.5;
+                }
             } else if (limitReachedDays.includes(formattedDate)) {
-                bookNowBtn.setAttribute('disabled', true);
+                if (bookNowBtn) bookNowBtn.setAttribute('disabled', true);
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'none';
+                    whatsappNowBtn.style.opacity = 0.5;
+                }
             } else if (offDaysFormatted.includes(formattedDate)) {
-                bookNowBtn.setAttribute('disabled', true);
+                if (bookNowBtn) bookNowBtn.setAttribute('disabled', true);
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'none';
+                    whatsappNowBtn.style.opacity = 0.5;
+                }
             } else if (currentLoopDate.getTime() < today.getTime()) {
                 td.classList.add("past-day");
                 td.title = "Cannot book past date";
             } else {
-                bookNowBtn.removeAttribute('disabled');
-
+                // Enable
+                if (bookNowBtn) bookNowBtn.removeAttribute('disabled');
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'auto';
+                    whatsappNowBtn.style.opacity = 1;
+                }
             }
         }
 
         function checkTimeSlotSelected(currentLoopDate) {
             const selectedTimeInput = document.getElementById("selected_time");
+            const selectedSlotInput = document.getElementById("selected_slot");
             const bookNowBtn        = document.getElementById("bookNowBtn");
+            const whatsappNowBtn    = document.getElementById("whatsappNowBtn");
 
             // Parse JSON safely
             let selected = [];
@@ -915,9 +954,21 @@
 
             // Enable if there are selected slots, disable otherwise
             if (Array.isArray(selected) && selected.length > 0) {
-                bookNowBtn.removeAttribute("disabled");
+                if (bookNowBtn) {
+                    bookNowBtn.removeAttribute("disabled");
+                }
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'auto';
+                    whatsappNowBtn.style.opacity = 1;
+                }
             } else {
-                bookNowBtn.setAttribute("disabled", true);
+                if (bookNowBtn) {
+                    bookNowBtn.setAttribute("disabled", true);
+                }
+                if (whatsappNowBtn) {
+                    whatsappNowBtn.style.pointerEvents = 'none';
+                    whatsappNowBtn.style.opacity = 0.5;
+                }
             }
         }
 
@@ -991,9 +1042,7 @@
             renderCalendar(currentDate);
         });
     </script>
-
     <!-- END Calendar script -->
-
 
     <!-- Time Slot script -->
     <script>
@@ -1079,7 +1128,7 @@
 
                             // On user selection
                             checkbox.addEventListener("change", () => {
-                                const slotObj = { date, id: slot.id, time };
+                                const slotObj = { date, id: slot.court, time };
 
                                 if (checkbox.checked) {
                                     td.classList.add("bg-primary", "text-white");
@@ -1116,4 +1165,71 @@
 
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const whatsappNowBtn = document.getElementById("whatsappNowBtn");
+            const selectedDateInput = document.getElementById("selected_date");
+            const selectedTimes = document.getElementById("selected_time");
+
+            // WhatsApp numbers with names
+            const whatsappNumbers = [
+                { name: "Dayang", phone: "+601136307973" },
+                { name: "Daus", phone: "+60175363022" },
+                { name: "Syafiq", phone: "+60149070273" }
+            ];
+
+            // weights = probability (higher number = higher chance)
+            const numberWeights = [4, 3, 3];
+
+            if (whatsappNowBtn) {
+                whatsappNowBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const date = selectedDateInput.value;
+                    if (!date) return;
+
+                    // Parse selected time slots
+                    let selectedSlots = [];
+                    try {
+                        selectedSlots = JSON.parse(selectedTimes.value || "[]");
+                    } catch(e) { selectedSlots = []; }
+
+                    if (!selectedSlots.length) return;
+
+                    // Pick a person randomly based on weights
+                    const pickedIndex = pickWeightedRandom(whatsappNumbers, numberWeights);
+                    const currentPerson = whatsappNumbers[pickedIndex];
+                    const phone = currentPerson.phone;
+                    const personName = currentPerson.name;
+
+                    // Build a readable list: "Classic (10:15 AM), Muji (10:15 AM)"
+                    let slotsText = selectedSlots.map(slot => `${slot.id} (${slot.time})`).join(", ");
+
+                    // WhatsApp message in proper Bahasa Melayu
+                    const packageTitle = "{{ $package->name }}";
+                    const message = encodeURIComponent(
+                        `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${date} ${slotsText}.`
+                    );
+
+                    // Open WhatsApp
+                    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, '_blank');
+
+                });
+            }
+
+            // Weighted random helper
+            function pickWeightedRandom(numbers, weights) {
+                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+                let rand = Math.random() * totalWeight;
+                for (let i = 0; i < numbers.length; i++) {
+                    if (rand < weights[i]) return i;
+                    rand -= weights[i];
+                }
+                return numbers.length - 1; // fallback
+            }
+
+        });
+
+    </script>
 @endpush

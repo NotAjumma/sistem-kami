@@ -608,10 +608,10 @@
                                         <div class="event-organizer text-primary" title="Organizer">By
                                             {{ $package->organizer->name }}
                                         </div>
-                                        <div class="event-title mb-2" title="{{ $package->name }}">
-                                            {{ Str::limit(($package->name), 25) }}
+                                        <div class="event-title mb-2" title="{{ $package->name }}" style="height: 50px;">
+                                            {{ Str::limit(($package->name), 35) }}
                                         </div>
-                                        <div class="event-desc">
+                                        <div class="event-desc" style="height: 80px;">
                                             {{ Str::limit(strip_tags($package->description), 140) }}
                                         </div>
                                         <hr class="dashed-hr mb-2 mt-4" />
