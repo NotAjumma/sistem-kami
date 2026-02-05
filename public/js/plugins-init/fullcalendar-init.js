@@ -37,8 +37,8 @@ var skeletonEl = document.getElementById('calendar-skeleton');
     droppable: false,
     dayMaxEvents: true,
     slotMinTime: '07:00:00',
-    slotDuration: '00:20:00',
-    slotLabelInterval: '00:20:00',
+    slotDuration: '00:15:00',
+    slotLabelInterval: '00:15:00',
     slotEventOverlap: false,
     eventTimeFormat: {
       hour: 'numeric',
@@ -102,11 +102,12 @@ var skeletonEl = document.getElementById('calendar-skeleton');
       const slotName    = arg.event.extendedProps.slot || '';
       const isDeposit  = arg.event.extendedProps.is_deposit === true;
       const balance     = arg.event.extendedProps.balance || '';
+      const deposit     = arg.event.extendedProps.deposit || '';
       
       let paymentHtml = '';
       if (isDeposit) {
         paymentHtml = `<div class="fc-event-customer-name">
-                          Deposit | Balance: RM${balance}
+                          Deposit RM${deposit} | Balance: RM${balance}
                         </div>`;
       } else {
         paymentHtml = `<div class="fc-event-customer-name">
@@ -127,17 +128,26 @@ var skeletonEl = document.getElementById('calendar-skeleton');
 
             <!-- Top row: time + title + slot -->
             <div style="display: flex; justify-content: space-between; font-weight: bold;">
-              <span>${arg.timeText}</span>
-              ${paymentHtml}
-              <span>${title} - ${slotName}</span>
+              <span>Booking Info: </span>
+              <span>Customer Info: </span>
             </div>
 
             <!-- Bottom row: customer + phone + payment -->
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-              <span>Customer Info: </span>
-              <span>${customer} - ${phone}</span>
+              <span>${arg.timeText}</span>
+              <span>${customer}</span>
+            </div>
 
-          </div>
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+              <span>${title} </span>
+              <span>${phone}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+              <span>${slotName}</span>
+            </div>
+             <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+              <span>${paymentHtml}</span>
+            </div>
         `
       };
 

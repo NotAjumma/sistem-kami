@@ -3,7 +3,7 @@
 <style>
 /* Time slots taller */
 .fc .fc-timegrid .fc-timegrid-slot {
-    height: 60px !important;
+    height: 120px !important;
 }
 
 .fc .fc-timegrid-slot-label,

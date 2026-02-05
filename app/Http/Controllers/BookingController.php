@@ -998,7 +998,11 @@ class BookingController extends Controller
                 $paymentTypeStatus = 'full_payment';
             }
 
-            $slotDurations = collect($package->vendorTimeSlots)->pluck('slot_duration_minutes', 'id');
+            $slotDurations = collect($package->vendorTimeSlots)
+                ->mapWithKeys(function ($slot) use ($package) {
+                    return [$slot->id => $package->duration_minutes];
+                });
+
             if (!empty($selected_time)) {
                 foreach ($selected_time as $slot) {
 

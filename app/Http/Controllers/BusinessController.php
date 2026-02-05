@@ -191,10 +191,6 @@ class BusinessController extends Controller
             });
 
         $timeSlots = VendorTimeSlot::where('organizer_id', $organizer->id)
-            ->where(function ($q) use ($package) {
-                $q->whereNull('package_id')
-                    ->orWhere('package_id', $package->id);
-            })
             ->where('is_active', 1)
             ->orderBy('start_time')
             ->get();
@@ -216,7 +212,7 @@ class BusinessController extends Controller
 
             // Compute how many intervals fit between start and end
             $diffInMinutes      = $end->diffInMinutes($start);
-            $slotsInThisPeriod  = intdiv($diffInMinutes, $slot->slot_duration_minutes);
+            $slotsInThisPeriod  = intdiv($diffInMinutes, $package->duration_minutes);
 
             $totalSlotCount += $slotsInThisPeriod;
         }
@@ -234,7 +230,7 @@ class BusinessController extends Controller
 
                 $start          = Carbon::parse($slot->start_time);
                 $end            = Carbon::parse($slot->end_time);
-                $duration       = $slot->slot_duration_minutes;
+                $duration       = $package->duration_minutes;
                 $totalSegments  = floor($start->diffInMinutes($end) / $duration);
 
                 $bookedSegments = 0;
@@ -272,6 +268,8 @@ class BusinessController extends Controller
             ->select('package_id', 'package_category_id', 'booked_date_start') // ✅ Now includes category
             ->get();
 
+            \Log::info("confirmedBookings");
+            \Log::info($confirmedBookings);
 
         $slotLimits = VendorTimeSlotLimit::where('organizer_id', $organizer->id)
             ->where(function ($q) use ($package) {
@@ -357,22 +355,31 @@ class BusinessController extends Controller
         
         $bookedDates = DB::table('bookings_vendor_time_slot')
             ->where('organizer_id', $package->organizer->id)
-            ->where('package_id', $package->id)
             ->whereIn('status', ['deposit_paid', 'full_payment'])
             ->whereDate('booked_date_start', '=', $date) // ✅ match exact date
             ->select('vendor_time_slot_id', 'booked_time_start', 'booked_time_end')
             ->get();
 
-        $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id')->map(function ($bookings) {
-            return $bookings->map(function ($b) {
-                return Carbon::parse($b->booked_time_start)->format('g:i A');
-            })->toArray();
+        $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id')->map(function ($bookings) use ($package) {
+            $blockedTimes = [];
+            foreach ($bookings as $b) {
+                $bStart = Carbon::parse($b->booked_time_start);
+                $bEnd   = $b->booked_time_end 
+                            ? Carbon::parse($b->booked_time_end) 
+                            : $bStart->copy()->addMinutes($package->duration_minutes); // fallback
+
+                // Calculate which slotStart times are blocked
+                $slotStart = Carbon::parse($bStart)->copy()->floorMinutes($package->duration_minutes); // rounds down to nearest interval
+                $blockedTimes[] = $slotStart->format('g:i A');
+            }
+            return array_unique($blockedTimes);
         });
+
         
         foreach ($package->vendorTimeSlots as $timeSlot) {
             $start      = Carbon::parse($timeSlot->start_time);
             $end        = Carbon::parse($timeSlot->end_time);
-            $interval   = $timeSlot->slot_duration_minutes;
+            $interval   = $package->duration_minutes;
 
             $times = [];
             while ($start < $end) {

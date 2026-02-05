@@ -403,10 +403,6 @@ class OrganizerBusinessController extends Controller
             });
 
         $timeSlots = VendorTimeSlot::where('organizer_id', $authUser->id)
-            ->where(function ($q) use ($package) {
-                $q->whereNull('package_id')
-                    ->orWhere('package_id', $package->id);
-            })
             ->where('is_active', 1)
             ->orderBy('start_time')
             ->get();
@@ -422,13 +418,13 @@ class OrganizerBusinessController extends Controller
             $start  = Carbon::parse($slot->start_time);
             $end    = Carbon::parse($slot->end_time);
 
-            if (!$slot->slot_duration_minutes || $end->lessThanOrEqualTo($start)) {
+            if (!$package->duration_minutes || $end->lessThanOrEqualTo($start)) {
                 continue;
             }
 
             // Compute how many intervals fit between start and end
             $diffInMinutes      = $end->diffInMinutes($start);
-            $slotsInThisPeriod  = intdiv($diffInMinutes, $slot->slot_duration_minutes);
+            $slotsInThisPeriod  = intdiv($diffInMinutes, $package->duration_minutes);
 
             $totalSlotCount += $slotsInThisPeriod;
         }
@@ -446,7 +442,7 @@ class OrganizerBusinessController extends Controller
 
                 $start          = Carbon::parse($slot->start_time);
                 $end            = Carbon::parse($slot->end_time);
-                $duration       = $slot->slot_duration_minutes;
+                $duration       = $package->duration_minutes;
                 $totalSegments  = floor($start->diffInMinutes($end) / $duration);
 
                 $bookedSegments = 0;
@@ -734,6 +730,7 @@ class OrganizerBusinessController extends Controller
                         'code'          => $booking->booking_code,
                         'slot'          => $slotName,
                         'is_deposit'    => $booking->is_deposit,
+                        'deposit'       => $booking->paid_amount,
                         'balance'       => $booking->balance,
                         'booking_id'    => $booking->id,
                     ],

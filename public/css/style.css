@@ -20880,8 +20880,8 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
     padding: 2px 4px;
     font-size: 10px; } }
 
-.fc-media-screen .fc-timegrid-event-harness {
-  height: 61px; }
+/* .fc-media-screen .fc-timegrid-event-harness {
+  height: 61px; } */
 
 .fc .fc-media-screen {
   width: 100%;
