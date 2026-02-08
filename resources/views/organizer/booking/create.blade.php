@@ -810,6 +810,7 @@
         const customerPayInput = document.getElementById('customerPay');
         const remainingBalanceInput = document.getElementById('remainingBalance');
         const packages = @json($packages);
+        let requiredSlots = 1;
         document.getElementById('packageSelect').addEventListener('change', function () {
             const packageId = this.value;
             const container = document.getElementById('addonsContainer');
@@ -830,8 +831,8 @@
 
             /* ---------- ADDONS RENDER ---------- */
             const selectedPackage = packages.find(p => p.id == packageId);
+            requiredSlots = selectedPackage.package_slot_quantity;
 
-            console.log(selectedPackage);
             container.innerHTML = '';
 
             if (!selectedPackage || !selectedPackage.addons || selectedPackage.addons.length === 0) {
@@ -857,6 +858,8 @@
                     `;
 
                     container.insertAdjacentHTML('beforeend', checkbox);
+                    const checkboxList = container.querySelector(`#addon_${addon.id}`);
+                    checkboxList.addEventListener('change', updateFinalPrice);
                 });
             }
 
@@ -912,16 +915,23 @@
 
         // Functions
         function updateFinalPrice() {
-            const quantity = selectedTimes.length; // number of selected time slots
 
-            console.log(quantity);
-            // If no time slot selected, package price = 0
-            const basePrice = quantity > 0 ? parseFloat(packagePriceInput.value) : 0;
+            const selectedCount = selectedTimes.length;
+
+            // how many full packages
+            const packageQty = Math.floor(selectedCount / requiredSlots);
+
+            const basePrice = parseFloat(packagePriceInput.value) || 0;
             const discount = parseFloat(discountInput.value) || 0;
 
-            // Calculate final price
-            const finalPrice = Math.max((basePrice * quantity) - discount, 0);
-            packagePriceInput.value = basePrice; // show base price
+            // addons
+            let addonTotal = 0;
+            document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
+                addonTotal += parseFloat(cb.dataset.price || 0);
+            });
+
+            const finalPrice = Math.max((basePrice * packageQty) + addonTotal - discount, 0);
+
             finalPriceInput.value = finalPrice;
 
             updateRemainingBalance();

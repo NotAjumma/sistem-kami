@@ -974,13 +974,17 @@ class BookingController extends Controller
 
             $packageCode      = strtoupper($package['package_code'] ?? 'DFT');
             $basePackagePrice = (float) $package->base_price;
+            $slotQtyRequired = $package->package_slot_quantity ?? 1;
 
-            if (!empty($selected_time)) {
-                $selectedCount = count($selected_time);
-                $packageTotal  = $selectedCount * $basePackagePrice;
-            } else {
-                $packageTotal = $basePackagePrice;
-            }
+            $selectedCount = !empty($selected_time) ? count($selected_time) : 0;
+
+            // how many full packages
+            $packageQty = $selectedCount > 0
+                ? intdiv($selectedCount, $slotQtyRequired)
+                : 1;
+
+            // calculate package total
+            $packageTotal = $packageQty * $basePackagePrice;
 
             /* ADDON PRICE HERE */
             $totalPrice = $packageTotal + $addonTotal;
