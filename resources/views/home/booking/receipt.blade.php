@@ -157,24 +157,29 @@
                     @endif
                     
                     @if ($booking->package_id && $booking->package)
-                        <div class="mt-4 mb-4 row align-items-stretch justify-content-center text-start border rounded p-2">
-                            @if (!empty($booking->package->images) && count($booking->package->images) > 0)
-                                @php
-                                    $coverImage = collect($booking->package->images)->firstWhere('is_cover', true) ?? $booking->package->images[0];
-                                @endphp
-                                <div class="col-auto h-100 d-flex align-items-center">
-                                    <img src="{{ asset('images/organizers/' . $booking->package->organizer->id . '/packages/' . $booking->package->id . '/' . $coverImage['url']) }}"
-                                        alt="{{ $coverImage['alt_text'] }}" width="50" height="50"
-                                        class="object-fit-cover rounded shadow-sm border" loading="lazy" decoding="async" />
-                                </div>
-                            @endif
-
-                            <div class="col h-100 d-flex flex-column justify-content-center">
-                                <p class="mb-1 small" style="color: #7cb6cc; !important">Package Purchased</p>
-                                <h5 class="text-white mb-0 medium">{{ $booking->package->name }}</h5>
-                                <small class="text-white mb-0">by {{ $booking->package->organizer->name }}</small>
+                       <div class="mt-4 mb-4 row align-items-center text-start border rounded p-2 bg-dark">
+                        @if (!empty($booking->package->images) && count($booking->package->images) > 0)
+                            @php
+                                $coverImage = collect($booking->package->images)->firstWhere('is_cover', true) ?? $booking->package->images[0];
+                            @endphp
+                            <div class="col-auto">
+                                <img 
+                                    src="{{ asset('images/organizers/' . $booking->package->organizer->id . '/packages/' . $booking->package->id . '/' . $coverImage['url']) }}" 
+                                    alt="{{ $coverImage['alt_text'] }}" 
+                                    class="rounded shadow-sm border" 
+                                    style="width: 80px; height: 80px; object-fit: cover;" 
+                                    loading="lazy" 
+                                    decoding="async" 
+                                />
                             </div>
+                        @endif
+
+                        <div class="col d-flex flex-column justify-content-center ps-3">
+                            <p class="mb-1 small text-info">Package Purchased</p>
+                            <h5 class="text-white mb-0">{{ $booking->package->name }}</h5>
+                            <small class="text-white">by {{ $booking->package->organizer->name }}</small>
                         </div>
+                    </div>
 
 
                     @elseif ($booking->event_id && $booking->event)
@@ -207,24 +212,29 @@
                             Phone</span><strong>{{ format_my_phone($booking->participant->phone, $booking->participant->country) }}</strong>
                     </div>
                     @if($booking->vendorTimeSlots && $booking->vendorTimeSlots->count())
-                        @foreach ($booking->vendorTimeSlots as $slot)
-                            <div class="payment-detail-row"><span>Booked Slot</span><strong>{{ $slot->timeSlot->slot_name }}</strong>
-                            </div>
-                            <div class="payment-detail-row"><span>Booked Date</span><strong>{{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}</strong>
-                            </div>
-                            @if($slot->booked_time_start)
-                            <div class="payment-detail-row"><span>Booked Time</span>
+                        @foreach($booking->vendorTimeSlots as $slot)
+                            <div class="payment-detail-row">
+                                <span>{{ $slot->timeSlot->slot_name }}</span>
                                 <strong>
-                                    {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A') }}
-                                    @if($slot->booked_time_end)
-                                    -
-                                    {{ \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A') }}
+                                    {{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}
+                                    @if($slot->booked_time_start)
+                                        , {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A') }}
+                                        @if($slot->booked_time_end)
+                                            - {{ \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A') }}
+                                        @endif
                                     @endif
                                 </strong>
                             </div>
-                            @endif
                         @endforeach
                     @endif
+
+                    {{-- Booked Add-ons --}}
+                    <!-- @if($booking->addons && $booking->addons->count())
+                        <div class="payment-detail-row">
+                            <span>Add-ons Total</span>
+                            <strong>RM{{ number_format($booking->addons->sum('price'), 2) }}</strong>
+                        </div>
+                    @endif -->
 
                     <hr class="dashed-line" />
 

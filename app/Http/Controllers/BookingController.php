@@ -891,6 +891,7 @@ class BookingController extends Controller
         $selected_time  = json_decode($request->input('selected_time'), true) ?? [];
         // $discountAmount  = $request->input('discount');
         $deposit_amount  = $request->input('deposit_amount');
+        $addonIds = $request->input('addon_ids', []);
         // $package_inputs = session('package_inputs');
         if (!$package_id || !$selected_date) {
             \Log::info("tendang back");
@@ -913,6 +914,8 @@ class BookingController extends Controller
             'notes'             => 'nullable|string',
             'payment_type'      => 'required|string',
             'reference'         => 'nullable|string',
+            'addon_ids'         => 'nullable|array',
+            'addon_ids.*'       => 'exists:package_addons,id',
         ]);
 
         DB::beginTransaction();
@@ -948,6 +951,10 @@ class BookingController extends Controller
                     'address',
                 ]);
 
+                $selectedAddons = $package->addons()
+                    ->whereIn('id', $addonIds)
+                    ->get();
+
                 // If phone is empty, use whatsapp_number
                 $data['phone'] = $data['whatsapp_number'];
                 $data['email'] = $authUser->email;
@@ -960,14 +967,24 @@ class BookingController extends Controller
                 throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
             }
 
-            $packageCode    = strtoupper($package['package_code'] ?? 'DFT');
-            if (!empty($selected_time)){
-                $selectedCount  = count($selected_time);
-                $totalPrice      = $selectedCount * (float) $package['base_price'];
-                $eachSlotPrice  = (float) $package['base_price'];
-            } else{
-                $totalPrice = (float) $package['base_price']; // or base_price if needed
+            $addonTotal = $selectedAddons->sum(function ($addon) {
+                return (float) ($addon->price ?? 0);
+            });
+
+
+            $packageCode      = strtoupper($package['package_code'] ?? 'DFT');
+            $basePackagePrice = (float) $package->base_price;
+
+            if (!empty($selected_time)) {
+                $selectedCount = count($selected_time);
+                $packageTotal  = $selectedCount * $basePackagePrice;
+            } else {
+                $packageTotal = $basePackagePrice;
             }
+
+            /* ADDON PRICE HERE */
+            $totalPrice = $packageTotal + $addonTotal;
+
             $paymentType    = $request->input('payment_type');
             $booking = Booking::create([
                 'participant_id'    => $participant->id,
@@ -981,6 +998,11 @@ class BookingController extends Controller
                 'payment_method'    => 'sistemkami',
                 'payment_type'      => $paymentType,
             ]);
+
+            /* ---------- SAVE ADDONS INTO PIVOT TABLE ---------- */
+            if (!empty($addonIds)) {
+                $booking->addons()->sync($addonIds);
+            }
 
             $depositAmount = $deposit_amount;
 
@@ -1146,12 +1168,12 @@ class BookingController extends Controller
             $phone = $data['whatsapp_number'];
 
            // Mulakan mesej
-$text = "Hai " . $data['name'] . ",\n\n";
-$text .= "Tempahan anda telah berjaya dibuat untuk Pakej "
-       . $booking->package->name
-       . " oleh "
-       . $authUser->name
-       . ".\n\n";
+        $text = "Hai " . $data['name'] . ",\n\n";
+        $text .= "Tempahan anda telah berjaya dibuat untuk Pakej "
+            . $booking->package->name
+            . " oleh "
+            . $authUser->name
+            . ".\n\n";
 
         // Info pembayaran
         if ($booking->payment_type === 'deposit') {
@@ -1180,6 +1202,14 @@ $text .= "Tempahan anda telah berjaya dibuat untuk Pakej "
             $text .= "📌 Slot: " . $slotName . "\n";
             $text .= "🗓 Tarikh: " . $startDate . "\n";
             $text .= "⏰ Masa: " . $startTime . " - " . $endTime . "\n\n";
+        }
+
+        if ($booking->addons->count()) {
+            $text .= "*Add Ons Dipilih:*\n";
+            foreach ($booking->addons as $addon) {
+                $text .= "- {$addon->name} (RM" . number_format($addon->price, 2) . ")\n";
+            }
+            $text .= "\n";
         }
 
         // Tambah pautan resit

@@ -272,6 +272,13 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label">Add Ons</label>
+                                <div id="addonsContainer" class="border rounded p-3">
+                                    <small class="text-muted">Please select a package first</small>
+                                </div>
+                            </div>
+
                            <div class="mb-3 col-md-6">
                                 <label class="form-label">Package Base Price (RM)</label>
                                 <input type="number" class="form-control" id="packagePrice" readonly>
@@ -802,8 +809,13 @@
         const depositSection = document.getElementById('depositSection');
         const customerPayInput = document.getElementById('customerPay');
         const remainingBalanceInput = document.getElementById('remainingBalance');
+        const packages = @json($packages);
         document.getElementById('packageSelect').addEventListener('change', function () {
             const packageId = this.value;
+            const container = document.getElementById('addonsContainer');
+
+            // reset addons UI every time package changes
+            container.innerHTML = '<small class="text-muted">Loading add-ons...</small>';
 
             if (!packageId) {
                 document.getElementById('calendarSection').classList.add('d-none');
@@ -811,11 +823,47 @@
                 finalPriceInput.value = '';
                 discountInput.value = 0;
                 depositSection.classList.add('d-none');
+
+                container.innerHTML = '<small class="text-muted">Please select a package first</small>';
                 return;
             }
 
+            /* ---------- ADDONS RENDER ---------- */
+            const selectedPackage = packages.find(p => p.id == packageId);
+
+            console.log(selectedPackage);
+            container.innerHTML = '';
+
+            if (!selectedPackage || !selectedPackage.addons || selectedPackage.addons.length === 0) {
+                container.innerHTML = '<small class="text-muted">No add-ons available for this package</small>';
+            } else {
+
+                selectedPackage.addons.forEach(addon => {
+                    const checkbox = `
+                        <div class="form-check mb-2">
+                            <input 
+                                class="form-check-input addon-checkbox"
+                                type="checkbox"
+                                name="addon_ids[]"
+                                value="${addon.id}"
+                                data-price="${addon.price ?? 0}"
+                                id="addon_${addon.id}"
+                            >
+                            <label class="form-check-label" for="addon_${addon.id}">
+                                ${addon.name}
+                                ${addon.price ? `<small class="text-muted">(RM ${parseFloat(addon.price).toFixed(2)})</small>` : ''}
+                            </label>
+                        </div>
+                    `;
+
+                    container.insertAdjacentHTML('beforeend', checkbox);
+                });
+            }
+
+            /* ---------- YOUR ORIGINAL LOGIC ---------- */
             fetchCalendarData(packageId);
         });
+
         function fetchCalendarData(packageId) {
             const calendarSection = document.getElementById('calendarSection');
             const loading = document.getElementById('calendarLoading');

@@ -24,4 +24,10 @@ class PackageAddon extends Model
     {
         return $this->belongsTo(Package::class);
     }
+
+    public function bookings()
+    {
+        return $this->belongsToMany(Booking::class, 'booking_addon');
+    }
+
 }

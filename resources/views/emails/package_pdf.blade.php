@@ -209,6 +209,16 @@ body {
                             <td>RM{{ number_format($slotPrice ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
+                    {{-- Booked Add-ons --}}
+                    @if($booking->addons && $booking->addons->count())
+                        @foreach($booking->addons as $addon)
+                            <tr>
+                                <td colspan="2">{{ $addon->name }}</td>
+                                <td colspan="2">{{ $addon->description }}</td>
+                                <td>RM{{ number_format($addon->price, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
                     <tr>
 						<td colspan="4">Subtotal</td>
 						<td>RM{{ number_format($subtotal, 2) }}</td>

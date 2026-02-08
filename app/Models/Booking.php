@@ -89,8 +89,9 @@ class Booking extends Model
         return $this->payment_type === 'deposit';
     }
 
-
-
-
+    public function addons()
+    {
+        return $this->belongsToMany(PackageAddon::class, 'booking_addon', 'booking_id', 'addon_id');
+    }
 
 }
