@@ -395,9 +395,14 @@ class BusinessController extends Controller
             ];
         }
 
+        $offDays = VendorOffDay::where('organizer_id', $package->organizer->id)
+            ->whereDate('off_date', $date)
+            ->get();
+
         return response()->json([
             'date'   => $date,
             'slots'  => $slots,
+            'vendorOffTimes' => $offDays,
         ]);
     }
 

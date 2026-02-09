@@ -393,7 +393,12 @@
             const lastDay = new Date(year, month + 1, 0);
             const firstWeekday = (firstDay.getDay() + 6) % 7; // Make Monday = 0
             const totalDays = lastDay.getDate();
-            const offDaysFormatted = vendorOffDays.map(off => off.off_date);
+            // Keep full info for each off day
+            const offDaysFormatted = vendorOffDays.map(off => ({
+                date: off.off_date,
+                start_time: off.start_time,
+                end_time: off.end_time
+            }));
             
             let bookedDatesFormatted = [];
 
@@ -438,6 +443,9 @@
                 // Highlight today
                 const today = new Date();
                 const maxDate = new Date(today.getFullYear() + maxBookingOffset, 11);
+
+                const offDayForDate = offDaysFormatted.find(off => off.date === formattedDate);
+
                 today.setHours(0, 0, 0, 0); // Normalize time
                 currentLoopDate.setHours(0, 0, 0, 0);
                 if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
@@ -450,9 +458,12 @@
                 } else if (limitReachedDays.includes(formattedDate)) {
                     td.classList.add("past-day");
                     td.title = "Booking limit reached for this week";
-                } else if (offDaysFormatted.includes(formattedDate)) {
-                    td.classList.add("off-day");
-                    td.title = "Unavailable (Off Day)";
+                } else if (offDayForDate) {
+                    if ((!offDayForDate.start_time && !offDayForDate.end_time) ||
+                        (offDayForDate.start_time === "00:00:00" && offDayForDate.end_time === "23:59:59")) {
+                        td.classList.add("off-day");
+                        td.title = "Unavailable (Off Day)";
+                    }
                 } else if (currentLoopDate.getTime() < today.getTime()) {
                     td.classList.add("past-day");
                     td.title = "Cannot book past date";
@@ -678,7 +689,6 @@
         let selectedTimes = [];
 
         function renderTimeSlot(date, currentLoopDate, packageId, base_price) {
-            console.log("Render time slot for:", date);
             const slotHeader = document.getElementById("slotHeader");
             const slotBody = document.getElementById("slotBody");
             const selectedTimeInput = document.getElementById("selected_time");
@@ -755,6 +765,31 @@
                             checkbox.type = "checkbox";
                             checkbox.classList.add("form-check-input");
                             checkbox.value = `${slot.id}|${time}`;
+                            
+                            // Convert 12h time (e.g., "10:00 AM") to 24h format
+                            const [hourMin, ampm] = time.split(" "); // "10:00 AM" -> ["10:00", "AM"]
+                            let [hours, minutes] = hourMin.split(":").map(Number);
+                            if (ampm === "PM" && hours !== 12) hours += 12;
+                            if (ampm === "AM" && hours === 12) hours = 0;
+                            const currentTime = `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:00`;
+
+                            // Check if slot is booked
+                            let isDisabled = slot.bookedTimes && slot.bookedTimes.includes(time);
+
+                            // Check if slot falls in vendor off time
+                            if (data.vendorOffTimes) {
+                                data.vendorOffTimes.forEach(off => {
+                                    if (currentTime >= off.start_time && currentTime < off.end_time) {
+                                        isDisabled = true;
+                                    }
+                                });
+                            }
+
+                            if (isDisabled) {
+                                checkbox.disabled = true;
+                                td.classList.add("bg-success", "bg-opacity-50"); // highlight disabled
+                                td.title = "Unavailable (Off Time)";
+                            }
 
                             // Mark booked slots (disable + green highlight)
                             if (slot.bookedTimes && slot.bookedTimes.includes(time)) {
@@ -799,6 +834,14 @@
                         </td>
                     </tr>`;
                 });
+        }
+
+        function timeTo24h(timeStr) {
+            const [time, modifier] = timeStr.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+            return `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:00`;
         }
 
     </script>
