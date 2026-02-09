@@ -16,6 +16,7 @@ use App\Models\VendorTimeSlot;
 use App\Models\BookingTicket;
 use App\Models\Ticket;
 use App\Models\Package;
+use App\Models\PackageAddon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -967,9 +968,39 @@ class BookingController extends Controller
                 throw new \Exception('Session expired or incomplete. Sila pilih package semula.');
             }
 
-            $addonTotal = $selectedAddons->sum(function ($addon) {
-                return (float) ($addon->price ?? 0);
-            });
+            $addonTotal = 0;
+
+            /* ---------- NORMAL ADDONS (checkbox) ---------- */
+            if ($request->filled('addon_ids')) {
+
+                $selectedAddons = PackageAddon::whereIn('id', $request->addon_ids)->get();
+
+                foreach ($selectedAddons as $addon) {
+                    $addonTotal += (float) $addon->price;
+                }
+            }
+
+            /* ---------- QTY ADDONS ---------- */
+            if ($request->filled('addon_qty')) {
+
+                foreach ($request->addon_qty as $addonId => $qty) {
+
+                    $qty = (int) $qty;
+
+                    if ($qty <= 0) {
+                        continue;
+                    }
+
+                    $addon = PackageAddon::find($addonId);
+
+                    if (!$addon) {
+                        continue;
+                    }
+
+                    $addonTotal += (float) $addon->price * $qty;
+                }
+            }
+
 
 
             $packageCode      = strtoupper($package['package_code'] ?? 'DFT');
@@ -1004,9 +1035,31 @@ class BookingController extends Controller
             ]);
 
             /* ---------- SAVE ADDONS INTO PIVOT TABLE ---------- */
-            if (!empty($addonIds)) {
-                $booking->addons()->sync($addonIds);
+
+            $syncData = [];
+
+            /* 1️⃣ Checkbox addons (normal add-ons) */
+            if ($request->has('addon_ids')) {
+                foreach ($request->addon_ids as $addonId) {
+                    $syncData[$addonId] = ['qty' => 1];
+                }
             }
+
+            /* 2️⃣ Quantity addons (Tambahan Orang etc) */
+            if ($request->has('addon_qty')) {
+                foreach ($request->addon_qty as $addonId => $qty) {
+
+                    $qty = (int) $qty;
+
+                    // only save if > 0
+                    if ($qty > 0) {
+                        $syncData[$addonId] = ['qty' => $qty];
+                    }
+                }
+            }
+
+            $booking->addons()->sync($syncData);
+
 
             $depositAmount = $deposit_amount;
 
@@ -1210,11 +1263,23 @@ class BookingController extends Controller
 
         if ($booking->addons->count()) {
             $text .= "*Add Ons Dipilih:*\n";
+
             foreach ($booking->addons as $addon) {
-                $text .= "- {$addon->name} (RM" . number_format($addon->price, 2) . ")\n";
+
+                $qty = $addon->pivot->qty ?? 1;
+                $lineTotal = $addon->price * $qty;
+
+                // If qty addon
+                if ($qty > 1) {
+                    $text .= "- {$addon->name} x{$qty} (RM" . number_format($lineTotal, 2) . ")\n";
+                } else {
+                    $text .= "- {$addon->name} (RM" . number_format($addon->price, 2) . ")\n";
+                }
             }
+
             $text .= "\n";
         }
+
 
         // Tambah pautan resit
         if ($booking->payment_type === 'deposit') {

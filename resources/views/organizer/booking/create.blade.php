@@ -811,12 +811,12 @@
         const remainingBalanceInput = document.getElementById('remainingBalance');
         const packages = @json($packages);
         let requiredSlots = 1;
+        const addonsContainer = document.getElementById('addonsContainer');
         document.getElementById('packageSelect').addEventListener('change', function () {
             const packageId = this.value;
-            const container = document.getElementById('addonsContainer');
 
             // reset addons UI every time package changes
-            container.innerHTML = '<small class="text-muted">Loading add-ons...</small>';
+            addonsContainer.innerHTML = '<small class="text-muted">Loading add-ons...</small>';
 
             if (!packageId) {
                 document.getElementById('calendarSection').classList.add('d-none');
@@ -825,7 +825,7 @@
                 discountInput.value = 0;
                 depositSection.classList.add('d-none');
 
-                container.innerHTML = '<small class="text-muted">Please select a package first</small>';
+                addonsContainer.innerHTML = '<small class="text-muted">Please select a package first</small>';
                 return;
             }
 
@@ -833,38 +833,103 @@
             const selectedPackage = packages.find(p => p.id == packageId);
             requiredSlots = selectedPackage.package_slot_quantity;
 
-            container.innerHTML = '';
+            addonsContainer.innerHTML = '';
 
             if (!selectedPackage || !selectedPackage.addons || selectedPackage.addons.length === 0) {
-                container.innerHTML = '<small class="text-muted">No add-ons available for this package</small>';
+                addonsContainer.innerHTML = '<small class="text-muted">No add-ons available for this package</small>';
             } else {
 
                 selectedPackage.addons.forEach(addon => {
-                    const checkbox = `
-                        <div class="form-check mb-2">
-                            <input 
-                                class="form-check-input addon-checkbox"
-                                type="checkbox"
-                                name="addon_ids[]"
-                                value="${addon.id}"
-                                data-price="${addon.price ?? 0}"
-                                id="addon_${addon.id}"
-                            >
-                            <label class="form-check-label" for="addon_${addon.id}">
+
+                let html = '';
+
+                // QTY ADDON (Tambahan Orang)
+                if (addon.is_qty == 1) {
+
+                    html = `
+                    <div class="mb-3 addon-qty-wrapper">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            <span>
                                 ${addon.name}
-                                ${addon.price ? `<small class="text-muted">(RM ${parseFloat(addon.price).toFixed(2)})</small>` : ''}
-                            </label>
+                                <small class="text-muted">(RM ${parseFloat(addon.price).toFixed(2)} each)</small>
+                            </span>
+                        </label>
+
+                        <div class="input-group" style="max-width:150px;">
+                            <button class="btn btn-outline-secondary qty-minus" type="button" data-id="${addon.id}">-</button>
+
+                            <input 
+                                type="number"
+                                class="form-control text-center addon-qty-input"
+                                name="addon_qty[${addon.id}]"
+                                value="0"
+                                min="0"
+                                data-price="${addon.price}"
+                                id="addon_qty_${addon.id}"
+                            >
+
+                            <button class="btn btn-outline-secondary qty-plus" type="button" data-id="${addon.id}">+</button>
                         </div>
+                    </div>
                     `;
 
-                    container.insertAdjacentHTML('beforeend', checkbox);
-                    const checkboxList = container.querySelector(`#addon_${addon.id}`);
-                    checkboxList.addEventListener('change', updateFinalPrice);
-                });
+                } else {
+
+                    // NORMAL ADDON (checkbox)
+                    html = `
+                    <div class="form-check mb-2">
+                        <input 
+                            class="form-check-input addon-checkbox"
+                            type="checkbox"
+                            name="addon_ids[]"
+                            value="${addon.id}"
+                            data-price="${addon.price ?? 0}"
+                            id="addon_${addon.id}"
+                        >
+                        <label class="form-check-label" for="addon_${addon.id}">
+                            ${addon.name}
+                            ${addon.price ? `<small class="text-muted">(RM ${parseFloat(addon.price).toFixed(2)})</small>` : ''}
+                        </label>
+                    </div>
+                    `;
+                }
+
+                addonsContainer.insertAdjacentHTML('beforeend', html);
+            });
+
             }
 
             /* ---------- YOUR ORIGINAL LOGIC ---------- */
             fetchCalendarData(packageId);
+        });
+
+        addonsContainer.addEventListener('input', function(e){
+            if(e.target.classList.contains('addon-qty-input')){
+                updateFinalPrice();
+            }
+        });
+        addonsContainer.addEventListener('change', function(e){
+            if (e.target.classList.contains('addon-checkbox')) {
+                updateFinalPrice();
+            }
+        });
+
+
+        // plus button
+        addonsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('qty-plus')) {
+                const id = e.target.dataset.id;
+                const input = document.getElementById(`addon_qty_${id}`);
+                input.value = parseInt(input.value || 0) + 1;
+                updateFinalPrice();
+            }
+
+            if (e.target.classList.contains('qty-minus')) {
+                const id = e.target.dataset.id;
+                const input = document.getElementById(`addon_qty_${id}`);
+                input.value = Math.max(parseInt(input.value || 0) - 1, 0);
+                updateFinalPrice();
+            }
         });
 
         function fetchCalendarData(packageId) {
@@ -924,18 +989,28 @@
             const basePrice = parseFloat(packagePriceInput.value) || 0;
             const discount = parseFloat(discountInput.value) || 0;
 
-            // addons
             let addonTotal = 0;
+
+            /* ---------- CHECKBOX ADDONS ---------- */
             document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
                 addonTotal += parseFloat(cb.dataset.price || 0);
             });
 
+            /* ---------- QTY ADDONS ---------- */
+            document.querySelectorAll('.addon-qty-input').forEach(input => {
+                const qty = parseInt(input.value || 0);
+                const price = parseFloat(input.dataset.price || 0);
+
+                addonTotal += qty * price;
+            });
+
             const finalPrice = Math.max((basePrice * packageQty) + addonTotal - discount, 0);
 
-            finalPriceInput.value = finalPrice;
+            finalPriceInput.value = finalPrice.toFixed(2);
 
             updateRemainingBalance();
         }
+
 
 
         function updateRemainingBalance() {

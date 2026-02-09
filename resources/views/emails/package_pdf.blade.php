@@ -1,6 +1,12 @@
 @php
     $slotCount = max($booking->vendorTimeSlots->count(), 1);
-    $slotPrice = $booking->total_price / $slotCount;
+
+    // Total add-ons
+    $addonTotal = $booking->addons->sum(function ($addon) {
+        return $addon->price * ($addon->pivot->qty ?? 1);
+    });
+
+    $slotPrice = ($booking->total_price - $addonTotal) / $slotCount;
 
     $subtotal = $booking->total_price;
     $discount = $booking->discount ?? 0;
@@ -212,10 +218,19 @@ body {
                     {{-- Booked Add-ons --}}
                     @if($booking->addons && $booking->addons->count())
                         @foreach($booking->addons as $addon)
+                            @php
+                                $qty = $addon->pivot->qty ?? 1;
+                                $addonTotalPrice = $addon->price * $qty;
+                            @endphp
                             <tr>
-                                <td colspan="2">{{ $addon->name }}</td>
+                                <td colspan="2">
+                                    {{ $addon->name }} 
+                                    @if($qty > 1)
+                                        x{{ $qty }}
+                                    @endif
+                                </td>
                                 <td colspan="2">{{ $addon->description }}</td>
-                                <td>RM{{ number_format($addon->price, 2) }}</td>
+                                <td>RM{{ number_format($addonTotalPrice, 2) }}</td>
                             </tr>
                         @endforeach
                     @endif

@@ -91,7 +91,10 @@ class Booking extends Model
 
     public function addons()
     {
-        return $this->belongsToMany(PackageAddon::class, 'booking_addon', 'booking_id', 'addon_id');
+        return $this->belongsToMany(PackageAddon::class, 'booking_addon', 'booking_id', 'addon_id')
+                    ->withPivot('qty')
+                    ->withTimestamps();
     }
+
 
 }
