@@ -369,7 +369,8 @@
     <!-- calendar script -->
     
     <script>
-       
+        let calendarData = null;
+        let currentPackageId = null;
         const calendarBody = document.getElementById("calendarBody");
         const currentMonthDisplay = document.getElementById("currentMonth");
         const prevMonthBtn = document.getElementById("prevMonth");
@@ -539,20 +540,20 @@
         const todayBtn = document.getElementById("todayBtn");
 
         todayBtn.addEventListener("click", () => {
-            currentDate = new Date(); // Reset to today
-            renderCalendar(currentDate);
+            currentDate = new Date();
+            if (calendarData) renderCalendar(currentDate, calendarData, currentPackageId);
             document.getElementById("selected_date").value = "";
             document.getElementById("bookNowBtn").setAttribute("disabled", true);
         });
 
         prevMonthBtn.addEventListener("click", () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar(currentDate);
+            if (calendarData) renderCalendar(currentDate, calendarData, currentPackageId);
         });
 
         nextMonthBtn.addEventListener("click", () => {
             currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar(currentDate);
+            if (calendarData) renderCalendar(currentDate, calendarData, currentPackageId);
         });
 
         // Initial render
@@ -947,7 +948,9 @@
                 .then(res => res.json())
                 .then(data => {
                     let currentDate = new Date();
-                    renderCalendar(currentDate, data, packageId);
+                    calendarData = data;
+                    currentPackageId = packageId;
+                    renderCalendar(currentDate, calendarData, currentPackageId);
 
                     // hide loading, show content
                     loading.classList.add('d-none');

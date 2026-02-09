@@ -1271,9 +1271,9 @@ class BookingController extends Controller
 
                 // If qty addon
                 if ($qty > 1) {
-                    $text .= "- {$addon->name} x{$qty} (RM" . number_format($lineTotal, 2) . ")\n";
+                    $text .= "- {$addon->name} x{$qty}" . "\n";
                 } else {
-                    $text .= "- {$addon->name} (RM" . number_format($addon->price, 2) . ")\n";
+                    $text .= "- {$addon->name}" . "\n";
                 }
             }
 
