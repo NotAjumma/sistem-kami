@@ -1210,13 +1210,11 @@
 
             // WhatsApp numbers with names
             const whatsappNumbers = [
-                { name: "Dayang", phone: "+601136307973" },
-                { name: "Daus", phone: "+60175363022" },
-                { name: "Syafiq", phone: "+60149070273" }
+                { name: "Dayang", phone: "+601136307973" }
             ];
 
             // weights = probability (higher number = higher chance)
-            const numberWeights = [4, 3, 3];
+            const numberWeights = [10];
 
             if (whatsappNowBtn) {
                 whatsappNowBtn.addEventListener('click', function(e) {
@@ -1224,6 +1222,16 @@
 
                     const date = selectedDateInput.value;
                     if (!date) return;
+
+                    // Convert to a Date object
+                    const dateObj = new Date(date);
+
+                    // Format as Malaysian style
+                    const formattedDate = dateObj.toLocaleDateString('ms-MY', {
+                        day: 'numeric',
+                        month: 'long',   // "Mac", "April", etc.
+                        year: 'numeric'
+                    });
 
                     // Parse selected time slots
                     let selectedSlots = [];
@@ -1240,12 +1248,12 @@
                     const personName = currentPerson.name;
 
                     // Build a readable list: "Classic (10:15 AM), Muji (10:15 AM)"
-                    let slotsText = selectedSlots.map(slot => `${slot.id} (${slot.time})`).join(", ");
+                    let slotsText = selectedSlots.map(slot => `${slot.id} (${slot.time})`).join("\n");
 
                     // WhatsApp message in proper Bahasa Melayu
                     const packageTitle = "{{ $package->name }}";
                     const message = encodeURIComponent(
-                        `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${date} ${slotsText}.`
+                        `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${formattedDate}\n${slotsText}.`
                     );
 
                     // Open WhatsApp
