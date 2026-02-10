@@ -1,16 +1,14 @@
-
 document.addEventListener('DOMContentLoaded', function () {
   var Calendar = FullCalendar.Calendar;
   var Draggable = FullCalendar.Draggable;
 
   var containerEl = document.getElementById('external-events');
   var calendarEl  = document.getElementById('calendar');
-var skeletonEl = document.getElementById('calendar-skeleton');
-  let rawEvents = []; // store original events
-  let currentViewType = 'dayGridMonth'; // default
+  var skeletonEl = document.getElementById('calendar-skeleton');
+  let currentViewType = 'dayGridMonth';
 
   // ----------------------------------------------------------------
-  // External draggable events (optional – kept from your code)
+  // External draggable events (optional)
   // ----------------------------------------------------------------
   if (containerEl) {
     new Draggable(containerEl, {
@@ -24,187 +22,183 @@ var skeletonEl = document.getElementById('calendar-skeleton');
   // ----------------------------------------------------------------
   // Calendar init
   // ----------------------------------------------------------------
-  var calendar = new Calendar(calendarEl, {
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    googleCalendarApiKey: 'AIzaSyBmc1F4_InL0ulB_Jdl51m6iHchXTj_4r4',
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
-
-    initialDate: new Date().toISOString().slice(0, 10),
+    initialDate: new Date().toISOString().slice(0,10),
     navLinks: false,
     editable: false,
     droppable: false,
-    dayMaxEvents: true,
+    dayMaxEvents: false,
     slotMinTime: '07:00:00',
     slotDuration: '00:15:00',
     slotLabelInterval: '00:15:00',
     slotEventOverlap: false,
-    eventTimeFormat: {
-      hour: 'numeric',
-      minute: '2-digit',
-      meridiem: 'short'
+    eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+
+    // ------------------------
+    // Use eventSources ONLY
+    // ------------------------
+    eventSources: [
+      // Booking events
+      {
+        events: function(fetchInfo, successCallback, failureCallback) {
+          skeletonEl.style.display = 'flex';
+          let mode = currentViewType === 'dayGridMonth' ? 'month' : 'detail';
+          if (currentViewType === 'timeGridWeek') mode = 'week';
+
+          fetch(`/bookings/json-public?mode=${mode}`)
+            .then(res => res.json())
+            .then(data => {
+              skeletonEl.style.display = 'none';
+              successCallback(data);
+            })
+            .catch(err => {
+              skeletonEl.style.display = 'none';
+              failureCallback(err);
+            });
+        }
+      },
+
+      // Malaysia holidays
+      {
+        googleCalendarId: 'en.malaysia#holiday@group.v.calendar.google.com',
+        className: 'fc-holiday',
+        allDay: true,
+        display: 'auto',
+        color: '#487af7ff',
+        editable: false,
+        overlap: false,
+        extendedProps: {
+          isHoliday: true
+        }
+      }
+
+    ],
+
+
+    dateClick: function(info) {
+      if (info.view.type === 'dayGridMonth') {
+        calendar.changeView('timeGridDay', info.dateStr);
+      }
     },
 
-    // ------------------------------------------------------------
-    // Fetch events ONCE and store raw version
-    // ------------------------------------------------------------
-    events: function (fetchInfo, successCallback, failureCallback) {
-
-      // Show skeleton before fetch
-      skeletonEl.style.display = 'flex';
-
-      const mode = currentViewType === 'dayGridMonth' ? 'month' : 'detail';
-
-      fetch(`/bookings/json-public?mode=${mode}`)
-        .then(res => res.json())
-        .then(data => {
-          // Hide skeleton after fetch
-          skeletonEl.style.display = 'none';
-          successCallback(data);
-        })
-        .catch(err => {
-          skeletonEl.style.display = 'none';
-          failureCallback(err);
-        });
+    moreLinkClick: function(info) {
+      calendar.changeView('timeGridDay', info.date);
+      return 'none';
     },
 
-
-
-    datesSet: function (info) {
+    datesSet: function(info) {
       currentViewType = info.view.type;
       calendar.refetchEvents();
     },
 
-    // ------------------------------------------------------------
-    // Custom event rendering
-    // ------------------------------------------------------------
-    eventContent: function (arg) {
+    eventContent: function(arg) {
+
+      // console.log('Event Data:', arg.event); 
+      // Ignore holiday events in month view
+      
+
+
       const count = arg.event.extendedProps.count || 'loading..';
-      // MONTH VIEW → summary only
+
+      // Month view bookings
       if (arg.view.type === 'dayGridMonth') {
+        if (arg.event.extendedProps.description) {
+          const shortTitle = arg.event.title.split('(')[0].trim();
+
+          return {
+            html: `
+              <div class="fc-event-custom fc-month-summary">
+                <div class="fc-holiday">${shortTitle}</div>
+              </div>
+            `
+          };
+        }else{
+          const count = arg.event.extendedProps.count || 'loading..';
+          return {
+            html: `
+              <div class="fc-event-custom fc-month-summary">
+                <div class="fc-event-title">${arg.event.title}</div>
+                <div class="fc-event-count">${count} bookings</div>
+              </div>
+            `
+          };
+        }
+        
+      }
+
+      // WEEK VIEW
+      if (arg.view.type === 'timeGridWeek') {
+        if (arg.event.allDay) return { html: '' };
+
+        const start = arg.event.start;
+        const end = arg.event.end;
+        const slot = arg.event.extendedProps?.slot ?? '';
+        const formatTime = d => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         return {
           html: `
-            <div class="fc-event-custom fc-month-summary">
-              <div class="fc-event-title">${arg.event.title}</div>
-              <div class="fc-event-count">
-                ${count} bookings
-              </div>
+            <div class="fc-week-event">
+              <div class="fc-week-time">${formatTime(start)} - ${formatTime(end)}</div>
+              <div class="fc-week-title">${arg.event.title}</div>
+              <div class="fc-week-slot">${slot}</div>
             </div>
           `
         };
       }
 
-      // WEEK / DAY VIEW → detailed
-      const customer    = arg.event.extendedProps.customer || '';
-      const phone       = arg.event.extendedProps.phone || '';
-      const title       = arg.event.title;
-      const slotName    = arg.event.extendedProps.slot || '';
-      const isDeposit  = arg.event.extendedProps.is_deposit === true;
-      const balance     = arg.event.extendedProps.balance || '';
-      const deposit     = arg.event.extendedProps.deposit || '';
-      
-      let paymentHtml = '';
-      if (isDeposit) {
-        paymentHtml = `<div class="fc-event-customer-name">
-                          Deposit RM${deposit} | Balance: RM${balance}
-                        </div>`;
-      } else {
-        paymentHtml = `<div class="fc-event-customer-name">
-                        Full Payment
-                      </div>`;
+      // DAY VIEW
+      const customer = arg.event.extendedProps.customer || '';
+      const phone = arg.event.extendedProps.phone || '';
+      const title = arg.event.title;
+      const slotName = arg.event.extendedProps.slot || '';
+      const isDeposit = arg.event.extendedProps.is_deposit === true;
+      const balance = arg.event.extendedProps.balance || '';
+      const deposit = arg.event.extendedProps.deposit || '';
+
+      let paymentHtml = isDeposit
+        ? `Deposit RM${deposit} | Balance: RM${balance}`
+        : `Full Payment`;
+
+      if (!arg.event.extendedProps.description) {
+        return {
+          html: `
+            <div class="fc-event-custom" style="display:flex; flex-direction:column; gap:4px; font-size:11px;">
+              <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <span>Booking Info: </span>
+                <span>Customer Info: </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <span>${arg.timeText}</span>
+                <span>${customer}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <span>${title}</span>
+                <span>${phone}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <span>${slotName}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <span>${paymentHtml}</span>
+              </div>
+            </div>
+          `
+        };
       }
-      
-
-
-      return {
-        html: `
-          <div class="fc-event-custom" style="
-            display: flex; 
-            flex-direction: column; 
-            gap: 4px;
-            font-size: 11px;
-          ">
-
-            <!-- Top row: time + title + slot -->
-            <div style="display: flex; justify-content: space-between; font-weight: bold;">
-              <span>Booking Info: </span>
-              <span>Customer Info: </span>
-            </div>
-
-            <!-- Bottom row: customer + phone + payment -->
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-              <span>${arg.timeText}</span>
-              <span>${customer}</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-              <span>${title} </span>
-              <span>${phone}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-              <span>${slotName}</span>
-            </div>
-             <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-              <span>${paymentHtml}</span>
-            </div>
-        `
-      };
-
     },
+
     eventClick: function(info) {
-      // Prevent default browser behavior
       info.jsEvent.preventDefault();
-
-      // Get booking code or ID from extendedProps
-      const bookingCode = info.event.extendedProps.booking_id; // or id
-
-      if (bookingCode) {
-        // Redirect to booking details page
-        window.open(`/booking/details/${bookingCode}`, '_blank');
-      }
-    },
+      const bookingCode = info.event.extendedProps.booking_id;
+      if (bookingCode) window.open(`/booking/details/${bookingCode}`, '_blank');
+    }
   });
 
   calendar.render();
+
 });
-
-// ------------------------------------------------------------------
-// Helper: group events for MONTH view
-// ------------------------------------------------------------------
-function groupEventsForMonth(events) {
-  const map = {};
-
-  events.forEach(event => {
-    const date = event.start.split('T')[0];
-    const pkg  = event.title;
-
-    const key = `${date}_${pkg}`;
-
-    if (!map[key]) {
-      map[key] = {
-        title: pkg,
-        start: date,
-        allDay: true,
-        count: 0,
-        backgroundColor: event.backgroundColor,
-        borderColor: event.borderColor
-      };
-    }
-
-    map[key].count++;
-  });
-
-  return Object.values(map).map(e => ({
-    title: e.title,
-    start: e.start,
-    allDay: true,
-    backgroundColor: e.backgroundColor,
-    borderColor: e.borderColor,
-    extendedProps: {
-      count: e.count
-    }
-  }));
-}
-
-

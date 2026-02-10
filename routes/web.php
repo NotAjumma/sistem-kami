@@ -157,6 +157,7 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     // Similar for organizer, marshal, participant...
 });
 Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
+Route::get('/calendar/holidays', [OrganizerBusinessController::class, 'holidays']);
 
 Route::prefix('organizer/business')->middleware('auth:organizer')->controller(OrganizerBusinessController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.business.dashboard');

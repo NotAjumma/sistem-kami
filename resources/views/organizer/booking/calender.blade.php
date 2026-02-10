@@ -1,6 +1,31 @@
 @extends('layouts.admin.default')
 @push('styles')
 <style>
+
+.fc .fc-daygrid-event-harness {
+    margin-bottom: 2px;
+}
+
+.holiday-label {
+  font-weight: bold;
+  color: #8dff0aff; /* dark red */
+  font-size: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.fc-holiday {
+    font-size: 8px !important;
+    white-space: normal !important;   /* allow text to wrap */
+    word-wrap: break-word !important; /* break long words if needed */
+    overflow-wrap: break-word !important;
+    line-height: 1.2;                 /* optional: adjust line spacing */
+}
+
+
+
 /* Time slots taller */
 .fc .fc-timegrid .fc-timegrid-slot {
     height: 120px !important;

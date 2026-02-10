@@ -20,6 +20,7 @@ use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Http;
 
 class OrganizerBusinessController extends Controller
 {
@@ -665,7 +666,7 @@ class OrganizerBusinessController extends Controller
                     DB::raw("DATE(slots.booked_date_start) as date"),
                     'packages.name as package',
                     'bookings.status',
-                    DB::raw('COUNT(*) as total')
+                    DB::raw('COUNT(DISTINCT bookings.id) as total')
                 )
                 ->groupBy('date', 'package', 'bookings.status')
                 ->get();
@@ -691,6 +692,65 @@ class OrganizerBusinessController extends Controller
             });
         }
 
+        if ($mode === 'week') {
+
+            $bookings = Booking::with([
+                'vendorTimeSlots.timeSlot',
+                'package'
+            ])->get();
+
+            $events = [];
+
+            foreach ($bookings as $booking) {
+
+                if ($booking->vendorTimeSlots->isEmpty()) continue;
+
+                $start = null;
+                $end   = null;
+                $slotNames = [];
+
+                foreach ($booking->vendorTimeSlots as $slot) {
+
+                    $slotStart = $slot->booked_date_start . 'T' . $slot->booked_time_start;
+                    $slotEnd   = $slot->booked_date_end   . 'T' . $slot->booked_time_end;
+
+                    if (!$start || $slotStart < $start) {
+                        $start = $slotStart;
+                    }
+
+                    if (!$end || $slotEnd > $end) {
+                        $end = $slotEnd;
+                    }
+
+                    if ($slot->timeSlot?->slot_name) {
+                        $slotNames[] = $slot->timeSlot->slot_name;
+                    }
+                }
+
+                $color = match ($booking->status) {
+                    'paid' => '#16a34a',
+                    'deposit' => '#f59e0b',
+                    'cancelled' => '#dc2626',
+                    default => '#2563eb',
+                };
+
+                $events[] = [
+                    'id' => 'w-'.$booking->id,
+                    'title' => $booking->package?->name ?? 'Booking',
+                    'start' => $start,
+                    'end' => $end,
+                    'backgroundColor' => $color,
+                    'borderColor' => $color,
+                    'extendedProps' => [
+                        'slot' => implode(', ', array_unique($slotNames)), 
+                    ],
+                ];
+            }
+
+
+            return $events;
+        }
+
         // --------------------------------------------------
         // WEEK / DAY (DETAILED MODE)
         // --------------------------------------------------
@@ -702,46 +762,98 @@ class OrganizerBusinessController extends Controller
             ->get();
 
         foreach ($bookings as $booking) {
+
+            if ($booking->vendorTimeSlots->isEmpty()) {
+                continue;
+            }
+
+            $start = null;
+            $end   = null;
+            $slotNames = [];
+
             foreach ($booking->vendorTimeSlots as $slot) {
 
-                $slotName = $slot->timeSlot?->slot_name;
+                $slotStart = $slot->booked_date_start . 'T' . $slot->booked_time_start;
+                $slotEnd   = $slot->booked_date_end   . 'T' . $slot->booked_time_end;
 
-                if($booking->is_deposit){
-                    $balance = $booking->final_price - $booking->paid_amount;
+                // find earliest start
+                if (!$start || $slotStart < $start) {
+                    $start = $slotStart;
                 }
-                $color = match ($booking->status) {
-                    'paid' => '#16a34a',
-                    'deposit' => '#f59e0b',
-                    'cancelled' => '#dc2626',
-                    default => '#2563eb',
-                };
 
-                $events[] = [
-                    'id'    => $slot->id,
-                    'title' => $booking->package?->name ?? 'Booking',
-                    'start' => $slot->booked_date_start . 'T' . $slot->booked_time_start,
-                    'end'   => $slot->booked_date_end   . 'T' . $slot->booked_time_end,
-                    'backgroundColor' => $color,
-                    'borderColor'     => $color,
-                    'extendedProps' => [
-                        'customer'      => $booking->participant?->name ?? 'Unknown',
-                        'phone'         => $booking->participant?->phone ?? '',
-                        'status'        => $booking->status,
-                        'code'          => $booking->booking_code,
-                        'slot'          => $slotName,
-                        'is_deposit'    => $booking->is_deposit,
-                        'deposit'       => $booking->paid_amount,
-                        'balance'       => $booking->balance,
-                        'booking_id'    => $booking->id,
-                    ],
-                ];
+                // find latest end
+                if (!$end || $slotEnd > $end) {
+                    $end = $slotEnd;
+                }
+
+                if ($slot->timeSlot?->slot_name) {
+                    $slotNames[] = $slot->timeSlot->slot_name;
+                }
             }
+
+            // calculate balance
+            $balance = 0;
+            if ($booking->is_deposit) {
+                $balance = $booking->final_price - $booking->paid_amount;
+            }
+
+            $color = match ($booking->status) {
+                'paid' => '#16a34a',
+                'deposit' => '#f59e0b',
+                'cancelled' => '#dc2626',
+                default => '#2563eb',
+            };
+
+            $events[] = [
+                'id'    => $booking->id, // IMPORTANT: booking id, not slot id
+                'title' => $booking->package?->name ?? 'Booking',
+                'start' => $start,
+                'end'   => $end,
+                'backgroundColor' => $color,
+                'borderColor'     => $color,
+                'extendedProps' => [
+                    'customer'      => $booking->participant?->name ?? 'Unknown',
+                    'phone'         => $booking->participant?->phone ?? '',
+                    'status'        => $booking->status,
+                    'code'          => $booking->booking_code,
+                    'slot'          => implode(', ', $slotNames), // merged slots
+                    'is_deposit'    => $booking->is_deposit,
+                    'deposit'       => $booking->paid_amount,
+                    'balance'       => $balance,
+                    'booking_id'    => $booking->id,
+                ],
+            ];
         }
+
 
         return $events;
     }
 
 
+    public function holidays()
+    {
+        $year = request('year', now()->year);
+
+        // Fetch from free Nager.Date API
+        $response = Http::get("https://date.nager.at/api/v3/PublicHolidays/{$year}/MY");
+
+        if ($response->failed()) {
+            return [];
+        }
+
+        $holidays = $response->json();
+
+        // return for FullCalendar
+        return collect($holidays)->map(function ($h) {
+            return [
+                'title' => $h['localName'], // e.g., "Hari Raya Aidilfitri"
+                'start' => $h['date'],      // full day
+                'allDay' => true,
+                'display' => 'background',   // background event
+                'classNames' => ['fc-holiday'] // custom CSS class
+            ];
+        });
+    }
 
 
 }
