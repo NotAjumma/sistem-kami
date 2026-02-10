@@ -166,6 +166,12 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/booking/create', 'showCreateBooking')->name('organizer.business.booking.create');
     Route::post('/booking/create', [BookingController::class, 'webFormBookingPackageByAdmin'])->name('organizer.business.booking.create.send');
     Route::get('/bookings/json', [OrganizerBusinessController::class, 'getBookingsJson']);
+ Route::get('/booking/{booking}/edit', [BookingController::class, 'edit'])
+    ->name('organizer.business.booking.edit');
+
+Route::post('/booking/{booking}/update', [BookingController::class, 'update'])
+    ->name('organizer.business.booking.update');
+
 
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
@@ -173,7 +179,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/packages', 'showPackages')->name('organizer.business.packages');
     Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
 
-    Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
+    // Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.business.booking.verify');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.business.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.business.ticket.checkin');

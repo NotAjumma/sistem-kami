@@ -1409,4 +1409,42 @@ class BookingController extends Controller
 
         return $billCode;
     }
+
+    public function edit(Booking $booking)
+    {
+        $packages = Package::with('addons')->get();
+        $booking->load(['vendorTimeSlots', 'participant', 'package:id,name']);
+
+        \Log::info("booking");
+        \Log::info($booking);
+        return view('organizer.booking.edit', [
+            'packages' => $packages,
+            'booking'  => $booking,
+            'isEdit'   => true,
+            'authUser' => auth()->user(),
+        ]);
+    }
+
+
+
+    public function update(Request $request, Booking $booking)
+    {
+        $booking->update([
+            'name'            => $request->name,
+            'whatsapp_number' => $request->whatsapp_number,
+            'package_id'      => $request->package_id,
+            'selected_date'   => $request->selected_date,
+            'selected_time'   => $request->selected_time,
+            'notes'           => $request->notes,
+            'discount'        => $request->discount,
+            'payment_type'    => $request->payment_type,
+            'deposit_amount'  => $request->deposit_amount,
+        ]);
+
+        return redirect()
+            ->route('organizer.business.booking.edit', $booking->id)
+            ->with('success', 'Booking updated successfully');
+    }
+
+
 }

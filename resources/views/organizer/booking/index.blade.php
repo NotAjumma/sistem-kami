@@ -217,6 +217,14 @@
                                                                 </form>
                                                             </li>
                                                         @endif
+                                                        <li>
+                                                            <a href="{{ route('organizer.business.booking.edit', $booking->id) }}">
+                                                                <button type="button"
+                                                                    class="dropdown-item text-primary">
+                                                                    Edit
+                                                                </button>
+                                                            </a>
+                                                        </li>
                                                     </ul>
                                                 </div>
                                             </td>
