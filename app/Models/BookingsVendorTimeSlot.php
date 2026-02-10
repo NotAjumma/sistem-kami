@@ -39,4 +39,9 @@ class BookingsVendorTimeSlot extends Model
     {
         return $this->belongsTo(Organizer::class);
     }
+
+    public function scopePaidStatuses($query)
+    {
+        return $query->whereIn('status', ['deposit_paid', 'full_payment']);
+    }
 }

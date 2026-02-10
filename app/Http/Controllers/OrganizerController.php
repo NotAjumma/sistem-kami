@@ -62,6 +62,19 @@ class OrganizerController extends Controller
             ->count();
         $totalBookings = Booking::where('organizer_id', $organizerId)->where('status', 'paid')->count();
         $totalIncome = Booking::where('organizer_id', $organizerId)->where('status', 'paid')->sum('final_price');
+        // Total income already received
+        $paidIncome = Booking::where('status', 'paid')
+            ->where('payment_type', 'full_payment') // full payment received
+            ->sum('final_price');
+
+        // Total deposit received
+        $depositIncome = Booking::where('status', 'paid')
+            ->where('payment_type', 'deposit') // only deposit received
+            ->sum('paid_amount'); // assuming you store deposit separately
+
+        // Total income expected (remaining balance)
+        $pendingIncome = Booking::where('status', 'paid')
+            ->sum('final_price') - ($paidIncome + $depositIncome);
         $pendingBookings = Booking::where('organizer_id', $organizerId)->where('status', 'pending')->count();
         $confirmBookings = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->count();
 
@@ -90,11 +103,11 @@ class OrganizerController extends Controller
 
         $totalPackages = Package::where('organizer_id', $organizerId)->count();
 
-        $totalSlotBooked = BookingsVendorTimeSlot::whereIn('status', ['deposit', 'full_payment'])
+        $totalSlotBooked = BookingsVendorTimeSlot::paidStatuses()
             ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'paid'))
             ->count();
 
-        $totalUpcomingSlots = BookingsVendorTimeSlot::whereIn('status', ['deposit', 'full_payment'])
+        $totalUpcomingSlots = BookingsVendorTimeSlot::paidStatuses()
             ->whereHas('booking', fn($q) => 
                 $q->where('organizer_id', $organizerId)
                 ->where('status', 'paid')
@@ -108,21 +121,58 @@ class OrganizerController extends Controller
             ->take(3)
             ->get();
 
+        // Chart yearly
+
+        // $salesChartData = [];
+
+        // foreach ($topPackages as $package) {
+        //     $monthlySales = Booking::selectRaw('MONTH(created_at) as month, SUM(final_price) as total')
+        //         ->where('package_id', $package->id)
+        //         ->where('status', 'paid')
+        //         ->groupBy(DB::raw('MONTH(created_at)'))
+        //         ->pluck('total', 'month');
+
+        //     $salesChartData[] = [
+        //         'name' => $package->name,
+        //         'className' => 'bg-success', // or any color
+        //         'data' => collect(range(1, 12))->map(fn($m) => (int) ($monthlySales[$m] ?? 0))->toArray()
+        //     ];
+        // }
+
+        // Chart last 30 days range
         $salesChartData = [];
 
+        $startDate = Carbon::now()->subDays(29)->startOfDay(); 
+        $endDate = Carbon::now()->endOfDay();
+
         foreach ($topPackages as $package) {
-            $monthlySales = Booking::selectRaw('MONTH(created_at) as month, SUM(final_price) as total')
+            // Get daily sales and total bookings
+            $dailyData = Booking::selectRaw('DATE(created_at) as date, SUM(final_price) as total_sales, COUNT(*) as total_bookings')
                 ->where('package_id', $package->id)
                 ->where('status', 'paid')
-                ->groupBy(DB::raw('MONTH(created_at)'))
-                ->pluck('total', 'month');
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get()
+                ->keyBy('date');
+
+            $sales = collect(range(0, 29))->map(function ($i) use ($startDate, $dailyData) {
+                $date = $startDate->copy()->addDays($i)->format('Y-m-d');
+                return (float) ($dailyData[$date]->total_sales ?? 0);
+            });
+
+            $bookings = collect(range(0, 29))->map(function ($i) use ($startDate, $dailyData) {
+                $date = $startDate->copy()->addDays($i)->format('Y-m-d');
+                return (int) ($dailyData[$date]->total_bookings ?? 0);
+            });
 
             $salesChartData[] = [
                 'name' => $package->name,
-                'className' => 'bg-success', // or any color
-                'data' => collect(range(1, 12))->map(fn($m) => (int) ($monthlySales[$m] ?? 0))->toArray()
+                'data' => $sales->toArray(),
+                'bookings' => $bookings->toArray(), // pass bookings for tooltip
             ];
         }
+
+        $chartDataJson = json_encode($salesChartData);
 
 
         return view('organizer.index', compact(
@@ -132,6 +182,9 @@ class OrganizerController extends Controller
             'ticketSold',
             'totalBookings',
             'totalIncome',
+            'paidIncome',
+            'pendingIncome',
+            'depositIncome',
             'confirmBookings',
             'pendingBookings',
             'salesChartData',

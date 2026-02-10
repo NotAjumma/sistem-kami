@@ -762,89 +762,166 @@
 
     }
     const isMobile = window.innerWidth <= 450;
+    // var marketChart = function () {
+    //   if (jQuery('#marketChart').length > 0) {
+    //     const colors = ["var(--primary)", "var(--secondary)", "#ffc107"];
+    //     const chartData = window.salesChartData || [];
+
+    //     const options = {
+    //       series: chartData,
+    //       chart: {
+    //         height: 300,
+    //         type: 'line',
+    //         toolbar: { show: false }
+    //       },
+    //       colors: colors.slice(0, chartData.length),
+    //       dataLabels: { enabled: false },
+    //       stroke: {
+    //         curve: 'smooth',
+    //         width: 6
+    //       },
+    //       legend: { show: true },
+    //       markers: {
+    //         strokeWidth: 5,
+    //         strokeColors: '#fff',
+    //         hover: { size: 10 },
+    //       },
+    //       grid: {
+    //         show: true,
+    //         strokeDashArray: 6,
+    //         borderColor: 'var(--border)',
+    //         xaxis: { lines: { show: true } },
+    //         yaxis: { lines: { show: false } },
+    //       },
+    //       yaxis: {
+    //         show: true,
+    //         labels: {
+    //           style: {
+    //             colors: 'var(--text)',
+    //             fontSize: '12px',
+    //             fontFamily: 'Poppins',
+    //             fontWeight: 400
+    //           },
+    //           formatter: function (value) {
+    //             return "RM" + value;
+    //           }
+    //         },
+    //       },
+    //       xaxis: {
+    //         categories: isMobile
+    //           ? ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    //           : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    //         labels: {
+    //           style: {
+    //             colors: '#B5B5C3',
+    //             fontSize: '12px',
+    //             fontFamily: 'Poppins',
+    //             fontWeight: 400
+    //           }
+    //         },
+    //         axisBorder: { show: false },
+    //         tooltip: { enabled: false }
+    //       },
+    //       tooltip: {
+    //         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+    //           let tooltipHtml = '<div class="tooltip_box">';
+    //           w.config.series.forEach((s, i) => {
+    //             tooltipHtml += `
+    //                     <div class="tooltip-data">
+    //                         <span class="data-point ${s.className}">${s.name}</span>
+    //                         <span>RM ${series[i][dataPointIndex]}</span>
+    //                     </div>`;
+    //           });
+    //           return tooltipHtml + '</div>';
+    //         }
+    //       },
+    //       fill: {
+    //         type: 'solid',
+    //         opacity: 0
+    //       }
+    //     };
+
+    //     var chartBar1 = new ApexCharts(document.querySelector("#marketChart"), options);
+    //     chartBar1.render();
+    //   }
+    // }
+
+    // Chart last 30 days
     var marketChart = function () {
-      if (jQuery('#marketChart').length > 0) {
-        const colors = ["var(--primary)", "var(--secondary)", "#ffc107"];
-        const chartData = window.salesChartData || [];
+      const chartEl = document.querySelector("#marketChart");
+      if (chartEl) {
 
-        const options = {
-          series: chartData,
-          chart: {
-            height: 300,
-            type: 'line',
-            toolbar: { show: false }
-          },
-          colors: colors.slice(0, chartData.length),
-          dataLabels: { enabled: false },
-          stroke: {
-            curve: 'smooth',
-            width: 6
-          },
-          legend: { show: true },
-          markers: {
-            strokeWidth: 5,
-            strokeColors: '#fff',
-            hover: { size: 10 },
-          },
-          grid: {
-            show: true,
-            strokeDashArray: 6,
-            borderColor: 'var(--border)',
-            xaxis: { lines: { show: true } },
-            yaxis: { lines: { show: false } },
-          },
-          yaxis: {
-            show: true,
-            labels: {
-              style: {
-                colors: 'var(--text)',
-                fontSize: '12px',
-                fontFamily: 'Poppins',
-                fontWeight: 400
-              },
-              formatter: function (value) {
-                return "RM" + value;
-              }
-            },
-          },
-          xaxis: {
-            categories: isMobile
-              ? ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-              : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            labels: {
-              style: {
-                colors: '#B5B5C3',
-                fontSize: '12px',
-                fontFamily: 'Poppins',
-                fontWeight: 400
-              }
-            },
-            axisBorder: { show: false },
-            tooltip: { enabled: false }
-          },
-          tooltip: {
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-              let tooltipHtml = '<div class="tooltip_box">';
-              w.config.series.forEach((s, i) => {
-                tooltipHtml += `
-                        <div class="tooltip-data">
-                            <span class="data-point ${s.className}">${s.name}</span>
-                            <span>RM ${series[i][dataPointIndex]}</span>
-                        </div>`;
-              });
-              return tooltipHtml + '</div>';
-            }
-          },
-          fill: {
-            type: 'solid',
-            opacity: 0
+          const chartData = window.salesChartData || [];
+
+          const today = new Date();
+          const labels = [];
+          for (let i = 29; i >= 0; i--) {
+              const d = new Date();
+              d.setDate(today.getDate() - i);
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = d.toLocaleString('default', { month: 'short' });
+              labels.push(`${day} ${month}`);
           }
-        };
 
-        var chartBar1 = new ApexCharts(document.querySelector("#marketChart"), options);
-        chartBar1.render();
+          const defaultColors = ["#007bff", "#6c757d", "#ffc107", "#28a745", "#17a2b8"];
+
+          const options = {
+              series: chartData,
+              chart: { height: 300, type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
+              colors: defaultColors.slice(0, chartData.length),
+              dataLabels: { enabled: false },
+              stroke: { curve: 'smooth', width: 4 },
+              markers: { size: 5, strokeWidth: 2, strokeColors: '#fff', hover: { size: 8 } },
+              legend: { show: true },
+              grid: { show: true, strokeDashArray: 6, borderColor: 'var(--border)' },
+              yaxis: {
+                  labels: { formatter: value => "RM" + value }
+              },
+              xaxis: {
+                  categories: labels,
+                  labels: { rotate: -45, style: { fontSize: '10px', colors: '#B5B5C3' } },
+                  tooltip: { enabled: false }
+              },
+              tooltip: {
+                  shared: true,
+                  intersect: false,
+                  y: {
+                      formatter: function(value, { seriesIndex, dataPointIndex, w }) {
+                          const bookings = w.config.series[seriesIndex].bookings[dataPointIndex] || 0;
+                          return "RM" + value + " (" + bookings + " bookings)";
+                      }
+                  }
+              },
+              responsive: [
+                  {
+                      breakpoint: 768,
+                      options: {
+                          chart: { height: 250 },
+                          xaxis: {
+                              labels: {
+                                  rotate: -60,
+                                  formatter: (val, i) => i % 2 === 0 ? val : ''
+                              }
+                          },
+                          tooltip: { style: { fontSize: '10px' } }
+                      }
+                  }
+              ]
+          };
+
+          var chart = new ApexCharts(chartEl, options);
+          chart.render();
+
+          // Force recalculation of x-axis labels after render
+          setTimeout(() => {
+              chart.updateOptions({}, true, true); 
+          }, 100); // 100ms delay usually enough
       }
     }
+
+
+
+
 
     var extraInfoChart = function(){
       if(jQuery('#extra_info_chart').length > 0 ){
