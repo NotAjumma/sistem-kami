@@ -1256,6 +1256,26 @@
                         `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${formattedDate}\n${slotsText}.`
                     );
 
+                    // ----------- TRACK WHATSAPP CLICK BEFORE OPEN -----------
+                    fetch('/track/whatsapp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            package_id: "{{ $package->id }}",
+                            date: date,
+                            time: selectedSlots.map(s => s.time),
+                            slot_name: selectedSlots.map(s => s.id) 
+                        })
+                    }).then(res => {
+                        // optional: console log
+                        console.log('WhatsApp click logged');
+                    }).catch(err => {
+                        console.error('Logging failed', err);
+                    });
+
                     // Open WhatsApp
                     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, '_blank');
 

@@ -12,6 +12,7 @@ use App\Models\BookingVendorTimeSlot;
 use App\Models\VendorTimeSlotLimit;
 use App\Models\Organizer;
 use App\Models\Package;
+use App\Helper\VisitorLogger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -332,6 +333,8 @@ class BusinessController extends Controller
         $page_title = $package->name;
         $seo = $this->page_seo($organizer, $package);
 
+        VisitorLogger::log('view_package', 'package', $package->id);
+
         return view('home.business.package.index', [
             'organizer'         => $organizer,
             'package'           => $package,
@@ -352,7 +355,6 @@ class BusinessController extends Controller
         $package    = Package::with('vendorTimeSlots', 'organizer')->findOrFail($packageId);
         $slots      = [];
 
-        
         $bookedDates = DB::table('bookings_vendor_time_slot')
             ->where('organizer_id', $package->organizer->id)
             ->whereIn('status', ['deposit_paid', 'full_payment'])
@@ -398,6 +400,16 @@ class BusinessController extends Controller
         $offDays = VendorOffDay::where('organizer_id', $package->organizer->id)
             ->whereDate('off_date', $date)
             ->get();
+
+        VisitorLogger::log(
+            'check_slot',
+            'calendar',
+            $packageId,
+            [
+                'date' => $request->input('date'),
+            ]
+        );
+
 
         return response()->json([
             'date'   => $date,
@@ -548,4 +560,19 @@ class BusinessController extends Controller
         ]);
     }
 
+    public function whatsappNow(Request $request)
+    {
+        VisitorLogger::log(
+            'whatsapp_click',
+            'package',
+            $request->package_id,
+            [
+                'date' => $request->date,
+                'time' => $request->time,        
+                'slot_name' => $request->slot_name 
+            ]
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
 }

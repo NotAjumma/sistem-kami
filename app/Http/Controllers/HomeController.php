@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\PackageCategory;
 use App\Models\Package;
 use App\Models\Event;
+use App\Helper\VisitorLogger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -40,6 +41,13 @@ class HomeController extends Controller
             ->orderBy('order_by')
             ->get();
         // $packageTypes = PackageCategory::all();
+
+        VisitorLogger::log(
+            'visit_page',   // action
+            'home',         // page type
+            null,           // no reference id
+            []              // optional meta
+        );
 
         return view('home.index', compact('events', 'packages', 'eventCategories'));
     }
