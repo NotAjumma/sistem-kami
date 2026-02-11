@@ -854,5 +854,22 @@
 
 @push('scripts')
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/visitor-log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    action: 'visit_page',
+                    page: 'home',
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log('Visitor logged', data))
+            .catch(err => console.error('Logging failed', err));
+        });
     </script>
+
 @endpush

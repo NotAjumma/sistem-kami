@@ -42,13 +42,6 @@ class HomeController extends Controller
             ->get();
         // $packageTypes = PackageCategory::all();
 
-        VisitorLogger::log(
-            'visit_page',   // action
-            'home',         // page type
-            null,           // no reference id
-            []              // optional meta
-        );
-
         return view('home.index', compact('events', 'packages', 'eventCategories'));
     }
 
@@ -99,4 +92,15 @@ class HomeController extends Controller
         return view('home.search', compact('events', 'eventCategories', 'page_title'));
     }
 
+    public function log(Request $request)
+    {
+        VisitorLogger::log(
+            $request->action,
+            $request->page,
+            $request->reference_id,
+            $request->meta ?? []
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
 }

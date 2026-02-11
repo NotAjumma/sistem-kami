@@ -159,6 +159,7 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
 Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
 Route::get('/calendar/holidays', [OrganizerBusinessController::class, 'holidays']);
 Route::post('/track/whatsapp', [BusinessController::class, 'whatsappNow']);
+Route::post('/visitor-log', [HomeController::class, 'log'])->name('visitor.log');
 
 Route::prefix('organizer/business')->middleware('auth:organizer')->controller(OrganizerBusinessController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.business.dashboard');
