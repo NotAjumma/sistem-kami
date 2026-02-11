@@ -39,7 +39,7 @@
 
 /* Custom event content */
 .fc-event-custom {
-    font-size: 12px;
+    font-size: 8px;
     line-height: 1.3;
     padding: 2px 4px;
 }
@@ -54,7 +54,7 @@
 
 .fc-event-custom .fc-event-customer-name,
 .fc-event-custom .fc-event-customer-phone {
-    font-size: 11px;
+    font-size: 8px;
     opacity: 0.9;
 }
 .fc-event-customer-info, .fc-event-info{
@@ -79,14 +79,14 @@
 }
 
 .fc-month-summary .fc-event-title {
-  font-size: 12px;
+  font-size: 8px;
   font-weight: 600;
   word-break: break-word;
 }
 
 .fc-month-summary .fc-event-count {
   margin-top: 2px;
-  font-size: 11px;
+  font-size: 8px;
   background: rgba(255,255,255,0.85);
   color: #000;
   padding: 1px 6px;

@@ -113,7 +113,7 @@
                                                 <i class="fa-solid fa-sort-down me-2"></i>
                                                 Total Bookings
                                             </p>
-                                            <h2 class="font-w600 mb-0">{{ $totalBookings }}</h2>
+                                            <h2 class="font-w600 mb-0">{{ $totalBookings }} Bookings</h2>
                                         </div>
                                         <div class="dlab-swiper-circle">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
@@ -210,9 +210,9 @@
                                         <div class="chart-num">
                                             <p>
                                                 <i class="fa-solid fa-sort-down me-2"></i>
-                                                Total Packages Created
+                                                Total Packages Active
                                             </p>
-                                            <h2 class="font-w600 mb-0">{{ $totalPackages }}</h2>
+                                            <h2 class="font-w600 mb-0">{{ $totalPackages }} Packages</h2>
                                         </div>
                                         <div class="dlab-swiper-circle">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
@@ -285,7 +285,7 @@
                             <div class="card-header pb-0 border-0 flex-wrap">
                                 <div class="mb-0">
                                     <h4 class="card-title">Sales in the Last 30 Days</h4>
-                                    <p>Income from confirmed bookings of your 3 top packages</p>
+                                    <p>Income from confirmed bookings of your packages</p>
                                 </div>
                             </div>
                             <div class="card-body pt-2">

@@ -119,9 +119,9 @@ class OrganizerController extends Controller
             ->count();
 
         $topPackages = Package::where('organizer_id', $organizerId)
+            ->active()
             ->withCount('bookings')
             ->orderByDesc('bookings_count')
-            ->take(3)
             ->get();
 
         // Chart yearly

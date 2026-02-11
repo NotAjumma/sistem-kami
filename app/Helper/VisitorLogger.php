@@ -10,7 +10,15 @@ class VisitorLogger
 {
     public static function log($action, $page = null, $referenceId = null, $meta = [])
     {
-        return;
+        // return;
+        $agent = new Agent();
+
+        $userAgent = request()->userAgent();
+        
+        if ($agent->isRobot() || preg_match('/bot|crawl|spider|facebook|whatsapp|telegram|preview|meta/i', $userAgent)) {
+            return; // skip logging for bots
+        }
+
         if (!session()->has('visitor_id')) {
             session(['visitor_id' => (string) Str::uuid()]);
         }
@@ -35,8 +43,6 @@ class VisitorLogger
         if ($last && now()->diffInSeconds($last->created_at) < 8) {
             return;
         }
-        
-        $agent = new Agent();
 
         VisitorAction::create([
             'visitor_id' => session('visitor_id'),
