@@ -10,6 +10,7 @@ class VisitorLogger
 {
     public static function log($action, $page = null, $referenceId = null, $meta = [])
     {
+        return;
         if (!session()->has('visitor_id')) {
             session(['visitor_id' => (string) Str::uuid()]);
         }
