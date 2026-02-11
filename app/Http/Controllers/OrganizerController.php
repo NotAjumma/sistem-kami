@@ -11,6 +11,7 @@ use App\Models\EmailLog;
 use App\Models\Ticket;
 use App\Models\Event;
 use App\Models\Package;
+use App\Models\VisitorAction;
 use App\Models\BookingsVendorTimeSlot;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -101,7 +102,9 @@ class OrganizerController extends Controller
             ];
         }
 
-        $totalPackages = Package::where('organizer_id', $organizerId)->count();
+        $totalPackages = Package::active()
+            ->where('organizer_id', $organizerId)
+            ->count();
 
         $totalSlotBooked = BookingsVendorTimeSlot::paidStatuses()
             ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'paid'))
@@ -174,6 +177,11 @@ class OrganizerController extends Controller
 
         $chartDataJson = json_encode($salesChartData);
 
+        $totalVisitToday = VisitorAction::where('action', 'visit_page')
+            ->whereDate('created_at', Carbon::today())
+            ->distinct('visitor_id')
+            ->count('visitor_id');
+
 
         return view('organizer.index', compact(
             'page_title',
@@ -192,6 +200,7 @@ class OrganizerController extends Controller
             'totalSlotBooked',
             'totalPackages',
             'totalUpcomingSlots',
+            'totalVisitToday',
         ));
     }
 
@@ -250,6 +259,84 @@ class OrganizerController extends Controller
         return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings', 'events'));
     }
 
+    public function actionLogsChart()
+    {
+        $days = 30;
+        $today = Carbon::today();
+
+        // Initialize an array of last 30 days
+        $labels = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $labels[] = $today->copy()->subDays($i)->format('d M');
+        }
+
+        // Fetch unique home visits & WhatsApp clicks per day
+        $logs = DB::table('visitor_actions')
+            ->select(
+                DB::raw("DATE(created_at) as date"),
+                DB::raw("COUNT(DISTINCT CASE WHEN action = 'visit_page' AND page = 'home' THEN visitor_id END) as home_visits"),
+                DB::raw("COUNT(DISTINCT CASE WHEN action = 'whatsapp_click' THEN visitor_id END) as whatsapp_clicks")
+            )
+            ->where('created_at', '>=', $today->copy()->subDays($days - 1))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $homeVisits = [];
+        $whatsappClicks = [];
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $dateKey = $today->copy()->subDays($i)->toDateString();
+            $homeVisits[] = $logs[$dateKey]->home_visits ?? 0;
+            $whatsappClicks[] = $logs[$dateKey]->whatsapp_clicks ?? 0;
+        }
+
+        // Fetch unique package views per package with package name
+        $packages = DB::table('visitor_actions as va')
+            ->join('packages as p', 'va.reference_id', '=', 'p.id')
+            ->select(
+                'p.name as package_name',
+                DB::raw("DATE(va.created_at) as date"),
+                DB::raw("COUNT(DISTINCT va.visitor_id) as views")
+            )
+            ->where('va.action', 'view_package')
+            ->where('va.created_at', '>=', $today->copy()->subDays($days - 1))
+            ->groupBy('p.name', 'date')
+            ->orderBy('p.name')
+            ->orderBy('date')
+            ->get();
+
+        // Get list of unique package names
+        $packageNames = $packages->pluck('package_name')->unique();
+
+        $packageSeries = [];
+        foreach ($packageNames as $packageName) {
+            $data = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $dateKey = $today->copy()->subDays($i)->toDateString();
+                $row = $packages->firstWhere(function($item) use ($packageName, $dateKey) {
+                    return $item->package_name == $packageName && $item->date == $dateKey;
+                });
+                $data[] = $row->views ?? 0;
+            }
+            $packageSeries[] = [
+                'name' => $packageName,
+                'data' => $data
+            ];
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'series' => array_merge(
+                [
+                    ['name' => 'Home Visits', 'data' => $homeVisits],
+                    ['name' => 'WhatsApp Clicks', 'data' => $whatsappClicks]
+                ],
+                $packageSeries
+            )
+        ]);
+    }
 
 
     public function ticketsConfirmed(Request $request)

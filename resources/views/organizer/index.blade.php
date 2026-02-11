@@ -19,6 +19,34 @@
                     <div class="swiper mySwiper-counter position-relative overflow-hidden">
                         <div class="swiper-wrapper">
                             <div class="swiper-slide">
+                                <div class="card card-box bg-pink">
+                                    <div class="card-header border-0 pb-0">
+                                        <div class="chart-num">
+                                            <p>
+                                                <i class="fa-solid fa-sort-down me-2"></i>
+                                                Total User Visit Today
+                                            </p>
+                                            <h2 class="font-w600 mb-0">{{ $totalVisitToday }} user</h2>
+                                        </div>
+                                        <div class="dlab-swiper-circle">
+                                           <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45" viewBox="0 0 24 24">
+                                                <!-- White circular background -->
+                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
+
+                                                <!-- User head -->
+                                                <circle cx="12" cy="8" r="4" fill="#ac4cbc" />
+
+                                                <!-- User body -->
+                                                <path d="M6 20c0-3.3137 2.6863-6 6-6s6 2.6863 6 6" fill="none" stroke="#ac4cbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="widgetChart6" class="chart-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
                                 <div class="card card-box bg-secondary">
                                     <div class="card-header border-0 pb-0">
                                         <div class="chart-num">
@@ -43,7 +71,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             @if($authUser->type == "event")
                             <div class="swiper-slide">
                                 <div class="card card-box bg-pink">
@@ -210,84 +237,6 @@
                                 </div>
                             </div>
                             @endif
-                            <!-- <div class="swiper-slide">
-                                <div class="card card-box bg-info">
-                                    <div class="card-header border-0 pb-0">
-                                        <div class="chart-num">
-                                            <p>
-                                                <i class="fa-solid fa-sort-down me-2"></i>
-                                                Confirmed Booking
-                                            </p>
-                                            <h2 class="font-w600 mb-0">{{ $confirmBookings }}</h2>
-                                        </div>
-                                        <div class="dlab-swiper-circle">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
-                                                viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
-
-                                                <g transform="translate(6.6,6.6) scale(0.45)">
-                                                    <path
-                                                        d="M10,1h6a0,0,0,0,1,0,0V6.13a.87.87,0,0,1-.87.87H10.87A.87.87,0,0,1,10,6.13V1A0,0,0,0,1,10,1Z"
-                                                        fill="#00ADA3" />
-                                                    <path
-                                                        d="M11,26H3a3,3,0,0,1-3-3V3A3,3,0,0,1,3,0H23a3,3,0,0,1,3,3v8a1,1,0,0,1-2,0V3a1,1,0,0,0-1-1H3A1,1,0,0,0,2,3V23a1,1,0,0,0,1,1h8a1,1,0,0,1,0,2Z"
-                                                        fill="#00ADA3" />
-                                                    <path d="M7,22H5a1,1,0,0,1,0-2H7a1,1,0,0,1,0,2Z" fill="#00ADA3" />
-                                                    <path
-                                                        d="M23,32a9,9,0,1,1,9-9A9,9,0,0,1,23,32Zm0-16a7,7,0,1,0,7,7A7,7,0,0,0,23,16Z"
-                                                        fill="#00ADA3" />
-                                                    <circle class="cls-1" cx="23" cy="23" r="5" fill="#FFFA6F"></circle>
-                                                    <path
-                                                        d="M23,26a1,1,0,0,1-.71-.29l-2-2a1,1,0,0,1,1.42-1.42L23,23.59l3.29-3.3a1,1,0,0,1,1.42,1.42l-4,4A1,1,0,0,1,23,26Z"
-                                                        fill="#00ADA3" />
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-0">
-                                        <div id="widgetChart3" class="chart-primary"></div>
-                                    </div>
-                                </div>
-                            </div> -->
-                            <!-- <div class="swiper-slide">
-                                <div class="card card-box bg-danger">
-                                    <div class="card-header border-0 pb-0">
-                                        <div class="chart-num">
-                                            <p>
-                                                <i class="fa-solid fa-sort-down me-2"></i>
-                                                Pending Bookings
-                                            </p>
-                                            <h2 class="font-w600 mb-0">{{ $pendingBookings }}</h2>
-                                        </div>
-                                        <div class="dlab-swiper-circle">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45"
-                                                viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
-
-                                                <g transform="translate(6.6,6.6) scale(0.45)">
-                                                    <path
-                                                        d="M10,1h6a0,0,0,0,1,0,0V6.13a.87.87,0,0,1-.87.87H10.87A.87.87,0,0,1,10,6.13V1A0,0,0,0,1,10,1Z"
-                                                        fill="#fd5353" />
-                                                    <path
-                                                        d="M11,26H3a3,3,0,0,1-3-3V3A3,3,0,0,1,3,0H23a3,3,0,0,1,3,3v8a1,1,0,0,1-2,0V3a1,1,0,0,0-1-1H3A1,1,0,0,0,2,3V23a1,1,0,0,0,1,1h8a1,1,0,0,1,0,2Z"
-                                                        fill="#fd5353" />
-                                                    <path d="M7,22H5a1,1,0,0,1,0-2H7a1,1,0,0,1,0,2Z" fill="#fd5353" />
-                                                    <path
-                                                        d="M23,32a9,9,0,1,1,9-9A9,9,0,0,1,23,32Zm0-16a7,7,0,1,0,7,7A7,7,0,0,0,23,16Z"
-                                                        fill="#fd5353" />
-                                                    <circle class="cls-1" cx="23" cy="23" r="5" fill="#e59ff1"></circle>
-                                                    <path
-                                                        d="M24.41,23l1.3-1.29a1,1,0,0,0-1.42-1.42L23,21.59l-1.29-1.3a1,1,0,0,0-1.42,1.42L21.59,23l-1.3,1.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0L23,24.41l1.29,1.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42Z"
-                                                        fill="#fd5353" />
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-0">
-                                        <div id="widgetChart4" class="chart-primary"></div>
-                                    </div>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -344,6 +293,21 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-xl-6">
+                        <div class="card crypto-chart">
+                            <div class="card-header pb-0 border-0 flex-wrap">
+                                <div class="mb-0">
+                                    <h4 class="card-title">Action Logs in the Last 30 Days</h4>
+                                    <p>Home visits, WhatsApp clicks, and package views</p>
+                                </div>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div id="actionLogChart"></div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- <div class="col-xl-6">
                                                                                                 <div class="card market-chart">
@@ -908,7 +872,8 @@
     </script>
     <script>
         window.salesChartData = @json($salesChartData);
-        window.$shirtSizeData = @json($shirtSizeData); // Optional, for debugging
+        window.$shirtSizeData = @json($shirtSizeData);
+        window.$shirtSizeData = @json($shirtSizeData);
     </script>
 
 @endpush

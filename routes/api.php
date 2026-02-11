@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\OrganizerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +42,4 @@ Route::post('/login', function(Request $request) {
 });
 
 Route::get('/packages/{package}/available-slots', [BusinessController::class, 'getAvailableSlots']);
+Route::get('/action-logs-chart', [OrganizerController::class, 'actionLogsChart']);

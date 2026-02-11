@@ -919,6 +919,83 @@
       }
     }
 
+    var actionLogChart = function () {
+        const chartEl = document.querySelector("#actionLogChart");
+        if (!chartEl) return;
+
+        // Fetch aggregated data from backend
+        fetch('/api/action-logs-chart') // your controller endpoint
+            .then(res => res.json())
+            .then(data => {
+                const defaultColors = [
+                    "#007bff", // Home Visits
+                    "#28a745", // WhatsApp Clicks
+                    "#ffc107", // first package
+                    "#17a2b8",
+                    "#fd7e14",
+                    "#6f42c1",
+                    "#e83e8c",
+                    "#20c997",
+                    "#6610f2",
+                    "#fd6f6f",
+                    "#ffb74d",
+                    "#4db6ac",
+                    "#ba68c8",
+                    "#f06292",
+                    "#81c784"
+                ];
+
+                const options = {
+                    series: data.series, // directly use aggregated series
+                    chart: {
+                        type: 'bar',
+                        height: 350,
+                        stacked: true,
+                        toolbar: { show: false },
+                        zoom: { enabled: false }
+                    },
+                    colors: defaultColors.slice(0, data.series.length),
+                    plotOptions: { bar: { horizontal: false, columnWidth: '45%' } },
+                    dataLabels: { enabled: false },
+                    stroke: { width: 2, colors: ['transparent'] },
+                    legend: {
+                        show: true,
+                        position: 'bottom',       
+                        horizontalAlign: 'center', 
+                        markers: { radius: 12 }   
+                    },
+                    grid: { show: true, borderColor: 'var(--border)' },
+                    yaxis: { labels: { formatter: value => value.toFixed(0) }, title: { text: 'Actions Count' } },
+                    xaxis: {
+                        categories: data.labels, // last 30 days labels from backend
+                        labels: { rotate: -45, style: { fontSize: '10px', colors: '#B5B5C3' } },
+                        tooltip: { enabled: false }
+                    },
+                    tooltip: { shared: true, intersect: false, y: { formatter: val => val + " actions" } },
+                    responsive: [
+                        {
+                            breakpoint: 768,
+                            options: {
+                                chart: { height: 250 },
+                                xaxis: { labels: { rotate: -60, formatter: (val, i) => i % 2 === 0 ? val : '' } },
+                                tooltip: { style: { fontSize: '10px' } }
+                            }
+                        }
+                    ]
+                };
+
+                const chart = new ApexCharts(chartEl, options);
+                chart.render();
+
+                // Force recalculation of x-axis labels after render
+                setTimeout(() => {
+                    chart.updateOptions({}, true, true);
+                }, 100);
+            })
+            .catch(err => console.error("Error fetching action logs:", err));
+    };
+
+
 
 
 
@@ -2508,6 +2585,7 @@
         marketChart22();
         extraInfoChart();
         swipercard();
+        actionLogChart();
 
       },
 

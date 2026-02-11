@@ -70,4 +70,14 @@ class Package extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('status', 'inactive');
+    }
 }
