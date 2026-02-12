@@ -146,7 +146,6 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     });
     // Similar for organizer, marshal, participant...
 });
-Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
 Route::get('/calendar/holidays', [OrganizerBusinessController::class, 'holidays']);
 Route::post('/track/whatsapp', [BusinessController::class, 'whatsappNow']);
 Route::post('/visitor-log', [HomeController::class, 'log'])->name('visitor.log');
@@ -166,6 +165,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/packages', 'showPackages')->name('organizer.business.packages');
     Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
 
+    Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
     Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.business.booking.verify');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.business.tickets.confirmed');

@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
           let mode = currentViewType === 'dayGridMonth' ? 'month' : 'detail';
           if (currentViewType === 'timeGridWeek') mode = 'week';
 
-          fetch(`/bookings/json-public?mode=${mode}`)
+          fetch(`/organizer/business/bookings/json-public?mode=${mode}`)
             .then(res => res.json())
             .then(data => {
               skeletonEl.style.display = 'none';

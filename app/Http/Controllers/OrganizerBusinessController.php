@@ -664,7 +664,7 @@ class OrganizerBusinessController extends Controller
         if ($mode === 'month') {
 
             $rows = DB::table('bookings')
-                ->where('organizer_id', $organizerId)
+                ->where('bookings.organizer_id', $organizerId)
                 ->join('bookings_vendor_time_slot as slots', 'slots.booking_id', '=', 'bookings.id')
                 ->leftJoin('packages', 'packages.id', '=', 'bookings.package_id')
                 ->select(
