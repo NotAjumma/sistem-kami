@@ -684,6 +684,24 @@
             </div>
         </aside>
 
+        <!-- T&C Modal -->
+        <div class="modal fade" id="tncModal" tabindex="-1" aria-labelledby="tncModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tncModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
+                    {!! $package->tnc !!}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="confirm-tc" class="btn btn-primary">I Agree & Continue</button>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -1207,7 +1225,9 @@
             const whatsappNowBtn = document.getElementById("whatsappNowBtn");
             const selectedDateInput = document.getElementById("selected_date");
             const selectedTimes = document.getElementById("selected_time");
-
+            const tncModal = new bootstrap.Modal(document.getElementById('tncModal'));
+            const confirmTncBtn = document.getElementById('confirm-tc');
+            
             // WhatsApp numbers with names
             const whatsappNumbers = @json($whatsappNumbers);
 
@@ -1218,43 +1238,50 @@
                 whatsappNowBtn.addEventListener('click', function(e) {
                     e.preventDefault();
 
+                    // Show the T&C modal
+                    tncModal.show();
+                });
+            }
+            if (confirmTncBtn) {
+                confirmTncBtn.addEventListener('click', function() {
+
+                    // Hide modal first
+                    tncModal.hide();
+
                     const date = selectedDateInput.value;
                     if (!date) return;
 
-                    // Convert to a Date object
+                    // Format date
                     const dateObj = new Date(date);
-
-                    // Format as Malaysian style
                     const formattedDate = dateObj.toLocaleDateString('ms-MY', {
                         day: 'numeric',
-                        month: 'long',   // "Mac", "April", etc.
+                        month: 'long',
                         year: 'numeric'
                     });
 
-                    // Parse selected time slots
+                    // Parse selected slots
                     let selectedSlots = [];
                     try {
                         selectedSlots = JSON.parse(selectedTimes.value || "[]");
                     } catch(e) { selectedSlots = []; }
-
                     if (!selectedSlots.length) return;
 
-                    // Pick a person randomly based on weights
+                    // Pick a person randomly
                     const pickedIndex = pickWeightedRandom(whatsappNumbers, numberWeights);
                     const currentPerson = whatsappNumbers[pickedIndex];
                     const phone = currentPerson.phone;
                     const personName = currentPerson.name;
 
-                    // Build a readable list: "Classic (10:15 AM), Muji (10:15 AM)"
+                    // Slots text
                     let slotsText = selectedSlots.map(slot => `${slot.id} (${slot.time})`).join("\n");
 
-                    // WhatsApp message in proper Bahasa Melayu
+                    // WhatsApp message
                     const packageTitle = "{{ $package->name }}";
                     const message = encodeURIComponent(
                         `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${formattedDate}\n${slotsText}.`
                     );
 
-                    // ----------- TRACK WHATSAPP CLICK BEFORE OPEN -----------
+                    // Track click
                     fetch('/track/whatsapp', {
                         method: 'POST',
                         headers: {
@@ -1268,18 +1295,15 @@
                             time: selectedSlots.map(s => s.time),
                             slot_name: selectedSlots.map(s => s.id) 
                         })
-                    }).then(res => {
-                        // optional: console log
-                        console.log('WhatsApp click logged');
-                    }).catch(err => {
-                        console.error('Logging failed', err);
-                    });
+                    }).then(res => console.log('WhatsApp click logged'))
+                    .catch(err => console.error('Logging failed', err));
 
                     // Open WhatsApp
                     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, '_blank');
 
                 });
             }
+
 
             // Weighted random helper
             function pickWeightedRandom(numbers, weights) {
