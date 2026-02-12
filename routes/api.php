@@ -43,3 +43,5 @@ Route::post('/login', function(Request $request) {
 
 Route::get('/packages/{package}/available-slots', [BusinessController::class, 'getAvailableSlots']);
 Route::get('/action-logs-chart', [OrganizerController::class, 'actionLogsChart']);
+Route::get('/sales-chart', [OrganizerController::class, 'getSalesChartData']);
+Route::get('/organizer/total-visits-today', [OrganizerController::class, 'getTotalVisitsToday']);

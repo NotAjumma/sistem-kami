@@ -26,7 +26,10 @@
                                                 <i class="fa-solid fa-sort-down me-2"></i>
                                                 Total User Visit Today
                                             </p>
-                                            <h2 class="font-w600 mb-0">{{ $totalVisitToday }} user</h2>
+                                            <h2 class="font-w600 mb-0" id="total-visit-today">
+                                                <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                            </h2>
+
                                         </div>
                                         <div class="dlab-swiper-circle">
                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45" viewBox="0 0 24 24">
@@ -874,6 +877,22 @@
         window.salesChartData = @json($salesChartData);
         window.$shirtSizeData = @json($shirtSizeData);
         window.$shirtSizeData = @json($shirtSizeData);
+
+        function loadTotalVisitsToday() {
+            $.ajax({
+                url: '/api/organizer/total-visits-today',
+                method: 'GET',
+                success: function(data) {
+                    $('#total-visit-today').text(data.total_visits_today + ' user');
+                },
+                error: function() {
+                    $('#total-visit-today').text('0 user');
+                }
+            });
+        }
+
+        // Load immediately
+        loadTotalVisitsToday();
     </script>
 
 @endpush

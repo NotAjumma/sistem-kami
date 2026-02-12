@@ -846,138 +846,114 @@
     //   }
     // }
 
-    // Chart last 30 days
-    var marketChart = function () {
-      const chartEl = document.querySelector("#marketChart");
-      if (chartEl) {
+    // Global color pool
+    const globalColorPool = [
+        "#007bff",
+        "#28a745",
+        "#ffc107",
+        "#17a2b8",
+        "#fd7e14",
+        "#6f42c1",
+        "#e83e8c",
+        "#20c997",
+        "#6610f2",
+        "#fd6f6f"
+    ];
 
-          const chartData = window.salesChartData || [];
+    // Store assigned colors
+    const packageColorMap = {};
 
-          const today = new Date();
-          const labels = [];
-          for (let i = 29; i >= 0; i--) {
-              const d = new Date();
-              d.setDate(today.getDate() - i);
-              const day = String(d.getDate()).padStart(2, '0');
-              const month = d.toLocaleString('default', { month: 'short' });
-              labels.push(`${day} ${month}`);
-          }
-
-          const defaultColors = ["#007bff", "#6c757d", "#ffc107", "#28a745", "#17a2b8"];
-
-          const options = {
-              series: chartData,
-              chart: { height: 300, type: 'line', toolbar: { show: false }, zoom: { enabled: false } },
-              colors: defaultColors.slice(0, chartData.length),
-              dataLabels: { enabled: false },
-              stroke: { curve: 'smooth', width: 4 },
-              markers: { size: 5, strokeWidth: 2, strokeColors: '#fff', hover: { size: 8 } },
-              legend: { show: true },
-              grid: { show: true, strokeDashArray: 6, borderColor: 'var(--border)' },
-              yaxis: {
-                  labels: { formatter: value => "RM" + value }
-              },
-              xaxis: {
-                  categories: labels,
-                  labels: { rotate: -45, style: { fontSize: '10px', colors: '#B5B5C3' } },
-                  tooltip: { enabled: false }
-              },
-              tooltip: {
-                  shared: true,
-                  intersect: false,
-                  y: {
-                      formatter: function(value, { seriesIndex, dataPointIndex, w }) {
-                          const bookings = w.config.series[seriesIndex].bookings[dataPointIndex] || 0;
-                          return "RM" + value + " (" + bookings + " bookings)";
-                      }
-                  }
-              },
-              responsive: [
-                  {
-                      breakpoint: 768,
-                      options: {
-                          chart: { height: 250 },
-                          xaxis: {
-                              labels: {
-                                  rotate: -60,
-                                  formatter: (val, i) => i % 2 === 0 ? val : ''
-                              }
-                          },
-                          tooltip: { style: { fontSize: '10px' } }
-                      }
-                  }
-              ]
-          };
-
-          var chart = new ApexCharts(chartEl, options);
-          chart.render();
-
-          // Force recalculation of x-axis labels after render
-          setTimeout(() => {
-              chart.updateOptions({}, true, true); 
-          }, 100); // 100ms delay usually enough
-      }
+    // Function to get consistent color
+    function getPackageColor(name) {
+        if (!packageColorMap[name]) {
+            const usedColors = Object.keys(packageColorMap).length;
+            packageColorMap[name] = globalColorPool[usedColors % globalColorPool.length];
+        }
+        return packageColorMap[name];
     }
 
-    var actionLogChart = function () {
-        const chartEl = document.querySelector("#actionLogChart");
+
+    // Chart last 30 days
+   var marketChart = function () {
+
+        const chartEl = document.querySelector("#marketChart");
         if (!chartEl) return;
 
-        // Fetch aggregated data from backend
-        fetch('/api/action-logs-chart') // your controller endpoint
+        // 1️⃣ Show spinner first
+        chartEl.innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:300px;">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        `;
+
+        fetch('/api/sales-chart') // your new endpoint
             .then(res => res.json())
-            .then(data => {
-                const defaultColors = [
-                    "#007bff", // Home Visits
-                    "#28a745", // WhatsApp Clicks
-                    "#ffc107", // first package
-                    "#17a2b8",
-                    "#fd7e14",
-                    "#6f42c1",
-                    "#e83e8c",
-                    "#20c997",
-                    "#6610f2",
-                    "#fd6f6f",
-                    "#ffb74d",
-                    "#4db6ac",
-                    "#ba68c8",
-                    "#f06292",
-                    "#81c784"
-                ];
+            .then(response => {
+
+                // Clear spinner
+                chartEl.innerHTML = "";
+
+                const chartData = response.series || [];
+                const labels = response.labels || [];
 
                 const options = {
-                    series: data.series, // directly use aggregated series
+                    series: chartData,
                     chart: {
-                        type: 'bar',
-                        height: 350,
-                        stacked: true,
+                        height: 300,
+                        type: 'line',
                         toolbar: { show: false },
                         zoom: { enabled: false }
                     },
-                    colors: defaultColors.slice(0, data.series.length),
-                    plotOptions: { bar: { horizontal: false, columnWidth: '45%' } },
+                    colors: response.series.map(s => getPackageColor(s.name)),
                     dataLabels: { enabled: false },
-                    stroke: { width: 2, colors: ['transparent'] },
-                    legend: {
-                        show: true,
-                        position: 'bottom',       
-                        horizontalAlign: 'center', 
-                        markers: { radius: 12 }   
+                    stroke: { curve: 'smooth', width: 4 },
+                    markers: {
+                        size: 5,
+                        strokeWidth: 2,
+                        strokeColors: '#fff',
+                        hover: { size: 8 }
                     },
-                    grid: { show: true, borderColor: 'var(--border)' },
-                    yaxis: { labels: { formatter: value => value.toFixed(0) }, title: { text: 'Actions Count' } },
+                    legend: { show: true },
+                    grid: {
+                        show: true,
+                        strokeDashArray: 6,
+                        borderColor: 'var(--border)'
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: value => "RM" + value
+                        }
+                    },
                     xaxis: {
-                        categories: data.labels, // last 30 days labels from backend
-                        labels: { rotate: -45, style: { fontSize: '10px', colors: '#B5B5C3' } },
+                        categories: labels,
+                        labels: {
+                            rotate: -45,
+                            style: { fontSize: '10px', colors: '#B5B5C3' }
+                        },
                         tooltip: { enabled: false }
                     },
-                    tooltip: { shared: true, intersect: false, y: { formatter: val => val + " actions" } },
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                        y: {
+                            formatter: function(value, { seriesIndex, dataPointIndex, w }) {
+                                const bookings =
+                                    w.config.series[seriesIndex].bookings?.[dataPointIndex] || 0;
+                                return "RM" + value + " (" + bookings + " bookings)";
+                            }
+                        }
+                    },
                     responsive: [
                         {
                             breakpoint: 768,
                             options: {
                                 chart: { height: 250 },
-                                xaxis: { labels: { rotate: -60, formatter: (val, i) => i % 2 === 0 ? val : '' } },
+                                xaxis: {
+                                    labels: {
+                                        rotate: -60,
+                                        formatter: (val, i) => i % 2 === 0 ? val : ''
+                                    }
+                                },
                                 tooltip: { style: { fontSize: '10px' } }
                             }
                         }
@@ -987,18 +963,106 @@
                 const chart = new ApexCharts(chartEl, options);
                 chart.render();
 
-                // Force recalculation of x-axis labels after render
-                setTimeout(() => {
-                    chart.updateOptions({}, true, true);
-                }, 100);
             })
-            .catch(err => console.error("Error fetching action logs:", err));
+            .catch(err => {
+                console.error("Error fetching sales chart:", err);
+
+                chartEl.innerHTML = `
+                    <div style="display:flex;justify-content:center;align-items:center;height:300px;color:red;">
+                        Failed to load sales data
+                    </div>
+                `;
+            });
     };
 
 
+    var actionLogChart = function () {
+        const chartEl = document.querySelector("#actionLogChart");
+        if (!chartEl) return;
 
+        // 1️⃣ Show loading spinner first
+        chartEl.innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:350px;">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        `;
 
+        fetch('/api/action-logs-chart')
+            .then(res => res.json())
+            .then(data => {
 
+                // 2️⃣ Clear spinner before render chart
+                chartEl.innerHTML = "";
+
+                const options = {
+                    series: data.series,
+                    chart: {
+                        type: 'bar',
+                        height: 350,
+                        stacked: true,
+                        toolbar: { show: false },
+                        zoom: { enabled: false }
+                    },
+                    colors: data.series.map(s => getPackageColor(s.name)),
+                    plotOptions: { bar: { horizontal: false, columnWidth: '45%' } },
+                    dataLabels: { enabled: false },
+                    stroke: { width: 2, colors: ['transparent'] },
+                    legend: {
+                        show: true,
+                        position: 'bottom',
+                        horizontalAlign: 'center',
+                        markers: { radius: 12 }
+                    },
+                    grid: { show: true, borderColor: 'var(--border)' },
+                    yaxis: {
+                        labels: { formatter: value => value.toFixed(0) },
+                        title: { text: 'Actions Count' }
+                    },
+                    xaxis: {
+                        categories: data.labels,
+                        labels: {
+                            rotate: -45,
+                            style: { fontSize: '10px', colors: '#B5B5C3' }
+                        },
+                        tooltip: { enabled: false }
+                    },
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                        y: { formatter: val => val + " actions" }
+                    },
+                    responsive: [
+                        {
+                            breakpoint: 768,
+                            options: {
+                                chart: { height: 250 },
+                                xaxis: {
+                                    labels: {
+                                        rotate: -60,
+                                        formatter: (val, i) => i % 2 === 0 ? val : ''
+                                    }
+                                },
+                                tooltip: { style: { fontSize: '10px' } }
+                            }
+                        }
+                    ]
+                };
+
+                const chart = new ApexCharts(chartEl, options);
+                chart.render();
+
+            })
+            .catch(err => {
+                console.error("Error fetching action logs:", err);
+
+                // 3️⃣ Show error message if fail
+                chartEl.innerHTML = `
+                    <div style="display:flex;justify-content:center;align-items:center;height:350px;color:red;">
+                        Failed to load chart
+                    </div>
+                `;
+            });
+    };
 
     var extraInfoChart = function(){
       if(jQuery('#extra_info_chart').length > 0 ){

@@ -561,6 +561,8 @@ class OrganizerBusinessController extends Controller
         $authUser = auth()->guard('organizer')->user()->load('user');
 
         $packages = Package::query()
+            ->active()
+            ->sortedAsc()
             ->select('id', 'name', 'organizer_id', 'package_slot_quantity')
             ->where('organizer_id', $authUser->id)
             ->with([
@@ -571,7 +573,6 @@ class OrganizerBusinessController extends Controller
                 'images',
                 'organizer',
             ])
-            ->orderBy('name')
             ->get();
 
         $limitReachedDays   = [];      

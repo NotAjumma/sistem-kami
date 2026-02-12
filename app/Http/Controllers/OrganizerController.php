@@ -28,32 +28,33 @@ class OrganizerController extends Controller
         $organizerId = $authUser->id;
 
         // Get first 100 confirmed bookings with shirt_size info
-        $shirtSizeData = Booking::where('organizer_id', $authUser->id)
-            ->where('status', 'confirmed')
-            ->take(100)
-            ->get()
-            ->map(function ($booking) {
-                $extraRaw = $booking->extra_info;
+        // $shirtSizeData = Booking::where('organizer_id', $authUser->id)
+        //     ->where('status', 'confirmed')
+        //     ->take(100)
+        //     ->get()
+        //     ->map(function ($booking) {
+        //         $extraRaw = $booking->extra_info;
 
-                // Skip if null or empty
-                if (empty($extraRaw))
-                    return null;
+        //         // Skip if null or empty
+        //         if (empty($extraRaw))
+        //             return null;
 
-                // Decode if it's a string (JSON)
-                $extra = is_string($extraRaw) ? json_decode($extraRaw, true) : (array) $extraRaw;
+        //         // Decode if it's a string (JSON)
+        //         $extra = is_string($extraRaw) ? json_decode($extraRaw, true) : (array) $extraRaw;
 
-                // Skip if not array or doesn't contain shirt_size
-                if (!is_array($extra) || empty($extra['shirt_size']))
-                    return null;
+        //         // Skip if not array or doesn't contain shirt_size
+        //         if (!is_array($extra) || empty($extra['shirt_size']))
+        //             return null;
 
-                return $extra['shirt_size'];
-            })
-            ->filter()
-            ->countBy();
+        //         return $extra['shirt_size'];
+        //     })
+        //     ->filter()
+        //     ->countBy();
 
-        $shirtSizes = $shirtSizeData->keys();
-        $shirtCounts = $shirtSizeData->values();
+        // $shirtSizes = $shirtSizeData->keys();
+        // $shirtCounts = $shirtSizeData->values();
 
+        $shirtSizeData = [];
         // Basic stats
         $totalEvents = Event::where('organizer_id', $organizerId)->count();
         $ticketSold = BookingTicket::whereIn('status', ['printed', 'checkin'])
@@ -116,12 +117,6 @@ class OrganizerController extends Controller
             ->where('booked_date_start', '>=', Carbon::today()) // only future or today slots
             ->count();
 
-        $topPackages = Package::where('organizer_id', $organizerId)
-            ->active()
-            ->withCount('bookings')
-            ->orderByDesc('bookings_count')
-            ->get();
-
         // Chart yearly
 
         // $salesChartData = [];
@@ -140,45 +135,7 @@ class OrganizerController extends Controller
         //     ];
         // }
 
-        // Chart last 30 days range
-        $salesChartData = [];
-
-        $startDate = Carbon::now()->subDays(29)->startOfDay(); 
-        $endDate = Carbon::now()->endOfDay();
-
-        foreach ($topPackages as $package) {
-            // Get daily sales and total bookings
-            $dailyData = Booking::selectRaw('DATE(created_at) as date, SUM(final_price) as total_sales, COUNT(*) as total_bookings')
-                ->where('package_id', $package->id)
-                ->where('status', 'paid')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->groupBy(DB::raw('DATE(created_at)'))
-                ->get()
-                ->keyBy('date');
-
-            $sales = collect(range(0, 29))->map(function ($i) use ($startDate, $dailyData) {
-                $date = $startDate->copy()->addDays($i)->format('Y-m-d');
-                return (float) ($dailyData[$date]->total_sales ?? 0);
-            });
-
-            $bookings = collect(range(0, 29))->map(function ($i) use ($startDate, $dailyData) {
-                $date = $startDate->copy()->addDays($i)->format('Y-m-d');
-                return (int) ($dailyData[$date]->total_bookings ?? 0);
-            });
-
-            $salesChartData[] = [
-                'name' => $package->name,
-                'data' => $sales->toArray(),
-                'bookings' => $bookings->toArray(), // pass bookings for tooltip
-            ];
-        }
-
         $chartDataJson = json_encode($salesChartData);
-
-        $totalVisitToday = VisitorAction::where('action', 'visit_page')
-            ->whereDate('created_at', Carbon::today())
-            ->distinct('visitor_id')
-            ->count('visitor_id');
 
 
         return view('organizer.index', compact(
@@ -198,8 +155,98 @@ class OrganizerController extends Controller
             'totalSlotBooked',
             'totalPackages',
             'totalUpcomingSlots',
-            'totalVisitToday',
         ));
+    }
+
+    public function getTotalVisitsToday()
+    {
+        $organizerId = auth()->guard('organizer')->id();
+
+        // Get package IDs for this organizer
+        $packageIds = DB::table('packages')
+            ->where('organizer_id', $organizerId)
+            ->pluck('id');
+
+        // Date range for today
+        $start = Carbon::today()->startOfDay();
+        $end   = Carbon::today()->endOfDay();
+
+        // Combined query
+        $totalVisitToday = VisitorAction::whereBetween('created_at', [$start, $end])
+            ->where(function ($query) use ($organizerId, $packageIds) {
+                $query->where(function ($q) use ($organizerId) {
+                    $q->where('action', 'visit_page')
+                    ->where('page', 'profile')
+                    ->where('reference_id', $organizerId);
+                })
+                ->orWhere(function ($q) use ($packageIds) {
+                    if ($packageIds->isNotEmpty()) {
+                        $q->where('action', 'view_package')
+                        ->whereIn('reference_id', $packageIds);
+                    }
+                });
+            })
+            ->distinct('visitor_id')
+            ->count('visitor_id');
+
+        return response()->json([
+            'total_visits_today' => $totalVisitToday
+        ]);
+    }
+
+   public function getSalesChartData()
+    {
+        $organizerId = auth()->guard('organizer')->id();
+
+        $startDate = Carbon::now()->subDays(29)->startOfDay();
+        $endDate   = Carbon::now()->endOfDay();
+
+        // Generate labels once
+        $labels = collect(range(0, 29))->map(function ($i) use ($startDate) {
+            return $startDate->copy()->addDays($i)->format('d M');
+        })->toArray();
+
+        // Get all package IDs first
+        $packages = Package::where('organizer_id', $organizerId)
+            ->active()
+            ->withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->take(5)
+            ->get();
+
+        $salesChartData = [];
+
+        foreach ($packages as $package) {
+
+            $dailyData = Booking::selectRaw('DATE(created_at) as date, SUM(final_price) as total_sales, COUNT(*) as total_bookings')
+                ->where('package_id', $package->id)
+                ->where('status', 'paid')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get()
+                ->keyBy('date');
+
+            $sales = [];
+            $bookings = [];
+
+            for ($i = 0; $i < 30; $i++) {
+                $dateKey = $startDate->copy()->addDays($i)->format('Y-m-d');
+
+                $sales[] = (float) ($dailyData[$dateKey]->total_sales ?? 0);
+                $bookings[] = (int) ($dailyData[$dateKey]->total_bookings ?? 0);
+            }
+
+            $salesChartData[] = [
+                'name' => $package->name,
+                'data' => $sales,
+                'bookings' => $bookings,
+            ];
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'series' => $salesChartData,
+        ]);
     }
 
     public function bookings(Request $request)
@@ -262,18 +309,26 @@ class OrganizerController extends Controller
         $days = 30;
         $today = Carbon::today();
 
-        // Initialize an array of last 30 days
+        // Labels for last 30 days
         $labels = [];
         for ($i = $days - 1; $i >= 0; $i--) {
             $labels[] = $today->copy()->subDays($i)->format('d M');
         }
 
-        // Fetch unique home visits & WhatsApp clicks per day
+        $authUser = auth()->guard('organizer')->user();
+        $authId = $authUser->id;
+
+        // Packages belonging to this organizer
+        $packageIds = DB::table('packages')
+            ->where('organizer_id', $authId)
+            ->pluck('id');
+
+        // Visitor actions per day
         $logs = DB::table('visitor_actions')
             ->select(
                 DB::raw("DATE(created_at) as date"),
-                DB::raw("COUNT(DISTINCT CASE WHEN action = 'visit_page' AND page = 'home' THEN visitor_id END) as home_visits"),
-                DB::raw("COUNT(DISTINCT CASE WHEN action = 'whatsapp_click' THEN visitor_id END) as whatsapp_clicks")
+                DB::raw("COUNT(DISTINCT CASE WHEN action = 'visit_page' AND page = 'profile' AND reference_id = $authId THEN visitor_id END) as profile_visits"),
+                DB::raw("COUNT(DISTINCT CASE WHEN action = 'whatsapp_click' AND " . ($packageIds->isNotEmpty() ? 'reference_id IN (' . $packageIds->implode(',') . ')' : '0=1') . " THEN visitor_id END) as whatsapp_clicks")
             )
             ->where('created_at', '>=', $today->copy()->subDays($days - 1))
             ->groupBy('date')
@@ -281,16 +336,16 @@ class OrganizerController extends Controller
             ->get()
             ->keyBy('date');
 
-        $homeVisits = [];
+        // Build arrays for chart
+        $profileVisits = [];
         $whatsappClicks = [];
-
         for ($i = $days - 1; $i >= 0; $i--) {
             $dateKey = $today->copy()->subDays($i)->toDateString();
-            $homeVisits[] = $logs[$dateKey]->home_visits ?? 0;
+            $profileVisits[] = $logs[$dateKey]->profile_visits ?? 0;
             $whatsappClicks[] = $logs[$dateKey]->whatsapp_clicks ?? 0;
         }
 
-        // Fetch unique package views per package with package name
+        // Package views
         $packages = DB::table('visitor_actions as va')
             ->join('packages as p', 'va.reference_id', '=', 'p.id')
             ->select(
@@ -299,13 +354,13 @@ class OrganizerController extends Controller
                 DB::raw("COUNT(DISTINCT va.visitor_id) as views")
             )
             ->where('va.action', 'view_package')
+            ->whereIn('va.reference_id', $packageIds)
             ->where('va.created_at', '>=', $today->copy()->subDays($days - 1))
             ->groupBy('p.name', 'date')
             ->orderBy('p.name')
             ->orderBy('date')
             ->get();
 
-        // Get list of unique package names
         $packageNames = $packages->pluck('package_name')->unique();
 
         $packageSeries = [];
@@ -313,9 +368,7 @@ class OrganizerController extends Controller
             $data = [];
             for ($i = $days - 1; $i >= 0; $i--) {
                 $dateKey = $today->copy()->subDays($i)->toDateString();
-                $row = $packages->firstWhere(function($item) use ($packageName, $dateKey) {
-                    return $item->package_name == $packageName && $item->date == $dateKey;
-                });
+                $row = $packages->firstWhere(fn($item) => $item->package_name == $packageName && $item->date == $dateKey);
                 $data[] = $row->views ?? 0;
             }
             $packageSeries[] = [
@@ -328,7 +381,7 @@ class OrganizerController extends Controller
             'labels' => $labels,
             'series' => array_merge(
                 [
-                    ['name' => 'Home Visits', 'data' => $homeVisits],
+                    ['name' => 'Profile Visits', 'data' => $profileVisits],
                     ['name' => 'WhatsApp Clicks', 'data' => $whatsappClicks]
                 ],
                 $packageSeries

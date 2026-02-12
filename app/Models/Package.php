@@ -80,4 +80,15 @@ class Package extends Model
     {
         return $query->where('status', 'inactive');
     }
+
+    public function scopeSortedAsc($query)
+    {
+        return $query->orderBy('order_by', 'asc');
+    }
+
+    public function scopeSortedDesc($query)
+    {
+        return $query->orderBy('order_by', 'desc');
+    }
+
 }
