@@ -829,7 +829,6 @@ class OrganizerBusinessController extends Controller
         return $events;
     }
 
-
     public function holidays()
     {
         $year = request('year', now()->year);

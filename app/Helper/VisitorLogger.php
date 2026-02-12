@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class VisitorLogger
 {
-    public static function log($action, $page = null, $referenceId = null, $meta = [])
+    public static function log($action, $page = null, $referenceId = null, $meta = [], $uri = null)
     {
         // return;
         $agent = new Agent();
@@ -27,6 +27,8 @@ class VisitorLogger
         if (isset($meta['time']) && is_array($meta['time'])) {
             $meta['time'] = implode(',', $meta['time']);
         }
+
+        $finalUri = $uri ?? request()->fullUrl();
 
         /*
         ========================================
@@ -48,7 +50,7 @@ class VisitorLogger
             'visitor_id' => session('visitor_id'),
             'action' => $action,
             'page' => $page,
-            'uri' => request()->fullUrl(),
+            'uri' => $finalUri,
             'reference_id' => $referenceId,
             'meta' => $meta,
             'ip_address' => request()->ip(),

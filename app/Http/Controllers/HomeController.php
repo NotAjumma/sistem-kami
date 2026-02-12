@@ -98,7 +98,8 @@ class HomeController extends Controller
             $request->action,
             $request->page,
             $request->reference_id,
-            $request->meta ?? []
+            $request->meta ?? [],
+            $request->uri
         );
 
         return response()->json(['status' => 'ok']);

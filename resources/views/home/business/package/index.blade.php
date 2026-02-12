@@ -1264,6 +1264,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({
+                            organizer_id: "{{ $organizer->id }}",
                             package_id: "{{ $package->id }}",
                             date: date,
                             time: selectedSlots.map(s => s.time),

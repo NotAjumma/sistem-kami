@@ -86,8 +86,6 @@ class BusinessController extends Controller
     {
         
         $organizer = Organizer::with([
-            'activePackages.addons',
-            'activePackages.items',
             'activePackages.discounts',
             'activePackages.category',
             'activePackages.images',
@@ -418,7 +416,6 @@ class BusinessController extends Controller
         ]);
     }
 
-
     public function showBooking($organizerSlug, $packageSlug)
     {
         $package = Package::whereHas('organizer', function ($query) use ($organizerSlug) {
@@ -567,12 +564,44 @@ class BusinessController extends Controller
             'package',
             $request->package_id,
             [
-                'date' => $request->date,
-                'time' => $request->time,        
-                'slot_name' => $request->slot_name 
+                'date'          => $request->date,
+                'time'          => $request->time,        
+                'slot_name'     => $request->slot_name 
             ]
         );
 
         return response()->json(['status' => 'ok']);
     }
+
+    public function getBanners($id)
+    {
+        $organizer = Organizer::findOrFail($id);
+
+        return response()->json([
+            'id' => $organizer->id,
+            'banners' => $organizer->banner_path ?? []
+        ]);
+    }
+
+    public function getPackageImages($id)
+    {
+        $packages = Package::with('images')
+            ->where('organizer_id', $id)
+            ->get();
+
+        return response()->json([
+            'packages' => $packages->map(function ($package) {
+                return [
+                    'id' => $package->id,
+                    'images' => $package->images->map(function ($img) use ($package) {
+                        return [
+                            'url' => asset("images/organizers/{$package->organizer_id}/packages/{$package->id}/{$img->url}"),
+                            'alt' => $img->alt_text
+                        ];
+                    })
+                ];
+            })
+        ]);
+    }
+
 }

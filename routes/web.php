@@ -97,15 +97,15 @@ Route::get('/receipt/pdf/{booking_code}', function ($booking_code) {
 
 });
 
-Route::prefix('business')->group(function () {
-    // Public profile
-    Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
-    Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
-    Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');
-    Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
-    Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
-    Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
-});
+// Public profile
+Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
+Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
+Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');
+Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
+Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
+Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
+Route::get('/organizer/{id}/banners', [BusinessController::class, 'getBanners']);
+Route::get('/organizer/{id}/packages/images', [BusinessController::class, 'getPackageImages']);
 
 Route::get('/admin/login', [AuthController::class, 'showLoginAdmin'])->name('admin.login');
 Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {

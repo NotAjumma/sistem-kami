@@ -21,8 +21,6 @@ use Carbon\Carbon;
 
 class OrganizerController extends Controller
 {
-
-
     public function dashboard()
     {
         $page_title = 'Dashboard';
@@ -338,7 +336,6 @@ class OrganizerController extends Controller
         ]);
     }
 
-
     public function ticketsConfirmed(Request $request)
     {
         $page_title = 'Tickets List Confirmed';
@@ -445,7 +442,6 @@ class OrganizerController extends Controller
 
         return redirect()->back()->with('error', 'This booking is already cancelled.');
     }
-
 
     public function ticketCheckin($id)
     {

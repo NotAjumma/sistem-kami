@@ -269,6 +269,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
             user-select: text;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .event-title {
@@ -305,13 +309,12 @@
         {{-- Carousel --}}
         <!-- Size banner 1500px x 350px -->
         <div id="organizerCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                @foreach($organizer->banner_path ?? [] as $index => $image)
-                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                        <img src="{{ asset('images/organizers/' . $organizer->id . '/' . $image) }}" 
-                            class="d-block w-100 carousel-image" alt="Slide {{ $index + 1 }}">
+            <div class="carousel-inner" id="carouselInner">
+                <div class="carousel-item active">
+                    <div class="d-flex justify-content-center align-items-center" style="height:350px;">
+                        <div class="spinner-border text-secondary"></div>
                     </div>
-                @endforeach
+                </div>
             </div>
             @if(!empty($organizer->banner_path) && count($organizer->banner_path) > 1)
                 <button class="carousel-control-prev" type="button" data-bs-target="#organizerCarousel" data-bs-slide="prev">
@@ -357,7 +360,7 @@
                     </div>
 
                     @php
-                        $maxLength = 200;
+                        $maxLength = 100;
                         $isLong = strlen($organizer->description) > $maxLength;
                         $excerpt = Str::limit($organizer->description, $maxLength);
                     @endphp
@@ -398,31 +401,6 @@
 
             </div>
         </section>
-
-        <!-- Services Offered Section -->
-        <!-- <section id="services" class="mb-5">
-                                                                                                    <h3 class="mb-4 fw-bold">Services Offered</h3>
-                                                                                                    <div class="row g-3">
-                                                                                                        <div class="col-12 col-md-4">
-                                                                                                            <div class="service-card h-100">
-                                                                                                                <h5>Full Wedding Planning</h5>
-                                                                                                                <p class="mb-0">Handle all of all ealing detatis in step</p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-12 col-md-4">
-                                                                                                            <div class="service-card h-100">
-                                                                                                                <h5>Partial Planning</h5>
-                                                                                                                <p class="mb-0">Assistance with selected wedding planning</p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-12 col-md-4">
-                                                                                                            <div class="service-card h-100">
-                                                                                                                <h5>Day-of Coordination</h5>
-                                                                                                                <p class="mb-0">Management of wedding day to ensure furns</p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </section> -->
 
         <!-- Filter Search -->
         <form method="GET" class="row g-2 mb-4">
@@ -469,14 +447,19 @@
                             @endphp
                             <div id="packageCarousel_{{ $package->id }}" class="carousel slide mb-4 package-carousel"
                                 data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    @foreach($package->images ?? [] as $index => $image)
-                                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                            <img src="{{ asset('images/organizers/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}" 
-                                                class="d-block w-100" alt="{{ $image->alt_text ?? 'Slide ' . ($index + 1) }}">
+
+                                <div class="carousel-inner"
+                                    id="carouselInner_{{ $package->id }}"
+                                    data-package="{{ $package->id }}">
+
+                                    <div class="carousel-item active">
+                                        <div class="d-flex justify-content-center align-items-center" style="height:260px;">
+                                            <div class="spinner-border text-secondary"></div>
                                         </div>
-                                    @endforeach
+                                    </div>
+
                                 </div>
+
                                 @if(!empty($package->images) && count($package->images) > 1)
                                     <button class="carousel-control-prev" type="button"
                                         data-bs-target="#packageCarousel_{{ $package->id }}" data-bs-slide="prev">
@@ -549,7 +532,7 @@
                                     <div class="mt-3">
                                         <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
                                             class="btn btn-primary w-100" style="background-color: #001f4d !important;">
-                                            Read more
+                                            Tempah Sekarang
                                         </a>
                                     </div>
 
@@ -565,7 +548,7 @@
         <!-- Gallery Section -->
         <!-- Size gallery img 1024px x 1024px -->
         @if(!request('package_category') && !request('keyword'))
-        <section id="portfolio" class="mb-5">
+        <!-- <section id="portfolio" class="mb-5">
             <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Gallery</h3>
             <div class="row g-4">
                 @foreach($organizer->gallery as $index => $gallery)
@@ -588,7 +571,7 @@
                     </div>
                 @endforeach
             </div>
-        </section>
+        </section> -->
         @endif
 
         {{-- Google Map --}}
@@ -602,7 +585,7 @@
         @endif
 
     </div>
-    <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+    <!-- <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content" style="max-height: 100vh; overflow: hidden;">
                 <div class="modal-body p-0">
@@ -644,7 +627,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
 
 @endsection
@@ -678,5 +661,129 @@
             }
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const organizerId = @json($organizer->id);
+            const container = document.getElementById("carouselInner");
+
+            fetch(`/organizer/${organizerId}/banners`)
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.banners.length) {
+                    container.innerHTML = `
+                        <div class="carousel-item active">
+                            <div class="text-center p-5">No banner available</div>
+                        </div>`;
+                    return;
+                }
+
+                let html = "";
+
+                data.banners.forEach((image, index) => {
+                    html += `
+                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                        <img 
+                            src="/images/organizers/${data.id}/${image}" 
+                            class="d-block w-100 carousel-image"
+                            loading="lazy"
+                            decoding="async"
+                            alt="banner">
+                    </div>`;
+                });
+
+                container.innerHTML = html;
+
+                // reinitialize bootstrap carousel
+                const carousel = new bootstrap.Carousel(document.getElementById('organizerCarousel'));
+
+            })
+            .catch(err => {
+                container.innerHTML = `
+                <div class="carousel-item active">
+                    <div class="text-danger text-center p-5">Failed to load images</div>
+                </div>`;
+            });
+
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const organizerId = @json($organizer->id);
+
+            fetch(`/organizer/${organizerId}/packages/images`)
+                .then(res => res.json())
+                .then(data => {
+
+                    data.packages.forEach(pkg => {
+
+                        const container = document.querySelector(
+                            `#carouselInner_${pkg.id}`
+                        );
+
+                        if (!container) return;
+
+                        if (!pkg.images.length) {
+                            container.innerHTML = `
+                                <div class="carousel-item active">
+                                    <div class="text-center p-5">
+                                        No images available
+                                    </div>
+                                </div>`;
+                            return;
+                        }
+
+                        let html = "";
+
+                        pkg.images.forEach((image, index) => {
+                            html += `
+                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                    <img 
+                                        src="${image.url}"
+                                        class="d-block w-100"
+                                        style="height:260px; object-fit:cover;"
+                                        loading="lazy"
+                                        decoding="async"
+                                        alt="${image.alt ?? ''}">
+                                </div>`;
+                        });
+
+                        container.innerHTML = html;
+
+                        const carouselElement = container.closest('.carousel');
+                        bootstrap.Carousel.getOrCreateInstance(carouselElement);
+
+                    });
+
+                })
+                .catch(err => {
+                    console.error('Failed to load package images', err);
+                });
+
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/visitor-log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    action: 'visit_page',
+                    page: 'profile',
+                    reference_id: "{{ $organizer->id }}",
+                    uri: window.location.href 
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log('Visitor logged', data))
+            .catch(err => console.error('Logging failed', err));
+        });
+    </script>
+
 
 @endpush
