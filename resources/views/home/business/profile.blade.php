@@ -662,125 +662,64 @@
         }
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
+        document.addEventListener("DOMContentLoaded", async function() {
             const organizerId = @json($organizer->id);
-            const container = document.getElementById("carouselInner");
 
-            fetch(`/organizer/${organizerId}/banners`)
-            .then(res => res.json())
-            .then(data => {
+            // Run both fetches in parallel
+            const [bannerRes, packageRes] = await Promise.all([
+                fetch(`/organizer/${organizerId}/banners`),
+                fetch(`/organizer/${organizerId}/packages/images`)
+            ]);
 
-                if (!data.banners.length) {
-                    container.innerHTML = `
-                        <div class="carousel-item active">
-                            <div class="text-center p-5">No banner available</div>
-                        </div>`;
+            const bannersData = await bannerRes.json();
+            const packagesData = await packageRes.json();
+
+            // === 1. BANNER ===
+            const bannerContainer = document.getElementById("carouselInner");
+            if (bannersData.banners.length) {
+                // show first banner immediately
+                let html = `<div class="carousel-item active">
+                                <img src="/images/organizers/${bannersData.id}/${bannersData.banners[0]}" class="d-block w-100 carousel-image" decoding="sync" loading="eager" alt="banner">
+                            </div>`;
+                // remaining banners lazy load
+                bannersData.banners.slice(1).forEach(img => {
+                    html += `<div class="carousel-item">
+                                <img src="/images/organizers/${bannersData.id}/${img}" class="d-block w-100 carousel-image" decoding="async" loading="lazy" alt="banner">
+                            </div>`;
+                });
+                bannerContainer.innerHTML = html;
+                bootstrap.Carousel.getOrCreateInstance(document.getElementById('organizerCarousel'));
+            } else {
+                bannerContainer.innerHTML = `<div class="carousel-item active"><div class="text-center p-5">No banner available</div></div>`;
+            }
+
+            // === 2. PACKAGES ===
+            packagesData.packages.forEach(pkg => {
+                const container = document.querySelector(`#carouselInner_${pkg.id}`);
+                if (!container) return;
+
+                if (!pkg.images.length) {
+                    container.innerHTML = `<div class="carousel-item active"><div class="text-center p-5">No images available</div></div>`;
                     return;
                 }
 
-                let html = "";
+                // First image sync
+                const firstImg = pkg.images[0];
+                const firstImgEl = `<img src="${firstImg.url}" class="d-block w-100" style="height:260px; object-fit:cover;" decoding="sync" loading="eager" alt="${firstImg.alt ?? ''}">`;
+                let html = `<div class="carousel-item active">${firstImgEl}</div>`;
 
-                data.banners.forEach((image, index) => {
-                    html += `
-                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                        <img 
-                            src="/images/organizers/${data.id}/${image}" 
-                            class="d-block w-100 carousel-image"
-                            decoding="async"
-                            alt="banner">
-                    </div>`;
+                // remaining images async lazy load
+                pkg.images.slice(1).forEach(img => {
+                    html += `<div class="carousel-item">
+                                <img src="${img.url}" class="d-block w-100" style="height:260px; object-fit:cover;" decoding="async" loading="lazy" alt="${img.alt ?? ''}">
+                            </div>`;
                 });
 
                 container.innerHTML = html;
-
-                // reinitialize bootstrap carousel
-                const carousel = new bootstrap.Carousel(document.getElementById('organizerCarousel'));
-
-            })
-            .catch(err => {
-                container.innerHTML = `
-                <div class="carousel-item active">
-                    <div class="text-danger text-center p-5">Failed to load images</div>
-                </div>`;
+                bootstrap.Carousel.getOrCreateInstance(container.closest('.carousel'));
             });
-
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
 
-            const organizerId = @json($organizer->id);
-
-            fetch(`/organizer/${organizerId}/packages/images`)
-                .then(res => res.json())
-                .then(data => {
-
-                    data.packages.forEach(pkg => {
-
-                        const container = document.querySelector(
-                            `#carouselInner_${pkg.id}`
-                        );
-
-                        if (!container) return;
-
-                        if (!pkg.images.length) {
-                            container.innerHTML = `
-                                <div class="carousel-item active">
-                                    <div class="text-center p-5">
-                                        No images available
-                                    </div>
-                                </div>`;
-                            return;
-                        }
-
-                        let html = "";
-
-                        pkg.images.forEach((image, index) => {
-                            html += `
-                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                    <img 
-                                        src="${image.url}"
-                                        class="d-block w-100"
-                                        style="height:260px; object-fit:cover;"
-                                        decoding="async"
-                                        alt="${image.alt ?? ''}">
-                                </div>`;
-                        });
-
-                        container.innerHTML = html;
-
-                        const carouselElement = container.closest('.carousel');
-                        bootstrap.Carousel.getOrCreateInstance(carouselElement);
-
-                    });
-
-                })
-                .catch(err => {
-                    console.error('Failed to load package images', err);
-                });
-
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/visitor-log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    action: 'visit_page',
-                    page: 'profile',
-                    reference_id: "{{ $organizer->id }}",
-                    uri: window.location.href 
-                })
-            })
-            .then(res => res.json())
-            .then(data => console.log('Visitor logged', data))
-            .catch(err => console.error('Logging failed', err));
-        });
     </script>
 
 
