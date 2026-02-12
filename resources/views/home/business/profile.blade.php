@@ -738,12 +738,10 @@
 
                         pkg.images.forEach((image, index) => {
 
-                            const webpUrl = image.url.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-
                             html += `
                                 <div class="carousel-item ${index === 0 ? 'active' : ''}">
                                     <img 
-                                        src="${webpUrl}"
+                                        src="${image.url}"
                                         class="d-block w-100"
                                         style="height:260px; object-fit:cover;"
                                         loading="lazy"

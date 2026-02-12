@@ -609,7 +609,7 @@
                                             {{ $package->organizer->name }}
                                         </div>
                                         <div class="event-title mb-2" title="{{ $package->name }}" style="height: 50px;">
-                                            {{ Str::limit(($package->name), 35) }}
+                                            {{ Str::limit(($package->name), 45) }}
                                         </div>
                                         <div class="event-desc" style="height: 80px;">
                                             {{ Str::limit(strip_tags($package->description), 140) }}
