@@ -655,12 +655,16 @@ class OrganizerBusinessController extends Controller
 
     public function getBookingsJson(Request $request)
     {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+        $organizerId = $authUser->id;
+
         $mode = $request->get('mode', 'detail');
 
         // MONTH SUMMARY MODE
         if ($mode === 'month') {
 
             $rows = DB::table('bookings')
+                ->where('organizer_id', $organizerId)
                 ->join('bookings_vendor_time_slot as slots', 'slots.booking_id', '=', 'bookings.id')
                 ->leftJoin('packages', 'packages.id', '=', 'bookings.package_id')
                 ->select(
@@ -759,6 +763,7 @@ class OrganizerBusinessController extends Controller
         $events = [];
 
         $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package'])
+            ->where('organizer_id', $organizerId)
             ->whereHas('vendorTimeSlots')
             ->get();
 

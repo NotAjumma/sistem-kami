@@ -65,11 +65,13 @@ class OrganizerController extends Controller
         // Total income already received
         $paidIncome = Booking::where('status', 'paid')
             ->where('payment_type', 'full_payment') // full payment received
+            ->where('organizer_id', $organizerId) // full payment received
             ->sum('final_price');
 
         // Total deposit received
         $depositIncome = Booking::where('status', 'paid')
             ->where('payment_type', 'deposit') // only deposit received
+            ->where('organizer_id', $organizerId)
             ->sum('paid_amount'); // assuming you store deposit separately
 
         // Total income expected (remaining balance)
@@ -194,7 +196,7 @@ class OrganizerController extends Controller
         ]);
     }
 
-   public function getSalesChartData()
+    public function getSalesChartData()
     {
         $organizerId = auth()->guard('organizer')->id();
 
