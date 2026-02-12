@@ -703,21 +703,48 @@
                     return;
                 }
 
-                // First image sync
+                // Build first image element
                 const firstImg = pkg.images[0];
-                const firstImgEl = `<img src="${firstImg.url}" class="d-block w-100" style="height:260px; object-fit:cover;" decoding="sync" loading="eager" alt="${firstImg.alt ?? ''}">`;
-                let html = `<div class="carousel-item active">${firstImgEl}</div>`;
+                const firstImgEl = document.createElement('img');
+                firstImgEl.src = firstImg.url;
+                firstImgEl.alt = firstImg.alt ?? '';
+                firstImgEl.className = 'd-block w-100';
+                firstImgEl.style.height = '260px';
+                firstImgEl.style.objectFit = 'cover';
+                firstImgEl.decoding = 'sync';
+                firstImgEl.loading = 'eager';
 
-                // remaining images async lazy load
-                pkg.images.slice(1).forEach(img => {
-                    html += `<div class="carousel-item">
-                                <img src="${img.url}" class="d-block w-100" style="height:260px; object-fit:cover;" decoding="async" loading="lazy" alt="${img.alt ?? ''}">
-                            </div>`;
-                });
+                const firstCarouselItem = document.createElement('div');
+                firstCarouselItem.className = 'carousel-item active';
+                firstCarouselItem.appendChild(firstImgEl);
 
-                container.innerHTML = html;
-                bootstrap.Carousel.getOrCreateInstance(container.closest('.carousel'));
+                container.innerHTML = '';
+                container.appendChild(firstCarouselItem);
+
+                // Wait for first image to load before adding remaining
+                firstImgEl.onload = () => {
+                    // Add remaining images
+                    pkg.images.slice(1).forEach(img => {
+                        const item = document.createElement('div');
+                        item.className = 'carousel-item';
+                        const imgEl = document.createElement('img');
+                        imgEl.src = img.url;
+                        imgEl.alt = img.alt ?? '';
+                        imgEl.className = 'd-block w-100';
+                        imgEl.style.height = '260px';
+                        imgEl.style.objectFit = 'cover';
+                        imgEl.loading = 'lazy';
+                        imgEl.decoding = 'async';
+                        item.appendChild(imgEl);
+                        container.appendChild(item);
+                    });
+
+                    // Init carousel only after first image loaded
+                    const carouselEl = container.closest('.carousel');
+                    bootstrap.Carousel.getOrCreateInstance(carouselEl, { ride: 'carousel' });
+                };
             });
+
         });
 
     </script>
