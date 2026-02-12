@@ -475,6 +475,10 @@
                 font-size: 3rem;
             }
         }
+        .package-img {
+            height: 260px;      
+            object-fit: cover;   
+        }
     </style>
 @endpush
 @section('content')
@@ -576,7 +580,7 @@
                                     </div>
                                     @if ($package->images->isNotEmpty())
                                         <img src="{{ asset('images/organizers/' . $package->organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url) }}"
-                                            class="d-block w-100" alt="Package Image">
+                                            class="d-block w-100 package-img" alt="Package Image">
                                     @endif
 
                                     @if ($package->valid_from && $package->valid_until)
@@ -624,17 +628,19 @@
 
                                         @endphp
 
-                                        @if ($location)
-                                            <div class="event-footer">
-                                                <div class="location" title="Location"><i
-                                                        class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
-                                                @if (!is_null($package->final_price))
-                                                    <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
-                                                @else
-                                                    <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
-                                                @endif
-                                            </div>
-                                        @endif
+                                        <div class="event-footer">
+                                            @if ($location)
+                                            <div class="location" title="Location"><i
+                                                    class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
+                                            @else
+                                            <div class="location" title="Location"></div>
+                                            @endif
+                                            @if (!is_null($package->final_price))
+                                                <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
+                                            @else
+                                                <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </a>
