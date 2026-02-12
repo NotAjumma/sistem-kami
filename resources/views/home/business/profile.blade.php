@@ -684,7 +684,7 @@
                 // remaining banners lazy load
                 bannersData.banners.slice(1).forEach(img => {
                     html += `<div class="carousel-item">
-                                <img src="/images/organizers/${bannersData.id}/${img}" class="d-block w-100 carousel-image" decoding="async" loading="lazy" alt="banner">
+                                <img src="/images/organizers/${bannersData.id}/${img}" class="d-block w-100 carousel-image" decoding="async" alt="banner">
                             </div>`;
                 });
                 bannerContainer.innerHTML = html;
@@ -733,7 +733,6 @@
                         imgEl.className = 'd-block w-100';
                         imgEl.style.height = '260px';
                         imgEl.style.objectFit = 'cover';
-                        imgEl.loading = 'lazy';
                         imgEl.decoding = 'async';
                         item.appendChild(imgEl);
                         container.appendChild(item);
