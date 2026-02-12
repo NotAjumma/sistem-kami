@@ -634,18 +634,18 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('galleryModal');
-            modal.addEventListener('show.bs.modal', function (event) {
-                const trigger = event.relatedTarget;
-                const index = trigger.getAttribute('data-img-index');
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     const modal = document.getElementById('galleryModal');
+        //     modal.addEventListener('show.bs.modal', function (event) {
+        //         const trigger = event.relatedTarget;
+        //         const index = trigger.getAttribute('data-img-index');
 
-                const carousel = bootstrap.Carousel.getInstance(document.getElementById('galleryCarousel')) ||
-                    new bootstrap.Carousel(document.getElementById('galleryCarousel'));
+        //         const carousel = bootstrap.Carousel.getInstance(document.getElementById('galleryCarousel')) ||
+        //             new bootstrap.Carousel(document.getElementById('galleryCarousel'));
 
-                carousel.to(parseInt(index));
-            });
-        });
+        //         carousel.to(parseInt(index));
+        //     });
+        // });
     </script>
     <script>
         function toggleDesc(id) {
@@ -670,8 +670,6 @@
             fetch(`/organizer/${organizerId}/banners`)
             .then(res => res.json())
             .then(data => {
-
-
 
                 if (!data.banners.length) {
                     container.innerHTML = `
@@ -739,12 +737,16 @@
                         let html = "";
 
                         pkg.images.forEach((image, index) => {
+
+                            const webpUrl = image.url.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+
                             html += `
                                 <div class="carousel-item ${index === 0 ? 'active' : ''}">
                                     <img 
-                                        src="${image.url}"
+                                        src="${webpUrl}"
                                         class="d-block w-100"
                                         style="height:260px; object-fit:cover;"
+                                        loading="lazy"
                                         decoding="async"
                                         alt="${image.alt ?? ''}">
                                 </div>`;
