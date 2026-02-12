@@ -687,7 +687,6 @@
                         <img 
                             src="/images/organizers/${data.id}/${image}" 
                             class="d-block w-100 carousel-image"
-                            loading="lazy"
                             decoding="async"
                             alt="banner">
                     </div>`;
@@ -744,7 +743,6 @@
                                         src="${image.url}"
                                         class="d-block w-100"
                                         style="height:260px; object-fit:cover;"
-                                        loading="lazy"
                                         decoding="async"
                                         alt="${image.alt ?? ''}">
                                 </div>`;
