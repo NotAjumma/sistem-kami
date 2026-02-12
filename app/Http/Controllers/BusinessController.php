@@ -84,35 +84,69 @@ class BusinessController extends Controller
 
     public function showProfile(Request $request, $slug)
     {
-        
-        $organizer = Organizer::with([
-            'activePackages.discounts',
-            'activePackages.category',
-            'activePackages.images',
-            'activePackages.images',
-            'gallery',
-        ])->where('slug', $slug)->firstOrFail();
+        $isPrivateRoute = $request->routeIs('business.profile.private');
 
-        if ($organizer->type !== 'service' || $organizer->visibility !== 'public' || !$organizer->is_active) {
-            abort(403, 'Unauthorized access to non-business type');
+        if ($isPrivateRoute) {
+            $organizer = Organizer::with([
+                'inactivePackages.discounts',
+                'inactivePackages.category',
+                'inactivePackages.images',
+                'inactivePackages.images',
+                'gallery',
+            ])->where('slug', $slug)->firstOrFail();
+        } else {
+            $organizer = Organizer::with([
+                'activePackages.discounts',
+                'activePackages.category',
+                'activePackages.images',
+                'activePackages.images',
+                'gallery',
+            ])->where('slug', $slug)->firstOrFail();
+        }
+
+        if ($isPrivateRoute) {
+            // Private route: allow only certain conditions
+            if ($organizer->type !== 'service' || $organizer->visibility !== 'private' || !$organizer->is_active) {
+                abort(403, 'Unauthorized access to non-business type');
+            }
+        } else {
+            // Public route: organizer must be public
+            if ($organizer->type !== 'service' || $organizer->visibility !== 'public' || !$organizer->is_active) {
+                abort(403, 'Unauthorized access to private business');
+            }
         }
 
         $seo = $this->page_seo($organizer);
-        
         $allActivePackages = $organizer->activePackages()->get();
+        
+        if ($isPrivateRoute) {
+            $allActivePackages = $organizer->inactivePackages()->get();
+        }
 
         $packageCategories = \App\Models\PackageCategory::whereIn(
             'id',
             $allActivePackages->pluck('category_id')->unique()
         )->get();
         
-        $packagesQuery = $organizer->activePackages()->with([
-            'addons',
-            'items',
-            'discounts',
-            'category',
-            'images'
-        ]);
+        if ($isPrivateRoute) {
+            $packagesQuery = $organizer->inactivePackages()->with([
+                'addons',
+                'items',
+                'discounts',
+                'category',
+                'images'
+            ]);
+        } else {
+            $packagesQuery = $organizer->activePackages()->with([
+                'addons',
+                'items',
+                'discounts',
+                'category',
+                'images'
+            ]);
+        }
+        
+        
 
         // Filter by keyword (searching name or description)
         if ($request->filled('keyword')) {
@@ -143,16 +177,27 @@ class BusinessController extends Controller
         ));
     }
 
-    public function showPackage($organizerSlug, $packageSlug)
+    public function showPackage(Request $request, $organizerSlug, $packageSlug)
     {
-        // Retrieve organizer by slug
-        $organizer = Organizer::where('slug', $organizerSlug)
-            ->with([
-                'activePackages.images',
-                'activePackages.discounts',
-                'gallery',
-            ])
-            ->firstOrFail();
+        $isPrivateRoute = $request->routeIs('business.package.private');
+
+        if ($isPrivateRoute) {
+            $organizer = Organizer::where('slug', $organizerSlug)
+                ->with([
+                    'inactivePackages.images',
+                    'inactivePackages.discounts',
+                    'gallery',
+                ])
+                ->firstOrFail();
+        } else {
+            $organizer = Organizer::where('slug', $organizerSlug)
+                ->with([
+                    'activePackages.images',
+                    'activePackages.discounts',
+                    'gallery',
+                ])
+                ->firstOrFail();
+        }
 
         // Find the package under this organizer
         $package = Package::whereHas('organizer', function ($query) use ($organizerSlug) {
@@ -331,6 +376,10 @@ class BusinessController extends Controller
         $page_title = $package->name;
         $seo = $this->page_seo($organizer, $package);
 
+        $whatsappNumbers = collect([
+            ['name' => $organizer->name, 'phone' => $organizer->phone]
+        ]);
+
         VisitorLogger::log('view_package', 'package', $package->id);
 
         return view('home.business.package.index', [
@@ -344,6 +393,7 @@ class BusinessController extends Controller
             'limitReachedDays'  => $limitReachedDays,
             'weekRangeBlock'    => $weekRangeBlock,
             'seo'               => $seo,
+            'whatsappNumbers'   => $whatsappNumbers,
         ]);
     }
 

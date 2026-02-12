@@ -1209,9 +1209,7 @@
             const selectedTimes = document.getElementById("selected_time");
 
             // WhatsApp numbers with names
-            const whatsappNumbers = [
-                { name: "Dayang", phone: "+601136307973" }
-            ];
+            const whatsappNumbers = @json($whatsappNumbers);
 
             // weights = probability (higher number = higher chance)
             const numberWeights = [10];

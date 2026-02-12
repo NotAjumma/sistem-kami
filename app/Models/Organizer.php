@@ -75,6 +75,13 @@ class Organizer extends Authenticatable
             ->orderBy('order_by');
     }
 
+    public function inactivePackages()
+    {
+        return $this->hasMany(Package::class)
+            ->where('status', 'inactive')
+            ->orderBy('order_by');
+    }
+
     public function gallery()
     {
         return $this->hasMany(BusinessGallery::class);

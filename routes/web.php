@@ -189,6 +189,8 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
 // Route::get('/login', [AuthController::class, 'participant'])->name('participant.login');
 
 // Public profile
+Route::get('/private/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile.private');
+Route::get('/private/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package.private');
 Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
 Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
 Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');

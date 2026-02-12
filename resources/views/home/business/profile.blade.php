@@ -472,6 +472,7 @@
                                 @endif
                             </div>
 
+                            @if ($package->status === 'active')
                             <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}">
                                 <div class="portfolio-content">
                                     <!-- <div class="event-organizer text-primary" title="Organizer">By
@@ -538,6 +539,74 @@
 
                                 </div>
                             </a>
+                            @else
+                            <a href="{{ route('business.package.private', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}">
+                                <div class="portfolio-content">
+                                    <!-- <div class="event-organizer text-primary" title="Organizer">By
+                                        {{ $organizer->name }}
+                                    </div> -->
+                                    {{-- Package Name --}}
+                                    <h4 class="event-title portfolio-title">{{ $package->name }}</h4>
+                                    {{-- Discount Info --}}
+                                    @if($validDiscount && $validDiscount->is_active)
+                                        <p class="text-danger mb-1">
+                                            @if($validDiscount->type === 'percentage')
+                                                Save {{ $validDiscount->amount }}%!
+                                            @else
+                                                Save RM {{ number_format($validDiscount->amount, 2) }}!
+                                            @endif
+                                        </p>
+                                    @endif
+
+                                    {{-- Pricing --}}
+                                    @php
+                                        $originalPrice = $package->base_price;
+                                        $finalPrice = $originalPrice;
+
+                                        if ($validDiscount && $validDiscount->is_active) {
+                                            if ($validDiscount->type === 'percentage') {
+                                                $finalPrice = $originalPrice - ($originalPrice * $validDiscount->amount / 100);
+                                            } else {
+                                                $finalPrice = $originalPrice - $validDiscount->amount;
+                                            }
+                                        }
+                                    @endphp
+
+                                    <p class="event-title portfolio-price">
+                                        @if($finalPrice < $originalPrice)
+                                            <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
+                                        @endif
+                                        @if($validDiscount && $validDiscount->is_active)
+                                            <strong>Now: RM {{ number_format($finalPrice, 2) }}</strong>
+                                        @else
+                                            <strong>RM {{ number_format($finalPrice, 2) }}</strong>
+
+                                        @endif
+                                    </p>
+
+                                    {{-- Validity --}}
+                                    @if($validDiscount && $validDiscount->is_active)
+                                        <time datetime="{{ \Carbon\Carbon::parse($package->valid_from)->format('Y-m-d') }}"
+                                            class="portfolio-date">
+                                            Valid Until: {{ \Carbon\Carbon::parse($package->valid_until)->format('F d, Y') }}
+                                        </time>
+                                    @endif
+
+                                    <div class="event-desc mt-2">
+                                        {{ Str::limit(strip_tags($package->description), 340) }}
+                                    </div>
+
+                                    {{-- Quick Booking Button --}}
+                                    <div class="mt-3">
+                                        <a href="{{ route('business.package', ['organizerSlug' => $organizer->slug, 'packageSlug' => $package->slug]) }}"
+                                            class="btn btn-primary w-100" style="background-color: #001f4d !important;">
+                                            Tempah Sekarang
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </a>
+                            @endif
 
                         </article>
                     </div>
