@@ -76,6 +76,7 @@ class OrganizerController extends Controller
 
         // Total income expected (remaining balance)
         $pendingIncome = Booking::where('status', 'paid')
+            ->where('organizer_id', $organizerId)
             ->sum('final_price') - ($paidIncome + $depositIncome);
         $pendingBookings = Booking::where('organizer_id', $organizerId)->where('status', 'pending')->count();
         $confirmBookings = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->count();

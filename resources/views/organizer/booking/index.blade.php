@@ -162,8 +162,12 @@
                                             <td>
                                                 @php
                                                     $filename = $booking->resit_path; // e.g., 'resit.pdf' or 'resit.png'
-                                                    $encoded = rawurlencode($filename);
-                                                    $url = asset('images/receipts/' . $encoded);
+                                                    if ($filename && file_exists(public_path('images/receipts/' . $filename))) {
+                                                        $encoded = rawurlencode($filename);
+                                                        $url = asset('images/receipts/' . $encoded);
+                                                    } else {
+                                                        $url = null; // or fallback to a default placeholder
+                                                    }
 
                                                     $isPdf = Str::endsWith(strtolower($filename), '.pdf');
                                                 @endphp
@@ -174,11 +178,13 @@
                                                         data-bs-target="#receiptPdfModal" data-pdf-url="{{ $url }}">
                                                         View PDF Receipt
                                                     </button>
-                                                @else
+                                                @elseif ($url)
                                                     <!-- Image Thumbnail -->
                                                     <img src="{{ $url }}" alt="Receipt" style="width: 100px; cursor: pointer;"
                                                         data-bs-toggle="modal" data-bs-target="#receiptImageModal"
                                                         data-img-url="{{ $url }}" />
+                                                @else
+                                                -
                                                 @endif
                                             </td>
                                             <td>{{ $booking->created_at->format('j M Y, H:iA') }}</td>
