@@ -586,22 +586,22 @@
         </div>
         <!-- T&C Modal -->
         <div class="modal fade" id="tncModal" tabindex="-1" aria-labelledby="tncModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="tncModalLabel">Terms & Conditions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tncModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
+                    <p class="mb-3">Please read and accept our terms and conditions before proceeding with your payment.</p>
+                    {!! $package->tnc !!}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="confirm-tc" class="btn btn-primary">I Agree & Continue</button>
+                </div>
+                </div>
             </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
-                <p class="mb-3">Please read and accept our terms and conditions before proceeding with your payment.</p>
-                {!! $package->tnc !!}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
-                <button type="button" id="confirm-tc" class="btn btn-primary">I Agree & Continue</button>
-            </div>
-            </div>
-        </div>
         </div>
 
     </main>
