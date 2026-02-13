@@ -398,73 +398,86 @@ class BusinessController extends Controller
     }
 
     public function getAvailableSlots(Request $request, $packageId)
-    {
-        $date       = $request->get('date');
-        $package    = Package::with('vendorTimeSlots', 'organizer')->findOrFail($packageId);
-        $slots      = [];
+{
+    $date    = $request->get('date');
+    $package = Package::with('vendorTimeSlots', 'organizer')->findOrFail($packageId);
+    $slots   = [];
 
-        $bookedDates = DB::table('bookings_vendor_time_slot')
-            ->where('organizer_id', $package->organizer->id)
-            ->whereIn('status', ['deposit_paid', 'full_payment'])
-            ->whereDate('booked_date_start', '=', $date) // ✅ match exact date
-            ->select('vendor_time_slot_id', 'booked_time_start', 'booked_time_end')
-            ->get();
+    // Get all bookings for this date
+    $bookedDates = DB::table('bookings_vendor_time_slot')
+        ->where('organizer_id', $package->organizer->id)
+        ->whereIn('status', ['deposit_paid', 'full_payment'])
+        ->whereDate('booked_date_start', '=', $date)
+        ->select('vendor_time_slot_id', 'booked_time_start', 'booked_time_end')
+        ->get();
 
-        $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id')->map(function ($bookings) use ($package) {
-            $blockedTimes = [];
-            foreach ($bookings as $b) {
-                $bStart = Carbon::parse($b->booked_time_start);
-                $bEnd   = $b->booked_time_end 
-                            ? Carbon::parse($b->booked_time_end) 
-                            : $bStart->copy()->addMinutes($package->duration_minutes); // fallback
+    // Group bookings by vendor slot
+    $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id');
 
-                // Calculate which slotStart times are blocked
-                $slotStart = Carbon::parse($bStart)->copy()->floorMinutes($package->duration_minutes); // rounds down to nearest interval
-                $blockedTimes[] = $slotStart->format('g:i A');
+    foreach ($package->vendorTimeSlots as $timeSlot) {
+        $start    = Carbon::parse($timeSlot->start_time);
+        $end      = Carbon::parse($timeSlot->end_time);
+        $interval = $package->duration_minutes;
+
+        $times = [];
+        $bookedTimes = [];
+
+        $slotStart = $start->copy();
+        while ($slotStart < $end) {
+            $slotEnd = $slotStart->copy()->addMinutes($interval);
+            $timeLabel = $slotStart->format('g:i A');
+
+            // Check if this slot overlaps any booking
+            $isBooked = false;
+            if (isset($groupedBookings[$timeSlot->id])) {
+                foreach ($groupedBookings[$timeSlot->id] as $b) {
+                    $bStart = Carbon::parse($b->booked_time_start);
+                    $bEnd   = $b->booked_time_end
+                                ? Carbon::parse($b->booked_time_end)
+                                : $bStart->copy()->addMinutes($package->duration_minutes);
+
+                    // Overlap check
+                    if ($slotStart < $bEnd && $slotEnd > $bStart) {
+                        $isBooked = true;
+                        break;
+                    }
+                }
             }
-            return array_unique($blockedTimes);
-        });
 
-        
-        foreach ($package->vendorTimeSlots as $timeSlot) {
-            $start      = Carbon::parse($timeSlot->start_time);
-            $end        = Carbon::parse($timeSlot->end_time);
-            $interval   = $package->duration_minutes;
-
-            $times = [];
-            while ($start < $end) {
-                $times[] = $start->format('g:i A');
-                $start->addMinutes($interval);
+            $times[] = $timeLabel;
+            if ($isBooked) {
+                $bookedTimes[] = $timeLabel;
             }
 
-            $slots[] = [
-                'id'            => $timeSlot->id,
-                'court'         => $timeSlot->slot_name ?? 'Slot '.$timeSlot->id,
-                'times'         => $times,
-                'bookedTimes'   => $groupedBookings[$timeSlot->id] ?? []
-            ];
+            $slotStart->addMinutes($interval);
         }
 
-        $offDays = VendorOffDay::where('organizer_id', $package->organizer->id)
-            ->whereDate('off_date', $date)
-            ->get();
-
-        VisitorLogger::log(
-            'check_slot',
-            'calendar',
-            $packageId,
-            [
-                'date' => $request->input('date'),
-            ]
-        );
-
-
-        return response()->json([
-            'date'   => $date,
-            'slots'  => $slots,
-            'vendorOffTimes' => $offDays,
-        ]);
+        $slots[] = [
+            'id'          => $timeSlot->id,
+            'court'       => $timeSlot->slot_name ?? 'Slot '.$timeSlot->id,
+            'times'       => $times,
+            'bookedTimes' => $bookedTimes,
+        ];
     }
+
+    $offDays = VendorOffDay::where('organizer_id', $package->organizer->id)
+        ->whereDate('off_date', $date)
+        ->get();
+
+    VisitorLogger::log(
+        'check_slot',
+        'calendar',
+        $packageId,
+        ['date' => $date]
+    );
+
+    return response()->json([
+        'date'           => $date,
+        'slots'          => $slots,
+        'vendorOffTimes' => $offDays,
+    ]);
+}
+
 
     public function showBooking($organizerSlug, $packageSlug)
     {
