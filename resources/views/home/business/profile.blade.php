@@ -393,6 +393,9 @@
                         $isLongLaptop = strlen($organizer->description) > $maxLengthLaptop;
                     @endphp
 
+                    @if (empty($organizer->social_links))
+                    <div class="mt-5"></div>
+                    @endif
                    {{-- Mobile --}}
                     <p class="profile-intro-desc mb-2 d-block d-md-none">
                         <span id="desc-preview-mobile-{{ $organizer->id }}">

@@ -195,11 +195,21 @@
 					</button>
 				</div>
 
-				<div class="hidden lg:flex gap-5 align-items-center">
+				<div class="hidden lg:flex gap-3 align-items-center">
 					<!-- Desktop Menu -->
 					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900">
 						<li><a class="hover:underline" href="/">Home</a></li>
+						
+						<!-- Contact Us WhatsApp Button -->
+						<li>
+							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." 
+							target="_blank" 
+							class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+								Contact Us
+							</a>
+						</li>
 					</ul>
+
 
 					<!-- Organizer Menu (Desktop) -->
 					<div class="hidden lg:block relative">
@@ -235,6 +245,11 @@
 			<div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
 				<button class="btn btn-primary" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
 					<a class="dropdown-item" href="/">Home</a>
+				</button>
+
+				<button class="btn btn-primary mt-3" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
+					<a class="dropdown-item" href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda.">
+						Contact Us</a>
 				</button>
 
 				<div class="dropdown mt-3">
@@ -329,10 +344,15 @@
 				<div class="d-flex justify-content-between align-items-center pt-3">
 					<small>&copy; {{ date('Y') }} Sistem Kami. All rights reserved.</small>
 					<div>
-						<a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
-						<a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
-						<a href="https://www.instagram.com/sistem.kami/" target="_blank" class="text-light me-3"><i class="fab fa-instagram"></i></a>
-						<a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
+						<!-- <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a> -->
+						<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." 
+						target="_blank" 
+						class="text-light me-3">
+							<i class="fab fa-whatsapp"></i>
+						</a>
+
+						<a href="https://www.instagram.com/sistemkami/" target="_blank" class="text-light me-3"><i class="fab fa-instagram"></i></a>
+						<!-- <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a> -->
 					</div>
 				</div>
 			</div>
