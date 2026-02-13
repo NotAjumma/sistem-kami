@@ -189,9 +189,13 @@
             .caption_alt_text{
                 font-size: 1rem !important;
             }
+
+            .item-icon {
+                bottom: 265px !important;
+            }
         }
 
-        @media (min-width: 992px) { /* tablets and below */
+        @media (min-width: 992px) { /* tablets and above */
             .carousel-caption {
                 bottom: 50px !important;
             }
@@ -286,6 +290,25 @@
             position: absolute;
             top: 12px;
             right: 5px;
+            padding: 10px;
+            color: #fff;
+            font-weight: 500;
+            /* width: 28px; */
+            height: 28px;
+            background-color: #001f4d;
+            border-radius: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* cursor: pointer; */
+            z-index: 10;
+            transition: background-color 0.3s ease;
+        }
+
+        .item-icon {
+            position: absolute;
+            bottom: 230px;
+            left: 10px;
             padding: 10px;
             color: #fff;
             font-weight: 500;
@@ -441,6 +464,12 @@
                             <div class="bookmark-icon" title="Bookmark">
                                 {{ $package->category->name }}
                             </div>
+                           @if($package->items->where('show_on_card', 1)->first())
+                                <div class="item-icon">
+                                    {{ $package->items->where('show_on_card', 1)->first()->title }}
+                                </div>
+                            @endif
+
                             {{-- Package image --}}
                             @php
                                 $validDiscount = $package->discounts[0] ?? null;
