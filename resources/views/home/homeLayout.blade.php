@@ -292,10 +292,11 @@
 					<div class="col-md-4 mb-3">
 						<h6 class="text-light pb-3">About Us</h6>
 						<p class="small">
-							Sistem Kami makes systems for your business.
-							We build ready-made or custom software to help you work better.
-
-							Simple. Fast. For you.
+							SistemKami.com is a booking and business management platform 
+							designed to help studios and service providers manage packages, 
+							schedules, and customers more efficiently. 
+							<br><br>
+							We simplify your operations so you can focus on growing your business.
 						</p>
 					</div>
 
