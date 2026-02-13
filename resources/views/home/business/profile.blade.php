@@ -383,26 +383,50 @@
                     </div>
 
                     @php
-                        $maxLength = 100;
-                        $isLong = strlen($organizer->description) > $maxLength;
-                        $excerpt = Str::limit($organizer->description, $maxLength);
+                        $maxLengthLaptop = 300;
+                        $maxLengthMobile = 100;
+
+                        $excerptMobile = Str::limit($organizer->description, $maxLengthMobile);
+                        $excerptLaptop = Str::limit($organizer->description, $maxLengthLaptop);
+
+                        $isLongMobile = strlen($organizer->description) > $maxLengthMobile;
+                        $isLongLaptop = strlen($organizer->description) > $maxLengthLaptop;
                     @endphp
 
-                    <p class="profile-intro-desc mb-2">
-                        <span id="desc-preview-{{ $organizer->id }}">
-                            {{ $excerpt }}
-                            @if($isLong)
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Read more</a>
+                   {{-- Mobile --}}
+                    <p class="profile-intro-desc mb-2 d-block d-md-none">
+                        <span id="desc-preview-mobile-{{ $organizer->id }}">
+                            {{ $excerptMobile }}
+                            @if($isLongMobile)
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'mobile')">Read more</a>
                             @endif
                         </span>
 
-                        @if($isLong)
-                            <span id="desc-full-{{ $organizer->id }}" style="display: none;">
+                        @if($isLongMobile)
+                            <span id="desc-full-mobile-{{ $organizer->id }}" style="display: none;">
                                 {{ $organizer->description }}
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }})">Show less</a>
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'mobile')">Show less</a>
                             </span>
                         @endif
                     </p>
+
+                    {{-- Laptop --}}
+                    <p class="profile-intro-desc mb-2 d-none d-lg-block">
+                        <span id="desc-preview-laptop-{{ $organizer->id }}">
+                            {{ $excerptLaptop }}
+                            @if($isLongLaptop)
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'laptop')">Read more</a>
+                            @endif
+                        </span>
+
+                        @if($isLongLaptop)
+                            <span id="desc-full-laptop-{{ $organizer->id }}" style="display: none;">
+                                {{ $organizer->description }}
+                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'laptop')">Show less</a>
+                            </span>
+                        @endif
+                    </p>
+
 
                     @php
                         $addressParts = array_filter([
@@ -746,9 +770,9 @@
         // });
     </script>
     <script>
-        function toggleDesc(id) {
-            const preview = document.getElementById(`desc-preview-${id}`);
-            const full = document.getElementById(`desc-full-${id}`);
+        function toggleDesc(id, device) {
+            let preview = document.getElementById(`desc-preview-${device}-${id}`);
+            let full = document.getElementById(`desc-full-${device}-${id}`);
 
             if (preview.style.display === "none") {
                 preview.style.display = "inline";
@@ -759,6 +783,7 @@
             }
         }
     </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
