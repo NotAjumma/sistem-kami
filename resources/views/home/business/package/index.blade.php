@@ -1382,9 +1382,7 @@
             const acceptTNC = document.getElementById('acceptTNC');
 
             // WhatsApp numbers with names 
-            const whatsappNumbers = @json($whatsappNumbers); // 
-            // weights = probability (higher number = higher chance) 
-            const numberWeights = [10];
+            const whatsappContacts = @json($whatsappNumbers);
             if (whatsappNowBtn) {
                 whatsappNowBtn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1415,10 +1413,7 @@
                 confirmBooking.disabled = !e.target.checked;
             });
 
-            const pickedIndex = pickWeightedRandom(whatsappNumbers, numberWeights); 
-            const currentPerson = whatsappNumbers[pickedIndex]; 
-            const studioAdminPhone = currentPerson.phone; 
-            const studioAdminName = currentPerson.name;
+            
 
             // Confirm → WhatsApp
             confirmBooking.addEventListener('click', () => {
@@ -1426,6 +1421,10 @@
 
                 const date = selectedDateInput.value;
                 if (!date) return;
+
+                const selectedPerson = pickWeightedRandom(whatsappContacts);
+                const studioAdminPhone = selectedPerson.phone;
+                const studioAdminName  = selectedPerson.name;
 
                 let selectedSlots = [];
                 try { selectedSlots = JSON.parse(selectedTimesInput.value || "[]"); } 
@@ -1520,15 +1519,20 @@
             });
 
             // Weighted random helper
-            function pickWeightedRandom(numbers, weights) {
-                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+            function pickWeightedRandom(contacts) {
+                const totalWeight = contacts.reduce((sum, c) => sum + (parseInt(c.weight) || 1), 0);
                 let rand = Math.random() * totalWeight;
-                for (let i = 0; i < numbers.length; i++) {
-                    if (rand < weights[i]) return i;
-                    rand -= weights[i];
+
+                for (let i = 0; i < contacts.length; i++) {
+                    rand -= (parseInt(contacts[i].weight) || 1);
+                    if (rand <= 0) {
+                        return contacts[i];
+                    }
                 }
-                return numbers.length - 1; // fallback
+
+                return contacts[contacts.length - 1];
             }
+
 
         });
 

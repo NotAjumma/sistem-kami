@@ -23,6 +23,7 @@ class Worker extends Authenticatable
         'state',
         'postal_code',
         'country',
+        'weight',
         'is_active',
     ];
 

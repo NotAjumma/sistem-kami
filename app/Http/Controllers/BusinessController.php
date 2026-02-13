@@ -12,6 +12,7 @@ use App\Models\BookingVendorTimeSlot;
 use App\Models\VendorTimeSlotLimit;
 use App\Models\Organizer;
 use App\Models\Package;
+use App\Models\Worker;
 use App\Helper\VisitorLogger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -380,6 +381,33 @@ class BusinessController extends Controller
             ['name' => $organizer->name, 'phone' => $organizer->phone]
         ]);
 
+        $workers = Worker::where('organizer_id', $organizer->id)
+            ->where('is_active', 1)
+            ->get(['name','phone','weight']);
+
+        if ($workers->count() > 0) {
+
+            $whatsappContacts = $workers->map(function ($w) {
+                return [
+                    'name'   => $w->name,
+                    'phone'  => $w->phone,
+                    'weight' => $w->weight ?? 1,
+                ];
+            })->values();
+
+        } else {
+
+            // fallback to organizer default numbers
+            $whatsappContacts = collect($whatsappNumbers)->map(function ($w) {
+                return [
+                    'name'   => $w['name'],
+                    'phone'  => $w['phone'],
+                    'weight' => 10, // default weight
+                ];
+            })->values();
+        }
+
+
         VisitorLogger::log('view_package', 'package', $package->id);
 
         return view('home.business.package.index', [
@@ -393,7 +421,7 @@ class BusinessController extends Controller
             'limitReachedDays'  => $limitReachedDays,
             'weekRangeBlock'    => $weekRangeBlock,
             'seo'               => $seo,
-            'whatsappNumbers'   => $whatsappNumbers,
+            'whatsappNumbers'   => $whatsappContacts,
         ]);
     }
 
