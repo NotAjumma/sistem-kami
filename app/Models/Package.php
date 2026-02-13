@@ -21,6 +21,7 @@ class Package extends Model
         'valid_from',
         'valid_until',
         'max_booking_year_offset',
+        'is_manual',
     ];
 
     protected $casts = [
@@ -28,8 +29,10 @@ class Package extends Model
         'final_price'               => 'decimal:2',
         'discount_percentage'       => 'integer',
         'max_booking_year_offset'   => 'integer',
+        'is_manual'                 => 'integer',
         'valid_from'                => 'datetime',
         'valid_until'               => 'datetime',
+        'exclude_vendor_time_slots' => 'array',
     ];
 
     public function organizer(): BelongsTo

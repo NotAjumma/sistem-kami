@@ -543,7 +543,7 @@ class OrganizerBusinessController extends Controller
         Log::info($timeSlots);
         return response()->json([
             'authUser'          => $authUser,
-            'package'          => $package,
+            'package'           => $package,
             'timeSlots'         => $timeSlots,
             'offDays'           => $offDays,
             'bookedDates'       => $bookedDates,

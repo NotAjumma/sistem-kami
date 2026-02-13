@@ -561,6 +561,7 @@
                                         }
                                     @endphp
 
+                                    @if($package->is_manual != 2)
                                     <p class="event-title portfolio-price">
                                         @if($finalPrice < $originalPrice)
                                             <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
@@ -572,6 +573,7 @@
 
                                         @endif
                                     </p>
+                                    @endif
 
                                     {{-- Validity --}}
                                     @if($validDiscount && $validDiscount->is_active)
@@ -628,6 +630,7 @@
                                         }
                                     @endphp
 
+                                    @if($package->is_manual != 2)
                                     <p class="event-title portfolio-price">
                                         @if($finalPrice < $originalPrice)
                                             <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
@@ -639,6 +642,7 @@
 
                                         @endif
                                     </p>
+                                    @endif
 
                                     {{-- Validity --}}
                                     @if($validDiscount && $validDiscount->is_active)
@@ -701,12 +705,24 @@
 
         {{-- Google Map --}}
         @if($organizer->latitude && $organizer->longitude)
+            @php
+                $mapQuery = $organizer->is_gmaps_verified
+                    ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
+                    : $organizer->latitude . ',' . $organizer->longitude;
+            @endphp
+
             <div style="margin-top: 50px;">
                 <iframe
-                    src="https://www.google.com/maps?q={{ urlencode($organizer->office_name) }}%20{{ $organizer->latitude }},{{ $organizer->longitude }}&output=embed"
-                    width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
+                    src="https://www.google.com/maps?q={{ $mapQuery }}&output=embed"
+                    width="100%" height="500"
+                    frameborder="0"
+                    style="border:0"
+                    allowfullscreen
+                    loading="lazy">
                 </iframe>
             </div>
+
+
         @endif
 
     </div>

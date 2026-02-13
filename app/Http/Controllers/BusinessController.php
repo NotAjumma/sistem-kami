@@ -414,7 +414,15 @@ class BusinessController extends Controller
         // Group bookings by vendor slot
         $groupedBookings = $bookedDates->groupBy('vendor_time_slot_id');
 
+        $excludedSlots = collect($package->exclude_vendor_time_slots ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+
         foreach ($package->vendorTimeSlots as $timeSlot) {
+            if (in_array((int) $timeSlot->id, $excludedSlots, true)) {
+                continue;
+            }
             $start    = Carbon::parse($timeSlot->start_time);
             $end      = Carbon::parse($timeSlot->end_time);
             $interval = $package->duration_minutes + $package->rest_minutes;
@@ -457,6 +465,8 @@ class BusinessController extends Controller
                 'court'       => $timeSlot->slot_name ?? 'Slot '.$timeSlot->id,
                 'times'       => $times,
                 'bookedTimes' => $bookedTimes,
+                'slot_price'  => $timeSlot->slot_price,
+                'is_theme_first' => $package->is_manual == 2,
             ];
         }
 

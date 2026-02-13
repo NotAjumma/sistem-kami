@@ -410,6 +410,7 @@
                         </span>
                     </h6>
                     <h1 class="property-title">{{ $package->name }}</h1>
+                    @if($package->is_manual != 2)
                     <p>
                         <span class="property-price">RM {{ number_format($finalPrice, 2) }}</span>
                         @if($discount)
@@ -421,6 +422,7 @@
                         @endif
                         <hr class="mb-4" />
                     </p>
+                    @endif
                 </div>
 
                  <!-- About Package -->
@@ -478,15 +480,27 @@
                     </section>
                 @endif
 
-                 {{-- Google Map --}}
+                {{-- Google Map --}}
                 @if($organizer->latitude && $organizer->longitude)
-                    <div style="margin-top: 50px;">
-                        <iframe
-                            src="https://www.google.com/maps?q={{ urlencode($organizer->office_name) }}%20{{ $organizer->latitude }},{{ $organizer->longitude }}&output=embed"
-                            width="100%" height="500" frameborder="0" style="border:0" allowfullscreen loading="lazy">
-                        </iframe>
-                    </div>
-                @endif
+                @php
+                    $mapQuery = $organizer->is_gmaps_verified
+                        ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
+                        : $organizer->latitude . ',' . $organizer->longitude;
+                @endphp
+
+                <div style="margin-top: 50px;">
+                    <iframe
+                        src="https://www.google.com/maps?q={{ $mapQuery }}&output=embed"
+                        width="100%" height="500"
+                        frameborder="0"
+                        style="border:0"
+                        allowfullscreen
+                        loading="lazy">
+                    </iframe>
+                </div>
+
+
+            @endif
             </div>
             <div class="col-lg-5 col-md-12">
                 <!-- Shortlist and Share Buttons -->
@@ -684,24 +698,117 @@
             </div>
         </aside>
 
-        <!-- T&C Modal -->
-        <div class="modal fade" id="tncModal" tabindex="-1" aria-labelledby="tncModalLabel" aria-hidden="true">
+        <!-- Booking Modal -->
+        <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tncModalLabel">Terms & Conditions</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
-                    {!! $package->tnc !!}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary btn-close-tnc" data-bs-dismiss="modal">Close</button>
-                    <button type="button" id="confirm-tc" class="btn btn-primary">I Agree & Continue</button>
-                </div>
+                    <!-- Step 1: Customer Details -->
+                    <div id="step1">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Customer Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="customerName" class="form-label">Name</label>
+                                <input type="text" id="customerName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="customerWhatsApp" class="form-label">WhatsApp Number</label>
+                                <input type="text" id="customerWhatsApp" class="form-control" placeholder="0123456789" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="paymentOption" class="form-label">Payment</label>
+                                <select id="paymentOption" class="form-select">
+                                    <option value="full">Full Payment</option>
+                                    <option value="deposit">Deposit</option>
+                                </select>
+                            </div>
+
+                            <!-- Deposit Info -->
+                            <div class="mb-3 d-none" id="depositWrapper">
+                                <label class="form-label">Deposit Amount</label>
+                                <input type="number" id="depositAmount" class="form-control" min="50" value="50">
+                                <small class="text-muted">Minimum deposit RM50</small>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-3">
+                                <label class="form-label">Add-Ons</label>
+
+                                @foreach($package->addons as $addon)
+                                    <div class="border rounded p-2 mb-2">
+
+                                        @if($addon->is_qty)
+                                            <!-- Quantity Type -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ $addon->name }}</strong>
+                                                    <div class="text-muted small">
+                                                        RM {{ number_format($addon->price, 2) }}
+                                                    </div>
+                                                </div>
+
+                                                <input 
+                                                    type="number" 
+                                                    class="form-control addon-qty"
+                                                    data-name="{{ $addon->name }}"
+                                                    data-price="{{ $addon->price }}"
+                                                    min="0"
+                                                    value="0"
+                                                    style="width: 90px;"
+                                                >
+                                            </div>
+
+                                        @else
+                                            <!-- Checkbox Type -->
+                                            <div class="form-check">
+                                                <input 
+                                                    type="checkbox"
+                                                    class="form-check-input addon-checkbox"
+                                                    data-name="{{ $addon->name }}"
+                                                    data-price="{{ $addon->price }}"
+                                                    id="addon_{{ $addon->id }}"
+                                                >
+                                                <label class="form-check-label" for="addon_{{ $addon->id }}">
+                                                    {{ $addon->name }} (RM {{ number_format($addon->price, 2) }})
+                                                </label>
+                                            </div>
+                                        @endif
+
+                                    </div>
+                                @endforeach
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="nextToTNC" class="btn btn-primary">Next</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Terms & Conditions -->
+                    <div id="step2" class="d-none">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Terms & Conditions</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                            {!! $package->tnc !!}
+                            <div class="form-check mt-3">
+                                <input type="checkbox" class="form-check-input" id="acceptTNC">
+                                <label class="form-check-label" for="acceptTNC">I agree to the Terms & Conditions</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="backToStep1" class="btn btn-outline-secondary">Back</button>
+                            <button type="button" id="confirmBooking" class="btn btn-primary" disabled>Proceed to WhatsApp</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 @endsection
 
@@ -1185,13 +1292,40 @@
                                 const slotObj = { date, id: slot.court, time };
 
                                 if (checkbox.checked) {
-                                    td.classList.add("bg-primary", "text-white");
-                                    selectedTimes.push(slotObj);
+                                    if (slot.is_theme_first) {
+                                        td.classList.add("bg-primary", "text-white");
+                                        selectedTimes = [slotObj];
+
+                                        // disable semua other checkboxes
+                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                            if (cb !== checkbox) cb.disabled = true;
+                                        });
+                                    } else {
+                                        td.classList.add("bg-primary", "text-white");
+                                        selectedTimes.push(slotObj);
+                                    }
                                 } else {
+                                    // uncheck logic
                                     td.classList.remove("bg-primary", "text-white");
                                     selectedTimes = selectedTimes.filter(
                                         s => !(s.date === slotObj.date && s.id === slotObj.id && s.time === slotObj.time)
                                     );
+
+                                    // Kalau is_theme_first = true, enable semua checkboxes semula
+                                    if (slot.is_theme_first) {
+                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                            cb.disabled = false;
+
+                                            // disabled asal untuk booked / off time
+                                            const [slotId, slotTime] = cb.value.split("|");
+                                            const originalSlot = data.slots.find(s => s.id == slotId);
+                                            const originalDisabled = 
+                                                (originalSlot.bookedTimes && originalSlot.bookedTimes.includes(slotTime)) ||
+                                                (data.vendorOffTimes && data.vendorOffTimes.some(off => slotTime >= off.start_time && slotTime < off.end_time));
+
+                                            if (originalDisabled) cb.disabled = true;
+                                        });
+                                    }
                                 }
 
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
@@ -1222,88 +1356,168 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
+            const paymentOption = document.getElementById('paymentOption');
+            const depositWrapper = document.getElementById('depositWrapper');
+            const depositAmount = document.getElementById('depositAmount');
+
+            paymentOption.addEventListener('change', function() {
+                if (this.value === 'deposit') {
+                    depositWrapper.classList.remove('d-none');
+                } else {
+                    depositWrapper.classList.add('d-none');
+                }
+            });
+
             const whatsappNowBtn = document.getElementById("whatsappNowBtn");
             const selectedDateInput = document.getElementById("selected_date");
-            const selectedTimes = document.getElementById("selected_time");
-            const tncModal = new bootstrap.Modal(document.getElementById('tncModal'));
-            const confirmTncBtn = document.getElementById('confirm-tc');
-            
-            // WhatsApp numbers with names
-            const whatsappNumbers = @json($whatsappNumbers);
+            const selectedTimesInput = document.getElementById("selected_time");
+            const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
 
-            // weights = probability (higher number = higher chance)
+            // Step elements
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const nextToTNC = document.getElementById('nextToTNC');
+            const backToStep1 = document.getElementById('backToStep1');
+            const confirmBooking = document.getElementById('confirmBooking');
+            const acceptTNC = document.getElementById('acceptTNC');
+
+            // WhatsApp numbers with names 
+            const whatsappNumbers = @json($whatsappNumbers); // 
+            // weights = probability (higher number = higher chance) 
             const numberWeights = [10];
-
             if (whatsappNowBtn) {
                 whatsappNowBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-
-                    // Show the T&C modal
-                    tncModal.show();
-                });
-            }
-            if (confirmTncBtn) {
-                confirmTncBtn.addEventListener('click', function() {
-
-                    // Hide modal first
-                    tncModal.hide();
-
-                    const date = selectedDateInput.value;
-                    if (!date) return;
-
-                    // Format date
-                    const dateObj = new Date(date);
-                    const formattedDate = dateObj.toLocaleDateString('ms-MY', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    });
-
-                    // Parse selected slots
-                    let selectedSlots = [];
-                    try {
-                        selectedSlots = JSON.parse(selectedTimes.value || "[]");
-                    } catch(e) { selectedSlots = []; }
-                    if (!selectedSlots.length) return;
-
-                    // Pick a person randomly
-                    const pickedIndex = pickWeightedRandom(whatsappNumbers, numberWeights);
-                    const currentPerson = whatsappNumbers[pickedIndex];
-                    const phone = currentPerson.phone;
-                    const personName = currentPerson.name;
-
-                    // Slots text
-                    let slotsText = selectedSlots.map(slot => `${slot.id} (${slot.time})`).join("\n");
-
-                    // WhatsApp message
-                    const packageTitle = "{{ $package->name }}";
-                    const message = encodeURIComponent(
-                        `Hai ${personName},\nSaya dari SistemKami ingin menempah pakej "${packageTitle}" pada tarikh ${formattedDate}\n${slotsText}.`
-                    );
-
-                    // Track click
-                    fetch('/track/whatsapp', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            organizer_id: "{{ $organizer->id }}",
-                            package_id: "{{ $package->id }}",
-                            date: date,
-                            time: selectedSlots.map(s => s.time),
-                            slot_name: selectedSlots.map(s => s.id) 
-                        })
-                    }).then(res => console.log('WhatsApp click logged'))
-                    .catch(err => console.error('Logging failed', err));
-
-                    // Open WhatsApp
-                    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, '_blank');
-
+                    bookingModal.show();
+                    step1.classList.remove('d-none');
+                    step2.classList.add('d-none');
                 });
             }
 
+            // Step 1 → Step 2
+            nextToTNC.addEventListener('click', () => {
+                const name = document.getElementById('customerName').value.trim();
+                const whatsapp = document.getElementById('customerWhatsApp').value.trim();
+                if (!name || !whatsapp) return alert("Please fill Name and WhatsApp.");
+
+                step1.classList.add('d-none');
+                step2.classList.remove('d-none');
+            });
+
+            // Back button
+            backToStep1.addEventListener('click', () => {
+                step2.classList.add('d-none');
+                step1.classList.remove('d-none');
+            });
+
+            // Enable confirm button if T&C accepted
+            acceptTNC.addEventListener('change', e => {
+                confirmBooking.disabled = !e.target.checked;
+            });
+
+            const pickedIndex = pickWeightedRandom(whatsappNumbers, numberWeights); 
+            const currentPerson = whatsappNumbers[pickedIndex]; 
+            const studioAdminPhone = currentPerson.phone; 
+            const studioAdminName = currentPerson.name;
+
+            // Confirm → WhatsApp
+            confirmBooking.addEventListener('click', () => {
+                bookingModal.hide();
+
+                const date = selectedDateInput.value;
+                if (!date) return;
+
+                let selectedSlots = [];
+                try { selectedSlots = JSON.parse(selectedTimesInput.value || "[]"); } 
+                catch(e) { selectedSlots = []; }
+                if (!selectedSlots.length) return;
+
+                const name = document.getElementById('customerName').value.trim();
+                const whatsapp = document.getElementById('customerWhatsApp').value.trim();
+                const payment = document.getElementById('paymentOption').value;
+                let paymentText = "";
+
+                if (payment === 'deposit') {
+                    const depositValue = Math.max(parseFloat(depositAmount.value), 50);
+                    paymentText = `Deposit: RM ${depositValue.toFixed(2)}`;
+                } else {
+                    paymentText = "Full Payment";
+                }
+
+
+                // Collect Add-ons
+                let addOnText = "";
+                let addOnTotal = 0;
+                let addOns = [];
+                
+                // Checkbox type
+                document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
+                    const name = cb.dataset.name;
+                    const price = parseFloat(cb.dataset.price);
+                    addOnText += `- ${name} (RM ${price.toFixed(2)})\n`;
+                    addOnTotal += price;
+                });
+
+                // Quantity type
+                document.querySelectorAll('.addon-qty').forEach(input => {
+                    const qty = parseInt(input.value);
+                    if (qty > 0) {
+                        const name = input.dataset.name;
+                        const price = parseFloat(input.dataset.price);
+                        const total = qty * price;
+
+                        addOnText += `- ${name} x${qty} (RM ${total.toFixed(2)})\n`;
+                        addOnTotal += total;
+                    }
+                });
+
+                document.querySelectorAll('.addon-checkbox:checked').forEach(function (el) {
+                    addOns.push(el.dataset.name);
+                });
+
+                // quantity add-ons (is_qty = 1)
+                document.querySelectorAll('.addon-qty').forEach(function (el) {
+                    const qty = parseInt(el.value);
+                    if (qty > 0) {
+                        addOns.push(`${el.dataset.name} x${qty}`);
+                    }
+                });
+
+                // Format date
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month:'long', year:'numeric' });
+
+                // Slots text
+                let slotsText = selectedSlots.map(s => `${s.id} (${s.time})`).join("\n");
+
+                // WhatsApp message
+                const packageTitle = "{{ $package->name }}";
+                let message = `Hai ${studioAdminName}, \n\nsaya ${name}. Saya ingin menempah pakej "${packageTitle}" pada ${formattedDate} \n\n${slotsText}. \n\nPayment: ${paymentText}.`;
+                if (addOns.length) {
+                    message += `\n\nAdd-ons:\n${addOns.map(a => `- ${a}`).join("\n")}`;
+                }
+
+                // Optional: log click to backend
+                fetch('/track/whatsapp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json','X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                    body: JSON.stringify({
+                        organizer_id: "{{ $organizer->id }}",
+                        package_id: "{{ $package->id }}",
+                        date: date,
+                        time: selectedSlots.map(s => s.time),
+                        slot_name: selectedSlots.map(s => s.id),
+                        customer_name: name,
+                        whatsapp: whatsapp,
+                        payment: payment,
+                        add_ons: addOns
+                    })
+                }).then(res => console.log('WhatsApp click logged'))
+                .catch(err => console.error('Logging failed', err));
+
+                // Open WhatsApp
+                window.open(`https://api.whatsapp.com/send?phone=${studioAdminPhone}&text=${encodeURIComponent(message)}`, '_blank');
+            });
 
             // Weighted random helper
             function pickWeightedRandom(numbers, weights) {

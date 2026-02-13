@@ -1005,10 +1005,8 @@ class BookingController extends Controller
                 }
             }
 
-
-
             $packageCode      = strtoupper($package['package_code'] ?? 'DFT');
-            $basePackagePrice = (float) $package->base_price;
+            $basePackagePrice = (float) ($package->is_manual == 2 ? $request->input('package_price') : $package->base_price);
             $slotQtyRequired = $package->package_slot_quantity ?? 1;
 
             $selectedCount = !empty($selected_time) ? count($selected_time) : 0;
@@ -1097,16 +1095,7 @@ class BookingController extends Controller
                     $end = $totalDuration > 0
                         ? $start->copy()->addMinutes($totalDuration)
                         : null;
-
-                    \Log::info("totalDuration");
-                    \Log::info($totalDuration);
-                    \Log::info("baseDuration");
-                    \Log::info($baseDuration);
-                    \Log::info("start");
-                    \Log::info($start);
-                    \Log::info("end");
-                    \Log::info($end);
-
+                        
                     BookingsVendorTimeSlot::create([
                         'booking_id'          => $booking->id,
                         'vendor_time_slot_id' => $slot['id'],

@@ -281,7 +281,7 @@
 
                            <div class="mb-3 col-md-6">
                                 <label class="form-label">Package Base Price (RM)</label>
-                                <input type="number" class="form-control" id="packagePrice" readonly>
+                                <input type="number" class="form-control" id="packagePrice" name="package_price" readonly>
                             </div>
 
                             <div class="mb-3 col-md-6">
@@ -802,16 +802,46 @@
                                 const slotObj = { date, id: slot.id, time };
 
                                 if (checkbox.checked) {
-                                    td.classList.add("bg-primary", "text-white");
-                                    selectedTimes.push(slotObj);
+                                    // Kalau is_theme_first = true, disable semua checkbox lain
+                                    if (slot.is_theme_first) {
+                                        // tandakan selected checkbox
+                                        td.classList.add("bg-primary", "text-white");
+                                        selectedTimes = [slotObj];
+
+                                        // disable semua other checkboxes
+                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                            if (cb !== checkbox) cb.disabled = true;
+                                        });
+                                    } else {
+                                        td.classList.add("bg-primary", "text-white");
+                                        selectedTimes.push(slotObj);
+                                    }
                                 } else {
+                                    // uncheck logic
                                     td.classList.remove("bg-primary", "text-white");
                                     selectedTimes = selectedTimes.filter(
                                         s => !(s.date === slotObj.date && s.id === slotObj.id && s.time === slotObj.time)
                                     );
+
+                                    // Kalau is_theme_first = true, enable semua checkboxes semula
+                                    if (slot.is_theme_first) {
+                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                            cb.disabled = false;
+
+                                            // disabled asal untuk booked / off time
+                                            const [slotId, slotTime] = cb.value.split("|");
+                                            const originalSlot = data.slots.find(s => s.id == slotId);
+                                            const originalDisabled = 
+                                                (originalSlot.bookedTimes && originalSlot.bookedTimes.includes(slotTime)) ||
+                                                (data.vendorOffTimes && data.vendorOffTimes.some(off => slotTime >= off.start_time && slotTime < off.end_time));
+
+                                            if (originalDisabled) cb.disabled = true;
+                                        });
+                                    }
                                 }
 
-                                document.getElementById('packagePrice').value = base_price;
+                                const price = slot.is_theme_first ? slot.slot_price : base_price;
+                                document.getElementById('packagePrice').value = price;
                                 updateFinalPrice();
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
                                 checkTimeSlotSelected(currentLoopDate);
