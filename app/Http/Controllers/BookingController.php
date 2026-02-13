@@ -969,7 +969,7 @@ class BookingController extends Controller
             }
 
             $addonTotal = 0;
-
+            $extraMinutes = 0;
             /* ---------- NORMAL ADDONS (checkbox) ---------- */
             if ($request->filled('addon_ids')) {
 
@@ -998,6 +998,10 @@ class BookingController extends Controller
                     }
 
                     $addonTotal += (float) $addon->price * $qty;
+
+                    if ($addon->is_time && $addon->time_minutes) {
+                        $extraMinutes += $addon->time_minutes * $qty;
+                    }
                 }
             }
 
@@ -1085,12 +1089,23 @@ class BookingController extends Controller
             if (!empty($selected_time)) {
                 foreach ($selected_time as $slot) {
 
-                    $duration = $slotDurations[$slot['id']] ?? 0;
+                    $baseDuration   = $slotDurations[$slot['id']] ?? 0;
+                    $totalDuration  = $baseDuration + $extraMinutes;
 
                     $start = Carbon::createFromFormat('g:i A', $slot['time']);
-                    $end   = $duration > 0
-                        ? $start->copy()->addMinutes($duration)
+
+                    $end = $totalDuration > 0
+                        ? $start->copy()->addMinutes($totalDuration)
                         : null;
+
+                    \Log::info("totalDuration");
+                    \Log::info($totalDuration);
+                    \Log::info("baseDuration");
+                    \Log::info($baseDuration);
+                    \Log::info("start");
+                    \Log::info($start);
+                    \Log::info("end");
+                    \Log::info($end);
 
                     BookingsVendorTimeSlot::create([
                         'booking_id'          => $booking->id,
@@ -1251,12 +1266,14 @@ class BookingController extends Controller
 
         // Tambah tarikh & masa setiap slot
         foreach ($booking->vendorTimeSlots as $slot) {
-            $slotName  = $slot->timeSlot->slot_name ?? '-';
+            $slotName = $slot->timeSlot->slot_name ?? '';
             $startDate = \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y');
             $startTime = \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A');
             $endTime   = \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A');
 
-            $text .= "📌 Slot: " . $slotName . "\n";
+            if ($slotName && !in_array(strtolower(trim($slotName)), ['slot'])) {
+                $text .= "📌 Slot: " . $slotName . "\n";
+            }
             $text .= "🗓 Tarikh: " . $startDate . "\n";
             $text .= "⏰ Masa: " . $startTime . " - " . $endTime . "\n\n";
         }
