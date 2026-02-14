@@ -180,16 +180,18 @@
 			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 				<!-- Logo -->
 				<a href="/">
-					<div class="font-bold text-xl select-none">
-						Sistem Kami
-					</div>
+					<img 
+						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" 
+						alt="Sistem Kami Logo"
+						class="h-10 w-auto"
+					>
 				</a>
 
 				<!-- Hamburger button (Mobile only) -->
 				<div class="lg:hidden">
 					<button id="menu-toggle" class="text-gray-800 focus:outline-none">
 						<!-- Hamburger Icon -->
-						<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						<svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
 						</svg>
 					</button>
