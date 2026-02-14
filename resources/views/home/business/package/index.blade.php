@@ -426,6 +426,7 @@
                 </div>
 
                  <!-- About Package -->
+                @if($package->description)
                 <section>
                     <h6 class="fw-semibold mb-2" style="font-size: 1.2rem;">Description</h6>
                     <hr class="mb-4" />
@@ -433,6 +434,7 @@
                        {!! $package->description !!}
                     </div>
                 </section>
+                @endif
 
                 <!-- Package Details -->
                 @if(!empty($package->items) && count($package->items) > 0)
@@ -481,7 +483,7 @@
                 @endif
 
                 {{-- Google Map --}}
-                @if($organizer->latitude && $organizer->longitude)
+                <!-- @if($organizer->latitude && $organizer->longitude)
                 @php
                     $mapQuery = $organizer->is_gmaps_verified
                         ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
@@ -497,7 +499,36 @@
                         allowfullscreen
                         loading="lazy">
                     </iframe>
-                </div>
+                </div> -->
+               @php
+                    $line1 = $organizer->address_line1;
+                    $line2 = $organizer->address_line2;
+                    $line3 = trim(collect([
+                        $organizer->postal_code,
+                        $organizer->city,
+                        $organizer->state
+                    ])->filter()->implode(', '));
+                @endphp
+
+                @if($line1 || $line2 || $line3)
+                    <div class="event-organizer text-dark fw-bold">
+                        <div class="mb-1">🏠</div>
+
+                        @if($line1)
+                            <div>{{ $line1 }}</div>
+                        @endif
+
+                        @if($line2)
+                            <div>{{ $line2 }}</div>
+                        @endif
+
+                        @if($line3)
+                            <div>{{ $line3 }}</div>
+                        @endif
+                    </div>
+                @endif
+
+
 
 
             @endif
@@ -732,6 +763,18 @@
                                 <small class="text-muted">Minimum deposit RM50</small>
                             </div>
 
+                            @if($package->is_manual == 2)
+                            <div class="mb-3">
+                                <label for="customerWhatsApp" class="form-label">Package Price (RM)</label>
+                                <input type="text" id="slotPriceDisplay" value="0" class="form-control" readonly>
+                            </div>
+                            @else
+                            <div class="mb-3">
+                                <label for="customerWhatsApp" class="form-label">Package Price (RM)</label>
+                                <input type="text" value="{{ $package->final_price }}" class="form-control" readonly>
+                            </div>
+                            @endif
+
                             <hr>
 
                             <div class="mb-3">
@@ -751,10 +794,12 @@
                                                 </div>
 
                                                 <input 
-                                                    type="number" 
+                                                    type="number"
                                                     class="form-control addon-qty"
                                                     data-name="{{ $addon->name }}"
                                                     data-price="{{ $addon->price }}"
+                                                    data-special-start="{{ $addon->special_date_start }}"
+                                                    data-special-end="{{ $addon->special_date_end }}"
                                                     min="0"
                                                     value="0"
                                                     style="width: 90px;"
@@ -769,6 +814,8 @@
                                                     class="form-check-input addon-checkbox"
                                                     data-name="{{ $addon->name }}"
                                                     data-price="{{ $addon->price }}"
+                                                    data-special-start="{{ $addon->special_date_start }}"
+                                                    data-special-end="{{ $addon->special_date_end }}"
                                                     id="addon_{{ $addon->id }}"
                                                 >
                                                 <label class="form-check-label" for="addon_{{ $addon->id }}">
@@ -781,6 +828,32 @@
                                 @endforeach
 
                             </div>
+
+                            <hr>
+
+                            <div class="bg-light p-3 rounded">
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Total</strong>
+                                    <strong>RM <span id="totalAmount">0.00</span></strong>
+                                </div>
+
+                                <div id="depositSummary" class="d-none">
+
+                                    <div class="d-flex justify-content-between">
+                                        <span>Deposit</span>
+                                        <span>RM <span id="depositDisplay">0.00</span></span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <span>Balance</span>
+                                        <span>RM <span id="balanceDisplay">0.00</span></span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" id="nextToTNC" class="btn btn-primary">Next</button>
@@ -976,11 +1049,11 @@
                     const formattedDate = `${yyyy}-${mm}-${dd}`;
 
                     // Log it (for debug)
-                    console.log(formattedDate);
+                    // console.log(formattedDate);
 
                     // Set the hidden input value
                     document.getElementById("selected_date").value = formattedDate;
-                    
+                    applySpecialDateAddons();
                     if (vendorTimeSlots.length > 0) {
                         const shouldHide =
                             currentLoopDate.getTime() < today.getTime() ||
@@ -1289,7 +1362,13 @@
 
                             // On user selection
                             checkbox.addEventListener("change", () => {
-                                const slotObj = { date, id: slot.court, time };
+                                const slotObj = { 
+                                    date, 
+                                    id: slot.court, 
+                                    time,
+                                    price: slot.slot_price ?? 0
+                                };
+
 
                                 if (checkbox.checked) {
                                     if (slot.is_theme_first) {
@@ -1330,6 +1409,7 @@
 
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
                                 checkTimeSlotSelected(currentLoopDate);
+                                updateSlotPriceDisplay(selectedTimes);
                                 // console.log("Selected times:", selectedTimes);
                             });
 
@@ -1355,23 +1435,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-
-            const paymentOption = document.getElementById('paymentOption');
-            const depositWrapper = document.getElementById('depositWrapper');
-            const depositAmount = document.getElementById('depositAmount');
-
-            paymentOption.addEventListener('change', function() {
-                if (this.value === 'deposit') {
-                    depositWrapper.classList.remove('d-none');
-                } else {
-                    depositWrapper.classList.add('d-none');
-                }
-            });
-
             const whatsappNowBtn = document.getElementById("whatsappNowBtn");
             const selectedDateInput = document.getElementById("selected_date");
             const selectedTimesInput = document.getElementById("selected_time");
             const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+
+            document.getElementById('selected_date').addEventListener('change', applySpecialDateAddons);
 
             // Step elements
             const step1 = document.getElementById('step1');
@@ -1390,6 +1459,10 @@
                     step1.classList.remove('d-none');
                     step2.classList.add('d-none');
                 });
+
+                setTimeout(() => {
+                    applySpecialDateAddons();
+                }, 200);
             }
 
             // Step 1 → Step 2
@@ -1413,7 +1486,45 @@
                 confirmBooking.disabled = !e.target.checked;
             });
 
-            
+            const packagePrice = {{ $package->final_price }};
+            const paymentOption = document.getElementById('paymentOption');
+            const depositWrapper = document.getElementById('depositWrapper');
+            const depositSummary = document.getElementById('depositSummary');
+            const depositAmountInput = document.getElementById('depositAmount');
+
+            paymentOption.addEventListener('change', function () {
+                if (this.value === 'deposit') {
+                    depositSummary.classList.remove('d-none');
+                    depositWrapper.classList.remove('d-none');
+                } else {
+                    depositSummary.classList.add('d-none');
+                    depositWrapper.classList.add('d-none');
+                }
+
+                calculateSummary(); // very important
+            });
+
+            document.addEventListener('change', function(e){
+                if (
+                    e.target.classList.contains('addon-checkbox') ||
+                    e.target.id === 'paymentOption'
+                ) {
+                    calculateSummary();
+                }
+            });
+
+            document.addEventListener('input', function(e){
+                if (
+                    e.target.classList.contains('addon-qty') ||
+                    e.target.id === 'depositAmount'
+                ) {
+                    calculateSummary();
+                }
+            });
+
+            // run once on load
+            calculateSummary();
+
 
             // Confirm → WhatsApp
             confirmBooking.addEventListener('click', () => {
@@ -1421,6 +1532,8 @@
 
                 const date = selectedDateInput.value;
                 if (!date) return;
+
+                const { grandTotal, addOns } = calculateSummary();
 
                 const selectedPerson = pickWeightedRandom(whatsappContacts);
                 const studioAdminPhone = selectedPerson.phone;
@@ -1437,64 +1550,43 @@
                 let paymentText = "";
 
                 if (payment === 'deposit') {
-                    const depositValue = Math.max(parseFloat(depositAmount.value), 50);
-                    paymentText = `Deposit: RM ${depositValue.toFixed(2)}`;
+
+                    let depositValue = parseFloat(depositAmountInput.value) || 0;
+
+                    // Safety: prevent deposit > total
+                    if (depositValue > grandTotal) {
+                        depositValue = grandTotal;
+                    }
+
+                    const balance = grandTotal - depositValue;
+
+                    paymentText = `Payment : Deposit Type \nTotal : RM ${grandTotal.toFixed(2)}\nDeposit : RM ${depositValue.toFixed(2)}\nBalance : RM ${balance.toFixed(2)}`;
+
                 } else {
-                    paymentText = "Full Payment";
+
+                    paymentText =
+                `Payment : Full Payment
+                Total   : RM ${grandTotal.toFixed(2)}`;
+
                 }
 
-
-                // Collect Add-ons
-                let addOnText = "";
-                let addOnTotal = 0;
-                let addOns = [];
-                
-                // Checkbox type
-                document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
-                    const name = cb.dataset.name;
-                    const price = parseFloat(cb.dataset.price);
-                    addOnText += `- ${name} (RM ${price.toFixed(2)})\n`;
-                    addOnTotal += price;
-                });
-
-                // Quantity type
-                document.querySelectorAll('.addon-qty').forEach(input => {
-                    const qty = parseInt(input.value);
-                    if (qty > 0) {
-                        const name = input.dataset.name;
-                        const price = parseFloat(input.dataset.price);
-                        const total = qty * price;
-
-                        addOnText += `- ${name} x${qty} (RM ${total.toFixed(2)})\n`;
-                        addOnTotal += total;
-                    }
-                });
-
-                document.querySelectorAll('.addon-checkbox:checked').forEach(function (el) {
-                    addOns.push(el.dataset.name);
-                });
-
-                // quantity add-ons (is_qty = 1)
-                document.querySelectorAll('.addon-qty').forEach(function (el) {
-                    const qty = parseInt(el.value);
-                    if (qty > 0) {
-                        addOns.push(`${el.dataset.name} x${qty}`);
-                    }
-                });
 
                 // Format date
                 const dateObj = new Date(date);
                 const formattedDate = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month:'long', year:'numeric' });
 
                 // Slots text
-                let slotsText = selectedSlots.map(s => `${s.id} (${s.time})`).join("\n");
+                let slotsText = selectedSlots.map(s => `${s.id} (${s.time})`).join(",");
 
                 // WhatsApp message
                 const packageTitle = "{{ $package->name }}";
-                let message = `Hai ${studioAdminName}, \n\nsaya ${name}. Saya ingin menempah pakej "${packageTitle}" pada ${formattedDate} \n\n${slotsText}. \n\nPayment: ${paymentText}.`;
+                let message = `
+                Hai ${studioAdminName}, \n\n saya ${name}. Saya ingin menempah \n\n Pakej : "${packageTitle}" \n Tarikh : ${formattedDate} \n Slot : ${slotsText}.`;
                 if (addOns.length) {
                     message += `\n\nAdd-ons:\n${addOns.map(a => `- ${a}`).join("\n")}`;
                 }
+
+                message += `\n\n ${paymentText}`;
 
                 // Optional: log click to backend
                 fetch('/track/whatsapp', {
@@ -1533,8 +1625,153 @@
                 return contacts[contacts.length - 1];
             }
 
-
+            
         });
+
+        function applySpecialDateAddons() {
+
+            const selectedDate = document.getElementById('selected_date').value;
+            if (!selectedDate) return;
+
+            const selected = new Date(selectedDate);
+
+            document.querySelectorAll('[data-special-start]').forEach(el => {
+
+                const start = el.dataset.specialStart;
+                const end   = el.dataset.specialEnd;
+
+                if (!start || !end) return; // normal addon
+
+                const startDate = new Date(start);
+                const endDate   = new Date(end);
+
+                const wrapper = el.closest('.border');
+
+                if (selected >= startDate && selected <= endDate) {
+
+                    wrapper.classList.remove('d-none');
+
+                    if (el.type === "checkbox") {
+                        el.checked = true;
+                        el.disabled = true;
+                    }
+
+                    if (el.type === "number") {
+                        el.value = 1;
+                        el.readOnly = true;
+                    }
+
+                } else {
+
+                    wrapper.classList.add('d-none');
+
+                    if (el.type === "checkbox") {
+                        el.checked = false;
+                        el.disabled = false;
+                    }
+
+                    if (el.type === "number") {
+                        el.value = 0;
+                        el.readOnly = false;
+                    }
+                }
+
+            });
+
+            calculateSummary();
+        }
+
+        function calculateSummary() {
+
+            let addOnTotal           = 0;
+            let packageTotal         = 0;
+            let addOns               = [];
+            const paymentOption      = document.getElementById('paymentOption');
+            const depositAmountInput = document.getElementById('depositAmount');
+
+            const isManual = {{ $package->is_manual }} == 2;
+
+            if (isManual) {
+                let selectedTimes = [];
+                try {
+                    selectedTimes = JSON.parse(selectedTimeInput.value || "[]");
+                } catch(e) {}
+
+                selectedTimes.forEach(slot => {
+                    packageTotal += parseFloat(slot.price || 0);
+                });
+
+            } else {
+                packageTotal = {{ $package->final_price }};
+            }
+
+            // Addons
+            document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
+                addOnTotal += parseFloat(cb.dataset.price);
+                addOns.push(cb.dataset.name);
+                
+            });
+
+            document.querySelectorAll('.addon-qty').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    addOnTotal += qty * parseFloat(input.dataset.price);
+                    addOns.push(`${input.dataset.name} x${qty}`);
+                }
+            });
+
+            let grandTotal = packageTotal + addOnTotal;
+
+            // Always update main total
+            document.getElementById('totalAmount').innerText = grandTotal.toFixed(2);
+
+            // 🔥 Deposit Mode
+            if (paymentOption.value === 'deposit') {
+
+                let depositAmount = parseFloat(depositAmountInput.value) || 0;
+
+                // Optional: auto cap deposit if > total
+                if (depositAmount > grandTotal) {
+                    depositAmount = grandTotal;
+                }
+
+                const balance = grandTotal - depositAmount;
+
+                document.getElementById('depositDisplay').innerText = depositAmount.toFixed(2);
+                document.getElementById('balanceDisplay').innerText = balance.toFixed(2);
+
+            } else {
+
+                // Reset deposit display when not used
+                document.getElementById('depositDisplay').innerText = "0.00";
+                document.getElementById('balanceDisplay').innerText = "0.00";
+            }
+
+            return {
+                grandTotal: grandTotal,
+                addOns: addOns
+            };
+        }
+
+
+        function updateSlotPriceDisplay(selectedTimes) {
+
+            const isManual = {{ $package->is_manual }} == 2;
+            if (!isManual) return;
+
+            let total = 0;
+
+            selectedTimes.forEach(slot => {
+                total += parseFloat(slot.price || 0);
+            });
+
+            const display = document.getElementById('slotPriceDisplay');
+            if (display) {
+                display.value = total.toFixed(2);
+            }
+
+            calculateSummary(); // update grand total too
+        }
 
     </script>
 @endpush

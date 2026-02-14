@@ -368,7 +368,7 @@
                                     : json_decode($organizer->social_links, true);
                             @endphp
 
-                            @if (!empty($socials))
+                            <!-- @if (!empty($socials))
                                 <div class="social-links d-flex gap-3 align-items-center">
                                     @foreach ($socials as $platform => $url)
                                         @if ($url)
@@ -377,6 +377,37 @@
                                             </a>
                                         @endif
                                     @endforeach
+                                </div>
+                            @endif -->
+                            @php
+                                $rawPhone = $organizer->phone ?? null;
+                                $phone = $rawPhone ? preg_replace('/[^0-9]/', '', $rawPhone) : null;
+
+                                // Tukar 01xxxxxxxx ke 601xxxxxxxx (Malaysia format)
+                                if ($phone && str_starts_with($phone, '0')) {
+                                    $phone = '6' . $phone;
+                                }
+                            @endphp
+
+                            @if($phone)
+                                @php
+                                    $name = $organizer->name;
+                                    $message = urlencode("Hai {$name},\n\nSaya dari sistemkami ingin tanya pasal pakej.");
+                                @endphp
+
+                                <div class="social-links d-flex gap-3 align-items-center mb-3">
+                                    <a href="https://wa.me/{{ $phone }}?text={{ $message }}" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    class="btn btn-success d-flex align-items-center gap-2">
+                                        
+                                        <i class="bi bi-whatsapp"></i>
+                                       <span class="d-flex flex-column text-start">
+                                            <span>WhatsApp</span>
+                                            <span>{{ $organizer->name }} Sekarang</span>
+                                        </span>
+
+                                    </a>
                                 </div>
                             @endif
                         @endif
@@ -397,7 +428,7 @@
                     <div class="mt-5"></div>
                     @endif
                    {{-- Mobile --}}
-                    <p class="profile-intro-desc mb-2 d-block d-md-none">
+                    <!-- <p class="profile-intro-desc mb-2 d-block d-md-none">
                         <span id="desc-preview-mobile-{{ $organizer->id }}">
                             {{ $excerptMobile }}
                             @if($isLongMobile)
@@ -428,7 +459,7 @@
                                 <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'laptop')">Show less</a>
                             </span>
                         @endif
-                    </p>
+                    </p> -->
 
 
                     @php
@@ -451,27 +482,6 @@
 
             </div>
         </section>
-
-        <!-- Filter Search -->
-        <form method="GET" class="row g-2 mb-4">
-            <div class="col-md-6">
-                <input type="text" name="keyword" class="form-control"
-                    placeholder="Search packages..." value="{{ request('keyword') }}">
-            </div>
-            <div class="col-md-4">
-                <select name="package_category" class="default-select w-100">
-                    <option value="">All Categories</option>
-                    @foreach ($packageCategories as $category)
-                        <option value="{{ $category->slug }}" {{ request('package_category') == $category->slug ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-            </div>
-        </form>
 
         <!-- Packages Section -->
         <!-- Size package img 1024px x 1024px -->
@@ -583,9 +593,26 @@
                                         </time>
                                     @endif
 
+                                    @if($package->description)
                                     <div class="event-desc mt-2">
                                         {{ Str::limit(strip_tags($package->description), 340) }}
                                     </div>
+                                    @else
+                                        @if(!empty($package->items) && count($package->items) > 0)
+                                        <section class="mb-4">
+                                            <ul class="list-unstyled property-details-list">
+                                                @foreach ($package->items ?? [] as $item)
+                                                    @if($item['is_optional'] == 0 )
+                                                    <li class="mb-0">
+                                                        <i class="fa-solid fa-check text-success me-2"></i>
+                                                        <strong class="mr-1">{{ $item['title'] }}</strong>
+                                                    </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </section>
+                                        @endif
+                                    @endif
 
                                     {{-- Quick Booking Button --}}
                                     <div class="mt-3">
@@ -704,7 +731,7 @@
         @endif
 
         {{-- Google Map --}}
-        @if($organizer->latitude && $organizer->longitude)
+        <!-- @if($organizer->latitude && $organizer->longitude)
             @php
                 $mapQuery = $organizer->is_gmaps_verified
                     ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
@@ -723,7 +750,7 @@
             </div>
 
 
-        @endif
+        @endif -->
 
     </div>
     <!-- <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
@@ -789,18 +816,18 @@
         // });
     </script>
     <script>
-        function toggleDesc(id, device) {
-            let preview = document.getElementById(`desc-preview-${device}-${id}`);
-            let full = document.getElementById(`desc-full-${device}-${id}`);
+        // function toggleDesc(id, device) {
+        //     let preview = document.getElementById(`desc-preview-${device}-${id}`);
+        //     let full = document.getElementById(`desc-full-${device}-${id}`);
 
-            if (preview.style.display === "none") {
-                preview.style.display = "inline";
-                full.style.display = "none";
-            } else {
-                preview.style.display = "none";
-                full.style.display = "inline";
-            }
-        }
+        //     if (preview.style.display === "none") {
+        //         preview.style.display = "inline";
+        //         full.style.display = "none";
+        //     } else {
+        //         preview.style.display = "none";
+        //         full.style.display = "inline";
+        //     }
+        // }
     </script>
 
     <script>
@@ -829,7 +856,6 @@
                         <img 
                             src="/images/organizers/${data.id}/${image}" 
                             class="d-block w-100 carousel-image"
-                            decoding="async"
                             alt="banner">
                     </div>`;
                 });
@@ -886,8 +912,6 @@
                                         src="${image.url}"
                                         class="d-block w-100"
                                         style="height:260px; object-fit:cover;"
-                                        loading="lazy"
-                                        decoding="async"
                                         alt="${image.alt ?? ''}">
                                 </div>`;
                         });
@@ -926,7 +950,4 @@
             .catch(err => console.error('Logging failed', err));
         });
     </script>
-
-
-
 @endpush
