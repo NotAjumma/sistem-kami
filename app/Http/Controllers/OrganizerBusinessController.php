@@ -136,7 +136,7 @@ class OrganizerBusinessController extends Controller
         $packages = DB::table('packages')
             ->where('organizer_id', $authUser->id)
             ->select('id', 'name')
-            ->orderBy('name')
+            ->orderBy('order_by')
             ->get();
 
         // Step 1: Get all event IDs by this organizer
@@ -157,21 +157,32 @@ class OrganizerBusinessController extends Controller
         // Step 4: Fetch bookings with optional status & search filters
         $bookings = Booking::with(['vendorTimeSlots', 'participant', 'package:id,name'])
             ->whereIn('id', $bookingIds)
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+
+            ->when($request->status, 
+                fn($q) => $q->where('status', $request->status)
+            )
+
             ->when($request->event_search, function ($query, $event_search) {
                 $query->whereHas('package', function ($q) use ($event_search) {
                     $q->where('name', $event_search);
                 });
             })
+
+            ->when($request->date, function ($query, $date) {
+                $query->whereHas('vendorTimeSlots', function ($q) use ($date) {
+                    $q->whereDate('booked_date_start', $date);
+                });
+            })
+
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('participant', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
                             ->orWhere('phone', 'like', "%{$search}%")
-                            ->orWhere('no_ic', 'like', "%{$search}%")
-                            ->orWhere('booking_code', 'like', "%{$search}%");
-                    });
+                            ->orWhere('no_ic', 'like', "%{$search}%");
+                    })
+                    ->orWhere('booking_code', 'like', "%{$search}%");
                 });
             })
 
@@ -179,6 +190,8 @@ class OrganizerBusinessController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+            Log::info("bookings");
+            Log::info($bookings);
         return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings', 'packages', 'events'));
     }
 
@@ -337,14 +350,14 @@ class OrganizerBusinessController extends Controller
 
     public function cancelBooking($id)
     {
-        $booking = Booking::with(['participant', 'bookingTickets', 'event.organizer'])->findOrFail($id);
+        $booking = Booking::with(['participant', 'vendorTimeSlots'])->findOrFail($id);
 
         if ($booking->status !== 'cancelled') {
             $booking->status = 'cancelled';
             $booking->save();
 
             // Optionally update related ticket status
-            $booking->bookingTickets()->update(['status' => 'cancelled']);
+            $booking->vendorTimeSlots()->update(['status' => 'cancelled']);
 
             return redirect()->back()->with('success', 'Booking has been cancelled.');
         }
@@ -658,13 +671,14 @@ class OrganizerBusinessController extends Controller
         $authUser = auth()->guard('organizer')->user()->load('user');
         $organizerId = $authUser->id;
 
-        $mode = $request->get('mode', 'detail');
+        $mode = $request->get('mode', 'detail', 'week');
 
         // MONTH SUMMARY MODE
         if ($mode === 'month') {
 
             $rows = DB::table('bookings')
                 ->where('bookings.organizer_id', $organizerId)
+                ->where('bookings.status', '!=', 'cancelled')
                 ->join('bookings_vendor_time_slot as slots', 'slots.booking_id', '=', 'bookings.id')
                 ->leftJoin('packages', 'packages.id', '=', 'bookings.package_id')
                 ->select(
@@ -702,7 +716,9 @@ class OrganizerBusinessController extends Controller
             $bookings = Booking::with([
                 'vendorTimeSlots.timeSlot',
                 'package'
-            ])->get();
+            ])
+            ->where('bookings.status', '!=', 'cancelled')
+            ->get();
 
             $events = [];
 
@@ -741,6 +757,7 @@ class OrganizerBusinessController extends Controller
 
                 $events[] = [
                     'id' => 'w-'.$booking->id,
+                    'code' => $booking->booking_code,
                     'title' => $booking->package?->name ?? 'Booking',
                     'start' => $start,
                     'end' => $end,
@@ -764,6 +781,7 @@ class OrganizerBusinessController extends Controller
 
         $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package'])
             ->where('organizer_id', $organizerId)
+            ->where('bookings.status', '!=', 'cancelled')
             ->whereHas('vendorTimeSlots')
             ->get();
 
@@ -858,6 +876,65 @@ class OrganizerBusinessController extends Controller
                 'classNames' => ['fc-holiday'] // custom CSS class
             ];
         });
+    }
+
+    public function makeFullPayment($id)
+    {
+        $booking = Booking::with(['participant', 'vendorTimeSlots'])->findOrFail($id);
+
+
+        if ($booking->payment_type === 'deposit' && $booking->status == 'paid') {
+            $booking->paid_amount = $booking->final_price; 
+            $booking->payment_type = 'full_payment';
+            $booking->save();
+
+            $booking->vendorTimeSlots()->update(['status' => 'full_payment']);
+
+            $booking->load('vendorTimeSlots');
+
+            // Send email to booking's email
+            // Mail::to($booking->participant->email)->send(new PaymentConfirmed($booking));
+
+            // EmailLog::create([
+            //     'to_email' => $booking->participant->email,
+            //     'type' => 'payment_confirmed',
+            //     'sent_at' => now(),
+            // ]);
+
+            $receiptUrl = route('booking.receipt.package', $booking->booking_code);
+
+            $text = "Hai " . ucfirst($booking->participant->name) . ",\n\n";
+
+            $text .= "🎉 Tahniah! Baki bayaran anda telah berjaya dijelaskan sepenuhnya.\n";
+            $text .= "Tempahan anda kini telah disahkan sebagai *FULL PAYMENT*.\n\n";
+
+            $text .= "*Status Pembayaran*: ✅ Pembayaran Penuh Telah Diterima\n";
+            $text .= "Jumlah Keseluruhan Dibayar: RM" . number_format(
+                $booking->final_price,
+                2
+            ) . "\n\n";
+
+            $text .= "📄 Resit Pembayaran Penuh boleh dimuat turun di sini:\n";
+            $text .= $receiptUrl . "\n\n";
+
+            $text .= "Terima kasih kerana menggunakan perkhidmatan SistemKami 🙏\n\n";
+            $text .= "📌 Peringatan 📌\n";
+            $text .= "⏱️ Sila datang 15 minit lebih awal sebelum slot anda.\n";
+            $text .= "👟 Digalakkan pakai kasut yang sesuai (lelaki & perempuan) untuk gambar lebih cantik.\n";
+            $text .= "👜 Wanita, bawa handbag untuk nampak lebih bergaya.";
+
+            $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $booking->participant->phone
+            . '&text=' . urlencode($text);
+
+            // return redirect()->back()->with('success', 'Payment verified and booking has been updated to Full Payment.');
+            return redirect()->back()->with([
+                'success' => 'Payment verified and booking for ' . $booking->participant->name . ' has been updated to Full Payment.',
+                'whatsapp_url' => $whatsappUrl,
+            ]);
+
+        }
+
+        return redirect()->back()->with('error', 'Cannot verify this booking.');
     }
 
 

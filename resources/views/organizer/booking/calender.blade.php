@@ -2,6 +2,13 @@
 @push('styles')
 <style>
 
+.fc-event-custom,
+.fc-week-event,
+.fc-month-summary {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
 .fc .fc-daygrid-event-harness {
     margin-bottom: 2px;
 }

@@ -670,14 +670,14 @@
                 currentDate.setMonth(today.getMonth());
             }
 
-            renderCalendar(currentDate);
+            renderCalendar(currentDate, calendarData, currentPackageId);
         });
 
         // Event listener for month change
         monthSelect.addEventListener("change", () => {
             const selectedMonth = parseInt(monthSelect.value);
             currentDate.setMonth(selectedMonth);
-            renderCalendar(currentDate);
+            renderCalendar(currentDate, calendarData, currentPackageId);
         });
     </script>
 

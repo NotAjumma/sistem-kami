@@ -108,29 +108,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Month view bookings
       if (arg.view.type === 'dayGridMonth') {
+
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('fc-event-custom', 'fc-month-summary');
+
         if (arg.event.extendedProps.description) {
           const shortTitle = arg.event.title.split('(')[0].trim();
 
-          return {
-            html: `
-              <div class="fc-event-custom fc-month-summary">
-                <div class="fc-holiday">${shortTitle}</div>
-              </div>
-            `
-          };
-        }else{
-          const count = arg.event.extendedProps.count || 'loading..';
-          return {
-            html: `
-              <div class="fc-event-custom fc-month-summary">
-                <div class="fc-event-title">${arg.event.title}</div>
-                <div class="fc-event-count">${count} bookings</div>
-              </div>
-            `
-          };
+          const holidayDiv = document.createElement('div');
+          holidayDiv.classList.add('fc-holiday');
+          holidayDiv.innerText = shortTitle;
+
+          wrapper.appendChild(holidayDiv);
+
+        } else {
+          const titleDiv = document.createElement('div');
+          titleDiv.classList.add('fc-event-title');
+          titleDiv.innerText = arg.event.title;
+
+          const countDiv = document.createElement('div');
+          countDiv.classList.add('fc-event-count');
+          countDiv.innerText = (arg.event.extendedProps.count || '0') + ' bookings';
+
+          wrapper.appendChild(titleDiv);
+          wrapper.appendChild(countDiv);
         }
-        
+
+        return { domNodes: [wrapper] };
       }
+
 
       // WEEK VIEW
       if (arg.view.type === 'timeGridWeek') {
@@ -194,9 +200,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     eventClick: function(info) {
       info.jsEvent.preventDefault();
-      const bookingCode = info.event.extendedProps.booking_id;
-      if (bookingCode) window.open(`/booking/details/${bookingCode}`, '_blank');
+
+      if (info.view.type === 'dayGridMonth') {
+
+        const date = info.event.startStr;
+        const packageName = info.event.title;
+
+        window.open(
+          `/organizer/business/bookings?date=${date}&event_search=${encodeURIComponent(packageName)}`,
+          '_blank'
+        );
+
+        return;
+      }
+
+      const bookingCode = info.event.extendedProps.code;
+
+      if (bookingCode) {
+        window.open(`/organizer/business/bookings?search=${bookingCode}`, '_blank');
+      }
     }
+
+
   });
 
   calendar.render();

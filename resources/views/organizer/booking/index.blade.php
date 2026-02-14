@@ -20,8 +20,10 @@
                                 <option value="">All</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
                                 </option>
-                                <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
+                                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid
                                 </option>
+                                <!-- <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
+                                </option> -->
                                 <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                                 </option>
                             </select>
@@ -209,7 +211,22 @@
                                                                 </form>
                                                             </li>
                                                         @endif
-                                                        @if($booking->payment_method === 'gform' && $booking->status !== 'cancelled')
+                                                        @if($booking->status == 'paid' && $booking->payment_type !== 'full_payment')
+                                                            <li>
+                                                                <form action="{{ route('organizer.business.booking.full_payment', $booking->id) }}"
+                                                                    method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="button"
+                                                                        class="dropdown-item text-primary btn-make-full-payment"
+                                                                        data-customer-name="{{ $booking->participant->name }}"
+                                                                        data-booking-code="{{ $booking->booking_code }}">
+                                                                       Make Full Payment
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        @endif
+                                                        @if($booking->status !== 'cancelled')
                                                             <li>
                                                                 <form action="{{ route('organizer.booking.cancel', $booking->id) }}"
                                                                     method="POST" class="d-inline">
@@ -264,6 +281,25 @@
 @endsection
 
 @push('scripts')
+    @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: @json(session('success')),
+                showCancelButton: true,
+                confirmButtonText: 'Send Receipt',
+                cancelButtonText: 'OK',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.open(@json(session('whatsapp_url')), "_blank");
+                }
+            });
+        </script>
+    @endif
     <script>
 
         $('#example3 tbody').on('click', '.btn-verify-payment', function () {
@@ -278,6 +314,30 @@
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, verify it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        $('#example3 tbody').on('click', '.btn-make-full-payment', function () {
+            const form          = $(this).closest('form')[0]; // get the form element
+            const bookingCode   = $(this).data('booking-code'); 
+            const customerName  = $(this).data('customer-name'); 
+            const upperName     = customerName.toUpperCase();
+            Swal.fire({
+                title: 'Are you sure?',
+                html: `
+                    Confirm to update booking for 
+                    <strong style="color:#3ab67a;">${upperName}</strong> 
+                    to <b>FULL PAYMENT</b>?
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, update it!'
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
