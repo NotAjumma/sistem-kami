@@ -483,7 +483,8 @@
                 @endif
 
                 {{-- Google Map --}}
-                <!-- @if($organizer->latitude && $organizer->longitude)
+                @if($organizer->google_map_show)
+                @if($organizer->latitude && $organizer->longitude)
                 @php
                     $mapQuery = $organizer->is_gmaps_verified
                         ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
@@ -499,8 +500,9 @@
                         allowfullscreen
                         loading="lazy">
                     </iframe>
-                </div> -->
-               @php
+                </div>
+                @endif
+                @php
                     $line1 = $organizer->address_line1;
                     $line2 = $organizer->address_line2;
                     $line3 = trim(collect([
@@ -788,6 +790,11 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <strong>{{ $addon->name }}</strong>
+                                                    @if($addon->hint)
+                                                        <span class="text-muted small">
+                                                            {{ $addon->hint }}
+                                                        </span>
+                                                    @endif
                                                     <div class="text-muted small">
                                                         RM {{ number_format($addon->price, 2) }}
                                                     </div>

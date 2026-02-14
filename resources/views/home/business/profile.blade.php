@@ -148,7 +148,7 @@
             }
 
             .profile-intro-name {
-                margin-left: 130px;
+               /* margin-left: 130px; */
             }
         }
 
@@ -351,136 +351,71 @@
 
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
-            <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
-                class="profile-pic shadow" />
-            <div class="card-profile profile-card">
-                <div class="profile-intro">
-                    <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
-                        <div>
-                            <h2 class="mb-0">{{ $organizer->name }}</h2>
-                            <p class="mb-1 fst-italic text-primary">{{ $organizer->category }}</p>
-                        </div>
+            <!-- <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
+                class="profile-pic shadow" /> -->
+            <div class="card-profile profile-card text-center">
+                <!-- Logo -->
+                <!-- @if(!empty($organizer->logo_url))
+                    <img src="{{ $organizer->logo_url }}" 
+                        alt="{{ $organizer->name }} logo"
+                        class="profile-pic shadow mb-3"
+                        style="width: 150px; height: 150px; object-fit: contain; border-radius: 10px;">
+                @endif -->
 
-                        @if (!empty($organizer->social_links))
-                            @php
-                                $socials = is_array($organizer->social_links)
-                                    ? $organizer->social_links
-                                    : json_decode($organizer->social_links, true);
-                            @endphp
-
-                            <!-- @if (!empty($socials))
-                                <div class="social-links d-flex gap-3 align-items-center">
-                                    @foreach ($socials as $platform => $url)
-                                        @if ($url)
-                                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="">
-                                                <i class="bi bi-{{ strtolower($platform) }}"></i>
-                                            </a>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @endif -->
-                            @php
-                                $rawPhone = $organizer->phone ?? null;
-                                $phone = $rawPhone ? preg_replace('/[^0-9]/', '', $rawPhone) : null;
-
-                                // Tukar 01xxxxxxxx ke 601xxxxxxxx (Malaysia format)
-                                if ($phone && str_starts_with($phone, '0')) {
-                                    $phone = '6' . $phone;
-                                }
-                            @endphp
-
-                            @if($phone)
-                                @php
-                                    $name = $organizer->name;
-                                    $message = urlencode("Hai {$name},\n\nSaya dari sistemkami ingin tanya pasal pakej.");
-                                @endphp
-
-                                <div class="social-links d-flex gap-3 align-items-center mb-3">
-                                    <a href="https://wa.me/{{ $phone }}?text={{ $message }}" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    class="btn btn-success d-flex align-items-center gap-2">
-                                        
-                                        <i class="bi bi-whatsapp"></i>
-                                       <span class="d-flex flex-column text-start">
-                                            <span>WhatsApp</span>
-                                            <span>{{ $organizer->name }} Sekarang</span>
-                                        </span>
-
-                                    </a>
-                                </div>
-                            @endif
-                        @endif
-                    </div>
-
-                    @php
-                        $maxLengthLaptop = 300;
-                        $maxLengthMobile = 100;
-
-                        $excerptMobile = Str::limit($organizer->description, $maxLengthMobile);
-                        $excerptLaptop = Str::limit($organizer->description, $maxLengthLaptop);
-
-                        $isLongMobile = strlen($organizer->description) > $maxLengthMobile;
-                        $isLongLaptop = strlen($organizer->description) > $maxLengthLaptop;
-                    @endphp
-
-                    @if (empty($organizer->social_links))
-                    <div class="mt-5"></div>
-                    @endif
-                   {{-- Mobile --}}
-                    <!-- <p class="profile-intro-desc mb-2 d-block d-md-none">
-                        <span id="desc-preview-mobile-{{ $organizer->id }}">
-                            {{ $excerptMobile }}
-                            @if($isLongMobile)
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'mobile')">Read more</a>
-                            @endif
-                        </span>
-
-                        @if($isLongMobile)
-                            <span id="desc-full-mobile-{{ $organizer->id }}" style="display: none;">
-                                {{ $organizer->description }}
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'mobile')">Show less</a>
-                            </span>
-                        @endif
-                    </p>
-
-                    {{-- Laptop --}}
-                    <p class="profile-intro-desc mb-2 d-none d-lg-block">
-                        <span id="desc-preview-laptop-{{ $organizer->id }}">
-                            {{ $excerptLaptop }}
-                            @if($isLongLaptop)
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'laptop')">Read more</a>
-                            @endif
-                        </span>
-
-                        @if($isLongLaptop)
-                            <span id="desc-full-laptop-{{ $organizer->id }}" style="display: none;">
-                                {{ $organizer->description }}
-                                <a href="javascript:void(0);" onclick="toggleDesc({{ $organizer->id }}, 'laptop')">Show less</a>
-                            </span>
-                        @endif
-                    </p> -->
-
-
-                    @php
-                        $addressParts = array_filter([
-                            $organizer->address_line1,
-                            $organizer->address_line2,
-                            $organizer->postal_code,
-                            $organizer->city,
-                            $organizer->state,
-                            $organizer->country
-                        ]);
-                    @endphp
-
-                    @if (!empty($addressParts))
-                        <div class="event-organizer text-primary d-flex align-items-start">
-                            <span>{{ implode(', ', $addressParts) }}</span>
-                        </div>
-                    @endif
+                <!-- Organizer Name & Category -->
+                <div class="profile-intro-name mb-3 w-100">
+                    <h2 class="mb-0" style="font-size: 30px;">{{ $organizer->name }}</h2>
+                    <p class="mb-1 text-primary">{{ $organizer->category }}</p>
                 </div>
 
+                <!-- WhatsApp Button -->
+                @php
+                    $rawPhone = $organizer->phone ?? null;
+                    $phone = $rawPhone ? preg_replace('/[^0-9]/', '', $rawPhone) : null;
+                    if ($phone && str_starts_with($phone, '0')) {
+                        $phone = '6' . $phone;
+                    }
+                    $name = $organizer->name;
+                    $message = urlencode("Hai {$name},\n\nSaya dari sistemkami ingin tanya pasal pakej.");
+                @endphp
+
+                @if($phone)
+                    <a href="https://wa.me/{{ $phone }}?text={{ $message }}" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="btn btn-success w-100 mb-3 d-flex justify-content-center align-items-center gap-3"
+                    style="font-size: 1.1rem; padding: 0.8rem 1rem;">
+
+                        <!-- <i class="bi bi-whatsapp" style="font-size: 1.5rem;"></i> -->
+                        <span class="d-flex flex-column text-center" style="">
+                            <i class="bi bi-whatsapp" style="font-size: 2rem;"></i>
+                            <span>Tekan sini chat</span>
+                            <span class="">{{ $organizer->name }} Sekarang</span>
+                        </span>
+
+                    </a>
+                @endif
+
+                <!-- Address -->
+                @php
+                    $addressParts = array_filter([
+                        $organizer->address_line1,
+                        $organizer->address_line2,
+                        $organizer->postal_code,
+                        $organizer->city,
+                        $organizer->state,
+                        $organizer->country
+                    ]);
+                @endphp
+
+                @if (!empty($addressParts))
+                    <div class="event-organizer text-primary mt-2">
+                        {{ implode(', ', $addressParts) }}
+                    </div>
+                @endif
             </div>
+
+
         </section>
 
         <!-- Packages Section -->
@@ -731,7 +666,8 @@
         @endif
 
         {{-- Google Map --}}
-        <!-- @if($organizer->latitude && $organizer->longitude)
+        @if($organizer->google_map_show)
+        @if($organizer->latitude && $organizer->longitude)
             @php
                 $mapQuery = $organizer->is_gmaps_verified
                     ? urlencode($organizer->office_name) . '%20' . $organizer->latitude . ',' . $organizer->longitude
@@ -750,7 +686,8 @@
             </div>
 
 
-        @endif -->
+        @endif
+        @endif
 
     </div>
     <!-- <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
