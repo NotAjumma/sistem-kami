@@ -166,15 +166,68 @@ class BusinessController extends Controller
             }
         }
 
+        $slots = VendorTimeSlot::with([
+                'images',
+            ])->where('is_active', 1)
+            ->where('organizer_id', $organizer->id)
+            ->get();
+
+            \Log::info("slots");
+            \Log::info($slots);
         $packages = $packagesQuery->get();
         $page_title = $organizer->name;
+
+        $limitReachedDays   = [];      
+        $weekRangeBlock     = [];
+        $fullyBookedDates       = [];
+        $offDays       = [];
+        $timeSlots       = [];
+        $bookedDates       = [];
+
+        $whatsappNumbersAdmin = collect([
+            ['name' => $organizer->name, 'phone' => $organizer->phone]
+        ]);
+
+        $workers = Worker::where('organizer_id', $organizer->id)
+            ->where('is_active', 1)
+            ->get(['name','phone','weight']);
+
+        if ($workers->count() > 0) {
+
+            $whatsappNumbers = $workers->map(function ($w) {
+                return [
+                    'name'   => $w->name,
+                    'phone'  => $w->phone,
+                    'weight' => $w->weight ?? 1,
+                ];
+            })->values();
+
+        } else {
+
+            // fallback to organizer default numbers
+            $whatsappNumbers = collect($whatsappNumbersAdmin)->map(function ($w) {
+                return [
+                    'name'   => $w['name'],
+                    'phone'  => $w['phone'],
+                    'weight' => 10, // default weight
+                ];
+            })->values();
+        }
 
         return view('home.business.profile', compact(
             'organizer',
             'packages',
+            'slots',
             'packageCategories',
             'page_title',
-            'seo'
+            'seo', 
+            'timeSlots',
+            'offDays',
+            'bookedDates',
+            'fullyBookedDates',
+            'limitReachedDays',
+            'weekRangeBlock',
+            'whatsappNumbers',
         ));
     }
 
@@ -423,6 +476,188 @@ class BusinessController extends Controller
             'seo'               => $seo,
             'whatsappNumbers'   => $whatsappContacts,
         ]);
+    }
+
+    public function fetchCalendarData($id)
+    {
+        // Find the package under this organizer
+        $package = Package::where('id', $id)
+            ->with([
+                'addons',
+                'items',
+                'discounts',
+                'category',
+                'images',
+                'organizer',
+            ])
+            ->firstOrFail();
+
+        $bookedDates = DB::table('bookings_vendor_time_slot')
+            // ->where('organizer_id', $authUser->id)
+            ->where('package_id', $package->id)
+            ->whereIn('status', ['deposit_paid', 'full_payment'])
+            ->whereDate('booked_date_start', '>=', now())
+            ->select('vendor_time_slot_id', 'booked_date_start', 'booked_date_end', 'booked_time_start', 'booked_time_end')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'date_start' => Carbon::parse($row->booked_date_start)->format('Y-m-d'),
+                    'date_end'   => Carbon::parse($row->booked_date_end)->format('Y-m-d'),
+                    'time_start' => $row->booked_time_start,
+                    'time_end'   => $row->booked_time_end,
+                    'vendor_time_slot_id' => $row->vendor_time_slot_id,
+                ];
+            });
+
+        $timeSlots = VendorTimeSlot::where('organizer_id', $package->organizer_id)
+            ->where('is_active', 1)
+            ->orderBy('start_time')
+            ->get();
+
+        $totalSlotCount = 0;
+
+        foreach ($timeSlots as $slot) {
+            if ($slot->is_full_day) {
+                $totalSlotCount += 1;
+                continue;
+            }
+
+            $start  = Carbon::parse($slot->start_time);
+            $end    = Carbon::parse($slot->end_time);
+
+            if (!$package->duration_minutes || $end->lessThanOrEqualTo($start)) {
+                continue;
+            }
+
+            // Compute how many intervals fit between start and end
+            $diffInMinutes      = $end->diffInMinutes($start);
+            $slotsInThisPeriod  = intdiv($diffInMinutes, $package->duration_minutes);
+
+            $totalSlotCount += $slotsInThisPeriod;
+        }
+
+        $fullyBookedDates       = [];
+        $groupedByDate          = collect($bookedDates)->groupBy('date_start');
+
+        foreach ($groupedByDate as $date => $bookingsForDate) {
+            $groupedBySlot = collect($bookingsForDate)->groupBy('vendor_time_slot_id');
+            $fullyBookedSlotsForDate = [];
+
+            foreach ($groupedBySlot as $slotId => $slotBookings) {
+                $slot = $timeSlots->firstWhere('id', $slotId);
+                if (!$slot) continue;
+
+                $start          = Carbon::parse($slot->start_time);
+                $end            = Carbon::parse($slot->end_time);
+                $duration       = $package->duration_minutes;
+                $totalSegments  = floor($start->diffInMinutes($end) / $duration);
+
+                $bookedSegments = 0;
+                foreach ($slotBookings as $booking) {
+                    $bStart = Carbon::parse($booking['time_start']);
+                    $bEnd   = Carbon::parse($booking['time_end']);
+                    $bookedSegments += floor($bStart->diffInMinutes($bEnd) / $duration);
+                }
+
+                if ($bookedSegments >= $totalSegments) {
+                    $fullyBookedSlotsForDate[] = $slotId;
+                }
+            }
+
+            if ($timeSlots->count() > 0 && count($fullyBookedSlotsForDate) === $timeSlots->count()) {
+                // $fullyBookedDates[] = $date;
+                $fullyBookedDates[] = [
+                    'date_start' => $date
+                ];
+            }
+        }
+
+        $confirmedBookings = DB::table('bookings_vendor_time_slot')
+            ->where('organizer_id', $package->organizer_id)
+            ->where(function ($q) use ($package) {
+                $q->where('package_id', $package->id)
+                    ->orWhereIn('package_id', function ($sub) use ($package) {
+                        $sub->select('id')
+                            ->from('packages')
+                            ->where('category_id', $package->category_id);
+                    });
+            })
+            ->whereNotNull('booked_date_start')
+            ->whereNotIn('status', ['failed', 'pending'])
+            ->select('package_id', 'package_category_id', 'booked_date_start') // ✅ Now includes category
+            ->get();
+
+
+        $slotLimits = VendorTimeSlotLimit::where('organizer_id', $package->organizer_id)
+            ->where(function ($q) use ($package) {
+                $q->whereNull('package_id')
+                    ->orWhere('package_id', $package->id)
+                    ->orWhere('package_category_id', $package->category_id);
+            })
+            ->where(function ($q) {
+                $q->whereNull('starts_at')->orWhereDate('starts_at', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhereDate('ends_at', '>=', now());
+            })
+            ->get();
+
+        $limitReachedDays   = [];      
+        $weekRangeBlock     = [];
+
+        foreach ($slotLimits as $limit) {
+            $grouped = $confirmedBookings
+                ->filter(
+                    fn($b) =>
+                    ($limit->package_id && $b->package_id == $limit->package_id) ||
+                    ($limit->package_category_id && $b->package_category_id == $limit->package_category_id)
+                )
+                ->groupBy(function ($b) use ($limit) {
+                    $date = Carbon::parse($b->booked_date_start);
+                    return $limit->duration_unit === 'week'
+                        ? $date->startOfWeek()->toDateString()
+                        : $date->format('Y-m');
+                });
+
+            foreach ($grouped as $start => $bookings) {
+                if (count($bookings) >= $limit->booking_limit) {
+                    $weekStart = Carbon::parse($start);
+                    // $weekStart = Carbon::parse($start)->startOfWeek(Carbon::MONDAY);
+                    $weekEnd = $weekStart->copy()->addDays(6); // optional if you want range
+                    $weekRangeBlock[] = $weekStart->toDateString() . ' - ' . $weekEnd->toDateString();
+
+                    $bookedDaysInThisWeek = collect($bookings)
+                        ->pluck('booked_date_start')
+                        ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+                        ->toArray();
+
+                    for ($i = 0; $i < 7; $i++) {
+                        $day = $weekStart->copy()->addDays($i)->toDateString();
+
+                        if (!in_array($day, $bookedDaysInThisWeek)) {
+                            $limitReachedDays[] = $day;
+                        } 
+                    }
+                }
+            }
+        }
+
+        $offDays = VendorOffDay::where('organizer_id', $package->organizer_id)
+            ->whereDate('off_date', '>=', now())
+            ->get();
+
+        // Log::info($timeSlots);
+        return response()->json([
+            'package'           => $package,
+            'timeSlots'         => $timeSlots,
+            'offDays'           => $offDays,
+            'bookedDates'       => $bookedDates,
+            'fullyBookedDates'  => $fullyBookedDates,
+            'limitReachedDays'  => $limitReachedDays,
+            'weekRangeBlock'    => $weekRangeBlock,
+        ]);
+
+
     }
 
     public function getAvailableSlots(Request $request, $packageId)
@@ -709,6 +944,27 @@ class BusinessController extends Controller
                     'images' => $package->images->map(function ($img) use ($package) {
                         return [
                             'url' => asset("images/organizers/{$package->organizer_id}/packages/{$package->id}/{$img->url}"),
+                            'alt' => $img->alt_text
+                        ];
+                    })
+                ];
+            })
+        ]);
+    }
+
+    public function getSlotImages($id)
+    {
+        $packages = VendorTimeSlot::with('images')
+            ->where('organizer_id', $id)
+            ->get();
+
+        return response()->json([
+            'packages' => $packages->map(function ($package) {
+                return [
+                    'id' => $package->id,
+                    'images' => $package->images->map(function ($img) use ($package) {
+                        return [
+                            'url' => asset("images/organizers/{$package->organizer_id}/slots/{$package->id}/{$img->url}"),
                             'alt' => $img->alt_text
                         ];
                     })

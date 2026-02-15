@@ -190,6 +190,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
 // Route::get('/login', [AuthController::class, 'participant'])->name('participant.login');
 
 // Public profile
+Route::get('/packages/{id}/calendar-data', [BusinessController::class, 'fetchCalendarData'])->name('business.profile.package.calendar.data');
 Route::get('/private/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile.private');
 Route::get('/private/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package.private');
 Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
@@ -200,6 +201,7 @@ Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class,
 Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
 Route::get('/organizer/{id}/banners', [BusinessController::class, 'getBanners']);
 Route::get('/organizer/{id}/packages/images', [BusinessController::class, 'getPackageImages']);
+Route::get('/organizer/{id}/slots/images', [BusinessController::class, 'getSlotImages']);
 
 
 Route::prefix('jiade')

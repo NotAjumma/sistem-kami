@@ -32,4 +32,10 @@ class VendorTimeSlot extends Model
     {
         return $this->hasMany(BookingsVendorTimeSlot::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(SlotImage::class, 'slot_id')->orderBy('sort_order', 'asc');
+    }
+
 }
