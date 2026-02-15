@@ -917,8 +917,8 @@
                                 <h4 class="event-title portfolio-title text-center">{{ $slot->slot_name ?? 'Tema' }}</h4>
                                 @if($organizer->what_flow == 2)
                                     <h4 class="event-title portfolio-title text-center">RM {{ $slot->slot_price }}</h4>
-                                    <h4 class="event-title portfolio-title text-center">{{ $slot->duration_minutes }} minit</h4>
                                     <h4 class="event-title portfolio-title text-center">{{ $slot->pax }}</h4>
+                                    <h4 class="event-title portfolio-title text-center">{{ $slot->duration_minutes }} minit</h4>
                                 @endif
                                 <div class="mt-3">
                                     <button type="button"
