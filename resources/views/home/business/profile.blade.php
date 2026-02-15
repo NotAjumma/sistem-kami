@@ -354,10 +354,6 @@
             }
         }
 
-        .profile-intro {
-            margin-left: 130px;
-        }
-
         .profile-intro h2 {
             font-weight: 700;
             margin-bottom: 0;
@@ -463,9 +459,6 @@
                 margin-left: 0px;
             }
 
-            .profile-intro-name {
-                margin-left: 130px;
-            }
         }
 
 
@@ -623,8 +616,8 @@
 
         .item-icon {
             position: absolute;
-            bottom: 230px;
-            left: 10px;
+            top: 50px;
+            right: 5px;
             padding: 10px;
             color: #fff;
             font-weight: 500;
@@ -667,14 +660,12 @@
 
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
-            <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }} logo"
-                class="profile-pic shadow" />
             <div class="card-profile profile-card">
                 <div class="profile-intro">
-                    <div class="profile-intro-name d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div class="profile-intro-name w-100 gap-2">
                         <div>
-                            <h2 class="mb-0">{{ $organizer->name }}</h2>
-                            <p class="mb-1 fst-italic text-primary">{{ $organizer->category }}</p>
+                            <h2 class="mb-0 text-center">{{ $organizer->name }}</h2>
+                            <p class="mb-1 fst-italic text-primary text-center">{{ $organizer->category }}</p>
                         </div>
                     </div>
 
@@ -689,9 +680,6 @@
                         $isLongLaptop = strlen($organizer->description) > $maxLengthLaptop;
                     @endphp
 
-                    <!-- @if (empty($organizer->social_links)) -->
-                    <div class="mt-5"></div>
-                    <!-- @endif -->
                    {{-- Mobile --}}
                     <!-- <p class="profile-intro-desc mb-2 d-block d-md-none">
                         <span id="desc-preview-mobile-{{ $organizer->id }}">
@@ -739,7 +727,7 @@
                     @endphp
 
                     @if (!empty($addressParts))
-                        <div class="event-organizer text-primary d-flex align-items-start">
+                        <div class="event-organizer text-primary d-flex text-center">
                             <span>{{ implode(', ', $addressParts) }}</span>
                         </div>
                     @endif

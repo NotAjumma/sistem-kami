@@ -134,8 +134,13 @@
                                 <label class="form-label">Customer Email (for send receipt thru email)</label>
                                 <input type="text" class="form-control" name="email" placeholder="Email" required>
                             </div> -->
+                            
                             <div class="mb-3 col-md-6">
+                                @if($authUser->what_flow != 2)
                                 <label class="form-label">Package</label>
+                                @else
+                                <label class="form-label">Slot</label>
+                                @endif
                                 <select class="form-select" name="package_id" id="packageSelect" required>
                                     <option value="">Choose a package</option>
                                     @foreach ($packages as $package)
@@ -316,14 +321,14 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3 col-md-6">
+                            <!-- <div class="mb-3 col-md-6">
                                 <label class="form-label">Reference</label>
                                 <select class="form-select" name="reference">
                                     <option value="">Choose a Reference</option>
                                     <option value="sales_a">Sales A</option>
                                     <option value="sales_b">Sales B</option>
                                 </select>
-                            </div>
+                            </div> -->
                             <div class="mb-3 col-md-12">
                                 <label class="form-label">Remarks</label>
                                 <textarea class="form-control" name="notes" rows="3"></textarea>

@@ -1081,7 +1081,7 @@ class BookingController extends Controller
 
             $slotDurations = collect($package->vendorTimeSlots)
                 ->mapWithKeys(function ($slot) use ($package) {
-                    return [$slot->id => $package->duration_minutes];
+                    return [$slot->id => $slot->duration_minutes];
                 });
 
             if (!empty($selected_time)) {
