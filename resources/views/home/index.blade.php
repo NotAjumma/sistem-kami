@@ -635,10 +635,12 @@
                                             @else
                                             <div class="location" title="Location"></div>
                                             @endif
-                                            @if (!is_null($package->final_price))
-                                                <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
-                                            @else
-                                                <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
+                                            @if($package->organizer->what_flow != 2)
+                                                @if (!is_null($package->final_price))
+                                                    <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
+                                                @else
+                                                    <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>

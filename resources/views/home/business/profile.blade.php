@@ -727,7 +727,7 @@
                     @endphp
 
                     @if (!empty($addressParts))
-                        <div class="event-organizer text-primary d-flex text-center">
+                        <div class="event-organizer text-primary text-center">
                             <span>{{ implode(', ', $addressParts) }}</span>
                         </div>
                     @endif
