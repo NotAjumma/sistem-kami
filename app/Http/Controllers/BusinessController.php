@@ -531,7 +531,12 @@ class BusinessController extends Controller
 
             // Compute how many intervals fit between start and end
             $diffInMinutes      = $end->diffInMinutes($start);
-            $slotsInThisPeriod  = intdiv($diffInMinutes, $package->duration_minutes);
+            if($package->organizer->what_flow == 2){
+                $totalDuration = $slot->duration_minutes + $slot->rest_minutes;
+            }else{
+                $totalDuration = $package->duration_minutes;
+            }
+            $slotsInThisPeriod  = intdiv($diffInMinutes, $totalDuration);
 
             $totalSlotCount += $slotsInThisPeriod;
         }
@@ -549,7 +554,11 @@ class BusinessController extends Controller
 
                 $start          = Carbon::parse($slot->start_time);
                 $end            = Carbon::parse($slot->end_time);
-                $duration       = $package->duration_minutes;
+                if($package->organizer->what_flow == 2){
+                    $duration       = $slot->duration_minutes + $slot->rest_minutes;
+                }else{
+                    $duration       = $package->duration_minutes;
+                }
                 $totalSegments  = floor($start->diffInMinutes($end) / $duration);
 
                 $bookedSegments = 0;
@@ -688,7 +697,11 @@ class BusinessController extends Controller
             }
             $start    = Carbon::parse($timeSlot->start_time);
             $end      = Carbon::parse($timeSlot->end_time);
-            $interval = $package->duration_minutes + $package->rest_minutes;
+            if($package->organizer->what_flow == 2){
+                $interval       = $timeSlot->duration_minutes + $timeSlot->rest_minutes;
+            }else{
+                $interval       = $package->duration_minutes;
+            }
 
             $times = [];
             $bookedTimes = [];
@@ -700,14 +713,30 @@ class BusinessController extends Controller
 
                 // Check if this slot overlaps any booking
                 $isBooked = false;
-                if (isset($groupedBookings[$timeSlot->id])) {
-                    foreach ($groupedBookings[$timeSlot->id] as $b) {
+                if ($timeSlot->is_multiple) {
+                    if (isset($groupedBookings[$timeSlot->id])) {
+                        foreach ($groupedBookings[$timeSlot->id] as $b) {
+                            $bStart = Carbon::parse($b->booked_time_start);
+                            $bEnd   = $b->booked_time_end
+                                        ? Carbon::parse($b->booked_time_end)
+                                        : $bStart->copy()->addMinutes($interval);
+
+                            // Overlap check
+                            if ($slotStart < $bEnd && $slotEnd > $bStart) {
+                                $isBooked = true;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $bookingsToCheck = $bookedDates;
+                    foreach ($bookingsToCheck as $b) {
+
                         $bStart = Carbon::parse($b->booked_time_start);
                         $bEnd   = $b->booked_time_end
                                     ? Carbon::parse($b->booked_time_end)
-                                    : $bStart->copy()->addMinutes($package->duration_minutes + $package->rest_minutes);
+                                    : $bStart->copy()->addMinutes($interval);
 
-                        // Overlap check
                         if ($slotStart < $bEnd && $slotEnd > $bStart) {
                             $isBooked = true;
                             break;

@@ -53,7 +53,24 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
 
+<style>
+.logo img {
+    max-width: 180px;   /* default mobile */
+    height: auto;
+}
 
+@media (min-width: 768px) {  /* tablet */
+    .logo img {
+        max-width: 140px;
+    }
+}
+
+@media (min-width: 1200px) { /* desktop besar */
+    .logo img {
+        max-width: 120px;
+    }
+}
+</style>
 </head>
 
 <body class="body">
@@ -61,8 +78,11 @@
         <div class="login-aside text-center  d-flex flex-column flex-row-auto">
             <div class="d-flex flex-column-auto flex-column pt-lg-40 pt-15">
                 <div class="text-center mb-lg-4 mb-2 pt-5 logo">
-                    <img src="{{ asset('images/logo-white.png') }}" alt="">
+                    <a href="{{ route('index') }}">
+                        <img src="{{ asset('images/logo-white.png') }}" alt="Logo">
+                    </a>
                 </div>
+
                 <h3 class="mb-2 text-white">Welcome back!</h3>
                 <p class="mb-4">Your all-in-one platform to organize, manage,<br>and grow your events seamlessly.</p>
             </div>

@@ -327,7 +327,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
             padding: 1.5rem;
-            margin-top: -5rem;
+            /* margin-top: -5rem; */
             position: relative;
         }
 
@@ -647,7 +647,7 @@
 
         {{-- Carousel --}}
         <!-- Size banner 1500px x 350px -->
-        <div id="organizerCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+        <!-- <div id="organizerCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
             <div class="carousel-inner" id="carouselInner">
                 <div class="carousel-item active">
                     <div class="d-flex justify-content-center align-items-center" style="height:350px;">
@@ -663,7 +663,7 @@
                     <span class="carousel-control-next-icon"></span>
                 </button>
             @endif
-        </div>
+        </div> -->
 
         <!-- Profile Section -->
         <section id="profile" class="position-relative mb-5 mt-5">
@@ -676,57 +676,6 @@
                             <h2 class="mb-0">{{ $organizer->name }}</h2>
                             <p class="mb-1 fst-italic text-primary">{{ $organizer->category }}</p>
                         </div>
-
-                        @if (!empty($organizer->social_links))
-                            @php
-                                $socials = is_array($organizer->social_links)
-                                    ? $organizer->social_links
-                                    : json_decode($organizer->social_links, true);
-                            @endphp
-
-                            <!-- @if (!empty($socials))
-                                <div class="social-links d-flex gap-3 align-items-center">
-                                    @foreach ($socials as $platform => $url)
-                                        @if ($url)
-                                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="">
-                                                <i class="bi bi-{{ strtolower($platform) }}"></i>
-                                            </a>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @endif -->
-                            @php
-                                $rawPhone = $organizer->phone ?? null;
-                                $phone = $rawPhone ? preg_replace('/[^0-9]/', '', $rawPhone) : null;
-
-                                // Tukar 01xxxxxxxx ke 601xxxxxxxx (Malaysia format)
-                                if ($phone && str_starts_with($phone, '0')) {
-                                    $phone = '6' . $phone;
-                                }
-                            @endphp
-
-                            @if($phone)
-                                @php
-                                    $name = $organizer->name;
-                                    $message = urlencode("Hai {$name},\n\nSaya dari sistemkami ingin tanya pasal pakej.");
-                                @endphp
-
-                                <div class="social-links d-flex gap-3 align-items-center mb-3">
-                                    <a href="https://wa.me/{{ $phone }}?text={{ $message }}" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    class="btn btn-success d-flex align-items-center gap-2">
-                                        
-                                        <i class="bi bi-whatsapp"></i>
-                                       <span class="d-flex flex-column text-start">
-                                            <span>WhatsApp</span>
-                                            <span>{{ $organizer->name }} Sekarang</span>
-                                        </span>
-
-                                    </a>
-                                </div>
-                            @endif
-                        @endif
                     </div>
 
                     @php
@@ -740,9 +689,9 @@
                         $isLongLaptop = strlen($organizer->description) > $maxLengthLaptop;
                     @endphp
 
-                    @if (empty($organizer->social_links))
+                    <!-- @if (empty($organizer->social_links)) -->
                     <div class="mt-5"></div>
-                    @endif
+                    <!-- @endif -->
                    {{-- Mobile --}}
                     <!-- <p class="profile-intro-desc mb-2 d-block d-md-none">
                         <span id="desc-preview-mobile-{{ $organizer->id }}">
@@ -805,7 +754,7 @@
         <!-- Size package img 1024px x 1024px -->
         <section>
             <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">
-                @if($organizer->id == 6)
+                @if($organizer->what_flow == 2)
                 1. Pilih Tema
                 @else
                 1. Pilih Pakej
@@ -891,19 +840,21 @@
                                         {{ Str::limit(strip_tags($package->description), 340) }}
                                     </div>
                                 @else
-                                    @if(!empty($package->items) && count($package->items) > 0)
-                                        <section class="mb-4">
-                                            <ul class="list-unstyled property-details-list">
-                                                @foreach ($package->items ?? [] as $item)
-                                                    @if($item['is_optional'] == 0 )
-                                                        <li class="mb-0">
-                                                            <i class="fa-solid fa-check text-success me-2"></i>
-                                                            <strong class="mr-1">{{ $item['title'] }}</strong>
-                                                        </li>
-                                                    @endif
-                                                @endforeach
-                                            </ul>
-                                        </section>
+                                    @if($organizer->what_flow != 2)
+                                        @if(!empty($package->items) && count($package->items) > 0)
+                                            <section class="mb-4">
+                                                <ul class="list-unstyled property-details-list">
+                                                    @foreach ($package->items ?? [] as $item)
+                                                        @if($item['is_optional'] == 0 )
+                                                            <li class="mb-0">
+                                                                <i class="fa-solid fa-check text-success me-2"></i>
+                                                                <strong class="mr-1">{{ $item['title'] }}</strong>
+                                                            </li>
+                                                        @endif
+                                                    @endforeach
+                                                </ul>
+                                            </section>
+                                        @endif
                                     @endif
                                 @endif
 
@@ -913,7 +864,8 @@
                                         class="package-btn btn btn-light w-100 text-dark"
                                         data-package-id="{{ $package->id }}"
                                         data-package-slot-qty="{{ $package->package_slot_quantity }}"
-                                        data-package-name="{{ $package->name }}">
+                                        data-package-name="{{ $package->name }}"
+                                        data-excluded-slots='@json($package->exclude_vendor_time_slots ?? [])'>
                                         Select
                                     </button>
                                 </div>
@@ -927,7 +879,7 @@
 
         <section>
             <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">
-                @if($organizer->id == 6)
+                @if($organizer->what_flow == 2)
                 2. Pilih Pakej
                 @else
                 2. Pilih Tema
@@ -963,10 +915,16 @@
 
                             <div class="portfolio-content">
                                 <h4 class="event-title portfolio-title">{{ $slot->slot_name ?? 'Tema' }}</h4>
+                                @if($organizer->what_flow == 2)
+                                <h4 class="event-title portfolio-title">RM {{ $slot->slot_price }}</h4>
+                                <h4 class="event-title portfolio-title">{{ $slot->duration_minutes }} minit</h4>
+
+                                @endif
                                 <div class="mt-3">
                                     <button type="button"
                                         class="slot-btn btn btn-light w-100 text-dark"
-                                        data-slot-id="{{ $slot->id }}">
+                                        data-slot-id="{{ $slot->id }}"
+                                        data-slot-price="{{ $slot->slot_price }}">
                                         Select
                                     </button>
                                 </div>
@@ -986,7 +944,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @if($organizer->id == 6)
+                @if($organizer->what_flow == 2)
                     Sila pilih tema dahulu.
                 @else
                     Sila pilih pakej dahulu.
@@ -1309,7 +1267,7 @@
                             <small class="text-muted">Minimum deposit RM50</small>
                         </div>
 
-                        @if($organizer->id == 6)
+                        @if($organizer->what_flow == 2)
                         <div class="mb-3">
                             <label for="selectedPackageSlot" class="form-label">Slot</label>
                             <input type="text" id="selectedPackageSlot" class="form-control" readonly placeholder="Sila pilih pakej dan tema dahulu">
@@ -1322,7 +1280,7 @@
 
                         <div class="mb-3">
                             <label for="customerWhatsApp" class="form-label">Package Price (RM)</label>
-                            <input type="text" id="modalPackagePrice" value="0" class="form-control" readonly>
+                            <input type="text" id="modalSlotPrice" value="0" class="form-control" readonly>
                         </div>
                         @else
                         <div class="mb-3">
@@ -1458,7 +1416,8 @@
 
 @push('scripts')
 <script>
-
+const whatFlow = {{ $organizer->what_flow }};
+let slotPrice = 0.00;
 function updateSelectedSlotInput() {
     const selectedSlotDisplay = document.getElementById('selectedSlotDisplay');
 
@@ -1562,7 +1521,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const pkgId  = parseInt(btn.dataset.packageId);
             const pkgQty = parseInt(btn.dataset.packageSlotQty);
-
+            console.log("pkgId");
+            console.log(pkgId);
             if (selectedPackageId === pkgId) {
 
                 // 🔴 DESELECT
@@ -1581,30 +1541,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('calendarDefaultBox')?.classList.remove('d-none');
                 document.getElementById('calendarContent')?.classList.add('d-none');
 
-                // 🟢 SELECT NEW PACKAGE
                 selectedPackageId  = pkgId;
                 selectedPackageQty = pkgQty;
 
                 selectedSlotIds = [];
                 selectedTimes   = [];
+
                 document.getElementById("selected_date").value = "";
 
                 resetTimeSlotUI();
 
                 fetchCalendarData(pkgId);
 
-                // 🔥 AUTO SELECT FOR COMBO
-                if (selectedPackageQty > 1) {
+                // 🔥 NEW PART
+                const excludedSlots = JSON.parse(btn.dataset.excludedSlots || "[]")
+                    .map(id => parseInt(id));
 
-                    slotButtons.forEach((b, i) => {
-                        if (i < selectedPackageQty) {
-                            selectedSlotIds.push(parseInt(b.dataset.slotId));
-                        }
-                    });
+                slotButtons.forEach(slotBtn => {
+                    const slotId = parseInt(slotBtn.dataset.slotId);
+                    const wrapper = slotBtn.closest('.col-12');
 
-                    updateSlotsUI();
-                }
+                    if (excludedSlots.includes(slotId)) {
+                        wrapper.classList.add('d-none');
+                    } else {
+                        wrapper.classList.remove('d-none');
+                    }
+                });
             }
+
             updatePackagesUI();
             updateSlotsUI();
             updateSelectedPackageSlot();
@@ -1623,6 +1587,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             const slotId = parseInt(btn.dataset.slotId);
+            slotPrice = parseFloat(btn.dataset.slotPrice);
+
+            let modalSlotPriceInput = document.getElementById('modalSlotPrice');
+            if (modalSlotPriceInput) {
+                modalSlotPriceInput.value = slotPrice.toFixed(2);
+            }
 
             // If already selected → unselect
             if (selectedSlotIds.includes(slotId)) {
@@ -1655,12 +1625,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-
-
-
-
-
 
     //  const packageButtons = document.querySelectorAll('.package-btn');
 
@@ -1768,17 +1732,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const paymentOption      = document.getElementById('paymentOption');
             const depositAmountInput = document.getElementById('depositAmount');
 
-            const isManual = {{ $package->is_manual }} == 2;
+            const isManual = {{ $organizer->what_flow }} == 2;
 
             if (isManual) {
-                let selectedTimes = [];
-                try {
-                    selectedTimes = JSON.parse(selectedTimeInput.value || "[]");
-                } catch(e) {}
+                // let selectedTimes = [];
+                // try {
+                //     selectedTimes = JSON.parse(selectedTimeInput.value || "[]");
+                // } catch(e) {}
 
-                selectedTimes.forEach(slot => {
-                    packageTotal += parseFloat(slot.price || 0);
-                });
+                // selectedTimes.forEach(slot => {
+                //     packageTotal += parseFloat(slot.price || 0);
+                // });
+                packageTotal =  slotPrice ;
+                console.log("packageTotal");
+                console.log(packageTotal);
 
             } else {
                 packageTotal =  packagePrice ;
@@ -1992,7 +1959,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formattedDate = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month:'long', year:'numeric' });
 
                 // Slots text
-                let slotsText = selectedSlots.map(s => `${s.id} (${s.time})`).join(",");
+                let slotsText = selectedSlots.map(s => `${s.name} (${s.time})`).join(",");
 
                 // WhatsApp message
                 const packageTitle = "{{ $package->name }}";
@@ -2190,9 +2157,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(selectedDate.getDate()).padStart(2, '0');
                     const formattedDate = `${yyyy}-${mm}-${dd}`;
-
-                    // Log it (for debug)
-                    console.log(formattedDate);
 
                     // Set the hidden input value
                     document.getElementById("selected_date").value = formattedDate;
@@ -2634,49 +2598,49 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        // document.addEventListener("DOMContentLoaded", function() {
 
-            const organizerId = @json($organizer->id);
-            const container = document.getElementById("carouselInner");
+        //     const organizerId = @json($organizer->id);
+        //     const container = document.getElementById("carouselInner");
 
-            fetch(`/organizer/${organizerId}/banners`)
-            .then(res => res.json())
-            .then(data => {
+        //     fetch(`/organizer/${organizerId}/banners`)
+        //     .then(res => res.json())
+        //     .then(data => {
 
-                if (!data.banners.length) {
-                    container.innerHTML = `
-                        <div class="carousel-item active">
-                            <div class="text-center p-5">No banner available</div>
-                        </div>`;
-                    return;
-                }
+        //         if (!data.banners.length) {
+        //             container.innerHTML = `
+        //                 <div class="carousel-item active">
+        //                     <div class="text-center p-5">No banner available</div>
+        //                 </div>`;
+        //             return;
+        //         }
 
-                let html = "";
+        //         let html = "";
 
-                data.banners.forEach((image, index) => {
-                    html += `
-                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                        <img 
-                            src="/images/organizers/${data.id}/${image}" 
-                            class="d-block w-100 carousel-image"
-                            alt="banner">
-                    </div>`;
-                });
+        //         data.banners.forEach((image, index) => {
+        //             html += `
+        //             <div class="carousel-item ${index === 0 ? 'active' : ''}">
+        //                 <img 
+        //                     src="/images/organizers/${data.id}/${image}" 
+        //                     class="d-block w-100 carousel-image"
+        //                     alt="banner">
+        //             </div>`;
+        //         });
 
-                container.innerHTML = html;
+        //         container.innerHTML = html;
 
-                // reinitialize bootstrap carousel
-                const carousel = new bootstrap.Carousel(document.getElementById('organizerCarousel'));
+        //         // reinitialize bootstrap carousel
+        //         const carousel = new bootstrap.Carousel(document.getElementById('organizerCarousel'));
 
-            })
-            .catch(err => {
-                container.innerHTML = `
-                <div class="carousel-item active">
-                    <div class="text-danger text-center p-5">Failed to load images</div>
-                </div>`;
-            });
+        //     })
+        //     .catch(err => {
+        //         container.innerHTML = `
+        //         <div class="carousel-item active">
+        //             <div class="text-danger text-center p-5">Failed to load images</div>
+        //         </div>`;
+        //     });
 
-        });
+        // });
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {

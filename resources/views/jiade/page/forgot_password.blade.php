@@ -43,8 +43,10 @@
 		<div class="login-aside text-center  d-flex flex-column flex-row-auto">
 			<div class="d-flex flex-column-auto flex-column pt-lg-40 pt-15">
 				<div class="text-center mb-lg-4 mb-2 pt-5 logo">
-					<img src="{{ asset('images/logo-white.png') }}" alt="">
-				</div>
+                    <a href="{{ route('index') }}">
+                        <img src="{{ asset('images/logo-white.png') }}" alt="Logo">
+                    </a>
+                </div>
 				<h3 class="mb-2 text-white">Welcome back!</h3>
 				<p class="mb-4">User Experience & Interface Design <br>Strategy SaaS Solutions</p>
 			</div>
