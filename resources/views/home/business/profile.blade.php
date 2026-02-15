@@ -889,7 +889,7 @@
                 @foreach($slots as $slot)
                     <div class="col-12 col-md-6 col-xl-6">
                         <article class="card portfolio-item transition-all duration-200">
-                            @if($organizer->id != 6)
+                            @if($organizer->what_flow != 2)
                             <div id="packageCarousel_{{ $slot->id }}" class="carousel slide mb-4 package-carousel"
                                 data-bs-ride="carousel">
                                 <div class="carousel-inner" id="carouselInner_slot_{{ $slot->id }}" data-package="{{ $slot->id }}">
@@ -914,10 +914,10 @@
                             @endif
 
                             <div class="portfolio-content">
-                                <h4 class="event-title portfolio-title">{{ $slot->slot_name ?? 'Tema' }}</h4>
+                                <h4 class="event-title portfolio-title text-center">{{ $slot->slot_name ?? 'Tema' }}</h4>
                                 @if($organizer->what_flow == 2)
-                                <h4 class="event-title portfolio-title">RM {{ $slot->slot_price }}</h4>
-                                <h4 class="event-title portfolio-title">{{ $slot->duration_minutes }} minit</h4>
+                                <h4 class="event-title portfolio-title text-center">RM {{ $slot->slot_price }}</h4>
+                                <h4 class="event-title portfolio-title text-center">{{ $slot->duration_minutes }} minit</h4>
 
                                 @endif
                                 <div class="mt-3">
@@ -1948,18 +1948,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
 
                     paymentText =
-                `Payment : Full Payment
-                Total   : RM ${grandTotal.toFixed(2)}`;
+                `Payment : Full Payment\n Total   : RM ${grandTotal.toFixed(2)}`;
 
                 }
-
 
                 // Format date
                 const dateObj = new Date(date);
                 const formattedDate = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month:'long', year:'numeric' });
 
+                const selectedSlotDisplay = document.getElementById('selectedSlotDisplay');
+
                 // Slots text
-                let slotsText = selectedSlots.map(s => `${s.name} (${s.time})`).join(",");
+                let slotsText = selectedSlotDisplay.value;
 
                 // WhatsApp message
                 const packageTitle = "{{ $package->name }}";
