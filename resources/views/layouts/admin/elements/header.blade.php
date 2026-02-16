@@ -861,7 +861,7 @@
                                                 <span class="d-block text-end">@ {{ $authUser->user->username }}</span>
                                             </div>
                                         </div>
-                                        <img src="{{ $authUser->logo_url ?? asset('images/uploads/default-organizer-logo.jpg') }}" alt="{{ $authUser->name }} logo">
+                                        <img src="{{ $authUser->logo_url ?? asset('storage/uploads/default-organizer-logo.jpg') }}" alt="{{ $authUser->name }} logo">
                                         <!-- <img src="{{ $authUser->organizer->logo_path ?? 'images/default.jpg' }}" alt=""> -->
                                     </div>
                                 </a>

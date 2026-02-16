@@ -585,7 +585,7 @@
 
                             $firstPackageImageUrl = null;
                             if ($firstPackage && $firstPackage->images && $firstPackage->images->first()) {
-                                $firstPackageImageUrl = asset('images/uploads/' . $organizer->id . '/packages/' . $firstPackage->id . '/' . $firstPackage->images->first()->url);
+                                $firstPackageImageUrl = asset('storage/uploads/' . $organizer->id . '/packages/' . $firstPackage->id . '/' . $firstPackage->images->first()->url);
                             }
 
                             $minPrice = null;
@@ -636,7 +636,7 @@
                                     @elseif(!empty($organizer->banner_path))
                                         <img src="{{ $organizer->banner_path }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
                                     @else
-                                        <img src="{{ asset('images/uploads/default-organizer-logo.jpg') }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
+                                        <img src="{{ asset('storage/uploads/default-organizer-logo.jpg') }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
                                     @endif
 
                                     <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">

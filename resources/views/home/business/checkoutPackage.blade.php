@@ -454,7 +454,7 @@
                     @php
                         $coverImage = collect($package->images)->firstWhere('is_cover', true) ?? $package->images[0];
                     @endphp
-                    <img src="{{ asset('images/uploads/' . $package->organizer->id . '/packages/' . $package->id . '/' . $coverImage['url']) }}"
+                    <img src="{{ asset('storage/uploads/' . $package->organizer->id . '/packages/' . $package->id . '/' . $coverImage['url']) }}"
                         alt="{{ $coverImage['alt_text'] }}" width="200" class="me-3 object-fit-cover" loading="lazy"
                         decoding="async" style="border-radius: 20px; height: 110px; " />
                 @endif

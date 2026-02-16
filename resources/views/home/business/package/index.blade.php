@@ -357,7 +357,7 @@
                 {{-- Main image - Always visible --}}
                 <div class="col-12 col-md-7">
                     @if($mainImage)
-                        <img src="{{ asset('images/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $mainImage->url) }}"
+                        <img src="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $mainImage->url) }}"
                             alt="{{ $mainImage->alt_text ?? 'Main image' }}"
                             class="property-images-main w-100 h-100 object-fit-cover"
                             style="aspect-ratio: 4/3; cursor: pointer;" data-bs-toggle="modal"
@@ -369,7 +369,7 @@
                 <div class="col-12 col-md-5 d-none d-md-flex flex-column gap-2 h-100">
                     @foreach($secondaryImages->take(2) as $index => $image)
                         <div class="flex-fill overflow-hidden rounded">
-                            <img src="{{ asset('images/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}"
+                            <img src="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $image->url) }}"
                                 alt="{{ $image->alt_text ?? 'Gallery image' }}" class="w-100 object-fit-cover"
                                 data-bs-toggle="modal" data-bs-target="#imageGalleryModal" data-img-index="{{ $index }}"
                                 style="height:{{ $heightClass }}; cursor: pointer;" />

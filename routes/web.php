@@ -29,23 +29,29 @@ use App\Models\Booking;
 |
 */
 
-Route::get('/send-test-mail', function () {
-    Mail::to('muhamadakmal9973@gmail.com')->send(new TestMail());
-    return 'Test email sent!';
+// Route::get('/send-test-mail', function () {
+//     Mail::to('muhamadakmal9973@gmail.com')->send(new TestMail());
+//     return 'Test email sent!';
+// });
+
+Route::get('/migrate-images', function () {
+
+    $source = public_path('images/uploads');
+    $destination = storage_path('app/public/uploads');
+
+    if (!File::exists($destination)) {
+        File::makeDirectory($destination, 0755, true);
+    }
+
+    File::copyDirectory($source, $destination);
+
+    return 'Images migrated successfully!';
 });
 
-Route::get('/env', function () {
-    return response()->json([
-        'APP_ENV' => env('APP_ENV'),
-        'GOOGLE_DRIVE_CREDENTIALS' => env('GOOGLE_DRIVE_CREDENTIALS'),
-        'APP_URL' => env('APP_URL'),
-        'MAILGUN_SECRET' => env('MAILGUN_SECRET'),
-        'MAILGUN_ENDPOINT' => env('MAILGUN_ENDPOINT'),
-        'MAILGUN_DOMAIN' => env('MAILGUN_DOMAIN'),
-        // Add any other keys you want to check
-    ]);
+Route::get('/link-storage', function () {
+    Artisan::call('storage:link');
+    return 'linked';
 });
-
 
 Route::get('/db-check', function () {
     try {

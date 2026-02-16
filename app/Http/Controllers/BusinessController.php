@@ -40,7 +40,7 @@ class BusinessController extends Controller
         }
 
         $seoImage = $imageSource
-            ? asset('images/uploads/' . $organizer->id . '/' . $imageSource)
+            ? asset('storage/uploads/' . $organizer->id . '/' . $imageSource)
             : asset('images/og-default.jpg');
 
         if ($isPackage) {
@@ -59,8 +59,8 @@ class BusinessController extends Controller
                     "{$appName} vendor",
                 ])),
                 'image'         => $package->images->first()
-                    ? asset('images/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url)
-                    : asset('images/logo-blue-full.png'),
+                    ? asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url)
+                    : asset('storage/logo-blue-full.png'),
 
             ];
         }
@@ -972,7 +972,7 @@ class BusinessController extends Controller
                     'id' => $package->id,
                     'images' => $package->images->map(function ($img) use ($package) {
                         return [
-                            'url' => asset("images/uploads/{$package->organizer_id}/packages/{$package->id}/{$img->url}"),
+                            'url' => asset("storage/uploads/{$package->organizer_id}/packages/{$package->id}/{$img->url}"),
                             'alt' => $img->alt_text
                         ];
                     })
@@ -993,7 +993,7 @@ class BusinessController extends Controller
                     'id' => $package->id,
                     'images' => $package->images->map(function ($img) use ($package) {
                         return [
-                            'url' => asset("images/uploads/{$package->organizer_id}/slots/{$package->id}/{$img->url}"),
+                            'url' => asset("storage/uploads/{$package->organizer_id}/slots/{$package->id}/{$img->url}"),
                             'alt' => $img->alt_text
                         ];
                     })
