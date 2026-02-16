@@ -1219,6 +1219,7 @@
 
                         <hr>
 
+                        @if($package->addons->count() > 0)
                         <div class="mb-3">
                             <label class="form-label">Add-Ons</label>
 
@@ -1273,8 +1274,8 @@
 
                                 </div>
                             @endforeach
-
                         </div>
+                        @endif
 
                         <hr>
 
