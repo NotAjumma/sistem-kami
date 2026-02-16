@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ImageUploadController extends Controller
@@ -13,23 +14,38 @@ class ImageUploadController extends Controller
     }
 
     // Handle file upload
-   public function upload(Request $request)
+    public function upload(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:5120', // max 5MB
+            'image' => 'required|image|max:5120',
             'organizer_id' => 'required|integer',
             'package_id' => 'required|integer',
+            'filename' => 'nullable|string', // optional nama custom tanpa extension
         ]);
 
         $organizerId = $request->input('organizer_id');
         $packageId = $request->input('package_id');
 
-        // Simpan file ke storage/app/public/uploads/{organizerId}/packages/{packageId}/
-        $path = $request->file('image')->store("uploads/$organizerId/packages/$packageId", 'public');
+        $file = $request->file('image');
 
-        // Kembalikan URL untuk blade
+        // Get extension dari file
+        $extension = $file->getClientOriginalExtension();
+
+        // Nama file custom, fallback ke original name
+        $name = $request->input('filename') 
+            ? $request->input('filename') . '.' . $extension
+            : $file->getClientOriginalName();
+
+        // Simpan file ke storage dengan nama custom
+        $path = $file->storeAs(
+            "uploads/$organizerId/packages/$packageId", 
+            $name, 
+            'public'
+        );
+
         $url = asset('storage/' . $path);
 
         return back()->with('success', 'Gambar berjaya diupload')->with('url', $url);
     }
+
 }
