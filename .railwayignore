@@ -1,9 +1,6 @@
-node_modules
+public/images/uploads
 vendor
+node_modules
 .git
 storage/logs
-storage/framework/cache
-storage/framework/sessions
-storage/framework/views
-public/storage
-tests
+storage/framework
