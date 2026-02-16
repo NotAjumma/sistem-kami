@@ -9,16 +9,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vendor_time_slots', function (Blueprint $table) {
-            $table->tinyInteger('is_multiple')
-                  ->default(0)
-                  ->after('rest_minutes');
+
+            $table->integer('rest_minutes')
+                ->default(0)
+                ->after('duration_minutes');
+
+            $table->boolean('is_multiple')
+                ->default(false)
+                ->after('rest_minutes');
+
         });
     }
 
     public function down(): void
     {
         Schema::table('vendor_time_slots', function (Blueprint $table) {
-            $table->dropColumn('is_multiple');
+
+            $table->dropColumn(['rest_minutes', 'is_multiple']);
+
         });
     }
+
 };

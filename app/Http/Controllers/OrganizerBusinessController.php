@@ -779,13 +779,21 @@ class OrganizerBusinessController extends Controller
 
         $events = [];
 
-        $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package'])
+        $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package', 'bookingAddons.addon'])
             ->where('organizer_id', $organizerId)
             ->where('bookings.status', '!=', 'cancelled')
             ->whereHas('vendorTimeSlots')
             ->get();
 
         foreach ($bookings as $booking) {
+
+            $addons = [];
+
+            foreach ($booking->bookingAddons as $bookingAddon) {
+                if ($bookingAddon->addon) {
+                    $addons[] = $bookingAddon->addon->name . ' x' . $bookingAddon->qty;
+                }
+            }
 
             if ($booking->vendorTimeSlots->isEmpty()) {
                 continue;
@@ -845,6 +853,7 @@ class OrganizerBusinessController extends Controller
                     'deposit'       => $booking->paid_amount,
                     'balance'       => $balance,
                     'booking_id'    => $booking->id,
+                    'addons'        => implode(', ', $addons),
                 ],
             ];
         }

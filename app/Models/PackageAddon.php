@@ -30,4 +30,10 @@ class PackageAddon extends Model
         return $this->belongsToMany(Booking::class, 'booking_addon');
     }
 
+    public function bookingAddons()
+    {
+        return $this->hasMany(BookingAddon::class, 'addon_id');
+    }
+
+
 }

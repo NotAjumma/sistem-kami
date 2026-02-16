@@ -170,6 +170,19 @@ document.addEventListener('DOMContentLoaded', function () {
         ? `Deposit RM${deposit} | Balance: RM${balance}`
         : `Full Payment`;
 
+      const addons = arg.event.extendedProps.addons;
+
+      let addonHtml = '';
+
+      if (addons) {
+        addonHtml = `
+          <div style="margin-top:4px;">
+            <strong>Add Ons:</strong><br>
+            ${addons}
+          </div>
+        `;
+      }
+
       if (!arg.event.extendedProps.description) {
         return {
           html: `
@@ -191,6 +204,9 @@ document.addEventListener('DOMContentLoaded', function () {
               </div>
               <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                 <span>${paymentHtml}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+               <span>${addonHtml}</span>
               </div>
             </div>
           `

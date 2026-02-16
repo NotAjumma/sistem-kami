@@ -96,5 +96,10 @@ class Booking extends Model
                     ->withTimestamps();
     }
 
+    public function bookingAddons()
+    {
+        return $this->hasMany(BookingAddon::class, 'booking_id');
+    }
+
 
 }

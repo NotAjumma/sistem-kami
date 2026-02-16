@@ -1287,6 +1287,8 @@
                         </div>
                         @endif
 
+                        <input type="hidden" id="selectedPackageId">
+
 
                         <hr>
 
@@ -1508,9 +1510,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
 
             const pkgId  = parseInt(btn.dataset.packageId);
+            const pkgName  = btn.dataset.packageName;
             const pkgQty = parseInt(btn.dataset.packageSlotQty);
-            console.log("pkgId");
-            console.log(pkgId);
+            // console.log("pkgId");
+            // console.log(pkgId);
             if (selectedPackageId === pkgId) {
 
                 // 🔴 DESELECT
@@ -1555,6 +1558,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         wrapper.classList.remove('d-none');
                     }
                 });
+
+                let selectedPackageSlot = document.getElementById('selectedPackageSlot');
+                if (selectedPackageSlot) {
+                    selectedPackageSlot.value = pkgName;
+                }
+                let selectedPackageIdInput = document.getElementById('selectedPackageId');
+                if (selectedPackageIdInput) {
+                    selectedPackageIdInput.value = pkgId;
+                }
             }
 
             updatePackagesUI();
@@ -1940,19 +1952,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 }
 
+                const whatFlow = {{ $organizer->what_flow }} == 2;
+
+                let titlePakej = 'Pakej';
+                let titleSlot = 'Slot';
+                if(whatFlow){
+                    titlePakej = 'Slot';
+                    titleSlot = 'Pakej';
+                }
                 // Format date
                 const dateObj = new Date(date);
                 const formattedDate = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month:'long', year:'numeric' });
 
                 const selectedSlotDisplay = document.getElementById('selectedSlotDisplay');
+                const selectedPackageSlot = document.getElementById('selectedPackageSlot');
+                const selectedPackageId = document.getElementById('selectedPackageId');
+
+                let pkgId = selectedPackageId.value;
 
                 // Slots text
                 let slotsText = selectedSlotDisplay.value;
 
                 // WhatsApp message
-                const packageTitle = "{{ $package->name }}";
+                let packageTitle = selectedPackageSlot.value;
                 let message = `
-                Hai ${studioAdminName}, \n\n saya ${name}. Saya ingin menempah \n\n Pakej : "${packageTitle}" \n Tarikh : ${formattedDate} \n Slot : ${slotsText}.`;
+                Hai ${studioAdminName}, \n\n saya ${name}. Saya ingin menempah \n\n "${titlePakej}" : "${packageTitle}" \n Tarikh : ${formattedDate} \n ${titleSlot} : ${slotsText}.`;
                 if (addOns.length) {
                     message += `\n\nAdd-ons:\n${addOns.map(a => `- ${a}`).join("\n")}`;
                 }
@@ -1965,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {'Content-Type': 'application/json','X-CSRF-TOKEN': '{{ csrf_token() }}'},
                     body: JSON.stringify({
                         organizer_id: "{{ $organizer->id }}",
-                        package_id: "{{ $package->id }}",
+                        package_id: pkgId,
                         date: date,
                         time: selectedSlots.map(s => s.time),
                         slot_name: selectedSlots.map(s => s.id),

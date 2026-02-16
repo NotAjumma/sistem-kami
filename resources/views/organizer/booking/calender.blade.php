@@ -35,7 +35,7 @@
 
 /* Time slots taller */
 .fc .fc-timegrid .fc-timegrid-slot {
-    height: 120px !important;
+    height: 150px !important;
 }
 
 .fc .fc-timegrid-slot-label,

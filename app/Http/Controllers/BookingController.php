@@ -1079,15 +1079,23 @@ class BookingController extends Controller
                 $paymentTypeStatus = 'full_payment';
             }
 
-            $slotDurations = collect($package->vendorTimeSlots)
-                ->mapWithKeys(function ($slot) use ($package) {
-                    return [$slot->id => $slot->duration_minutes];
-                });
+            if($package->organizer->what_flow == 2){
+                $slotDurations = collect($package->vendorTimeSlots)
+                    ->mapWithKeys(function ($slot) use ($package) {
+                        return [$slot->id => $slot->duration_minutes];
+                    });
+            }else{
+                $slotDurations = $package->duration_minutes;
+            }
 
             if (!empty($selected_time)) {
                 foreach ($selected_time as $slot) {
 
-                    $baseDuration   = $slotDurations[$slot['id']] ?? 0;
+                    if($package->organizer->what_flow == 2){
+                        $baseDuration   = $slotDurations[$slot['id']] ?? 0;
+                    }else{
+                        $baseDuration   = $slotDurations ?? 0;
+                    }
                     $totalDuration  = $baseDuration + $extraMinutes;
 
                     $start = Carbon::createFromFormat('g:i A', $slot['time']);
