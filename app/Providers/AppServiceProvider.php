@@ -26,5 +26,17 @@ class AppServiceProvider extends ServiceProvider
             File::ensureDirectoryExists(dirname($credentialsPath));
             File::put($credentialsPath, base64_decode($credentialsBase64));
         }
+
+        foreach ([
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('framework/cache'),
+            storage_path('app/public'),
+            storage_path('logs'),
+        ] as $path) {
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+        }
     }
 }
