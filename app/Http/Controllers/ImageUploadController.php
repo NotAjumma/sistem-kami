@@ -17,35 +17,36 @@ class ImageUploadController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:5120',
+            'image' => 'required|image|max:5120', // max 5MB
             'organizer_id' => 'required|integer',
             'package_id' => 'required|integer',
+            'type' => 'required|in:package,slot', // pilih type
             'filename' => 'nullable|string', // optional nama custom tanpa extension
         ]);
 
         $organizerId = $request->input('organizer_id');
         $packageId = $request->input('package_id');
-
+        $type = $request->input('type'); // package / slot
         $file = $request->file('image');
 
-        // Get extension dari file
         $extension = $file->getClientOriginalExtension();
-
-        // Nama file custom, fallback ke original name
         $name = $request->input('filename') 
             ? $request->input('filename') . '.' . $extension
             : $file->getClientOriginalName();
 
-        // Simpan file ke storage dengan nama custom
-        $path = $file->storeAs(
-            "uploads/$organizerId/packages/$packageId", 
-            $name, 
-            'public'
-        );
+        // Folder ikut type
+        $folder = "uploads/$organizerId/$type/$packageId";
+
+        $path = $file->storeAs($folder, $name, 'public');
 
         $url = asset('storage/' . $path);
 
-        return back()->with('success', 'Gambar berjaya diupload')->with('url', $url);
+        // Simpan session untuk display di blade (boleh loop banyak gambar nanti)
+        $images = session()->get($type.'_images', []);
+        $images[] = $url;
+        session()->put($type.'_images', $images);
+
+        return back()->with('success', ucfirst($type).' image berjaya diupload');
     }
 
 }
