@@ -38,5 +38,9 @@ class AppServiceProvider extends ServiceProvider
                 mkdir($path, 0755, true);
             }
         }
+
+        if (!file_exists(public_path('storage'))) {
+            Artisan::call('storage:link');
+        }
     }
 }

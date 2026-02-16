@@ -12,6 +12,7 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\OrganizerBusinessController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ImageUploadController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
@@ -71,7 +72,9 @@ Route::get('/db-check', function () {
     }
 });
 
-
+// super admin
+Route::get('/notajumma/upload-image', [ImageUploadController::class, 'show'])->name('superadmin.show.upload');
+Route::post('/notajumma/upload-image', [ImageUploadController::class, 'upload'])->name('superadmin.upload-image');
 
 // Used route
 Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
