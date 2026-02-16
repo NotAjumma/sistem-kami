@@ -1,3 +1,7 @@
-vendor
 node_modules
-.env
+vendor
+.git
+storage/logs
+storage/framework
+public/storage
+tests
