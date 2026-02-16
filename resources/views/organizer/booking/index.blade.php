@@ -1,6 +1,10 @@
 @extends('layouts.admin.default')
 @push('styles')
     <style>
+        .dropdown-menu {
+            max-height: none !important;
+            overflow: visible !important;
+        }
     </style>
 @endpush
 @section('content')
@@ -190,13 +194,13 @@
                                                 @endif
                                             </td>
                                             <td>{{ $booking->created_at->format('j M Y, H:iA') }}</td>
-                                            <td>
+                                            <td class="position-relative">
                                                 <div class="dropdown">
                                                     <button class="btn btn-primary btn-sm dropdown-toggle" type="button"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                                        data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                                                         Actions
                                                     </button>
-                                                    <ul class="dropdown-menu">
+                                                    <ul class="dropdown-menu dropdown-menu-end">
                                                         @if($booking->payment_method === 'gform' && $booking->status == 'pending' && !is_null($booking->resit_path))
                                                             <li>
                                                                 <form action="{{ route('organizer.booking.verify', $booking->id) }}"
