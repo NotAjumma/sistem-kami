@@ -56,11 +56,11 @@ class Organizer extends Authenticatable
     public function getLogoUrlAttribute()
     {
         if ($this->logo_path) {
-            return asset('images/organizers/' . $this->id . '/' . $this->logo_path);
+            return asset('images/uploads/' . $this->id . '/' . $this->logo_path);
         }
 
         // fallback to default logo if no logo_path set
-        return asset('images/organizers/default-organizer-logo.jpg');
+        return asset('images/uploads/default-organizer-logo.jpg');
     }
 
     public function packages()

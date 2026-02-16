@@ -247,8 +247,8 @@
         }
 
         .past-day {
-            background-color: rgb(205, 205, 207) !important;
-            color: #6c757d !important;
+            background-color: rgba(var(--bs-success-rgb)) !important;
+            color: #fff !important;
             cursor: not-allowed;
             opacity: 0.5;
         }
@@ -502,6 +502,10 @@
             .item-icon {
                 bottom: 265px !important;
             }
+
+            .icon-info{
+                display: none !important
+            }
         }
 
         @media (min-width: 992px) { /* tablets and above */
@@ -721,8 +725,7 @@
                             $organizer->address_line2,
                             $organizer->postal_code,
                             $organizer->city,
-                            $organizer->state,
-                            $organizer->country
+                            $organizer->state
                         ]);
                     @endphp
 
@@ -741,7 +744,7 @@
         <!-- Packages Section -->
         <!-- Size package img 1024px x 1024px -->
         <section>
-            <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">
+            <h3 class="mb-4 fw-bold text-center" style="font-size: 1.5rem; margin-top: 3rem;">
                 @if($organizer->what_flow == 2)
                 1. Pilih Tema
                 @else
@@ -786,7 +789,7 @@
                             </div>
 
                             <div class="portfolio-content">
-                                <h4 class="event-title portfolio-title">{{ $package->name }}</h4>
+                                <h4 class="event-title portfolio-title text-center">{{ $package->name }}</h4>
 
                                 @php
                                     $validDiscount = $package->discounts[0] ?? null;
@@ -814,34 +817,35 @@
                                 @endphp
 
                                 @if($package->is_manual != 2)
-                                <p class="event-title portfolio-price">
+                                <p class="event-title portfolio-price text-center mt-3 ">
                                     @if($finalPrice < $originalPrice)
                                         <del class="text-muted">RM {{ number_format($originalPrice, 2) }}</del><br>
                                     @endif
-                                    <strong>RM {{ number_format($finalPrice, 2) }}</strong>
+                                    <div class="event-title portfolio-price text-center">RM {{ number_format($finalPrice, 2) }}</div>
                                 </p>
                                 @endif
 
                                 {{-- Description or items --}}
                                 @if($package->description)
-                                    <div class="event-desc mt-2">
+                                    <div class="event-desc text-center">
                                         {{ Str::limit(strip_tags($package->description), 340) }}
                                     </div>
                                 @else
                                     @if($organizer->what_flow != 2)
-                                        @if(!empty($package->items) && count($package->items) > 0)
-                                            <section class="mb-4">
-                                                <ul class="list-unstyled property-details-list">
-                                                    @foreach ($package->items ?? [] as $item)
-                                                        @if($item['is_optional'] == 0 )
-                                                            <li class="mb-0">
-                                                                <i class="fa-solid fa-check text-success me-2"></i>
-                                                                <strong class="mr-1">{{ $item['title'] }}</strong>
-                                                            </li>
-                                                        @endif
-                                                    @endforeach
-                                                </ul>
-                                            </section>
+                                        @php
+                                            $includedItems = collect($package->items ?? [])->filter(function($i) {
+                                                return ($i['is_optional'] ?? 0) == 0;
+                                            })->pluck('title')->map(function($t) {
+                                                return Str::limit($t, 80);
+                                            })->toArray();
+                                        @endphp
+
+                                        @if(count($includedItems))
+                                            <div class="event-title portfolio-title text-center fw-bold text-dark">
+                                                @foreach($includedItems as $item)
+                                                    <div>{{ $item }}</div>
+                                                @endforeach
+                                            </div>
                                         @endif
                                     @endif
                                 @endif
@@ -866,7 +870,7 @@
         </section>
 
         <section>
-            <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">
+            <h3 class="mb-4 fw-bold text-center" style="font-size: 1.5rem;  margin-top: 3rem;">
                 @if($organizer->what_flow == 2)
                 2. Pilih Pakej
                 @else
@@ -946,7 +950,7 @@
         </div>
 
 
-        <section>
+        <section style="margin-top: 3rem;">
             <div id="calendarSection">
 
                 <!-- Default Placeholder -->
@@ -954,7 +958,7 @@
                     class="border rounded-3 p-5 text-center bg-light">
 
                     <div class="mb-3">
-                        <i class="fa-solid fa-calendar-check text-primary" style="font-size: 2rem;"></i>
+                        <i class="fa-solid fa-calendar-check text-primary" style="font-size: 1.5rem;"></i>
                     </div>
 
                     <h5 class="fw-semibold mb-2">
@@ -1053,9 +1057,9 @@
                     </table>
 
                     <!-- Time Slots -->
-                    <div id="timeSlots" class="d-none">
+                    <div id="timeSlots" class="d-none" style="margin-top: 3rem;">
                         <hr class="my-4" />
-                        <h6 class="fw-semibold mb-2 text-center" style="font-size: 1.2rem;">4. Pilih Masa</h6>
+                        <h6 class="fw-semibold mb-2 text-center" style="font-size: 1.5rem;">4. Pilih Masa</h6>
                         <hr class="mb-4" />
                         <!-- Legend -->
                         <div class="mt-0">
@@ -1122,36 +1126,6 @@
             </div>
         </section>
 
-
-        <!-- Gallery Section -->
-        <!-- Size gallery img 1024px x 1024px -->
-        @if(!request('package_category') && !request('keyword'))
-        <!-- <section id="portfolio" class="mb-5">
-            <h3 class="mb-4 fw-bold" style="font-size: 1.3rem;">Gallery</h3>
-            <div class="row g-4">
-                @foreach($organizer->gallery as $index => $gallery)
-                    @php
-                        $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name);
-                    @endphp
-                    <div class="col-6 col-md-4 col-xl-4">
-                        <article class="portfolio-item">
-                            <img src="{{ $imgUrl }}" alt="{{ $gallery->alt_text ?? 'Gallery Image' }}" class="portfolio-image"
-                                loading="lazy" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#galleryModal"
-                                data-img-index="{{ $index }}">
-                            <div class="portfolio-content">
-                                <h4 class="portfolio-title">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h4>
-                                <time datetime="{{ $gallery->created_at ? $gallery->created_at->format('Y-m') : '2025-01' }}"
-                                    class="portfolio-date">
-                                    {{ $gallery->created_at ? $gallery->created_at->format('F Y') : 'N/A' }}
-                                </time>
-                            </div>
-                        </article>
-                    </div>
-                @endforeach
-            </div>
-        </section> -->
-        @endif
-
         {{-- Google Map --}}
         @if($organizer->google_map_show)
         @if($organizer->latitude && $organizer->longitude)
@@ -1177,49 +1151,6 @@
         @endif
 
     </div>
-    <!-- <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content" style="max-height: 100vh; overflow: hidden;">
-                <div class="modal-body p-0">
-                    <button type="button" class="btn position-absolute top-0 end-0 z-3" style="height: 2.5rem; margin: 1rem !important;" data-bs-dismiss="modal"><i class="fa-solid fa-xmark fa-2xl"></i></button>
-
-                    <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            @foreach($organizer->gallery as $index => $gallery)
-                                @php $imgUrl = asset('images/organizers/' . $organizer->id . '/gallery/' . $gallery->file_name); @endphp
-                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                    <img src="{{ $imgUrl }}" class="d-block w-100 gallery-img"
-                                        alt="{{ $gallery->alt_text ?? 'Gallery Image' }}">
-
-                                    {{-- Caption Text Inside Modal --}}
-                                    <div class="mx-auto w-100 d-none d-md-block">
-                                        <div class="carousel-caption w-50 mx-auto text-center bg-dark bg-opacity-75 p-3 rounded">
-                                            <h5 class="caption_alt_text">{{ $gallery->alt_text ?? 'Gallery Photo' }}</h5>
-                                            @if($gallery->created_at)
-                                                <p class="mb-0">{{ $gallery->created_at->format('F Y') }}</p>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel"
-                            data-bs-slide="prev">
-                            <i class="fa-solid fa-square-caret-left text-primary d-none d-sm-inline" style="font-size: 5rem;"></i>
-                            <i class="fa-solid fa-square-caret-left text-primary d-inline d-sm-none" style="font-size: 3rem;"></i>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel"
-                            data-bs-slide="next">
-                            <i class="fa-solid fa-square-caret-right text-primary d-none d-sm-inline" style="font-size: 5rem;"></i>
-                            <i class="fa-solid fa-square-caret-right text-primary d-inline d-sm-none" style="font-size: 3rem;"></i>
-
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
 
     <!-- Booking Modal -->
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
@@ -1373,7 +1304,6 @@
                             </div>
 
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="nextToTNC" class="btn btn-primary">Next</button>
@@ -1399,6 +1329,21 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;">
+            <div class="icon-info" style="width:48px;height:48px;background:#001f4d;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;">i</div>
+            <div>
+                <div style="font-weight:700;margin-bottom:4px;">We use cookies to give you the best online experience.</div>
+                <div style="font-size:0.95rem;color:#4b5563;">By continuing to browse the site you are agreeing to our use of cookies.</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button id="cookieDecline" class="btn btn-outline-secondary">Decline</button>
+            <button id="cookieAccept" class="btn btn-primary">Accept</button>
         </div>
     </div>
 
@@ -1559,6 +1504,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
+                // 🔥 AUTO SELECT ONLY IF QTY = 2
+                selectedSlotIds = [];
+
+                if (selectedPackageQty === 2) {
+
+                    const availableSlots = [];
+
+                    slotButtons.forEach(slotBtn => {
+                        const slotId = parseInt(slotBtn.dataset.slotId);
+                        const wrapper = slotBtn.closest('.col-12');
+
+                        if (!wrapper.classList.contains('d-none')) {
+                            availableSlots.push(slotId);
+                        }
+                    });
+
+                    selectedSlotIds = availableSlots.slice(0, 2);
+                }
+
+
                 let selectedPackageSlot = document.getElementById('selectedPackageSlot');
                 if (selectedPackageSlot) {
                     selectedPackageSlot.value = pkgName;
@@ -1628,17 +1593,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //  const packageButtons = document.querySelectorAll('.package-btn');
 
-    packageButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
+    // packageButtons.forEach(btn => {
+    //     btn.addEventListener('click', function () {
 
-            const packageId = this.dataset.packageId;
+    //         const packageId = this.dataset.packageId;
 
-            if (!packageId) return;
+    //         if (!packageId) return;
 
-            fetchCalendarData(packageId);
+    //         fetchCalendarData(packageId);
 
-        });
-    });
+    //     });
+    // });
 
     function fetchCalendarData(packageId) {
         const calendarSection = document.getElementById('calendarSection');
@@ -1719,10 +1684,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             calculateSummary();
         };
-
-
-      
-
 
         function calculateSummary() {
 
@@ -1927,7 +1888,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 catch(e) { selectedSlots = []; }
                 if (!selectedSlots.length) return;
 
-                const name = document.getElementById('customerName').value.trim();
+                let nameInput = document.getElementById('customerName');
+                let name = nameInput.value.trim();
+
+                name = name
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ");
+
+                nameInput.value = name;
+
                 const whatsapp = document.getElementById('customerWhatsApp').value.trim();
                 const payment = document.getElementById('paymentOption').value;
                 let paymentText = "";
@@ -1976,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // WhatsApp message
                 let packageTitle = selectedPackageSlot.value;
                 let message = `
-                Hai ${studioAdminName}, \n\n saya ${name}. Saya ingin menempah \n\n "${titlePakej}" : "${packageTitle}" \n Tarikh : ${formattedDate} \n ${titleSlot} : ${slotsText}.`;
+                Hai ${studioAdminName}, \n\n Saya ${name} dan ingin menempah \n\n "${titlePakej}" : "${packageTitle}" \n Tarikh : ${formattedDate} \n ${titleSlot} : ${slotsText}.`;
                 if (addOns.length) {
                     message += `\n\nAdd-ons:\n${addOns.map(a => `- ${a}`).join("\n")}`;
                 }
@@ -2024,8 +1995,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
+<script>
+    (function(){
+        const COOKIE_NAME = 'cookie_consent';
+        const QUEUE_KEY = 'visitor_log_queue';
 
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return v ? v.pop() : null;
+        }
+        function setCookie(name, value, days=365) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days*24*60*60*1000));
+            document.cookie = name + '=' + value + ';path=/;expires=' + d.toUTCString();
+        }
 
+        function queueLog(payload) {
+            try {
+                const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+                q.push(payload);
+                localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+            } catch(e){ console.error(e); }
+        }
+
+        function flushQueue() {
+            try {
+                const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+                q.forEach(item => {
+                    fetch('/visitor-log', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(item)
+                    }).catch(err => console.error('Logging failed', err));
+                });
+                localStorage.removeItem(QUEUE_KEY);
+            } catch(e){ console.error(e); }
+        }
+
+        function sendVisitorLog(payload) {
+            const consent = getCookie(COOKIE_NAME);
+            if (consent === '1') {
+                fetch('/visitor-log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json())
+                .then(data => console.log('Visitor logged', data))
+                .catch(err => console.error('Logging failed', err));
+            } else {
+                // store until user accepts
+                queueLog(payload);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const consent = getCookie(COOKIE_NAME);
+            const banner = document.getElementById('cookieConsent');
+            if (!consent) {
+                banner.style.display = 'flex';
+            }
+
+            document.getElementById('cookieAccept').addEventListener('click', function(){
+                setCookie(COOKIE_NAME, '1', 365);
+                banner.style.display = 'none';
+                flushQueue();
+            });
+
+            document.getElementById('cookieDecline').addEventListener('click', function(){
+                setCookie(COOKIE_NAME, '0', 365);
+                banner.style.display = 'none';
+                localStorage.removeItem(QUEUE_KEY);
+            });
+
+            // send profile visit log (consent-aware)
+            sendVisitorLog({ action: 'visit_page', page: 'profile', reference_id: "{{ $organizer->id }}", uri: window.location.href });
+        });
+    })();
+</script>
     <!-- calendar script -->
     
     <script>
@@ -2761,26 +2813,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Failed to load package images', err);
                 });
 
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/visitor-log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    action: 'visit_page',
-                    page: 'profile',
-                    reference_id: "{{ $organizer->id }}",
-                    uri: window.location.href 
-                })
-            })
-            .then(res => res.json())
-            .then(data => console.log('Visitor logged', data))
-            .catch(err => console.error('Logging failed', err));
         });
     </script>
 @endpush

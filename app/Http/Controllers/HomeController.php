@@ -20,11 +20,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Only fetch events that are available (e.g. status = 1 = active, 0 = coming soon, 3 = ended)
-        $events = Event::with(['organizer', 'category', 'tickets'])
-            ->where('status', '1')
-            ->orderByDesc('id')
-            ->get();
+        // Previously fetched events for homepage; removed per requirement
 
         $packages = Package::with([
             'organizer',
@@ -37,12 +33,15 @@ class HomeController extends Controller
         ->orderBy('order_by')
         ->get();
 
+        // derive organizers from packages (unique)
+        $organizers = $packages->pluck('organizer')->unique('id')->values();
+
         $eventCategories = Category::whereNull('parent_id')
             ->orderBy('order_by')
             ->get();
         // $packageTypes = PackageCategory::all();
 
-        return view('home.index', compact('events', 'packages', 'eventCategories'));
+        return view('home.index', compact('packages', 'eventCategories', 'organizers'));
     }
 
     public function search(Request $request)

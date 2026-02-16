@@ -85,12 +85,12 @@
 			margin-left: 0 !important;
 		}
 
-		h2,
-		h6 {
-			font-family: "Press Start 2P", system-ui !important;
-			font-weight: 400;
-			font-style: normal;
-		}
+		h1,
+        h2,
+        h3,
+        h6 {
+            font-family: 'Playfair Display', serif !important;
+        }
 
 		.bg-gray-900 {
 			background-color: rgba(0, 31, 77, 1) !important;

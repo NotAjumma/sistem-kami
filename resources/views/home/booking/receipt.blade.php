@@ -164,7 +164,7 @@
                             @endphp
                             <div class="col-auto">
                                 <img 
-                                    src="{{ asset('images/organizers/' . $booking->package->organizer->id . '/packages/' . $booking->package->id . '/' . $coverImage['url']) }}" 
+                                    src="{{ asset('images/uploads/' . $booking->package->organizer->id . '/packages/' . $booking->package->id . '/' . $coverImage['url']) }}" 
                                     alt="{{ $coverImage['alt_text'] }}" 
                                     class="rounded shadow-sm border" 
                                     style="width: 80px; height: 80px; object-fit: cover;" 

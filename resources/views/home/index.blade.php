@@ -564,156 +564,124 @@
             </div>
         </section>
 
-        <!-- Business Custom Section -->
+        @php
+            // Ensure $organizers exists: use passed value or derive from $packages if available
+            $organizers = $organizers ?? (isset($packages) ? $packages->pluck('organizer')->unique('id')->values() : collect());
+        @endphp
+
+        <!-- Service Providers Section -->
         <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <div>
-                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 1.2rem;">Packages</h2>
+                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 2.2rem;">Service Providers</h2>
                 <div class="row g-4 justify-content-center">
-                    <!-- Card 1 -->
-                    @foreach ($packages as $package)
+                    @foreach ($organizers as $organizer)
+                        @php
+                            // packages related to this organizer (from $packages passed to view)
+                            $orgPackages = isset($packages) ? $packages->filter(function($p) use ($organizer) {
+                                return optional($p->organizer)->id == optional($organizer)->id;
+                            }) : collect();
+
+                            $firstPackage = $orgPackages->first();
+
+                            $firstPackageImageUrl = null;
+                            if ($firstPackage && $firstPackage->images && $firstPackage->images->first()) {
+                                $firstPackageImageUrl = asset('images/uploads/' . $organizer->id . '/packages/' . $firstPackage->id . '/' . $firstPackage->images->first()->url);
+                            }
+
+                            $minPrice = null;
+                            $multiplePrices = false;
+                            if ($orgPackages->count()) {
+                                if (isset($organizer->what_flow) && $organizer->what_flow == 2) {
+                                    // collect possible vendor time slots from packages
+                                    $allSlots = $orgPackages->flatMap(function($p) {
+                                        // try common slot relations/names
+                                        if (isset($p->vendor_time_slots)) return $p->vendor_time_slots;
+                                        if (isset($p->slots)) return $p->slots;
+                                        if (isset($p->time_slots)) return $p->time_slots;
+                                        if (isset($p->vendorTimeSlots)) return $p->vendorTimeSlots;
+                                        return collect();
+                                    });
+
+                                    $prices = $allSlots->map(function($s) {
+                                        if (is_array($s)) {
+                                            return $s['slot_price'] ?? $s['price'] ?? null;
+                                        }
+                                        return $s->slot_price ?? $s->price ?? null;
+                                    })->filter()->unique();
+
+                                    $minPrice = $prices->min();
+                                    $multiplePrices = $prices->count() > 1;
+                                } else {
+                                    $prices = $orgPackages->map(function($p) {
+                                        return $p->final_price ?? $p->base_price;
+                                    })->filter()->unique();
+
+                                    $minPrice = $prices->min();
+                                    $multiplePrices = $prices->count() > 1;
+                                }
+                            }
+                        @endphp
 
                         <div class="col-12 col-sm-6 col-xl-3 col-lg-4 col-md-6">
-                             <a href="{{ route('business.package', ['organizerSlug' => $package->organizer->slug, 'packageSlug' => $package->slug]) }}">
+                            <a href="{{ url('/' . ($organizer->slug ?? $organizer->id)) }}">
                                 <div class="card position-relative">
-                                    <div class="bookmark-icon" title="Bookmark">
-                                         {{ $package->category->name }}
+                                    <div class="bookmark-icon" title="Category">
+                                        {{ $organizer->category ?? '' }}
                                     </div>
-                                    @if ($package->images->isNotEmpty())
-                                        <img src="{{ asset('images/organizers/' . $package->organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url) }}"
-                                            class="d-block w-100 package-img" alt="Package Image">
+
+                                    @if($firstPackageImageUrl)
+                                        <img src="{{ $firstPackageImageUrl }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
+                                    @elseif(!empty($organizer->logo_url))
+                                        <img src="{{ $organizer->logo_url }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
+                                    @elseif(!empty($organizer->banner_path))
+                                        <img src="{{ $organizer->banner_path }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
+                                    @else
+                                        <img src="{{ asset('images/uploads/default-organizer-logo.jpg') }}" class="d-block w-100 package-img" alt="{{ $organizer->name }}">
                                     @endif
 
-                                    @if ($package->valid_from && $package->valid_until)
-                                        <div class="package-date-time text-center mx-3">
-                                            <div class="fw-bold small text-dark mb-2">
-                                                Available From
-                                            </div>
-
-                                            <div class="fs-6 text-primary fw-semibold">
-                                                <i class="far fa-calendar-alt me-2 text-primary"></i>
-                                                {{ \Carbon\Carbon::parse($package->valid_from)->format('d M Y') }} 
-                                                – 
-                                                {{ \Carbon\Carbon::parse($package->valid_until)->format('d M Y') }}
-                                            </div>
-
-                                            @if (\Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($package->valid_until)))
-                                                <div class="text-success small fw-semibold mt-2">
-                                                    <i class="fas fa-check-circle me-1"></i> Booking is open now!
-                                                </div>
-                                            @else
-                                                <div class="text-danger small fw-semibold mt-2">
-                                                    <i class="fas fa-times-circle me-1"></i> Booking period has ended.
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-    
                                     <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">
                                         <div class="event-organizer text-primary" title="Organizer">By
-                                            {{ $package->organizer->name }}
+                                            {{ $organizer->name }}
                                         </div>
-                                        <div class="event-title mb-2" title="{{ $package->name }}" style="height: 50px;">
-                                            {{ Str::limit(($package->name), 45) }}
+                                        <div class="event-title mb-2" title="{{ $organizer->name }}" style="height: 30px;">
+                                            {{ Str::limit(($organizer->name), 45) }}
                                         </div>
-                                        <div class="event-desc" style="height: 80px;">
-                                            {{ Str::limit(strip_tags($package->description), 140) }}
-                                        </div>
-                                        <hr class="dashed-hr mb-2 mt-4" />
-                                        @php
-                                            $location = collect([
-                                                $package->organizer->city,
-                                                $package->organizer->state,
-                                                $package->organizer->country
-                                            ])->filter()->implode(', ');
 
-                                        @endphp
-
-                                        <div class="event-footer">
-                                            @if ($location)
-                                            <div class="location" title="Location"><i
-                                                    class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
+                                        <div class="event-desc" style="height: 80px; overflow: hidden;">
+                                            @if($orgPackages->isNotEmpty())
+                                                <ul class="mb-0 ps-3">
+                                                    @foreach($orgPackages->take(3) as $pkg)
+                                                        <li style="font-size:0.95rem;">{{ Str::limit($pkg->name, 60) }}</li>
+                                                    @endforeach
+                                                    @if($orgPackages->count() > 3)
+                                                        <li style="font-size:0.95rem;">...</li>
+                                                    @endif
+                                                </ul>
                                             @else
-                                            <div class="location" title="Location"></div>
-                                            @endif
-                                            @if($package->organizer->what_flow != 2)
-                                                @if (!is_null($package->final_price))
-                                                    <div class="event-price fw-bold">RM{{ number_format($package->final_price, 2) }}</div>
-                                                @else
-                                                    <div class="event-price fw-bold">RM{{ number_format($package->base_price, 2) }}</div>
-                                                @endif
+                                                {{ Str::limit(strip_tags($organizer->description ?? ''), 140) }}
                                             @endif
                                         </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
 
-        <!-- Events Custom Section -->
-        <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
-            <div>
-                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 1.2rem;">Events</h2>
-                <div class="row g-4 justify-content-center">
-                    <!-- Card 1 -->
-                    @foreach ($events as $event)
-
-                        <div class="col-12 col-sm-6 col-xl-3 col-lg-4 col-md-6">
-                            <a href="{{ route('event.slug', ['slug' => $event->slug]) }}">
-                                <div class="card position-relative">
-                                    <!-- <div class="bookmark-icon" title="Bookmark">
-                                                                                                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                                                                                                                                <path d="M6 4a2 2 0 0 0-2 2v16l7-5 7 5V6a2 2 0 0 0-2-2H6z" />
-                                                                                                                                                            </svg>
-                                                                                                                                                        </div> -->
-                                    @if (!empty($event->image_cover))
-                                        <img src="{{ asset('images/events/' . $event->id . '/' . $event->image_cover) }}"
-                                            class="d-block w-100" alt="Event Image">
-                                    @endif
-                                    <div class="event-date-time mx-3">
-                                        <div class="text-primary">
-                                            <i
-                                                class="far fa-calendar-alt me-2 text-primary"></i>{{ \Carbon\Carbon::parse($event->start_date)->format('d M') }}
-                                        </div>
-                                        <div class="text-primary">
-                                            <i
-                                                class="far fa-clock me-2 text-primary"></i>{{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
-                                        </div>
-                                    </div>
-                                    <div class="card-body px-3 pb-3 pt-0">
-                                        <div class="event-organizer text-primary" title="Organizer">By
-                                            {{ $event->organizer->name }}
-                                        </div>
-                                        <div class="event-title mb-2" title="{{ $event->title }}">
-                                            {{ Str::limit(($event->title), 25) }}
-                                        </div>
-                                        <div class="event-desc">
-                                            {{ Str::limit(strip_tags($event->description), 80) }}
-                                        </div>
                                         <hr class="dashed-hr mb-2 mt-4" />
                                         @php
                                             $location = collect([
-                                                $event->district,
-                                                $event->state,
-                                                $event->country
+                                                $organizer->city ?? null,
+                                                $organizer->state ?? null
                                             ])->filter()->implode(', ');
-
-                                            $lowestPrice = $event->tickets->min('price');
                                         @endphp
 
-                                        @if ($location)
-                                            <div class="event-footer">
+                                        <div class="event-footer d-flex justify-content-between align-items-center">
+                                            @if ($location)
                                                 <div class="location" title="Location"><i
                                                         class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $location }}</div>
-                                                @if (!is_null($lowestPrice))
-                                                    <div class="event-price">RM{{ number_format($lowestPrice, 2) }} <sup>*</sup></div>
-                                                @else
-                                                    <div class="event-price text-muted">Free*</div>
-                                                @endif
-                                            </div>
-                                        @endif
+                                            @else
+                                                <div class="location" title="Location"></div>
+                                            @endif
+
+                                            @if($minPrice)
+                                                <div class="event-price fw-bold">RM{{ number_format($minPrice, 2) }}@if(!empty($multiplePrices))<sup>*</sup>@endif</div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </a>
@@ -858,26 +826,107 @@
         </section>
 
     </main>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;">
+            <div style="width:48px;height:48px;background:#001f4d;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;">i</div>
+            <div>
+                <div style="font-weight:700;margin-bottom:4px;">We use cookies to give you the best online experience.</div>
+                <div style="font-size:0.95rem;color:#4b5563;">By continuing to browse the site you are agreeing to our use of cookies.</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button id="cookieDecline" class="btn btn-outline-secondary">Decline</button>
+            <button id="cookieAccept" class="btn btn-primary">Accept</button>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/visitor-log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    action: 'visit_page',
-                    page: 'home',
-                })
-            })
-            .then(res => res.json())
-            .then(data => console.log('Visitor logged', data))
-            .catch(err => console.error('Logging failed', err));
-        });
-    </script>
+        (function(){
+            const COOKIE_NAME = 'cookie_consent';
+            const QUEUE_KEY = 'visitor_log_queue';
 
+            function getCookie(name) {
+                const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                return v ? v.pop() : null;
+            }
+            function setCookie(name, value, days=365) {
+                const d = new Date();
+                d.setTime(d.getTime() + (days*24*60*60*1000));
+                document.cookie = name + '=' + value + ';path=/;expires=' + d.toUTCString();
+            }
+
+            function queueLog(payload) {
+                try {
+                    const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+                    q.push(payload);
+                    localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+                } catch(e){ console.error(e); }
+            }
+
+            function flushQueue() {
+                try {
+                    const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+                    q.forEach(item => {
+                        fetch('/visitor-log', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(item)
+                        }).catch(err => console.error('Logging failed', err));
+                    });
+                    localStorage.removeItem(QUEUE_KEY);
+                } catch(e){ console.error(e); }
+            }
+
+            function sendVisitorLog(payload) {
+                const consent = getCookie(COOKIE_NAME);
+                if (consent === '1') {
+                    fetch('/visitor-log', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(payload)
+                    }).then(res => res.json())
+                    .then(data => console.log('Visitor logged', data))
+                    .catch(err => console.error('Logging failed', err));
+                } else {
+                    // store until user accepts
+                    queueLog(payload);
+                }
+            }
+
+            // show banner if consent not set
+            document.addEventListener('DOMContentLoaded', function() {
+                const consent = getCookie(COOKIE_NAME);
+                const banner = document.getElementById('cookieConsent');
+                if (!consent) {
+                    banner.style.display = 'flex';
+                }
+
+                document.getElementById('cookieAccept').addEventListener('click', function(){
+                    setCookie(COOKIE_NAME, '1', 365);
+                    banner.style.display = 'none';
+                    flushQueue();
+                });
+
+                document.getElementById('cookieDecline').addEventListener('click', function(){
+                    setCookie(COOKIE_NAME, '0', 365);
+                    banner.style.display = 'none';
+                    // clear any queued logs to respect decline
+                    localStorage.removeItem(QUEUE_KEY);
+                });
+
+                // original visitor log replaced with consent-aware sender
+                sendVisitorLog({ action: 'visit_page', page: 'home' });
+            });
+        })();
+    </script>
 @endpush
