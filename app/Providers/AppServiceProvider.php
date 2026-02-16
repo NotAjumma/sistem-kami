@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
             File::put($credentialsPath, base64_decode($credentialsBase64));
         }
 
+        // Ensure required directories exist
         foreach ([
             storage_path('framework/sessions'),
             storage_path('framework/views'),
@@ -34,9 +37,7 @@ class AppServiceProvider extends ServiceProvider
             storage_path('app/public'),
             storage_path('logs'),
         ] as $path) {
-            if (!file_exists($path)) {
-                mkdir($path, 0755, true);
-            }
+            File::ensureDirectoryExists($path);
         }
 
         if (!file_exists(public_path('storage'))) {
