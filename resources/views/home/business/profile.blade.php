@@ -502,10 +502,6 @@
             .item-icon {
                 bottom: 265px !important;
             }
-
-            .icon-info{
-                display: none !important
-            }
         }
 
         @media (min-width: 992px) { /* tablets and above */

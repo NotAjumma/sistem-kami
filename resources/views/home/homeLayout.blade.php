@@ -153,6 +153,12 @@
 		.bg-primary-dark {
 			background-color: rgba(0, 31, 77, 1);
 		}
+
+		@media (max-width: 991.98px) { /* tablets and below */
+            .icon-info {
+                display: none !important;
+            }
+        }
 	</style>
 	@stack('styles')
 </head>
