@@ -20,7 +20,7 @@ class ImageUploadController extends Controller
             'image' => 'required|image|max:5120', // max 5MB
             'organizer_id' => 'required|integer',
             'package_id' => 'required|integer',
-            'type' => 'required|in:package,slot', // pilih type
+            'type' => 'required|in:packages,slots', // pilih type
             'filename' => 'nullable|string', // optional nama custom tanpa extension
         ]);
 

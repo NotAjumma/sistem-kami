@@ -33,8 +33,8 @@
 
     <label>Type:</label>
     <select name="type" required>
-        <option value="package">Package</option>
-        <option value="slot">Slot</option>
+        <option value="packages">Package</option>
+        <option value="slots">Slot</option>
     </select>
 
     <label>File Name (Optional):</label>
