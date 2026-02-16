@@ -286,23 +286,25 @@
 
 @push('scripts')
     @if(session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: @json(session('success')),
-                showCancelButton: true,
-                confirmButtonText: 'Send Receipt',
-                cancelButtonText: 'OK',
-                reverseButtons: true,
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.open(@json(session('whatsapp_url')), "_blank");
-                }
-            });
-        </script>
+    <script>
+        const whatsappUrl = @json(session('whatsapp_url', null));
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: @json(session('success')),
+            showCancelButton: !!whatsappUrl,      // kalau ada URL, tunjuk cancel button
+            confirmButtonText: whatsappUrl ? 'Send Receipt' : 'OK', // confirm button
+            cancelButtonText: whatsappUrl ? 'OK' : undefined,       // cancel button hanya kalau ada URL
+            reverseButtons: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        }).then((result) => {
+            if (result.isConfirmed && whatsappUrl) {
+                window.open(whatsappUrl, "_blank");
+            }
+        });
+    </script>
     @endif
     <script>
 
