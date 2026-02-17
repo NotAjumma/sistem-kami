@@ -1187,7 +1187,10 @@
                             <label for="selectedPackageSlot" class="form-label">Slot</label>
                             <input type="text" id="selectedPackageSlot" class="form-control" readonly placeholder="Sila pilih pakej dan tema dahulu">
                         </div>
-
+                        <div class="mb-3">
+                            <label for="modalSelectedDate" class="form-label">Date</label>
+                            <input type="text" id="modalSelectedDate" value="0" class="form-control" readonly>
+                        </div>
                         <div class="mb-3">
                             <label for="selectedPackageSlot" class="form-label">Package</label>
                             <input type="text" id="selectedSlotDisplay" class="form-control" readonly placeholder="Sila pilih pakej dan tema dahulu">
@@ -1206,6 +1209,11 @@
                         <div class="mb-3">
                             <label for="customerWhatsApp" class="form-label">Package Price (RM)</label>
                             <input type="text" id="modalPackagePrice" value="0" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="modalSelectedDate" class="form-label">Date</label>
+                            <input type="text" id="modalSelectedDate" value="0" class="form-control" readonly>
                         </div>
 
                         <div class="mb-3">
@@ -1352,6 +1360,8 @@ const whatFlow = {{ $organizer->what_flow }};
 let slotPrice = 0.00;
 function updateSelectedSlotInput() {
     const selectedSlotDisplay = document.getElementById('selectedSlotDisplay');
+    const modalSelectedDate = document.getElementById('modalSelectedDate');
+    const selected_date = document.getElementById('selected_date');
 
     if (!selectedTimes || !selectedTimes.length) {
         selectedSlotDisplay.value = "Sila pilih tema dahulu";
@@ -1364,6 +1374,17 @@ function updateSelectedSlotInput() {
         .join(", ");
 
     selectedSlotDisplay.value = slotText;
+    const rawDate = selected_date.value;
+    const dateObj = new Date(rawDate);
+
+    const formattedDate = dateObj.toLocaleDateString('en-MY', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    modalSelectedDate.value = formattedDate;
+
 }
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -2559,19 +2580,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 if (checkbox.checked) {
                                     // Kalau is_theme_first = true, disable semua checkbox lain
-                                    if (slot.is_theme_first) {
-                                        // tandakan selected checkbox
-                                        td.classList.add("bg-primary", "text-white");
-                                        selectedTimes = [slotObj];
+                                    // if (slot.is_theme_first) {
+                                    //     // tandakan selected checkbox
+                                    //     td.classList.add("bg-primary", "text-white");
+                                    //     selectedTimes = [slotObj];
 
-                                        // disable semua other checkboxes
-                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
-                                            if (cb !== checkbox) cb.disabled = true;
-                                        });
-                                    } else {
+                                    //     // disable semua other checkboxes
+                                    //     document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                    //         if (cb !== checkbox) cb.disabled = true;
+                                    //     });
+                                    // } else {
                                         td.classList.add("bg-primary", "text-white");
                                         selectedTimes.push(slotObj);
-                                    }
+                                    // }
                                 } else {
                                     // uncheck logic
                                     td.classList.remove("bg-primary", "text-white");
@@ -2580,20 +2601,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                     );
 
                                     // Kalau is_theme_first = true, enable semua checkboxes semula
-                                    if (slot.is_theme_first) {
-                                        document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
-                                            cb.disabled = false;
+                                    // if (slot.is_theme_first) {
+                                    //     document.querySelectorAll('#slotBody input[type="checkbox"]').forEach(cb => {
+                                    //         cb.disabled = false;
 
-                                            // disabled asal untuk booked / off time
-                                            const [slotId, slotTime] = cb.value.split("|");
-                                            const originalSlot = data.slots.find(s => s.id == slotId);
-                                            const originalDisabled = 
-                                                (originalSlot.bookedTimes && originalSlot.bookedTimes.includes(slotTime)) ||
-                                                (data.vendorOffTimes && data.vendorOffTimes.some(off => slotTime >= off.start_time && slotTime < off.end_time));
+                                    //         // disabled asal untuk booked / off time
+                                    //         const [slotId, slotTime] = cb.value.split("|");
+                                    //         const originalSlot = data.slots.find(s => s.id == slotId);
+                                    //         const originalDisabled = 
+                                    //             (originalSlot.bookedTimes && originalSlot.bookedTimes.includes(slotTime)) ||
+                                    //             (data.vendorOffTimes && data.vendorOffTimes.some(off => slotTime >= off.start_time && slotTime < off.end_time));
 
-                                            if (originalDisabled) cb.disabled = true;
-                                        });
-                                    }
+                                    //         if (originalDisabled) cb.disabled = true;
+                                    //     });
+                                    // }
                                 }
                                 selectedTimeInput.value = JSON.stringify(selectedTimes);
                                 checkTimeSlotSelected(currentLoopDate);
