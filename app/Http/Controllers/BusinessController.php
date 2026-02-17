@@ -534,7 +534,11 @@ class BusinessController extends Controller
             if($package->organizer->what_flow == 2){
                 $totalDuration = $slot->duration_minutes + $slot->rest_minutes;
             }else{
-                $totalDuration = $package->duration_minutes;
+                if($package->rest_minutes > 0){
+                    $totalDuration   = $package->duration_minutes + $package->rest_minutes;
+                }else{
+                    $totalDuration = $package->duration_minutes;
+                }
             }
             $slotsInThisPeriod  = intdiv($diffInMinutes, $totalDuration);
 
@@ -557,7 +561,11 @@ class BusinessController extends Controller
                 if($package->organizer->what_flow == 2){
                     $duration       = $slot->duration_minutes + $slot->rest_minutes;
                 }else{
-                    $duration       = $package->duration_minutes;
+                    if($package->rest_minutes > 0){
+                        $duration   = $package->duration_minutes + $package->rest_minutes;
+                    }else{
+                        $duration   = $package->duration_minutes;
+                    }
                 }
                 $totalSegments  = floor($start->diffInMinutes($end) / $duration);
 
@@ -700,7 +708,11 @@ class BusinessController extends Controller
             if($package->organizer->what_flow == 2){
                 $interval       = $timeSlot->duration_minutes + $timeSlot->rest_minutes;
             }else{
-                $interval       = $package->duration_minutes;
+                if($package->rest_minutes > 0){
+                    $interval   = $package->duration_minutes + $package->rest_minutes;
+                }else{
+                    $interval       = $package->duration_minutes;
+                }
             }
 
             $times = [];
