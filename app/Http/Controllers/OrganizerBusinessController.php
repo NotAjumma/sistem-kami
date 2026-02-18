@@ -190,8 +190,8 @@ class OrganizerBusinessController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-            Log::info("bookings");
-            Log::info($bookings);
+            // Log::info("bookings");
+            // Log::info($bookings);
         return view('organizer.booking.index', compact('page_title', 'authUser', 'bookings', 'packages', 'events'));
     }
 

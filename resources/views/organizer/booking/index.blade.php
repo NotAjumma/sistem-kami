@@ -232,7 +232,7 @@
                                                         @endif
                                                         @if($booking->status !== 'cancelled')
                                                             <li>
-                                                                <form action="{{ route('organizer.booking.cancel', $booking->id) }}"
+                                                                <form action="{{ route('organizer.business.booking.cancel', $booking->id) }}"
                                                                     method="POST" class="d-inline">
                                                                     @csrf
                                                                     @method('PATCH')

@@ -142,7 +142,6 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.booking.verify');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.ticket.checkin');
-    Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.booking.cancel');
 
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
@@ -167,6 +166,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/booking/create', 'showCreateBooking')->name('organizer.business.booking.create');
     Route::post('/booking/create', [BookingController::class, 'webFormBookingPackageByAdmin'])->name('organizer.business.booking.create.send');
     Route::get('/bookings/json', [OrganizerBusinessController::class, 'getBookingsJson']);
+    Route::patch('/booking/{id}/cancel', [OrganizerBusinessController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
 
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
@@ -180,7 +180,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::patch('/booking/{id}/full_payment', 'makeFullPayment')->name('organizer.business.booking.full_payment');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.business.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.business.ticket.checkin');
-    Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
+    // Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
 
 
 

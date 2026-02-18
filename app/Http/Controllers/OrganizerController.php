@@ -482,22 +482,22 @@ class OrganizerController extends Controller
         return redirect()->back()->with('error', 'Cannot verify this booking.');
     }
 
-    public function cancelBooking($id)
-    {
-        $booking = Booking::with(['participant', 'bookingTickets', 'event.organizer'])->findOrFail($id);
+    // public function cancelBooking($id)
+    // {
+    //     $booking = Booking::with(['participant', 'bookingTickets', 'event.organizer'])->findOrFail($id);
 
-        if ($booking->status !== 'cancelled') {
-            $booking->status = 'cancelled';
-            $booking->save();
+    //     if ($booking->status !== 'cancelled') {
+    //         $booking->status = 'cancelled';
+    //         $booking->save();
 
-            // Optionally update related ticket status
-            $booking->bookingTickets()->update(['status' => 'cancelled']);
+    //         // Optionally update related ticket status
+    //         $booking->bookingTickets()->update(['status' => 'cancelled']);
 
-            return redirect()->back()->with('success', 'Booking has been cancelled.');
-        }
+    //         return redirect()->back()->with('success', 'Booking has been cancelled.');
+    //     }
 
-        return redirect()->back()->with('error', 'This booking is already cancelled.');
-    }
+    //     return redirect()->back()->with('error', 'This booking is already cancelled.');
+    // }
 
     public function ticketCheckin($id)
     {
