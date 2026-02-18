@@ -2099,17 +2099,17 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- calendar script -->
     
     <script>
-        let calendarData = null;
-        let currentPackageId = null;
-        let currentDate = new Date();
+        let calendarData            = null;
+        let currentPackageId        = null;
+        let currentDate             = new Date();
 
-        const calendarBody = document.getElementById("calendarBody");
-        const currentMonthDisplay = document.getElementById("currentMonth");
-        const prevMonthBtn = document.getElementById("prevMonth");
-        const nextMonthBtn = document.getElementById("nextMonth");
-        const maxBookingOffset = @json($package->max_booking_year_offset ?? 2);
+        const calendarBody          = document.getElementById("calendarBody");
+        const currentMonthDisplay   = document.getElementById("currentMonth");
+        const prevMonthBtn          = document.getElementById("prevMonth");
+        const nextMonthBtn          = document.getElementById("nextMonth");
+        const maxBookingOffset      = @json($package->max_booking_year_offset ?? 2);
         // console.log(vendorOffDays);
-        const timeSlotSection = document.getElementById("timeSlots");
+        const timeSlotSection       = document.getElementById("timeSlots");
 
         function renderCalendar(date, data, packageId) {
             const vendorTimeSlots      = data.timeSlots;
@@ -2138,7 +2138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 bookedDatesFormatted = [...new Set(bookedVendorDates.map(b => b.date_start))];
             }
-
             
             // Update header
             const monthNames = [
