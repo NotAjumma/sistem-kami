@@ -469,8 +469,13 @@
 			}
 		});
 	}
+	let packageChartLoaded = false;
+	let addonChartLoaded = false;
+	let slotChartLoaded = false;
 	var packageHorizontalBarChart = function () {
 
+		if (packageChartLoaded) return;
+    	packageChartLoaded = true;
 		var chartEl = document.querySelector('#package-horizontal-bar-chart');
 		var spinner = document.querySelector('#chart-spinner');
 
@@ -537,6 +542,8 @@
 	};
 	var addOnHorizontalBarChart = function () {
 
+		if (addonChartLoaded) return;
+    	addonChartLoaded = true;
 		var chartEl = document.querySelector('#addon-horizontal-bar-chart');
 		var spinner = document.querySelector('#addon-chart-spinner');
 
@@ -606,6 +613,8 @@
 	};
 	var slotHorizontalBarChart = function () {
 
+		if (slotChartLoaded) return;
+    	slotChartLoaded = true;
 		var chartEl = document.querySelector('#slot-horizontal-bar-chart');
 		var spinner = document.querySelector('#slot-chart-spinner');
 
