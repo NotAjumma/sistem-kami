@@ -1401,7 +1401,7 @@ class BookingController extends Controller
     public function bookingReceipt($booking_code)
     {
         $page_title = 'Your Booking Receipt';
-        $booking = Booking::with(['package', 'event', 'vendorTimeSlot'])
+        $booking = Booking::with(['package', 'event', 'vendorTimeSlots.vendorTimeSlot.images'])
             ->where('booking_code', $booking_code)
             ->firstOrFail();
 

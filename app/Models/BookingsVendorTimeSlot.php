@@ -44,4 +44,9 @@ class BookingsVendorTimeSlot extends Model
     {
         return $query->whereIn('status', ['deposit_paid', 'full_payment']);
     }
+
+    public function vendorTimeSlot()
+    {
+        return $this->belongsTo(VendorTimeSlot::class, 'vendor_time_slot_id');
+    }
 }

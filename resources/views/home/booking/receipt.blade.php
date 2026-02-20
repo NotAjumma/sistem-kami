@@ -108,7 +108,7 @@
             content: "";
             position: absolute;
             inset: 0; /* top:0; left:0; right:0; bottom:0; */
-            background-image: url(https://staging.sistemkami.com/images/organizers/3/packages/4/gold-cover.png);
+            background-image: url(https://i.pinimg.com/736x/68/c3/9e/68c39eaac008b69fca6dd3bc7b7b8304.jpg);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -141,7 +141,7 @@
                     <i class="fa-regular fa-circle-check fa-beat text-success" style="font-size: 4rem;"></i>
                 </div>
                 <div class="text-center mt-4 pt-3">
-                    <h3>Payment Success!</h3>
+                    <h3 style="font-size: 1.3rem;">Payment Success!</h3>
                     <p class="mb-3">Your payment has been successfully done.</p>
                     <hr class="dashed-line mb-2" />
                     @if($booking->payment_type == 'deposit')
@@ -158,21 +158,12 @@
                     
                     @if ($booking->package_id && $booking->package)
                        <div class="mt-4 mb-4 row align-items-center text-start border rounded p-2 bg-dark">
-                        @if (!empty($booking->package->images) && count($booking->package->images) > 0)
-                            @php
-                                $coverImage = collect($booking->package->images)->firstWhere('is_cover', true) ?? $booking->package->images[0];
-                            @endphp
-                            <div class="col-auto">
-                                <img 
-                                    src="{{ asset('storage/uploads/' . $booking->package->organizer->id . '/packages/' . $booking->package->id . '/' . $coverImage['url']) }}" 
-                                    alt="{{ $coverImage['alt_text'] }}" 
-                                    class="rounded shadow-sm border" 
-                                    style="width: 80px; height: 80px; object-fit: cover;" 
-                                    loading="lazy" 
-                                    decoding="async" 
-                                />
-                            </div>
-                        @endif
+                        <img 
+                            src="{{ $booking->display_image_url }}" 
+                            alt="Booking Image"
+                            class="rounded shadow-sm border" 
+                            style="width: 120px; height: 80px; object-fit: cover; padding: 0;" 
+                        >
 
                         <div class="col d-flex flex-column justify-content-center ps-3">
                             <p class="mb-1 small text-info">Package Purchased</p>

@@ -101,5 +101,40 @@ class Booking extends Model
         return $this->hasMany(BookingAddon::class, 'booking_id');
     }
 
+    public function getDisplayImageUrlAttribute()
+    {
+        // 🔹 1️⃣ Try Slot Image First
+        $bookingSlot = $this->vendorTimeSlots->first();
+
+        if ($bookingSlot && $bookingSlot->vendorTimeSlot) {
+
+            $slot = $bookingSlot->vendorTimeSlot;
+
+            if ($slot->images->count()) {
+
+                $image = $slot->images->firstWhere('is_cover', true)
+                        ?? $slot->images->first();
+
+                return asset(
+                    "storage/uploads/{$this->organizer_id}/slots/{$slot->id}/{$image->url}"
+                );
+            }
+        }
+
+        // 🔹 2️⃣ Fallback Package Image
+        if ($this->package && !empty($this->package->images)) {
+
+            $image = collect($this->package->images)
+                    ->firstWhere('is_cover', true)
+                    ?? $this->package->images[0];
+
+            return asset(
+                "storage/uploads/{$this->organizer_id}/packages/{$this->package->id}/{$image['url']}"
+            );
+        }
+
+        // 🔹 3️⃣ Final Fallback (Default Placeholder)
+        return asset('images/default-placeholder.jpg');
+    }
 
 }
