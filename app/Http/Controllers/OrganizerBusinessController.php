@@ -946,5 +946,103 @@ class OrganizerBusinessController extends Controller
         return redirect()->back()->with('error', 'Cannot verify this booking.');
     }
 
+    public function overviewReport()
+    {
+        $page_title = 'Overview';
+        $main_title = 'Report';
+        $authUser = auth()->guard('organizer')->user()->load('user');
 
+        return view('organizer.report.overview_report',
+            compact('page_title','main_title','authUser')
+        );
+    }
+
+    public function packageChartData()
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        $packages = Package::where('organizer_id', $authUser->id)
+            ->withCount(['bookings as paid_bookings_count' => function ($query) {
+                $query->whereIn('status', ['paid']);
+            }])
+            ->active()
+            ->get();
+
+        return response()->json([
+            'labels' => $packages->pluck('name'),
+            'series' => $packages->pluck('paid_bookings_count')
+        ]);
+    }
+
+    public function addOnChartData()
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        // Step 1: Clean sales per addon_id
+        $salesSub = \DB::table('booking_addon')
+            ->join('bookings', 'booking_addon.booking_id', '=', 'bookings.id')
+            ->where('bookings.organizer_id', $authUser->id)
+            ->where('bookings.status', 'paid')
+            ->select(
+                'booking_addon.addon_id',
+                \DB::raw('SUM(booking_addon.qty) as total_sold')
+            )
+            ->groupBy('booking_addon.addon_id');
+
+        // Step 2: Join + group by NAME only
+        $addons = \DB::table('package_addons')
+            ->join('packages', 'package_addons.package_id', '=', 'packages.id')
+            ->leftJoinSub($salesSub, 'sales', function ($join) {
+                $join->on('package_addons.id', '=', 'sales.addon_id');
+            })
+            ->where('packages.organizer_id', $authUser->id)
+            ->where('packages.status', 'active')
+            ->select(
+                'package_addons.name',
+                \DB::raw('SUM(COALESCE(sales.total_sold, 0)) as total_sold')
+            )
+            ->groupBy('package_addons.name')
+            ->orderByDesc('total_sold')
+            ->get();
+
+        return response()->json([
+            'labels' => $addons->pluck('name'),
+            'series' => $addons->pluck('total_sold')
+        ]);
+    }
+
+    public function slotChartData()
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        // Step 1: Get booking count per slot_id
+        $bookingSub = \DB::table('bookings_vendor_time_slot')
+            ->join('bookings', 'bookings_vendor_time_slot.booking_id', '=', 'bookings.id')
+            ->where('bookings.status', 'paid')
+            ->select(
+                'bookings_vendor_time_slot.vendor_time_slot_id',
+                \DB::raw('COUNT(*) as total_bookings')
+            )
+            ->groupBy('bookings_vendor_time_slot.vendor_time_slot_id');
+
+        // Step 2: Join with vendor_time_slots and group by slot_name
+        $slots = \DB::table('vendor_time_slots')
+            ->leftJoinSub($bookingSub, 'booking_counts', function ($join) {
+                $join->on('vendor_time_slots.id', '=', 'booking_counts.vendor_time_slot_id');
+            })
+            ->where('vendor_time_slots.organizer_id', $authUser->id)
+            ->where('vendor_time_slots.is_active', 1)
+            ->select(
+                'vendor_time_slots.slot_name',
+                \DB::raw('SUM(COALESCE(booking_counts.total_bookings, 0)) as total_bookings')
+            )
+            ->groupBy('vendor_time_slots.slot_name')
+            ->orderByDesc('total_bookings')
+            ->get();
+
+        return response()->json([
+            'labels' => $slots->pluck('slot_name'),
+            'series' => $slots->pluck('total_bookings')
+        ]);
+    }
 }

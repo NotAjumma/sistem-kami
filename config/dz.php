@@ -91,6 +91,9 @@ return [
 					'vendor/toastr/css/toastr.min.css'
 
 				],
+				'OrganizerBusinessController_overviewReport' => [
+					'vendor/chartist/css/chartist.min.css'
+				],
 				'WorkerController_ticketsConfirmed' => [
 					'vendor/datatables/css/jquery.dataTables.min.css',
 					'vendor/datatables/responsive/responsive.css',
@@ -435,6 +438,12 @@ return [
 					'vendor/jquery-smartwizard/dist/js/jquery.smartWizard.js',
 					'vendor/dropzone/dist/dropzone.js',
 					
+				],
+				'OrganizerBusinessController_overviewReport' => [
+					'vendor/apexchart/apexchart.js',
+					'vendor/chartist/js/chartist.min.js',
+					'vendor/chartist-plugin-tooltips/js/chartist-plugin-tooltip.min.js',
+					'js/plugins-init/chartist-init.js',
 				],
 				'WorkerController_ticketsConfirmed' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',

@@ -150,6 +150,15 @@
                         @endif
                     </ul>
                 </li>
+                <li>
+                    <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
+                        <i class="material-symbols-outlined">lab_profile</i>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('organizer.business.report.overview') }}">Overview</a></li>
+                    </ul>
+                </li>
             </ul>
             @elseif($authUser->user->role == "worker")
             <ul class="metismenu" id="menu">

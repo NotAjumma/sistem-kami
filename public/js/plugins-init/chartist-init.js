@@ -469,27 +469,207 @@
 			}
 		});
 	}
-	var horizontalBarChart = function(){
-		//Horizontal bar chart
-  
-		new Chartist.Bar('#horizontal-bar-chart', {
-				labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+	var packageHorizontalBarChart = function () {
+
+		var chartEl = document.querySelector('#package-horizontal-bar-chart');
+		var spinner = document.querySelector('#chart-spinner');
+
+		if (!chartEl) return;
+
+		// Show spinner
+		spinner.style.display = 'block';
+		chartEl.style.display = 'none';
+
+		fetch('/organizer/business/report/package-chart')
+			.then(response => response.json())
+			.then(data => {
+
+				if (!data.labels.length) {
+					spinner.innerHTML = '<p>No booking data available</p>';
+					return;
+				}
+
+				// ✅ Reverse manually so label + series stay aligned
+				const reversedLabels = [...data.labels].reverse();
+				const reversedSeries = [...data.series].reverse();
+
+				var chart = new Chartist.Bar('#package-horizontal-bar-chart', {
+				labels: reversedLabels,
 				series: [
-				  [5, 4, 3, 7, 5, 10, 3],
-				  [3, 2, 9, 5, 4, 6, 4]
+					reversedSeries.map(function(value, index) {
+						return {
+							value: value,
+							meta: reversedLabels[index]
+						};
+					})
 				]
-			  }, {
-				seriesBarDistance: 10,
-				reverseData: true,
-				horizontalBars: true,
-				axisY: {
-				  offset: 70
-				},
-				plugins: [
-				  Chartist.plugins.tooltip()
-				]
-			  });
-	}
+				}, {
+					seriesBarDistance: 10,
+					horizontalBars: true,
+					axisY: { offset: 120 },
+					plugins: [
+						Chartist.plugins.tooltip({
+							tooltipFnc: function(meta, value) {
+								return meta + '<br>' + value + ' Bookings';
+							}
+						})
+					]
+				});
+
+				// 🔥 ADD THIS
+				chart.on('draw', function(data) {
+					if (data.type === 'bar') {
+						data.group.append(new Chartist.Svg('text', {
+							x: data.x2 + 5,   // move text slightly right
+							y: data.y2,
+							'text-anchor': 'start'
+						}, 'ct-bar-label').text(data.value.x + ' Bookings'));
+					}
+				});
+
+				spinner.style.display = 'none';
+				chartEl.style.display = 'block';
+			})
+			.catch(error => {
+				spinner.innerHTML = '<p class="text-danger">Failed to load chart</p>';
+				console.error(error);
+			});
+	};
+	var addOnHorizontalBarChart = function () {
+
+		var chartEl = document.querySelector('#addon-horizontal-bar-chart');
+		var spinner = document.querySelector('#addon-chart-spinner');
+
+		if (!chartEl) return;
+
+		// Show spinner
+		spinner.style.display = 'block';
+		chartEl.style.display = 'none';
+
+		fetch('/organizer/business/report/package-addon-chart')
+			.then(response => response.json())
+			.then(data => {
+
+				if (!data.labels.length) {
+					spinner.innerHTML = '<p>No booking data available</p>';
+					return;
+				}
+
+				// 🔥 Reverse BOTH arrays manually
+				const reversedLabels = [...data.labels].reverse();
+				const reversedSeries = [...data.series].reverse();
+
+				var chart = new Chartist.Bar('#addon-horizontal-bar-chart', {
+					labels: reversedLabels,
+					series: [
+						reversedSeries.map(function(value, index) {
+							return {
+								value: value,
+								meta: reversedLabels[index]
+							};
+						})
+					]
+				}, {
+					seriesBarDistance: 10,
+					horizontalBars: true,
+					axisY: { offset: 120 },
+					plugins: [
+						Chartist.plugins.tooltip({
+							tooltipFnc: function(meta, value) {
+								return meta + '<br>' + value + ' units';
+							}
+						})
+					]
+				});
+
+				// 🔥 ADD THIS
+				chart.on('draw', function(data) {
+					if (data.type === 'bar') {
+						if (data.value.x > 0) {
+							data.group.append(new Chartist.Svg('text', {
+								x: data.x2 + 5,
+								y: data.y2,
+								'text-anchor': 'start'
+							}, 'ct-bar-label')
+							.text(data.value.x + ' units'));
+						}
+					}
+				});
+
+				spinner.style.display = 'none';
+				chartEl.style.display = 'block';
+			})
+			.catch(error => {
+				spinner.innerHTML = '<p class="text-danger">Failed to load chart</p>';
+				console.error(error);
+			});
+	};
+	var slotHorizontalBarChart = function () {
+
+		var chartEl = document.querySelector('#slot-horizontal-bar-chart');
+		var spinner = document.querySelector('#slot-chart-spinner');
+
+		if (!chartEl) return;
+
+		// Show spinner
+		spinner.style.display = 'block';
+		chartEl.style.display = 'none';
+
+		fetch('/organizer/business/report/slot-chart')
+			.then(response => response.json())
+			.then(data => {
+
+				if (!data.labels.length) {
+					spinner.innerHTML = '<p>No booking data available</p>';
+					return;
+				}
+
+				// ✅ Reverse manually so label + series stay aligned
+				const reversedLabels = [...data.labels].reverse();
+				const reversedSeries = [...data.series].reverse();
+
+				var chart = new Chartist.Bar('#slot-horizontal-bar-chart', {
+					labels: reversedLabels,
+					series: [
+						reversedSeries.map(function(value, index) {
+							return {
+								value: value,
+								meta: reversedLabels[index]
+							};
+						})
+					]
+				}, {
+					seriesBarDistance: 10,
+					horizontalBars: true,
+					axisY: { offset: 120 },
+					plugins: [
+						Chartist.plugins.tooltip({
+							tooltipFnc: function(meta, value) {
+								return meta + '<br>' + value + ' slots booked';
+							}
+						})
+					]
+				});
+
+				// 🔥 ADD THIS
+				chart.on('draw', function(data) {
+					if (data.type === 'bar') {
+						data.group.append(new Chartist.Svg('text', {
+							x: data.x2 + 5,   // move text slightly right
+							y: data.y2,
+							'text-anchor': 'start'
+						}, 'ct-bar-label').text(data.value.x + ' slots booked'));
+					}
+				});
+
+				spinner.style.display = 'none';
+				chartEl.style.display = 'block';
+			})
+			.catch(error => {
+				spinner.innerHTML = '<p class="text-danger">Failed to load chart</p>';
+				console.error(error);
+			});
+	};
 	var extremeChart = function(){
 			 // Extreme responsive configuration
 	  
@@ -842,7 +1022,9 @@
 			overlappingBarsChart();
 			multiLineChart();
 			stackedBarChart();
-			horizontalBarChart();
+			packageHorizontalBarChart();
+			addOnHorizontalBarChart();
+			slotHorizontalBarChart();
 			extremeChart();
 			labelPlacementChart();
 			animatingDonutChart();
@@ -867,7 +1049,9 @@
 			overlappingBarsChart();
 			multiLineChart();
 			stackedBarChart();
-			horizontalBarChart();
+			packageHorizontalBarChart();
+			addOnHorizontalBarChart();
+			slotHorizontalBarChart();
 			extremeChart();
 			labelPlacementChart();
 			animatingDonutChart();

@@ -9,6 +9,7 @@ class VendorTimeSlot extends Model
     use HasFactory;
 
     protected $fillable = [
+        'slot_name',
         'organizer_id',
         'package_id',
         'is_full_day',

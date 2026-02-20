@@ -182,6 +182,10 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.business.ticket.checkin');
     // Route::patch('/booking/{id}/cancel', [OrganizerController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
 
+    Route::get('/report/overview', 'overviewReport')->name('organizer.business.report.overview');
+    Route::get('/report/package-chart', 'packageChartData')->name('organizer.business.report.package.chart');
+    Route::get('/report/package-addon-chart', 'addOnChartData')->name('organizer.business.report.package.addon.chart');
+    Route::get('/report/slot-chart', 'slotChartData')->name('organizer.business.report.slot.chart');
 
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
