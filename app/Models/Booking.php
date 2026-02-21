@@ -13,6 +13,7 @@ class Booking extends Model
         'event_id',
         'package_id',
         'organizer_id',
+        'promoter_id',
         'booking_code',
         'total_price',
         'resit_path',

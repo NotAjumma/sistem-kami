@@ -321,14 +321,17 @@
                                 </div>
                             </div>
 
-                            <!-- <div class="mb-3 col-md-6">
-                                <label class="form-label">Reference</label>
-                                <select class="form-select" name="reference">
-                                    <option value="">Choose a Reference</option>
-                                    <option value="sales_a">Sales A</option>
-                                    <option value="sales_b">Sales B</option>
+                            @if($promoter->isNotEmpty())
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label">Promoter</label>
+                                <select class="form-select" name="promoter">
+                                    <option value="">Choose a Promoter</option>
+                                    @foreach($promoter as $ref)
+                                        <option value="{{ $ref->id }}">{{ $ref->name }}</option>
+                                    @endforeach
                                 </select>
-                            </div> -->
+                            </div>
+                            @endif
                             <div class="mb-3 col-md-12">
                                 <label class="form-label">Remarks</label>
                                 <textarea class="form-control" name="notes" rows="3"></textarea>

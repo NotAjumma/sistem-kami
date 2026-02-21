@@ -1970,7 +1970,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     message += `\n\nAdd-ons:\n${addOns.map(a => `- ${a}`).join("\n")}`;
                 }
 
+                const promoterName = @json($promoter?->name);
+
                 message += `\n\n ${paymentText}`;
+                if (promoterName) {
+                    message += `\n\nPromoted by ${promoterName}`;
+                }
+                
 
                 // Optional: log click to backend
                 fetch('/track/whatsapp', {

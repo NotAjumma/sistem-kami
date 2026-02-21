@@ -14,6 +14,7 @@ use App\Models\Event;
 use App\Models\VendorTimeSlot;
 use App\Models\VendorTimeSlotLimit;
 use App\Models\VendorOffDay;
+use App\Models\Worker;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -590,10 +591,13 @@ class OrganizerBusinessController extends Controller
 
         $limitReachedDays   = [];      
         $weekRangeBlock     = [];
-        $fullyBookedDates       = [];
-        $offDays       = [];
-        $timeSlots       = [];
-        $bookedDates       = [];
+        $fullyBookedDates   = [];
+        $offDays            = [];
+        $timeSlots          = [];
+        $bookedDates        = [];
+
+        $promoter = Worker::where('organizer_id', $authUser->id)
+                ->where('is_active', 2)->get();
 
         return view('organizer.booking.create', [
             'page_title'        => $page_title,
@@ -605,6 +609,7 @@ class OrganizerBusinessController extends Controller
             'fullyBookedDates'  => $fullyBookedDates,
             'limitReachedDays'  => $limitReachedDays,
             'weekRangeBlock'    => $weekRangeBlock,
+            'promoter'          => $promoter,
         ]);
 
 

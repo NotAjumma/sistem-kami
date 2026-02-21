@@ -914,7 +914,7 @@ class BookingController extends Controller
             'address'           => 'nullable|string',
             'notes'             => 'nullable|string',
             'payment_type'      => 'required|string',
-            'reference'         => 'nullable|string',
+            'promoter'          => 'nullable|string',
             'addon_ids'         => 'nullable|array',
             'addon_ids.*'       => 'exists:package_addons,id',
         ]);
@@ -1028,6 +1028,7 @@ class BookingController extends Controller
                 'event_id'          => null,
                 'package_id'        => $package['id'],
                 'organizer_id'      => $package['organizer_id'],
+                'promoter_id'       => $request->input('promoter') ?? null,
                 'booking_code'      => $packageCode . '-' . now()->format('ymdHis') . '-' . strtoupper(Str::random(6)),
                 'status'            => 'paid',
                 'total_price'       => 0,

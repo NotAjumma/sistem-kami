@@ -105,6 +105,30 @@ class BusinessController extends Controller
             ])->where('slug', $slug)->firstOrFail();
         }
 
+        $ref = trim($request->query('ref')); // buang space depan belakang
+
+        $promoter = null;
+
+        if ($ref) {
+
+            $normalizedRef = strtolower($ref);
+
+            $promoter = Worker::where('organizer_id', $organizer->id)
+                ->where('is_active', 2)
+                ->where(function ($q) use ($normalizedRef) {
+                    $q->whereRaw('LOWER(name) = ?', [$normalizedRef])
+                    ->orWhereRaw('CAST(id AS CHAR) = ?', [$normalizedRef]);
+                })
+                ->first();
+
+            if ($promoter) {
+                session([
+                    'ref_worker_id'   => $promoter->id,
+                    'ref_worker_name' => $promoter->name,
+                ]);
+            }
+        }
+
         if ($isPrivateRoute) {
             // Private route: allow only certain conditions
             if ($organizer->type !== 'service' || $organizer->visibility !== 'private' || !$organizer->is_active) {
@@ -228,6 +252,7 @@ class BusinessController extends Controller
             'limitReachedDays',
             'weekRangeBlock',
             'whatsappNumbers',
+            'promoter',
         ));
     }
 
