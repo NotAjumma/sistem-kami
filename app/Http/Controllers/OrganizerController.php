@@ -349,36 +349,36 @@ class OrganizerController extends Controller
         }
 
         // Package views
-        $packages = DB::table('visitor_actions as va')
-            ->join('packages as p', 'va.reference_id', '=', 'p.id')
-            ->select(
-                'p.name as package_name',
-                DB::raw("DATE(va.created_at) as date"),
-                DB::raw("COUNT(DISTINCT va.visitor_id) as views")
-            )
-            ->where('va.action', 'view_package')
-            ->whereIn('va.reference_id', $packageIds)
-            ->where('va.created_at', '>=', $today->copy()->subDays($days - 1))
-            ->groupBy('p.name', 'date')
-            ->orderBy('p.name')
-            ->orderBy('date')
-            ->get();
+        // $packages = DB::table('visitor_actions as va')
+        //     ->join('packages as p', 'va.reference_id', '=', 'p.id')
+        //     ->select(
+        //         'p.name as package_name',
+        //         DB::raw("DATE(va.created_at) as date"),
+        //         DB::raw("COUNT(DISTINCT va.visitor_id) as views")
+        //     )
+        //     ->where('va.action', 'view_package')
+        //     ->whereIn('va.reference_id', $packageIds)
+        //     ->where('va.created_at', '>=', $today->copy()->subDays($days - 1))
+        //     ->groupBy('p.name', 'date')
+        //     ->orderBy('p.name')
+        //     ->orderBy('date')
+        //     ->get();
 
-        $packageNames = $packages->pluck('package_name')->unique();
+        // $packageNames = $packages->pluck('package_name')->unique();
 
         $packageSeries = [];
-        foreach ($packageNames as $packageName) {
-            $data = [];
-            for ($i = $days - 1; $i >= 0; $i--) {
-                $dateKey = $today->copy()->subDays($i)->toDateString();
-                $row = $packages->firstWhere(fn($item) => $item->package_name == $packageName && $item->date == $dateKey);
-                $data[] = $row->views ?? 0;
-            }
-            $packageSeries[] = [
-                'name' => $packageName,
-                'data' => $data
-            ];
-        }
+        // foreach ($packageNames as $packageName) {
+        //     $data = [];
+        //     for ($i = $days - 1; $i >= 0; $i--) {
+        //         $dateKey = $today->copy()->subDays($i)->toDateString();
+        //         $row = $packages->firstWhere(fn($item) => $item->package_name == $packageName && $item->date == $dateKey);
+        //         $data[] = $row->views ?? 0;
+        //     }
+        //     $packageSeries[] = [
+        //         'name' => $packageName,
+        //         'data' => $data
+        //     ];
+        // }
 
         return response()->json([
             'labels' => $labels,
