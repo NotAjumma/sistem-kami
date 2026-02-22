@@ -117,7 +117,7 @@ class Package extends Model
                 return asset(
                     'storage/uploads/' .
                     $this->organizer_id .
-                    '/slots/' .
+                    '/slots/' . $slot->id . '/' .
                     $slotImage->url
                 );
             }

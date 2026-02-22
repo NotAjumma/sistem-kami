@@ -25,10 +25,19 @@ class HomeController extends Controller
         $packages = Package::with([
             'organizer',
             'category',
-            'vendorTimeSlots',
+
+            // Package cover image sahaja
             'images' => function ($query) {
-                $query->where('is_cover', true);
+                $query->where('is_cover', true)
+                    ->orderBy('sort_order');
             },
+
+            // Vendor slots + slot images
+            'vendorTimeSlots.images' => function ($query) {
+                $query->orderByDesc('is_cover')
+                    ->orderBy('sort_order');
+            },
+
         ])
         ->where('status', 'active')
         ->orderBy('order_by')
