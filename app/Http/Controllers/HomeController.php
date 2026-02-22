@@ -25,6 +25,7 @@ class HomeController extends Controller
         $packages = Package::with([
             'organizer',
             'category',
+            'vendorTimeSlots',
             'images' => function ($query) {
                 $query->where('is_cover', true);
             },
@@ -34,7 +35,14 @@ class HomeController extends Controller
         ->get();
 
         // derive organizers from packages (unique)
-        $organizers = $packages->pluck('organizer')->unique('id')->values();
+        $organizers = $packages
+            ->groupBy('organizer_id')
+            ->map(function ($group) {
+                $organizer = $group->first()->organizer;
+                $organizer->first_package = $group->first();
+                return $organizer;
+            })
+            ->values();
 
         $eventCategories = Category::whereNull('parent_id')
             ->orderBy('order_by')

@@ -94,4 +94,46 @@ class Package extends Model
         return $query->orderBy('order_by', 'desc');
     }
 
+    public function getDisplayImageUrlAttribute()
+    {
+        // 1️⃣ Package images
+        $image = $this->images()->first();
+        if ($image) {
+            return asset(
+                'storage/uploads/' .
+                $this->organizer_id .
+                '/packages/' .
+                $this->id . '/' .
+                $image->url
+            );
+        }
+
+        // 2️⃣ Slot images (ambil first slot yg ada image)
+        foreach ($this->vendorTimeSlots as $slot) {
+
+            $slotImage = $slot->images->first();
+
+            if ($slotImage) {
+                return asset(
+                    'storage/uploads/' .
+                    $this->organizer_id .
+                    '/slots/' .
+                    $slotImage->url
+                );
+            }
+        }
+
+        // 3️⃣ Organizer logo
+        if ($this->organizer && $this->organizer->logo_url) {
+            return $this->organizer->logo_url;
+        }
+
+        // 4️⃣ Organizer banner
+        if ($this->organizer && $this->organizer->banner_path) {
+            return $this->organizer->banner_path;
+        }
+
+        // 5️⃣ Default image
+        return asset('storage/uploads/default-organizer-logo.jpg');
+    }
 }

@@ -632,6 +632,7 @@
             z-index: 10;
             transition: background-color 0.3s ease;
         }
+        
     </style>
 @endpush
 
@@ -751,11 +752,13 @@
                 @foreach($packages as $package)
                     <div class="col-12 col-md-6 col-xl-6">
                         <article 
-                            class="card border-white portfolio-item transition-all duration-200"
+                            class="card border-white portfolio-item transition-all duration-200 d-flex flex-column h-100"
                         >
-                            <div class="bookmark-icon" title="Bookmark">
-                                {{ $package->category->name }}
-                            </div>
+                            @if(!empty($package->images) && count($package->images) > 0)
+                                <div class="bookmark-icon" title="Bookmark">
+                                    {{ $package->category->name }}
+                                </div>
+                            @endif
 
                             @if($package->items->where('show_on_card', 1)->first())
                                 <div class="item-icon">
@@ -784,7 +787,7 @@
                                 @endif
                             </div>
 
-                            <div class="portfolio-content">
+                            <div class="portfolio-content d-flex flex-column flex-grow-1">
                                 <h4 class="event-title portfolio-title text-center">{{ $package->name }}</h4>
 
                                 @php
@@ -847,7 +850,7 @@
                                 @endif
 
                                 {{-- Select / Selected button --}}
-                                <div class="mt-3">
+                                <div class="mt-auto">
                                     <button type="button"
                                         class="package-btn btn btn-light w-100 text-dark"
                                         data-package-id="{{ $package->id }}"
@@ -2747,12 +2750,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!container) return;
 
                         if (!pkg.images.length) {
-                            container.innerHTML = `
-                                <div class="carousel-item active">
-                                    <div class="text-center p-5">
-                                        No images available
-                                    </div>
-                                </div>`;
+                            const carouselWrapper = container.closest('.carousel');
+                            if (carouselWrapper) {
+                                carouselWrapper.style.display = 'none';
+                            }
                             return;
                         }
 
