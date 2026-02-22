@@ -156,7 +156,7 @@ class OrganizerBusinessController extends Controller
             ->pluck('id');
 
         // Step 4: Fetch bookings with optional status & search filters
-        $bookings = Booking::with(['vendorTimeSlots', 'participant', 'package:id,name'])
+        $bookings = Booking::with(['vendorTimeSlots', 'participant', 'package:id,name', 'promoter:id,name'])
             ->whereIn('id', $bookingIds)
 
             ->when($request->status, 

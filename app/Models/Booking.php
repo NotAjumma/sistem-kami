@@ -138,4 +138,8 @@ class Booking extends Model
         return asset('images/default-placeholder.jpg');
     }
 
+    public function promoter()
+    {
+        return $this->belongsTo(Worker::class, 'promoter_id');
+    }
 }

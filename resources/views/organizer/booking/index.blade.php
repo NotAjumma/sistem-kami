@@ -87,6 +87,7 @@
                                             <th>Total</th>
                                             <th>Balance</th>
                                             <th>Receipt</th>
+                                            <th>Promoter</th>
                                             <th>Date/Time</th>
                                             <th>Action</th>
                                         @else
@@ -116,7 +117,13 @@
                                             @endif
 
                                             <td>{{ $booking->participant->name }}</td>
-                                            <td>{{ $booking->participant->email }}</td>
+                                            <td>
+                                                @if($booking->participant?->email !== $authUser->email)
+                                                    {{ $booking->participant?->email }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
 
                                             @if($events)
                                             <td>{{ $booking->participant->no_ic }}</td>
@@ -193,6 +200,7 @@
                                                 -
                                                 @endif
                                             </td>
+                                            <td>{{ $booking->promoter->name ?? '-' }}</td>
                                             <td>{{ $booking->created_at->format('j M Y, H:iA') }}</td>
                                             <td class="position-relative">
                                                 <div class="dropdown">
