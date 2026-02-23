@@ -968,14 +968,27 @@ class OrganizerBusinessController extends Controller
 
         $packages = Package::where('organizer_id', $authUser->id)
             ->withCount(['bookings as paid_bookings_count' => function ($query) {
-                $query->whereIn('status', ['paid']);
+                $query->where('status', 'paid');
             }])
+            ->withSum(['bookings as paid_revenue' => function ($query) {
+                $query->where('status', 'paid');
+            }], 'final_price')
             ->active()
-            ->get();
+            ->get()
+            ->map(function ($package) {
+                return [
+                    'name' => $package->name,
+                    'bookings' => $package->paid_bookings_count ?? 0,
+                    'revenue' => $package->paid_revenue ?? 0
+                ];
+            })
+            ->sortByDesc('revenue')
+            ->values();
 
         return response()->json([
             'labels' => $packages->pluck('name'),
-            'series' => $packages->pluck('paid_bookings_count')
+            'booking_series' => $packages->pluck('bookings'),
+            'revenue_series' => $packages->pluck('revenue')
         ]);
     }
 

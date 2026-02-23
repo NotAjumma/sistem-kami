@@ -19,9 +19,8 @@
                             </div>
 
                             <!-- Chart -->
-                            <div id="package-horizontal-bar-chart"
-                                class="ct-chart"
-                                style="height:400px; display:none;">
+                            <div style="position: relative; height: 400px;">
+                                <canvas id="package-horizontal-bar-chart"></canvas>
                             </div>
 
                         </div>

@@ -472,74 +472,77 @@
 	let packageChartLoaded = false;
 	let addonChartLoaded = false;
 	let slotChartLoaded = false;
-	var packageHorizontalBarChart = function () {
+	// var packageHorizontalBarChart = function () {
 
-		if (packageChartLoaded) return;
-    	packageChartLoaded = true;
-		var chartEl = document.querySelector('#package-horizontal-bar-chart');
-		var spinner = document.querySelector('#chart-spinner');
+	// 	if (packageChartLoaded) return;
+    // 	packageChartLoaded = true;
+	// 	var chartEl = document.querySelector('#package-horizontal-bar-chart');
+	// 	var spinner = document.querySelector('#chart-spinner');
 
-		if (!chartEl) return;
+	// 	if (!chartEl) return;
 
-		// Show spinner
-		spinner.style.display = 'block';
-		chartEl.style.display = 'none';
+	// 	// Show spinner
+	// 	spinner.style.display = 'block';
+	// 	chartEl.style.display = 'none';
 
-		fetch('/organizer/business/report/package-chart')
-			.then(response => response.json())
-			.then(data => {
+	// 	fetch('/organizer/business/report/package-chart')
+    // .then(response => response.json())
+    // .then(data => {
 
-				if (!data.labels.length) {
-					spinner.innerHTML = '<p>No booking data available</p>';
-					return;
-				}
+	// 		if (!data.labels.length) {
+	// 			spinner.innerHTML = '<p>No booking data available</p>';
+	// 			return;
+	// 		}
 
-				// ✅ Reverse manually so label + series stay aligned
-				const reversedLabels = [...data.labels].reverse();
-				const reversedSeries = [...data.series].reverse();
+	// 		const reversedLabels = [...data.labels].reverse();
+	// 		const reversedBooking = [...data.booking_series].reverse();
+	// 		const reversedRevenue = [...data.revenue_series].reverse();
 
-				var chart = new Chartist.Bar('#package-horizontal-bar-chart', {
-				labels: reversedLabels,
-				series: [
-					reversedSeries.map(function(value, index) {
-						return {
-							value: value,
-							meta: reversedLabels[index]
-						};
-					})
-				]
-				}, {
-					seriesBarDistance: 10,
-					horizontalBars: true,
-					axisY: { offset: 120 },
-					plugins: [
-						Chartist.plugins.tooltip({
-							tooltipFnc: function(meta, value) {
-								return meta + '<br>' + value + ' Bookings';
-							}
-						})
-					]
-				});
+	// 		var chart = new Chartist.Bar('#package-horizontal-bar-chart', {
+	// 			labels: reversedLabels,
+	// 			series: [
+	// 				reversedBooking.map(function(value, index) {
+	// 					return {
+	// 						value: value,
+	// 						meta: {
+	// 							name: reversedLabels[index],
+	// 							revenue: reversedRevenue[index]
+	// 						}
+	// 					};
+	// 				})
+	// 			]
+	// 		}, {
+	// 			seriesBarDistance: 10,
+	// 			horizontalBars: true,
+	// 			axisY: { offset: 120 },
+	// 			plugins: [
+	// 				Chartist.plugins.tooltip({
+	// 					tooltipFnc: function(meta, value) {
+	// 						return meta.name +
+	// 							'<br>' + value + ' Bookings' +
+	// 							'<br>RM ' + parseFloat(meta.revenue).toLocaleString();
+	// 					}
+	// 				})
+	// 			]
+	// 		});
 
-				// 🔥 ADD THIS
-				chart.on('draw', function(data) {
-					if (data.type === 'bar') {
-						data.group.append(new Chartist.Svg('text', {
-							x: data.x2 + 5,   // move text slightly right
-							y: data.y2,
-							'text-anchor': 'start'
-						}, 'ct-bar-label').text(data.value.x + ' Bookings'));
-					}
-				});
+	// 		chart.on('draw', function(data) {
+	// 			if (data.type === 'bar') {
+	// 				const revenue = reversedRevenue[data.index];
 
-				spinner.style.display = 'none';
-				chartEl.style.display = 'block';
-			})
-			.catch(error => {
-				spinner.innerHTML = '<p class="text-danger">Failed to load chart</p>';
-				console.error(error);
-			});
-	};
+	// 				data.group.append(new Chartist.Svg('text', {
+	// 					x: data.x2 + 5,
+	// 					y: data.y2,
+	// 					'text-anchor': 'start'
+	// 				}, 'ct-bar-label')
+	// 				.text('RM ' + parseFloat(revenue).toLocaleString()));
+	// 			}
+	// 		});
+
+	// 		spinner.style.display = 'none';
+	// 		chartEl.style.display = 'block';
+	// 	});
+	// };
 	var addOnHorizontalBarChart = function () {
 
 		if (addonChartLoaded) return;
@@ -1031,7 +1034,7 @@
 			overlappingBarsChart();
 			multiLineChart();
 			stackedBarChart();
-			packageHorizontalBarChart();
+			// packageHorizontalBarChart();
 			addOnHorizontalBarChart();
 			slotHorizontalBarChart();
 			extremeChart();
@@ -1058,7 +1061,7 @@
 			overlappingBarsChart();
 			multiLineChart();
 			stackedBarChart();
-			packageHorizontalBarChart();
+			// packageHorizontalBarChart();
 			addOnHorizontalBarChart();
 			slotHorizontalBarChart();
 			extremeChart();

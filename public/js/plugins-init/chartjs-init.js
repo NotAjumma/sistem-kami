@@ -1137,8 +1137,6 @@
 		}
 	}
 
-
-
 	/* Function ============ */
 	return {
 		init:function(){

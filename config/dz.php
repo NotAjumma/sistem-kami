@@ -440,10 +440,20 @@ return [
 					
 				],
 				'OrganizerBusinessController_overviewReport' => [
-					'vendor/apexchart/apexchart.js',
 					'vendor/chartist/js/chartist.min.js',
 					'vendor/chartist-plugin-tooltips/js/chartist-plugin-tooltip.min.js',
 					'js/plugins-init/chartist-init.js',
+					'vendor/apexchart/apexchart.js',
+					'vendor/chart-js/chart.bundle.min.js',
+					'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2',
+					'vendor/counter/counter.min.js',
+					'vendor/counter/waypoint.min.js',
+					'vendor/peity/jquery.peity.min.js',
+					'vendor/swiper/js/swiper-bundle.min.js',
+					'js/dashboard/dashboard-1.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
 				],
 				'WorkerController_ticketsConfirmed' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',
