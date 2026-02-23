@@ -1525,10 +1525,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // 🔥 AUTO SELECT ONLY IF QTY = 2
+                // 🔥 AUTO SELECT IF QTY > 1
                 selectedSlotIds = [];
 
-                if (selectedPackageQty === 2) {
+                if (selectedPackageQty > 1) {
 
                     const availableSlots = [];
 
@@ -1541,7 +1541,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    selectedSlotIds = availableSlots.slice(0, 2);
+                    // Auto select based on selectedPackageQty
+                    selectedSlotIds = availableSlots.slice(0, selectedPackageQty);
                 }
 
 
