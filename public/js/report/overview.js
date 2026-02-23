@@ -3,7 +3,7 @@
 (function ($) {
   /* "use strict" */
 
-  // Chart.register(ChartDataLabels);
+  Chart.register(ChartDataLabels);
 
   var dlabChartlist = function () {
 
@@ -1067,147 +1067,147 @@
     };
 
 
-    // let packageChartInstance = null;
+    let packageChartInstance = null;
 
-    // function loadPackageComboChart() {
+    function loadPackageComboChart() {
 
-    //   fetch('/organizer/business/report/package-chart')
-    //     .then(response => response.json())
-    //     .then(data => {
+      fetch('/organizer/business/report/package-chart')
+        .then(response => response.json())
+        .then(data => {
 
-    //       if (!data.labels || !data.labels.length) {
-    //         document.getElementById('chart-spinner').innerHTML =
-    //           '<p>No booking data available</p>';
-    //         return;
-    //       }
+          if (!data.labels || !data.labels.length) {
+            document.getElementById('chart-spinner').innerHTML =
+              '<p>No booking data available</p>';
+            return;
+          }
 
-    //       // Combine + sort by revenue
-    //       let combined = data.labels.map((label, index) => ({
-    //         label: label,
-    //         bookings: parseInt(data.booking_series[index]) || 0,
-    //         revenue: parseFloat(data.revenue_series[index]) || 0
-    //       }));
+          // Combine + sort by revenue
+          let combined = data.labels.map((label, index) => ({
+            label: label,
+            bookings: parseInt(data.booking_series[index]) || 0,
+            revenue: parseFloat(data.revenue_series[index]) || 0
+          }));
 
-    //       combined.sort((a, b) => b.revenue - a.revenue);
-    //       combined = combined.slice(0, 5); // Top 5
+          combined.sort((a, b) => b.revenue - a.revenue);
+          combined = combined.slice(0, 5); // Top 5
 
-    //       const labels = combined.map(item => item.label);
-    //       const bookingData = combined.map(item => item.bookings);
-    //       const revenueData = combined.map(item => item.revenue);
+          const labels = combined.map(item => item.label);
+          const bookingData = combined.map(item => item.bookings);
+          const revenueData = combined.map(item => item.revenue);
 
-    //       const ctx = document
-    //         .getElementById('package-horizontal-bar-chart')
-    //         .getContext('2d');
+          const ctx = document
+            .getElementById('package-horizontal-bar-chart')
+            .getContext('2d');
 
-    //       if (packageChartInstance) {
-    //         packageChartInstance.destroy();
-    //       }
+          if (packageChartInstance) {
+            packageChartInstance.destroy();
+          }
 
-    //       packageChartInstance = new Chart(ctx, {
-    //         type: 'bar',
-    //         data: {
-    //           labels: labels,
-    //           datasets: [
-    //             {
-    //               label: 'Bookings',
-    //               data: bookingData,
-    //               backgroundColor: '#4e73df',
-    //               borderRadius: 6,
-    //               xAxisID: 'xBookings',
-    //               barThickness: 18
-    //             },
-    //             {
-    //               label: 'Revenue (RM)',
-    //               data: revenueData,
-    //               backgroundColor: '#1cc88a',
-    //               borderRadius: 6,
-    //               xAxisID: 'xRevenue',
-    //               barThickness: 18
-    //             }
-    //           ]
-    //         },
-    //         options: {
-    //           indexAxis: 'y',
-    //           responsive: true,
-    //           maintainAspectRatio: false,
+          packageChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Bookings',
+                  data: bookingData,
+                  backgroundColor: '#4e73df',
+                  borderRadius: 6,
+                  xAxisID: 'xBookings',
+                  barThickness: 18
+                },
+                {
+                  label: 'Revenue (RM)',
+                  data: revenueData,
+                  backgroundColor: '#1cc88a',
+                  borderRadius: 6,
+                  xAxisID: 'xRevenue',
+                  barThickness: 18
+                }
+              ]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
 
-    //           plugins: {
-    //             legend: {
-    //               position: 'top'
-    //             },
+              plugins: {
+                legend: {
+                  position: 'top'
+                },
 
-    //             datalabels: {
-    //               anchor: 'end',
-    //               align: function(context) {
+                datalabels: {
+                  anchor: 'end',
+                  align: function(context) {
 
-    //                 const scaleId = context.dataset.xAxisID;
-    //                 const scale = context.chart.scales[scaleId];
+                    const scaleId = context.dataset.xAxisID;
+                    const scale = context.chart.scales[scaleId];
 
-    //                 if (!scale) return 'right'; // fallback safe
+                    if (!scale) return 'right'; // fallback safe
 
-    //                 const value = context.dataset.data[context.dataIndex];
-    //                 const max = scale.max || 0;
+                    const value = context.dataset.data[context.dataIndex];
+                    const max = scale.max || 0;
 
-    //                 if (!max) return 'right';
+                    if (!max) return 'right';
 
-    //                 return value < max * 0.15 ? 'right' : 'left';
-    //               },
+                    return value < max * 0.15 ? 'right' : 'left';
+                  },
 
-    //               color: function(context) {
+                  color: function(context) {
 
-    //                 const scaleId = context.dataset.xAxisID;
-    //                 const scale = context.chart.scales[scaleId];
+                    const scaleId = context.dataset.xAxisID;
+                    const scale = context.chart.scales[scaleId];
 
-    //                 if (!scale) return '#000';
+                    if (!scale) return '#000';
 
-    //                 const value = context.dataset.data[context.dataIndex];
-    //                 const max = scale.max || 0;
+                    const value = context.dataset.data[context.dataIndex];
+                    const max = scale.max || 0;
 
-    //                 if (!max) return '#000';
+                    if (!max) return '#000';
 
-    //                 return value < max * 0.15
-    //                   ? context.dataset.backgroundColor
-    //                   : '#fff';
-    //               },
+                    return value < max * 0.15
+                      ? context.dataset.backgroundColor
+                      : '#fff';
+                  },
 
-    //               clamp: true,
+                  clamp: true,
 
-    //               formatter: function(value, context) {
-    //                 if (context.dataset.label === 'Revenue (RM)') {
-    //                   return 'RM ' + Number(value).toLocaleString();
-    //                 }
-    //                 return value + ' bookings';
-    //               },
+                  formatter: function(value, context) {
+                    if (context.dataset.label === 'Revenue (RM)') {
+                      return 'RM ' + Number(value).toLocaleString();
+                    }
+                    return value + ' bookings';
+                  },
 
-    //               font: {
-    //                 weight: 'bold'
-    //               }
-    //             },   
+                  font: {
+                    weight: 'bold'
+                  }
+                },   
 
-    //             tooltip: {
-    //               callbacks: {
-    //                 label: function(context) {
-    //                   if (context.dataset.label === 'Revenue (RM)') {
-    //                     return 'Revenue: RM ' + Number(context.raw).toLocaleString();
-    //                   }
-    //                   return 'Bookings: ' + context.raw;
-    //                 }
-    //               }
-    //             }
-    //           }
-    //         }
-    //       });
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      if (context.dataset.label === 'Revenue (RM)') {
+                        return 'Revenue: RM ' + Number(context.raw).toLocaleString();
+                      }
+                      return 'Bookings: ' + context.raw;
+                    }
+                  }
+                }
+              }
+            }
+          });
 
-    //       document.getElementById('chart-spinner').style.display = 'none';
-    //       document.getElementById('package-horizontal-bar-chart').style.display = 'block';
+          document.getElementById('chart-spinner').style.display = 'none';
+          document.getElementById('package-horizontal-bar-chart').style.display = 'block';
 
-    //     })
-    //     .catch(error => {
-    //       console.error('Chart load failed:', error);
-    //       document.getElementById('chart-spinner').innerHTML =
-    //         '<p class="text-danger">Failed to load chart</p>';
-    //     });
-    // }
+        })
+        .catch(error => {
+          console.error('Chart load failed:', error);
+          document.getElementById('chart-spinner').innerHTML =
+            '<p class="text-danger">Failed to load chart</p>';
+        });
+    }
 
     var extraInfoChart = function(){
       if(jQuery('#extra_info_chart').length > 0 ){
@@ -2795,7 +2795,7 @@
         extraInfoChart();
         swipercard();
         actionLogChart();
-        // loadPackageComboChart();
+        loadPackageComboChart();
 
       },
 
