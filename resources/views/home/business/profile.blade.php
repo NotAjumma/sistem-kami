@@ -1170,20 +1170,35 @@
                             <label for="customerWhatsApp" class="form-label">WhatsApp Number</label>
                             <input type="text" id="customerWhatsApp" class="form-control" placeholder="0123456789" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="paymentOption" class="form-label">Payment</label>
-                            <select id="paymentOption" class="form-select">
-                                <option value="full">Full Payment</option>
-                                <option value="deposit">Deposit</option>
-                            </select>
-                        </div>
 
-                        <!-- Deposit Info -->
-                        <div class="mb-3 d-none" id="depositWrapper">
-                            <label class="form-label">Deposit Amount</label>
-                            <input type="number" id="depositAmount" class="form-control" min="50" value="50">
-                            <small class="text-muted">Minimum deposit RM50</small>
-                        </div>
+                        @if($organizer->what_flow != 3)
+                            <div class="mb-3">
+                                <label for="paymentOption" class="form-label">Payment</label>
+                                <select id="paymentOption" class="form-select">
+                                    <option value="full">Full Payment</option>
+                                    <option value="deposit">Deposit</option>
+                                </select>
+                            </div>
+
+                            <!-- Deposit Info -->
+                            <div class="mb-3 d-none" id="depositWrapper">
+                                <label class="form-label">Deposit Amount</label>
+                                <input type="number" id="depositAmount" class="form-control" min="50" value="50">
+                                <small class="text-muted">Minimum deposit RM50</small>
+                            </div>
+                        @else
+                            <div class="d-none mb-3">
+                                <label for="paymentOption" class="form-label">Payment</label>
+                                <select id="paymentOption" class="form-select">
+                                    <option value="full">Full Payment</option>
+                                    <option value="deposit">Deposit</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3 d-none" id="depositRemarkWrapper">
+                                <small class="text-muted">Minimum deposit RM50</small>
+                            </div>
+                        @endif
 
                         @if($organizer->what_flow == 2)
                         <div class="mb-3">
@@ -1228,66 +1243,66 @@
                         <input type="hidden" id="selectedPackageId">
 
 
+                        @if($organizer->what_flow != 3)
                         <hr>
 
-                        @if($package->addons->count() > 0)
-                        <div class="mb-3">
-                            <label class="form-label">Add-Ons</label>
+                            @if($package->addons->count() > 0)
+                            <div class="mb-3">
+                                <label class="form-label">Add-Ons</label>
 
-                            @foreach($package->addons as $addon)
-                                <div class="border rounded p-2 mb-2">
+                                @foreach($package->addons as $addon)
+                                    <div class="border rounded p-2 mb-2">
 
-                                    @if($addon->is_qty)
-                                        <!-- Quantity Type -->
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <strong>{{ $addon->name }}</strong>
-                                                @if($addon->hint)
-                                                    <span class="text-muted small">
-                                                        {{ $addon->hint }}
-                                                    </span>
-                                                @endif
-                                                <div class="text-muted small">
-                                                    RM {{ number_format($addon->price, 2) }}
+                                        @if($addon->is_qty)
+                                            <!-- Quantity Type -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ $addon->name }}</strong>
+                                                    @if($addon->hint)
+                                                        <span class="text-muted small">
+                                                            {{ $addon->hint }}
+                                                        </span>
+                                                    @endif
+                                                    <div class="text-muted small">
+                                                        RM {{ number_format($addon->price, 2) }}
+                                                    </div>
                                                 </div>
+
+                                                <input 
+                                                    type="number"
+                                                    class="form-control addon-qty"
+                                                    data-name="{{ $addon->name }}"
+                                                    data-price="{{ $addon->price }}"
+                                                    data-special-start="{{ $addon->special_date_start }}"
+                                                    data-special-end="{{ $addon->special_date_end }}"
+                                                    min="0"
+                                                    value="0"
+                                                    style="width: 90px;"
+                                                >
                                             </div>
 
-                                            <input 
-                                                type="number"
-                                                class="form-control addon-qty"
-                                                data-name="{{ $addon->name }}"
-                                                data-price="{{ $addon->price }}"
-                                                data-special-start="{{ $addon->special_date_start }}"
-                                                data-special-end="{{ $addon->special_date_end }}"
-                                                min="0"
-                                                value="0"
-                                                style="width: 90px;"
-                                            >
-                                        </div>
+                                        @else
+                                            <!-- Checkbox Type -->
+                                            <div class="form-check">
+                                                <input 
+                                                    type="checkbox"
+                                                    class="form-check-input addon-checkbox"
+                                                    data-name="{{ $addon->name }}"
+                                                    data-price="{{ $addon->price }}"
+                                                    data-special-start="{{ $addon->special_date_start }}"
+                                                    data-special-end="{{ $addon->special_date_end }}"
+                                                    id="addon_{{ $addon->id }}"
+                                                >
+                                                <label class="form-check-label" for="addon_{{ $addon->id }}">
+                                                    {{ $addon->name }} (RM {{ number_format($addon->price, 2) }})
+                                                </label>
+                                            </div>
+                                        @endif
 
-                                    @else
-                                        <!-- Checkbox Type -->
-                                        <div class="form-check">
-                                            <input 
-                                                type="checkbox"
-                                                class="form-check-input addon-checkbox"
-                                                data-name="{{ $addon->name }}"
-                                                data-price="{{ $addon->price }}"
-                                                data-special-start="{{ $addon->special_date_start }}"
-                                                data-special-end="{{ $addon->special_date_end }}"
-                                                id="addon_{{ $addon->id }}"
-                                            >
-                                            <label class="form-check-label" for="addon_{{ $addon->id }}">
-                                                {{ $addon->name }} (RM {{ number_format($addon->price, 2) }})
-                                            </label>
-                                        </div>
-                                    @endif
-
-                                </div>
-                            @endforeach
-                        </div>
-                        @endif
-
+                                    </div>
+                                @endforeach
+                            </div>
+                            @endif
                         <hr>
 
                         <div class="bg-light p-3 rounded">
@@ -1310,12 +1325,38 @@
                                 </div>
 
                             </div>
+                        @else
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Total</strong>
+                                <strong>RM <span id="totalAmount">0.00</span></strong>
+                            </div>
 
+                            <div id="depositSummary" class="d-none">
+
+                                <div class="d-flex justify-content-between">
+                                    <span>Deposit</span>
+                                    <span>RM <span id="depositDisplay">0.00</span></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <span>Balance</span>
+                                    <span>RM <span id="balanceDisplay">0.00</span></span>
+                                </div>
+
+                            </div>
+
+                        @endif
                         </div>
                     </div>
+                    @if($organizer->what_flow != 3)
                     <div class="modal-footer">
                         <button type="button" id="nextToTNC" class="btn btn-primary">Next</button>
                     </div>
+                    @else
+                    <div class="modal-footer">
+                        <button type="button" id="confirmBooking" class="btn btn-success">WhatsApp Now</button>
+                    </div>
+                    @endif
                 </div>
 
                 <!-- Step 2: Terms & Conditions -->
@@ -1803,6 +1844,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
             const whatsappNowBtn = document.getElementById("whatsappNowBtn");
+            const fastTrack = {{ $organizer->what_flow }} === 3;
             const selectedDateInput = document.getElementById("selected_date");
             const selectedTimesInput = document.getElementById("selected_time");
             const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
@@ -1833,14 +1875,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Step 1 → Step 2
-            nextToTNC.addEventListener('click', () => {
-                const name = document.getElementById('customerName').value.trim();
-                const whatsapp = document.getElementById('customerWhatsApp').value.trim();
-                if (!name || !whatsapp) return alert("Please fill Name and WhatsApp.");
+            if (nextToTNC) {
+                nextToTNC.addEventListener('click', () => {
 
-                step1.classList.add('d-none');
-                step2.classList.remove('d-none');
-            });
+                    const name = document.getElementById('customerName').value.trim();
+                    const whatsapp = document.getElementById('customerWhatsApp').value.trim();
+
+                    if (!name || !whatsapp) {
+                        return alert("Tolong isi nama dan nombor WhatsApp");
+                    }
+
+                    // 🔥 IF FLOW 3 → DIRECT TO WHATSAPP
+                    if (fastTrack) {
+                        confirmBooking.click();
+                        return;
+                    }
+
+                    // Normal flow → go to TNC
+                    step1.classList.add('d-none');
+                    step2.classList.remove('d-none');
+                });
+            }
 
             // Back button
             backToStep1.addEventListener('click', () => {
@@ -1894,8 +1949,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Confirm → WhatsApp
             confirmBooking.addEventListener('click', () => {
+                const nameCustomer = document.getElementById('customerName').value.trim();
+                const whatsappCustomer = document.getElementById('customerWhatsApp').value.trim();
+
+                if (!nameCustomer || !whatsappCustomer) {
+                    return alert("Tolong isi nama dan nombor WhatsApp");
+                }
                 bookingModal.hide();
 
+                console.log("Booking confirmed");
                 const date = selectedDateInput.value;
                 if (!date) return;
 
