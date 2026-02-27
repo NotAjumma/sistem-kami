@@ -957,16 +957,17 @@ class BookingController extends Controller
                     ->get();
 
                 // If phone is empty, use whatsapp_number
-                // $data['phone'] = $data['whatsapp_number'];
-
                 $phone = preg_replace('/[^0-9]/', '', $data['whatsapp_number']);
 
-                if (str_starts_with($phone, '60')) {
+                // Case 1: +601123053082 → 601123053082
+                // Case 2: 601123053082 → 601123053082
+                if (substr($phone, 0, 2) === '60') {
                     $phone = '0' . substr($phone, 2);
                 }
 
-                if (!str_starts_with($phone, '0')) {
-                    $phone = '0' . ltrim($phone, '0');
+                // Case 3: 1123053082 → 01123053082
+                if (substr($phone, 0, 1) !== '0') {
+                    $phone = '0' . $phone;
                 }
 
                 $data['phone'] = $phone;
@@ -1247,7 +1248,7 @@ class BookingController extends Controller
             // return redirect()->route('booking.receipt.package', $booking->booking_code);
             $receiptUrl = route('booking.receipt.package', $booking->booking_code);
 
-            $phone = $data['whatsapp_number'];
+            $phone = $data['phone'];
 
            // Mulakan mesej
         $text = "Hai " . $data['name'] . ",\n\n";
@@ -1319,6 +1320,8 @@ class BookingController extends Controller
         $text .= "Terima kasih kerana menggunakan perkhidmatan kami 🙏\n\n";
         $text .= "📌 Reminder Penting 📌 \n";
         $text .= "⏱️ Sila datang 15 minit lebih awal sebelum slot anda.\n";
+
+        $organizer = $booking->package->organizer;
 
         $text .= "📍 *Lokasi Studio:*\n";
         $text .= $organizer->office_name . "\n";
