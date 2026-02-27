@@ -446,7 +446,7 @@
 
                                 Swal.close(); // close loading
 
-                                window.location.href = response.url;
+                                window.open(response.url, '_blank');
 
                                 Swal.fire({
                                     icon: 'success',

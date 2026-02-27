@@ -957,7 +957,19 @@ class BookingController extends Controller
                     ->get();
 
                 // If phone is empty, use whatsapp_number
-                $data['phone'] = $data['whatsapp_number'];
+                // $data['phone'] = $data['whatsapp_number'];
+
+                $phone = preg_replace('/[^0-9]/', '', $data['whatsapp_number']);
+
+                if (str_starts_with($phone, '60')) {
+                    $phone = '0' . substr($phone, 2);
+                }
+
+                if (!str_starts_with($phone, '0')) {
+                    $phone = '0' . ltrim($phone, '0');
+                }
+
+                $data['phone'] = $phone;
                 $data['email'] = $authUser->email;
 
                 $participant = Participant::create($data);
