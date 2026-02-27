@@ -1093,7 +1093,8 @@ class OrganizerBusinessController extends Controller
         // =========================
         // Generate WhatsApp Text
         // =========================
-        $text  = "Hai {$data['name']} 👋\n\n";
+        $name = ucfirst(strtolower($data['name']));
+        $text = "Hai {$name} 👋\n\n";
 
         $text .= "Tempahan anda telah berjaya dibuat untuk:\n";
         $text .= "📸 *Pakej:* {$booking->package->name}\n";
@@ -1150,7 +1151,7 @@ class OrganizerBusinessController extends Controller
             $text .= "\n";
         }
 
-        $receiptUrl = route('booking.receipt', $booking->id);
+        $receiptUrl = route('booking.receipt', $booking->booking_code);
 
         if ($booking->payment_type === 'deposit') {
             $text .= "📄 *Resit Deposit:*\n";
@@ -1208,7 +1209,8 @@ class OrganizerBusinessController extends Controller
         // =========================
         // Redirect ke WhatsApp
         // =========================
-        $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($text);
+        $whatsappUrl = "https://api.whatsapp.com/send?phone=+{$phone}
+            &text=" . urlencode($text);
 
         return response()->json([
             'success' => true,
