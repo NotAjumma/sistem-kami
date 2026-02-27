@@ -167,6 +167,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::post('/booking/create', [BookingController::class, 'webFormBookingPackageByAdmin'])->name('organizer.business.booking.create.send');
     Route::get('/bookings/json', [OrganizerBusinessController::class, 'getBookingsJson']);
     Route::patch('/booking/{id}/cancel', [OrganizerBusinessController::class, 'cancelBooking'])->name('organizer.business.booking.cancel');
+    Route::patch('/booking/{id}/send-receipt', [OrganizerBusinessController::class, 'sendReceipt'])->name('organizer.business.booking.send-receipt');
 
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');

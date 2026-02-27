@@ -251,6 +251,14 @@
                                                                     </button>
                                                                 </form>
                                                             </li>
+                                                            <li>
+                                                                <button type="button"
+                                                                    class="dropdown-item text-success btn-send-receipt"
+                                                                    data-url="{{ route('organizer.business.booking.send-receipt', $booking->id) }}"
+                                                                    data-customer-name="{{ $booking->participant->name }}">
+                                                                    Send Receipt via WhatsApp
+                                                                </button>
+                                                            </li>
                                                         @endif
                                                     </ul>
                                                 </div>
@@ -379,6 +387,94 @@
             });
         });
 
+        $('#example3 tbody').on('click', '.btn-send-receipt', function (e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const button = $(this);
+            const url = button.data('url');
+            const customerName = button.data('customer-name') || '';
+
+            if (!customerName.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Customer name missing'
+                });
+                return;
+            }
+
+            const upperName = customerName.toUpperCase();
+
+            Swal.fire({
+                title: 'Are you sure?',
+                html: `
+                    Send receipt to 
+                    <span style="color:#25D366;">${upperName}</span> via WhatsApp?
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#25D366',
+                confirmButtonText: 'Yes, send it!'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    // 🔥 Show Loading
+                    Swal.fire({
+                        title: 'Generating receipt...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // button.prop('disabled', true);
+
+                    $.ajax({
+                        url: url,
+                        type: 'PATCH',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+
+                            if (response.success) {
+
+                                Swal.close(); // close loading
+
+                                window.open(response.url, '_blank');
+
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Receipt Ready!',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+
+                            }
+                        },
+                        error: function (xhr) {
+
+                            Swal.close();
+                            button.prop('disabled', false);
+
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                Swal.fire('Error', xhr.responseJSON.message, 'error');
+                            } else {
+                                Swal.fire('Error', 'Something went wrong', 'error');
+                            }
+                        }
+                    });
+
+                }
+
+            });
+
+        });
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

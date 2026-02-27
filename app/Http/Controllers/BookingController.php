@@ -1305,10 +1305,44 @@ class BookingController extends Controller
 
         $text .= $receiptUrl . "\n\n";
         $text .= "Terima kasih kerana menggunakan perkhidmatan kami 🙏\n\n";
-        $text .= "📌 Penringatan 📌 \n";
+        $text .= "📌 Reminder Penting 📌 \n";
         $text .= "⏱️ Sila datang 15 minit lebih awal sebelum slot anda.\n";
-        $text .= "👟 Digalakkan pakai kasut yang sesuai (lelaki & perempuan) untuk gambar lebih cantik.\n";
-        $text .= "👜 Wanita, bawa handbag untuk nampak lebih bergaya.";
+
+        $text .= "📍 *Lokasi Studio:*\n";
+        $text .= $organizer->office_name . "\n";
+        $text .= $organizer->address_line1 . "\n";
+        $text .= $organizer->postal_code . " " .
+                $organizer->city . ", " .
+                $organizer->state . "\n";
+
+        // ======================
+        // Google Maps Link Logic
+        // ======================
+
+        if ($organizer->is_gmaps_verified) {
+
+            // guna nama bisnes
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($organizer->office_name);
+
+        } elseif ($organizer->latitude && $organizer->longitude) {
+
+            // guna lat long
+            $mapsUrl = "https://www.google.com/maps?q={$organizer->latitude},{$organizer->longitude}";
+
+        } else {
+
+            // fallback guna full address
+            $fullAddress = $organizer->address_line1 . ', ' .
+                $organizer->postal_code . ' ' .
+                $organizer->city . ', ' .
+                $organizer->state;
+
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($fullAddress);
+        }
+
+        $text .= "Google Maps:\n{$mapsUrl}\n\n";
 
         // Link WhatsApp (tanpa '+')
         $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $phone

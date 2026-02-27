@@ -1063,4 +1063,156 @@ class OrganizerBusinessController extends Controller
             'series' => $slots->pluck('total_bookings')
         ]);
     }
+
+    public function sendReceipt($id)
+    {
+        $booking = Booking::with([
+            'package',
+            'vendorTimeSlots.timeSlot',
+            'addons'
+        ])->findOrFail($id);
+
+        $authUser = auth()->guard('organizer')->user();
+
+        $data = [
+            'name' => $booking->participant->name ?? 'Customer',
+            'whatsapp_number' => $booking->participant->phone ?? null,
+        ];
+
+        if (!$data['whatsapp_number']) {
+            return back()->with('error', 'Nombor WhatsApp tidak dijumpai.');
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $data['whatsapp_number']);
+
+        // convert 01xxxx → 601xxxx
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '6' . $phone;
+        }
+
+        // =========================
+        // Generate WhatsApp Text
+        // =========================
+        $text  = "Hai {$data['name']} 👋\n\n";
+
+        $text .= "Tempahan anda telah berjaya dibuat untuk:\n";
+        $text .= "📸 *Pakej:* {$booking->package->name}\n";
+        $text .= "👤 *Organizer:* {$authUser->name}\n\n";
+
+        if ($booking->payment_type === 'deposit') {
+
+            if ($booking->paid_amount > 0) {
+                $text .= "💳 *Status:* Deposit diterima\n";
+                $text .= "💰 *Jumlah Deposit:* RM" . number_format($booking->paid_amount, 2) . "\n";
+            } else {
+                $text .= "💳 *Status:* Tiada deposit dibayar\n";
+            }
+
+            $balance = ($booking->total_price + ($booking->service_charge ?? 0) - ($booking->discount ?? 0)) - $booking->paid_amount;
+
+            $text .= "🧾 *Baki Perlu Dibayar:* RM" . number_format($balance, 2) . "\n\n";
+
+        } else {
+
+            $text .= "💳 *Status Pembayaran:* Penuh (Selesai)\n";
+            $text .= "💰 *Jumlah Dibayar:* RM" . number_format($booking->paid_amount, 2) . "\n\n";
+        }
+
+        foreach ($booking->vendorTimeSlots as $slot) {
+
+            $slotName = $slot->timeSlot->slot_name ?? '';
+            $startDate = Carbon::parse($slot->booked_date_start)->format('d M Y');
+            $startTime = Carbon::parse($slot->booked_time_start)->format('h:i A');
+            $endTime   = Carbon::parse($slot->booked_time_end)->format('h:i A');
+
+            if ($slotName && strtolower(trim($slotName)) !== 'slot') {
+                $text .= "📌 *Slot:* {$slotName}\n";
+            }
+
+            $text .= "🗓 *Tarikh:* {$startDate}\n";
+            $text .= "⏰ *Masa:* {$startTime} - {$endTime}\n\n";
+        }
+
+        if ($booking->addons->count()) {
+
+            $text .= "✨ *Add Ons Dipilih:*\n";
+
+            foreach ($booking->addons as $addon) {
+
+                $qty = $addon->pivot->qty ?? 1;
+                $text .= "• {$addon->name}";
+                if ($qty > 1) {
+                    $text .= " x{$qty}";
+                }
+                $text .= "\n";
+            }
+
+            $text .= "\n";
+        }
+
+        $receiptUrl = route('booking.receipt', $booking->id);
+
+        if ($booking->payment_type === 'deposit') {
+            $text .= "📄 *Resit Deposit:*\n";
+        } else {
+            $text .= "📄 *Resit Pembayaran Penuh:*\n";
+        }
+
+        $text .= "{$receiptUrl}\n\n";
+        // $text .= "Terima kasih kerana memilih kami ❤️\n\n";
+
+        // =========================
+        // Reminder & Location
+        // =========================
+
+        $organizer = $booking->package->organizer;
+
+        $text .= "⏳ *Reminder Penting*\n";
+        $text .= "Sila datang 15 minit lebih awal sebelum slot anda.\n\n";
+
+        $text .= "📍 *Lokasi Studio:*\n";
+        $text .= $organizer->office_name . "\n";
+        $text .= $organizer->address_line1 . "\n";
+        $text .= $organizer->postal_code . " " .
+                $organizer->city . ", " .
+                $organizer->state . "\n";
+
+        // ======================
+        // Google Maps Link Logic
+        // ======================
+
+        if ($organizer->is_gmaps_verified) {
+
+            // guna nama bisnes
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($organizer->office_name);
+
+        } elseif ($organizer->latitude && $organizer->longitude) {
+
+            // guna lat long
+            $mapsUrl = "https://www.google.com/maps?q={$organizer->latitude},{$organizer->longitude}";
+
+        } else {
+
+            // fallback guna full address
+            $fullAddress = $organizer->address_line1 . ', ' .
+                $organizer->postal_code . ' ' .
+                $organizer->city . ', ' .
+                $organizer->state;
+
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($fullAddress);
+        }
+
+        $text .= "Google Maps:\n{$mapsUrl}\n\n";
+        // =========================
+        // Redirect ke WhatsApp
+        // =========================
+        $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($text);
+
+        return response()->json([
+            'success' => true,
+            'url' => $whatsappUrl
+        ]);
+    }
 }
