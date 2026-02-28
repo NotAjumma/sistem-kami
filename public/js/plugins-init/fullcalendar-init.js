@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const isDeposit = arg.event.extendedProps.is_deposit === true;
       const balance = arg.event.extendedProps.balance || '';
       const deposit = arg.event.extendedProps.deposit || '';
-
+      const customFields = arg.event.extendedProps.custom_fields || {};
       let paymentHtml = isDeposit
         ? `Deposit RM${deposit} | Balance: RM${balance}`
         : `Full Payment`;
@@ -181,6 +181,24 @@ document.addEventListener('DOMContentLoaded', function () {
             ${addons}
           </div>
         `;
+      }
+
+      let addDetails = '';
+
+      if (Object.keys(customFields).length > 0) {
+
+        addDetails += `<strong>Extra Info:</strong><br>`;
+
+        for (const key in customFields) {
+
+          let label = key
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase());
+
+          addDetails += `${label}: ${customFields[key]}<br>`;
+        }
+
+        addDetails += `</div>`;
       }
 
       if (!arg.event.extendedProps.description) {
@@ -207,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
               </div>
               <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                <span>${addonHtml}</span>
+               <span style="text-align: end;">${addDetails}</span>
               </div>
             </div>
           `

@@ -784,7 +784,7 @@ class OrganizerBusinessController extends Controller
 
         $events = [];
 
-        $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package', 'bookingAddons.addon'])
+        $bookings = Booking::with(['vendorTimeSlots.timeSlot:id,slot_name', 'participant', 'package', 'bookingAddons.addon', 'details'])
             ->where('organizer_id', $organizerId)
             ->where('bookings.status', '!=', 'cancelled')
             ->whereHas('vendorTimeSlots')
@@ -841,6 +841,12 @@ class OrganizerBusinessController extends Controller
                 default => '#2563eb',
             };
 
+            $customFields = [];
+
+            foreach ($booking->details as $detail) {
+                $customFields[$detail->field_key] = $detail->field_value;
+            }
+
             $events[] = [
                 'id'    => $booking->id, // IMPORTANT: booking id, not slot id
                 'title' => $booking->package?->name ?? 'Booking',
@@ -859,10 +865,10 @@ class OrganizerBusinessController extends Controller
                     'balance'       => $balance,
                     'booking_id'    => $booking->id,
                     'addons'        => implode(', ', $addons),
+                    'custom_fields' => $customFields,
                 ],
             ];
         }
-
 
         return $events;
     }

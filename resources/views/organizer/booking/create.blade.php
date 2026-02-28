@@ -332,10 +332,8 @@
                                 </select>
                             </div>
                             @endif
-                            <div class="mb-3 col-md-12">
-                                <label class="form-label">Remarks</label>
-                                <textarea class="form-control" name="notes" rows="3"></textarea>
-                            </div>
+
+                            <div id="dynamicFieldsContainer"></div>
 
                             <input type="hidden" name="organizer_id" value="{{ $authUser->id }}">
 
@@ -1104,6 +1102,81 @@
             remainingBalanceInput.value = remaining;
         }
 
+    </script>
+
+    <script>
+    document.getElementById('packageSelect').addEventListener('change', function () {
+
+        let packageId = this.value;
+        let container = document.getElementById('dynamicFieldsContainer');
+
+        container.innerHTML = '';
+
+        if (!packageId) return;
+
+        fetch(`/organizer/business/packages/${packageId}/form-fields`)
+            .then(res => res.json())
+            .then(fields => {
+
+                fields.forEach(field => {
+
+                    let html = '';
+
+                    html += `<div class="mb-3">`;
+                    html += `<label class="form-label">${field.field_label}</label>`;
+
+                    switch(field.field_type) {
+
+                        case 'text':
+                            html += `<input type="text" class="form-control"
+                                        name="custom_fields[${field.field_key}]"
+                                        ${field.is_required ? 'required' : ''}>`;
+                            break;
+
+                        case 'number':
+                            html += `<input type="number" class="form-control"
+                                        name="custom_fields[${field.field_key}]"
+                                        ${field.is_required ? 'required' : ''}>`;
+                            break;
+
+                        case 'textarea':
+                            html += `<textarea class="form-control"
+                                        name="custom_fields[${field.field_key}]"
+                                        rows="3"
+                                        ${field.is_required ? 'required' : ''}></textarea>`;
+                            break;
+
+                        case 'select':
+                            html += `<select class="form-select"
+                                        name="custom_fields[${field.field_key}]"
+                                        ${field.is_required ? 'required' : ''}>`;
+
+                            html += `<option value="">Select</option>`;
+
+                            if (field.options) {
+                                field.options.forEach(option => {
+                                    html += `<option value="${option}">${option}</option>`;
+                                });
+                            }
+
+                            html += `</select>`;
+                            break;
+
+                        case 'checkbox':
+                            html += `<input type="checkbox"
+                                        value="1"
+                                        name="custom_fields[${field.field_key}]">`;
+                            break;
+                    }
+
+                    html += `</div>`;
+
+                    container.innerHTML += html;
+                });
+
+            });
+
+    });
     </script>
 
 @endpush

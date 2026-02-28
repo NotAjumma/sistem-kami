@@ -142,4 +142,16 @@ class Booking extends Model
     {
         return $this->belongsTo(Worker::class, 'promoter_id');
     }
+
+    public function details()
+    {
+        return $this->hasMany(BookingDetail::class);
+    }
+
+    public function getDetail($key)
+    {
+        return optional(
+            $this->details->where('field_key', $key)->first()
+        )->field_value;
+    }
 }

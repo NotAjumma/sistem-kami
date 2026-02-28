@@ -17,6 +17,7 @@ use App\Models\BookingTicket;
 use App\Models\Ticket;
 use App\Models\Package;
 use App\Models\PackageAddon;
+use App\Models\BookingFormField;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -1050,6 +1051,19 @@ class BookingController extends Controller
                 'payment_type'      => $paymentType,
             ]);
 
+            if ($request->has('custom_fields')) {
+
+                $booking->details()->createMany(
+                    collect($request->custom_fields)
+                        ->map(fn($value, $key) => [
+                            'field_key' => $key,
+                            'field_value' => $value,
+                        ])
+                        ->values()
+                        ->toArray()
+                );
+            }
+
             /* ---------- SAVE ADDONS INTO PIVOT TABLE ---------- */
 
             $syncData = [];
@@ -1476,5 +1490,12 @@ class BookingController extends Controller
         } while (Payment::where('bill_code', $billCode)->exists());
 
         return $billCode;
+    }
+
+    public function getFormFields($packageId)
+    {
+        $fields = BookingFormField::where('package_id', $packageId)->get();
+
+        return response()->json($fields);
     }
 }
