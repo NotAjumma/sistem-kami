@@ -868,6 +868,7 @@
             </div>
         </section>
 
+        @if($organizer->what_flow != 4)
         <section>
             <h3 class="mb-4 fw-bold text-center" style="font-size: 1.5rem;  margin-top: 3rem;">
                 @if($organizer->what_flow == 2)
@@ -925,6 +926,7 @@
                 @endforeach
             </div>
         </section>
+        @endif
 
         <!-- Select Package / Slot Warning Modal -->
         <div class="modal fade" id="packageSlotModal" tabindex="-1" aria-hidden="true">
@@ -979,7 +981,14 @@
                 </div>
 
                 <div id="calendarContent" class="d-none">
-                    <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">3. Pilih Tarikh</h3>
+                    <h3 class="mb-4 fw-bold mt-3 text-center" style="font-size: 1.3rem;">
+                        @if($organizer->what_flow == 4)
+                        2. 
+                        @else
+                        3.
+                        @endif
+                        Pilih Tarikh
+                    </h3>
                     <hr class="mb-4" />
                     <!-- Legend -->
                     <div class="mt-0">
@@ -1058,7 +1067,14 @@
                     <!-- Time Slots -->
                     <div id="timeSlots" class="d-none" style="margin-top: 3rem;">
                         <hr class="my-4" />
-                        <h6 class="fw-semibold mb-2 text-center" style="font-size: 1.5rem;">4. Pilih Masa</h6>
+                        <h6 class="fw-semibold mb-2 text-center" style="font-size: 1.5rem;">
+                            @if($organizer->what_flow == 4)
+                            3. 
+                            @else
+                            4.
+                            @endif
+                            Pilih Masa
+                        </h6>
                         <hr class="mb-4" />
                         <!-- Legend -->
                         <div class="mt-0">
@@ -2526,19 +2542,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const slotBody = document.getElementById("slotBody");
             const selectedTimeInput = document.getElementById("selected_time");
 
-            if (!selectedSlotIds.length) {
+            const flowHidePackage = {{ $organizer->what_flow }} != 4;
+            if(flowHidePackage){
+                if (!selectedSlotIds.length) {
 
-                timeSlotSection.classList.remove("d-none");
-                slotHeader.innerHTML = "<th></th>";
-                slotBody.innerHTML = `
-                    <tr>
-                        <td colspan="100%" class="text-center py-4 text-muted">
-                            Sila pilih tema dahulu.
-                        </td>
-                    </tr>
-                `;
+                    timeSlotSection.classList.remove("d-none");
+                    slotHeader.innerHTML = "<th></th>";
+                    slotBody.innerHTML = `
+                        <tr>
+                            <td colspan="100%" class="text-center py-4 text-muted">
+                                Sila pilih tema dahulu.
+                            </td>
+                        </tr>
+                    `;
 
-                return; // ❗ STOP here
+                    return; // ❗ STOP here
+                }
             }
             // Array to store all selected time objects
             selectedTimes = [];
