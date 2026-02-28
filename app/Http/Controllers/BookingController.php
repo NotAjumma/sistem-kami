@@ -1319,7 +1319,7 @@ class BookingController extends Controller
         $text .= $receiptUrl . "\n\n";
         $text .= "Terima kasih kerana menggunakan perkhidmatan kami 🙏\n\n";
         $text .= "📌 Reminder Penting 📌 \n";
-        $text .= "⏱️ Sila datang 15 minit lebih awal sebelum slot anda.\n";
+        $text .= "⏱️ Sila datang 15 minit lebih awal sebelum slot anda.\n\n";
 
         $organizer = $booking->package->organizer;
 
