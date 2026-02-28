@@ -3,6 +3,11 @@
 # Optional: print start info
 echo "Starting container and running drive:download-receipts..."
 
+php artisan optimize:clear
+php artisan view:clear
+php artisan config:clear
+php artisan route:clear
+
 echo "Running migrations..."
 php artisan migrate --force
 

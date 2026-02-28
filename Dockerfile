@@ -29,7 +29,7 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
     && chown -R www-data:www-data storage bootstrap/cache public public/app
 
 # Clear cache after permissions fixed
-RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
+# RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
