@@ -1114,6 +1114,7 @@
 
         if (!packageId) return;
 
+        
         fetch(`/organizer/business/packages/${packageId}/form-fields`)
             .then(res => res.json())
             .then(fields => {
