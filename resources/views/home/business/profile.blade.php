@@ -2317,6 +2317,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextMonthBtn.disabled = isNextMonthAfterLimit;
 
                 td.addEventListener("click", () => {
+
+                     // 🚫 BLOCK unavailable days
+                    if (
+                        td.classList.contains("off-day") ||
+                        td.classList.contains("booked-day") ||
+                        td.classList.contains("past-day")
+                    ) {
+                        return; // stop execution
+                    }
+                    
                     document.querySelectorAll("#calendarBody td").forEach(cell => cell.classList.remove("selected"));
                     td.classList.add("selected");
 
