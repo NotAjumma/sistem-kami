@@ -119,7 +119,7 @@
             </div>
             <div class="card-body">
                 <div class="basic-form">
-                    <form action="{{ route('organizer.business.booking.create.send') }}" method="POST">
+                    <form action="{{ route('organizer.business.booking.create.send') }}" method="POST" id="bookingForm">
                         @csrf
                         <div class="row">
                             <div class="mb-3 col-md-6">
@@ -372,6 +372,28 @@
         </script>
     @endif
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('#bookingForm');
+        const bookBtn = document.getElementById('bookNowBtn');
+
+        if (!form || !bookBtn) return; // safety check
+
+        form.addEventListener('submit', function (e) {
+
+            if (bookBtn.classList.contains('submitting')) {
+                e.preventDefault();
+                return false;
+            }
+
+            bookBtn.classList.add('submitting');
+            bookBtn.disabled = true;
+            bookBtn.innerHTML =
+                `<span class="spinner-border spinner-border-sm me-2"></span> Processing...`;
+
+        });
+    });
+    </script>
     <!-- calendar script -->
     
     <script>
