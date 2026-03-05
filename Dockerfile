@@ -1,9 +1,11 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
-    unzip git curl libzip-dev libpng-dev libonig-dev libxml2-dev zip ca-certificates \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+    unzip git curl libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    libonig-dev libxml2-dev zip ca-certificates \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd
 
 # Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
