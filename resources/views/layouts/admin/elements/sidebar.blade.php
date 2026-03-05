@@ -150,17 +150,38 @@
                         @endif
                     </ul>
                 </li>
-                <li>
+                <li class="{{ request()->routeIs('organizer.business.report.*') || request()->routeIs('commission.report') || request()->routeIs('organizer.transactions.*') ? 'mm-active' : '' }}">
+    
                     <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                         <i class="material-symbols-outlined">lab_profile</i>
                         <span class="nav-text">Reports</span>
                     </a>
+
                     <ul aria-expanded="false">
-                        <li><a href="{{ route('organizer.business.report.overview') }}">Overview</a></li>
+
+                        <li>
+                            <a href="{{ route('organizer.business.report.overview') }}"
+                            class="{{ request()->routeIs('organizer.business.report.overview') ? 'mm-active' : '' }}">
+                            Overview
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('commission.report') }}"
+                            class="{{ request()->routeIs('commission.report') ? 'mm-active' : '' }}">
+                            Commissions
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('organizer.transactions.index') }}"
+                            class="{{ request()->routeIs('organizer.transactions.*') ? 'mm-active' : '' }}">
+                            Transactions
+                            </a>
+                        </li>
+
                     </ul>
-                    <ul aria-expanded="false">
-                        <li><a href="{{ route('commission.report') }}">Commissions</a></li>
-                    </ul>
+
                 </li>
             </ul>
             @elseif($authUser->user->role == "worker")

@@ -154,4 +154,9 @@ class Booking extends Model
             $this->details->where('field_key', $key)->first()
         )->field_value;
     }
+
+    public function walletTransactions()
+    {
+        return $this->morphMany(WalletTransaction::class, 'reference');
+    }
 }

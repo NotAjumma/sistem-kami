@@ -50,6 +50,36 @@
                                 </div>
                             </div>
                             <div class="swiper-slide">
+                                <div class="card card-box bg-dark">
+                                    <div class="card-header border-0 pb-0">
+                                        <div class="chart-num">
+                                            <p>
+                                                <i class="fa-solid fa-sort-down me-2"></i>
+                                                Wallet Balance
+                                            </p>
+                                            <h2 class="font-w600 mb-1">RM{{ number_format($authUser->wallet_balance, 2) }}</h2>
+
+
+                                        </div>
+                                        <div class="dlab-swiper-circle">
+                                           <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45" viewBox="0 0 24 24">
+                                                <!-- White circular background -->
+                                                <circle cx="12" cy="12" r="12" fill="#ffffff" />
+
+                                                <!-- User head -->
+                                                <circle cx="12" cy="8" r="4" fill="#ac4cbc" />
+
+                                                <!-- User body -->
+                                                <path d="M6 20c0-3.3137 2.6863-6 6-6s6 2.6863 6 6" fill="none" stroke="#ac4cbc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="widgetChart3" class="chart-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
                                 <div class="card card-box bg-secondary">
                                     <div class="card-header border-0 pb-0">
                                         <div class="chart-num">

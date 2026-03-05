@@ -86,15 +86,36 @@
                     </tbody>
 
                     <tfoot>
-                        <tr>
-                            <th colspan="4">Total</th>
+                        <!-- Total Commissions -->
+                        <tr class="text-success">
+                            <th colspan="4">Total Commission</th>
                             <th>RM{{ number_format($totalRevenue,2) }}</th>
 
                             @foreach($workers as $w)
-                                @php $key = $w->id ?? 'organizer'; @endphp
-                                <th>RM{{ number_format($workerTotals[$key],2) }}</th>
+                                <th>RM{{ number_format($workerTotals[$w->id]['commission'] ?? 0,2) }}</th>
                             @endforeach
+                            <th>RM{{ number_format($totalPromoterCommission,2) }}</th>
+                            <th>RM{{ number_format($totalCompanyNet,2) }}</th>
+                        </tr>
 
+                        <tr class="text-danger">
+                            <th colspan="4" style="white-space: nowrap;">Worker Payouts</th>
+                            <th style="white-space: nowrap;">-</th>
+                            @foreach($workers as $w)
+                                <th style="white-space: nowrap;">
+                                    {{ isset($workerTotals[$w->id]['payout']) ? '-RM' . number_format($workerTotals[$w->id]['payout'], 2) : '-' }}
+                                </th>
+                            @endforeach
+                            <th style="white-space: nowrap;">-</th>
+                            <th style="white-space: nowrap;">-</th>
+                        </tr>
+
+                        <tr>
+                            <th colspan="4">Final Total</th>
+                            <th>RM{{ number_format($totalRevenue,2) }}</th>
+                            @foreach($workers as $w)
+                                <th>RM{{ number_format(($workerTotals[$w->id]['commission'] ?? 0) - ($workerTotals[$w->id]['payout'] ?? 0),2) }}</th>
+                            @endforeach
                             <th>RM{{ number_format($totalPromoterCommission,2) }}</th>
                             <th>RM{{ number_format($totalCompanyNet,2) }}</th>
                         </tr>

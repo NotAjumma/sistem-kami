@@ -15,6 +15,8 @@ use App\Models\VendorTimeSlot;
 use App\Models\VendorTimeSlotLimit;
 use App\Models\VendorOffDay;
 use App\Models\Worker;
+use App\Models\WalletTransaction;
+use App\Models\Organizer;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -351,16 +353,69 @@ class OrganizerBusinessController extends Controller
 
     public function cancelBooking($id)
     {
-        $booking = Booking::with(['participant', 'vendorTimeSlots'])->findOrFail($id);
+        $booking = Booking::with(['participant','vendorTimeSlots','package.organizer'])->findOrFail($id);
 
         if ($booking->status !== 'cancelled') {
-            $booking->status = 'cancelled';
-            $booking->save();
 
-            // Optionally update related ticket status
-            $booking->vendorTimeSlots()->update(['status' => 'cancelled']);
+            DB::beginTransaction();
 
-            return redirect()->back()->with('success', 'Booking has been cancelled.');
+            try {
+
+                $organizer = $booking->package->organizer;
+
+                $refundAmount = $booking->paid_amount;
+
+                /*
+                |--------------------------------------------------------------------------
+                | WALLET REFUND (if payment already exists)
+                |--------------------------------------------------------------------------
+                */
+
+                if ($refundAmount > 0) {
+
+                    $before = $organizer->wallet_balance ?? 0;
+                    $after  = $before - $refundAmount;
+
+                    WalletTransaction::create([
+                        'organizer_id' => $organizer->id,
+                        'type' => 'refund',
+                        'amount' => -$refundAmount,
+                        'balance_before' => $before,
+                        'balance_after' => $after,
+                        'reference_type' => Booking::class,
+                        'reference_id' => $booking->id,
+                        'description' => 'Refund booking cancellation - '.$booking->booking_code,
+                        'status' => 'completed'
+                    ]);
+
+                    $organizer->update([
+                        'wallet_balance' => $after
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE BOOKING
+                |--------------------------------------------------------------------------
+                */
+
+                $booking->status = 'cancelled';
+                $booking->save();
+
+                $booking->vendorTimeSlots()->update([
+                    'status' => 'cancelled'
+                ]);
+
+                DB::commit();
+
+                return redirect()->back()->with('success', 'Booking has been cancelled.');
+
+            } catch (\Exception $e) {
+
+                DB::rollBack();
+
+                return redirect()->back()->with('error', 'Cancel failed.');
+            }
         }
 
         return redirect()->back()->with('error', 'This booking is already cancelled.');
@@ -904,11 +959,42 @@ class OrganizerBusinessController extends Controller
 
 
         if ($booking->payment_type === 'deposit' && $booking->status == 'paid') {
-            $booking->paid_amount = $booking->final_price; 
-            $booking->payment_type = 'full_payment';
+            $remainingAmount        = $booking->final_price - $booking->paid_amount;
+            $booking->paid_amount   = $booking->final_price; 
+            $booking->payment_type  = 'full_payment';
             $booking->save();
 
             $booking->vendorTimeSlots()->update(['status' => 'full_payment']);
+
+            /*
+            |--------------------------------------------------------------------------
+            | WALLET TRANSACTION
+            |--------------------------------------------------------------------------
+            */
+
+            if ($remainingAmount > 0) {
+
+                $organizer = $booking->package->organizer;
+
+                $before = $organizer->wallet_balance ?? 0;
+                $after  = $before + $remainingAmount;
+
+                WalletTransaction::create([
+                    'organizer_id'      => $organizer->id,
+                    'type'              => 'income',
+                    'amount'            => $remainingAmount,
+                    'balance_before'    => $before,
+                    'balance_after'     => $after,
+                    'reference_type'    => Booking::class,
+                    'reference_id'      => $booking->id,
+                    'description'       => 'Remaining booking payment - ' . $booking->booking_code,
+                    'status'            => 'completed'
+                ]);
+
+                $organizer->update([
+                    'wallet_balance' => $after
+                ]);
+            }
 
             $booking->load('vendorTimeSlots');
 
@@ -1222,5 +1308,71 @@ class OrganizerBusinessController extends Controller
             'success' => true,
             'url' => $whatsappUrl
         ]);
+    }
+
+    public function getTransactions(Request $request)
+    {
+        $page_title = 'Transactions';
+        $main_title = 'Report';
+        $authUser = auth()->guard('organizer')->user();
+
+        $workers = Worker::where('organizer_id', $authUser->id)->get();
+        $transactions = WalletTransaction::with('reference')
+            ->where('organizer_id', $authUser->id)
+            ->latest()
+            ->paginate(20);
+
+        return view('organizer.report.transaction', compact('transactions', 'page_title', 'main_title', 'authUser', 'workers'));
+    }
+
+    public function storeWithdraw(Request $request)
+    {
+        $organizerId = auth()->guard('organizer')->id();
+
+        // Get the organizer record
+        $organizer = Organizer::find($organizerId);
+
+        if (!$organizer) {
+            return back()->with('error', 'Organizer not found');
+        }
+
+        // Check sufficient balance
+        if ($request->amount > $organizer->wallet_balance) {
+            return back()->with('error', 'Insufficient balance');
+        }
+
+        $balanceBefore = $organizer->wallet_balance;
+        $balanceAfter = $balanceBefore - $request->amount;
+
+        // If type is worker payout, get worker id and name
+        $workerId = $request->type === 'worker_payout' ? $request->worker_id : null;
+        $workerName = null;
+
+        if ($request->type === 'worker_payout' && $workerId) {
+            $worker = Worker::find($workerId);
+            $workerName = $worker?->name; // null safe
+        }
+
+        // Create wallet transaction
+        WalletTransaction::create([
+            'organizer_id' => $organizerId,
+            'type' => $request->type,
+            'amount' => -$request->amount,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $balanceAfter,
+            'reference_type' => $workerId ? Worker::class : null,
+            'reference_id' => $workerId,
+            'description' => $request->description 
+                ?? ($request->type === 'withdrawal' 
+                    ? 'Organizer withdraw' 
+                    : ($workerName ? "Payout to $workerName" : 'Worker payout')),
+            'status' => 'completed'
+        ]);
+
+        // Deduct from organizer's wallet_balance
+        $organizer->wallet_balance = $balanceAfter;
+        $organizer->save();
+
+        return back()->with('success', 'Transaction completed');
     }
 }

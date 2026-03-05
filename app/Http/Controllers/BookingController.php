@@ -18,6 +18,7 @@ use App\Models\Ticket;
 use App\Models\Package;
 use App\Models\PackageAddon;
 use App\Models\BookingFormField;
+use App\Models\WalletTransaction;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
@@ -1232,6 +1233,29 @@ class BookingController extends Controller
                 'status'        => $paymentTypeStatus,
             ]);
 
+            if ($paidAmount > 0) {
+
+                $organizer = $package->organizer;
+
+                $before = $organizer->wallet_balance ?? 0;
+                $after  = $before + $paidAmount;
+
+                WalletTransaction::create([
+                    'organizer_id' => $organizer->id,
+                    'type' => 'income',
+                    'amount' => $paidAmount,
+                    'balance_before' => $before,
+                    'balance_after' => $after,
+                    'reference_type' => 'booking',
+                    'reference_id' => $booking->id,
+                    'description' => 'Booking payment (' . $paymentType . ') - ' . $booking->booking_code,
+                    'status' => 'completed'
+                ]);
+
+                $organizer->update([
+                    'wallet_balance' => $after
+                ]);
+            }
             \Log::info('Payment record created', [
                 'booking_id'    => $booking->id,
                 'bill_code'     => $billCode,

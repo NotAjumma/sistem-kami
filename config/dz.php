@@ -38,6 +38,11 @@ return [
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
 					'vendor/toastr/css/toastr.min.css'
 				],
+				'OrganizerBusinessController_getTransactions' => [
+					'vendor/swiper/css/swiper-bundle.min.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+				],
 				'WorkerController_fishingKeyInWeight' => [
 					'vendor/swiper/css/swiper-bundle.min.css',
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
@@ -74,6 +79,13 @@ return [
 					'vendor/fullcalendar/css/main.min.css'
 				],
 				'OrganizerBusinessController_showPackages' => [
+					'vendor/datatables/css/jquery.dataTables.min.css',
+					'vendor/datatables/responsive/responsive.css',
+					'vendor/sweetalert2/dist/sweetalert2.min.css',
+					'vendor/toastr/css/toastr.min.css'
+
+				],
+				'OrganizerBusinessController_getTransactions' => [
 					'vendor/datatables/css/jquery.dataTables.min.css',
 					'vendor/datatables/responsive/responsive.css',
 					'vendor/sweetalert2/dist/sweetalert2.min.css',
@@ -338,6 +350,11 @@ return [
 					'js/plugins-init/toastr-init.js',
 					'js/plugins-init/sweetalert.init.js',
 				],
+				'BookingController_getTransactions' => [
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+					'js/plugins-init/sweetalert.init.js',
+				],
 				'WorkerController_fishingKeyInWeight' => [
 					'vendor/toastr/js/toastr.min.js',
 					'js/plugins-init/toastr-init.js',
@@ -412,6 +429,16 @@ return [
 					'js/plugins-init/fullcalendar-init.js',
 				],
 				'OrganizerBusinessController_showPackages' => [
+					'vendor/datatables/js/jquery.dataTables.min.js',
+					'vendor/datatables/responsive/responsive.js',
+					'js/plugins-init/datatables.init.js',
+					'js/highlight.min.js',
+					'vendor/sweetalert2/dist/sweetalert2.min.js',
+					'js/plugins-init/sweetalert.init.js',
+					'vendor/toastr/js/toastr.min.js',
+					'js/plugins-init/toastr-init.js',
+				],
+				'OrganizerBusinessController_getTransactions' => [
 					'vendor/datatables/js/jquery.dataTables.min.js',
 					'vendor/datatables/responsive/responsive.js',
 					'js/plugins-init/datatables.init.js',

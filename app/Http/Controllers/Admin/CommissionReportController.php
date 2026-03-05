@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\CommissionCalculator;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CommissionReportExport;
@@ -52,7 +53,12 @@ class CommissionReportController extends Controller
         $commissionRules = \App\Models\CommissionRule::where('organizer_id', $organizerId)->get();
 
         // 2️⃣ Initialize per-worker totals AFTER adding organizer
-        $workerTotals = $workers->mapWithKeys(fn($w) => [$w->id => 0.0])->toArray();
+        $workerTotals = $workers->mapWithKeys(fn($w) => [
+            $w->id => [
+                'commission' => 0.0,
+                'payout' => 0.0,
+            ]
+        ])->toArray();
 
         $report = [];
         $totalRevenue = 0;
@@ -89,7 +95,7 @@ class CommissionReportController extends Controller
 
             // Add to worker totals
             foreach ($calc['worker_breakdown'] as $wb) {
-                $workerTotals[$wb['worker_id']] += $wb['commission'];
+                $workerTotals[$wb['worker_id']]['commission'] += $wb['commission'];
             }
 
             $totalRevenue += $bookingStruct['amount'];
@@ -97,6 +103,14 @@ class CommissionReportController extends Controller
             $totalCompanyNet += $calc['company_net'];
 
             $report[] = array_merge($bookingStruct, $calc);
+        }
+
+        $payouts = WalletTransaction::where('type', 'worker_payout')
+            ->whereIn('reference_id', array_keys($workerTotals))
+            ->get();
+
+        foreach ($payouts as $payout) {
+            $workerTotals[$payout->reference_id]['payout'] += abs($payout->amount); // store positive value for display
         }
 
         if ($request->wantsJson() || $request->input('export') == 'json') {

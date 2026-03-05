@@ -198,6 +198,8 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/package/{id}/addons', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'getAddons']);
 
     Route::get('commission/report', [\App\Http\Controllers\Admin\CommissionReportController::class, 'index'])->name('commission.report');
+    Route::get('/transactions', [OrganizerBusinessController::class, 'getTransactions'])->name('organizer.transactions.index');
+    Route::post('/wallet/withdraw', [OrganizerBusinessController::class, 'storeWithdraw'])->name('organizer.withdraw.store');
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);
