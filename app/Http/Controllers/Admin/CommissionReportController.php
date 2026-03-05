@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Services\CommissionCalculator;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CommissionReportExport;
 
 class CommissionReportController extends Controller
 {
     public function index(Request $request)
     {
+        $page_title = 'Commission Report';
         $organizerId = auth()->guard('organizer')->id();
 
         // 1️⃣ Fetch bookings
         $query = \App\Models\Booking::with(['package','addons','promoter'])
+            ->whereIn('status', ['paid'])
             ->where('organizer_id', $organizerId);
 
         if ($request->filled('from')) {
@@ -63,12 +66,21 @@ class CommissionReportController extends Controller
                 'package_id' => $b->package_id,
                 'package_name' => $b->package->name ?? null,
                 'amount' => (float) $b->final_price,
-                'addons' => $b->addons->map(fn($ba) => [
-                    'id' => $ba->id,                         // booking_addon id
-                    'addon_id' => $ba->addon_id,             // link to package_addons.id
-                    'name' => $ba->name ?? '',
-                    'price' => (float)$ba->price,
-                ])->toArray(),
+                'addons' => $b->addons->map(function ($ba) {
+
+                    $qty = $ba->pivot->qty ?? 1;
+                    $price = (float)$ba->price;
+
+                    return [
+                        'id' => $ba->id,
+                        'addon_id' => $ba->id,
+                        'name' => $ba->name ?? '',
+                        'qty' => $qty,
+                        'price' => $price,
+                        'total_price' => $price * $qty,
+                    ];
+
+                })->toArray(),
                 'promoter_id' => $b->promoter_id,
             ];
 
@@ -92,21 +104,59 @@ class CommissionReportController extends Controller
         }
 
         if ($request->input('export') == 'excel') {
-            // simple array export - requires maatwebsite/excel installed and configured
+
             $rows = [];
-            foreach ($report as $r) {
-                $rows[] = [
-                    'Booking ID' => $r['id'],
-                    'Date' => $r['created_at'],
-                    'Package' => $r['package_name'],
-                    'Amount' => $r['amount'],
-                    'Total Worker Commission' => $r['total_worker_commission'],
-                    'Promoter Commission' => $r['promoter_commission'],
-                    'Company Net' => $r['company_net'],
-                ];
+
+            // Header
+            $header = [
+                'Booking ID',
+                'Date',
+                'Package',
+                'Addons',
+                'Amount'
+            ];
+
+            foreach ($workers as $w) {
+                $header[] = $w->name;
             }
 
-            return Excel::download(new \Maatwebsite\Excel\Collections\SheetCollection(['Report' => collect($rows)]), 'commission_report.xlsx');
+            $header[] = 'Promoter Commission';
+            $header[] = 'Company Net';
+
+            $rows[] = $header;
+
+            foreach ($report as $r) {
+
+                $addonText = collect($r['addons'] ?? [])
+                    ->map(fn($a) => $a['name'] . ' (RM' . number_format($a['price'],2) . ')')
+                    ->implode("\n");
+
+                $row = [
+                    $r['booking_id'],
+                    $r['booking_date'],
+                    $r['package_name'],
+                    $addonText,
+                    $r['amount'],
+                ];
+
+                // Worker commissions
+                $workerCommissionMap = collect($r['worker_breakdown'])
+                    ->pluck('commission', 'worker_id');
+
+                foreach ($workers as $w) {
+                    $row[] = round($workerCommissionMap[$w->id] ?? 0, 2);
+                }
+
+                $row[] = $r['promoter_commission'];
+                $row[] = $r['company_net'];
+
+                $rows[] = $row;
+            }
+
+            return Excel::download(
+                new \App\Exports\CommissionReportExport($rows),
+                'commission_report.xlsx'
+            );
         }
 
         $authUser = auth()->guard('organizer')
@@ -137,7 +187,8 @@ class CommissionReportController extends Controller
             'workerTotals',
             'totalRevenue',
             'totalPromoterCommission',
-            'totalCompanyNet'
+            'totalCompanyNet',
+            'page_title'
         ));
     }
 }

@@ -150,36 +150,39 @@ class CommissionCalculator
             $remainingPackageAmount = $finalAmount;
 
             foreach ($booking['addons'] ?? [] as $addon) {
-                // Does this worker own this addon?
-                $hasAddonRule = $rules->first(fn($r) =>
-                    $r->worker_id == $worker->id &&
+
+                // Get all workers that own this addon
+                $addonWorkers = $rules->filter(fn($r) =>
                     $r->addon_id == $addon['id']
                 );
 
-                if ($hasAddonRule) {
-                    // ✅ Assign addon commission to this worker
-                    $resAddon = self::calculateWorkerCommissionAddon([
-                        'booking_id' => $booking['id'],
-                        'worker_id' => $worker->id,
-                        'package_id' => $booking['package_id'],
-                        'addon_id' => $addon['id'],
-                        'amount' => (float) $addon['price'],
-                    ], $rules);
+                if ($addonWorkers->isNotEmpty()) {
 
-                    $workerAddonCommission += $resAddon['commission'];
+                    $shareCount = $addonWorkers->count();
 
-                    // Subtract addon price from this worker's remaining package
-                    $remainingPackageAmount -= (float) $addon['price'];
+                    // check if current worker is one of them
+                    $workerRule = $addonWorkers->firstWhere('worker_id', $worker->id);
+
+                    if ($workerRule) {
+
+                        // Split addon amount
+                        $sharedAmount = (float)$addon['total_price'] / $shareCount;
+
+                        $workerAddonCommission += $sharedAmount;
+                    }
+
+                    // Remove addon price from package (only once globally)
+                    $remainingPackageAmount -= (float)$addon['total_price'];
                 }
             }
 
             // 2️⃣ Subtract all addon prices that **any worker owns** from package for this worker
-            foreach ($booking['addons'] ?? [] as $addon) {
-                $ownerRule = $rules->first(fn($r) => $r->addon_id == $addon['id']);
-                if ($ownerRule && $ownerRule->worker_id != $worker->id) {
-                    $remainingPackageAmount -= (float)$addon['price'];
-                }
-            }
+            // foreach ($booking['addons'] ?? [] as $addon) {
+            //     $ownerRule = $rules->first(fn($r) => $r->addon_id == $addon['id']);
+            //     if ($ownerRule && $ownerRule->worker_id != $worker->id) {
+            //         $remainingPackageAmount -= (float)$addon['total_price'];
+            //     }
+            // }
 
             $remainingPackageAmount = max(0, $remainingPackageAmount);
 

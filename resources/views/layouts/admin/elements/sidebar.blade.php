@@ -158,6 +158,9 @@
                     <ul aria-expanded="false">
                         <li><a href="{{ route('organizer.business.report.overview') }}">Overview</a></li>
                     </ul>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('commission.report') }}">Commissions</a></li>
+                    </ul>
                 </li>
             </ul>
             @elseif($authUser->user->role == "worker")
