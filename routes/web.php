@@ -190,6 +190,15 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/report/slot-chart', 'slotChartData')->name('organizer.business.report.slot.chart');
 
 
+    Route::get('commission/setup', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'index'])->name('commission.setup');
+    Route::post('commission/setup', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'store'])->name('commission.setup.store');
+    Route::post('commission/setup/promoter', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'savePromoter'])->name('commission.setup.promoter');
+    Route::put('commission/rule/{commissionRule}', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'update'])->name('commission.rule.update');
+    Route::delete('commission/rule/{commissionRule}', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'destroy'])->name('commission.rule.delete');
+    Route::get('/package/{id}/addons', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'getAddons']);
+
+    Route::get('commission/report', [\App\Http\Controllers\Admin\CommissionReportController::class, 'index'])->name('commission.report');
+
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);
 
