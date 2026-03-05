@@ -1246,7 +1246,7 @@ class BookingController extends Controller
                     'amount' => $paidAmount,
                     'balance_before' => $before,
                     'balance_after' => $after,
-                    'reference_type' => 'booking',
+                    'reference_type' => Booking::class,
                     'reference_id' => $booking->id,
                     'description' => 'Booking payment (' . $paymentType . ') - ' . $booking->booking_code,
                     'status' => 'completed'
