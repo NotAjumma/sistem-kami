@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('reminders:send')->everyMinute(); // TODO: change back to ->hourly() after testing
+        // $schedule->command('reminders:send')->everyMinute(); // for testing
+        $schedule->command('reminders:send')->hourly();
     }
 
     /**
