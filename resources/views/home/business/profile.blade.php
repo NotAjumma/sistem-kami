@@ -2279,8 +2279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (offDayForDate) {
                     if ((!offDayForDate.start_time && !offDayForDate.end_time) ||
                         (offDayForDate.start_time === "00:00:00" && offDayForDate.end_time === "23:59:59")) {
-                        td.classList.add("off-day");
-                        td.title = "Unavailable (Off Day)";
+                        // td.classList.add("off-day");
+                        td.classList.add("booked-day");
+                        // td.title = "Unavailable (Off Day)";
+                        td.title = "Unavailable (Fully Booked)";
                     }
                 } else if (currentLoopDate.getTime() < today.getTime()) {
                     td.classList.add("past-day");
