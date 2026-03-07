@@ -55,6 +55,11 @@ return [
             'provider' => 'workers',
         ],
 
+        'superadmin' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+
         'marshal' => [
             'driver' => 'session',
             'provider' => 'users',

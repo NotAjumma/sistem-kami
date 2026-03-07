@@ -244,7 +244,7 @@
                     <p class="section-title">Tickets</p>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered mb-0">
-                            <thead class="table-light">
+                            <thead class="table">
                                 <tr>
                                     <th>Ticket Code</th>
                                     <th>Participant Name</th>

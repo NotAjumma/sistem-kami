@@ -113,13 +113,42 @@ class SendBookingReminders extends Command
         ]);
         $address = implode(', ', $addressParts);
 
+        // ======================
+        // Google Maps Link Logic
+        // ======================
+
+        if ($organizer->is_gmaps_verified) {
+
+            // guna nama bisnes
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($organizer->office_name);
+
+        } elseif ($organizer->latitude && $organizer->longitude) {
+
+            // guna lat long
+            $mapsUrl = "https://www.google.com/maps?q={$organizer->latitude},{$organizer->longitude}";
+
+        } else {
+
+            // fallback guna full address
+            $fullAddress = $organizer->address_line1 . ', ' .
+                $organizer->postal_code . ' ' .
+                $organizer->city . ', ' .
+                $organizer->state;
+
+            $mapsUrl = "https://www.google.com/maps/search/?api=1&query=" .
+                urlencode($fullAddress);
+        }
+
         $locationLine = '';
         if ($address) {
             $locationLine = "📍 Lokasi: {$address}";
             if ($organizer->latitude && $organizer->longitude) {
-                $locationLine .= "\nhttps://maps.google.com/?q={$organizer->latitude},{$organizer->longitude}";
+                $locationLine .= " {$mapsUrl}";
             }
         }
+
+        $balance  = ($booking->total_price + ($booking->service_charge ?? 0) - ($booking->discount ?? 0)) - $booking->paid_amount;
 
         $lines = [
             "Hai {$participant->name}! 👋",
@@ -127,10 +156,15 @@ class SendBookingReminders extends Command
             "Ini adalah peringatan bahawa tempahan anda akan bermula tidak lama lagi!",
             "",
             "Pakej: " . ($booking->package->name ?? '-'),
-            "",
-            "📅 Tarikh: {$slotDate}",
-            "⏰ Masa: {$slotTime}{$slotEnd}",
         ];
+
+        if ($booking->payment_type === 'deposit' && $balance > 0) {
+            $lines[] = "💰 Baki: RM" . number_format($balance, 2);
+        }
+
+        $lines[] = "";
+        $lines[] = "📅 Tarikh: {$slotDate}";
+        $lines[] = "⏰ Masa: {$slotTime}{$slotEnd}";
 
         if ($locationLine) {
             $lines[] = "";
@@ -144,7 +178,7 @@ class SendBookingReminders extends Command
         $lines[] = "• Lewat = tiada masa tambahan";
         $lines[] = "";
         $lines[] = "Kerjasama anda amat dihargai. Jumpa nanti! 😊";
-        $lines[] = "- {$organizer->name}";
+        // $lines[] = "- {$organizer->name}";
 
         $message = implode("\n", $lines);
 

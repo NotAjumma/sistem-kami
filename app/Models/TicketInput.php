@@ -13,7 +13,7 @@ class TicketInput extends Model
         'ticket_id',
         'parent',
         'label',
-        'label_key',
+        'input_key',
         'input_type',
         'options',
         'placeholder',
@@ -22,7 +22,7 @@ class TicketInput extends Model
     ];
 
     protected $casts = [
-        'options' => 'array',
+        'options'     => 'array',
         'is_required' => 'boolean',
     ];
 

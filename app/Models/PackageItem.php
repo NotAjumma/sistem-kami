@@ -14,14 +14,16 @@ class PackageItem extends Model
         'quantity',
         'unit_price',
         'is_optional',
+        'show_on_card',
         'sort_order',
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
-        'unit_price' => 'decimal:2',
-        'is_optional' => 'boolean',
-        'sort_order' => 'integer',
+        'quantity'     => 'integer',
+        'unit_price'   => 'decimal:2',
+        'is_optional'  => 'boolean',
+        'show_on_card' => 'boolean',
+        'sort_order'   => 'integer',
     ];
 
     public function package(): BelongsTo

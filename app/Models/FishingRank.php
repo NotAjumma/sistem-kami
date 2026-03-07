@@ -9,10 +9,11 @@ class FishingRank extends Model
     protected $fillable = [
         'name',
         'type',
+        'sub_type',
         'target_weight',
+        'target_weight_limit',
+        'calculation_mode',
         'time_mode',
-        'calculation_mode', // 'calculation_mode', ['single', 'total']
-        'sub_type',         // 'sub_type', ['heaviest', 'most_catch', 'other']
     ];
 
     public function leaderboards()

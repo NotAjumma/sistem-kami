@@ -14,24 +14,27 @@ class Payment extends Model
         'bill_code',
         'ref_no',
         'amount',
+        'payment_type',
+        'is_final',
+        'method',
         'status',
         'paid_at',
         'raw_response',
     ];
 
     protected $casts = [
-        'paid_at' => 'datetime',
+        'paid_at'      => 'datetime',
         'raw_response' => 'array',
+        'amount'       => 'decimal:2',
+        'is_final'     => 'boolean',
     ];
 
-    // Relationship: 1 Payment belongs to 1 Booking
     public function booking()
     {
         return $this->belongsTo(Booking::class);
     }
 
-    // Helper: check if payment is completed
-    public function isPaid()
+    public function isPaid(): bool
     {
         return $this->status === 'paid';
     }

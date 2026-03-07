@@ -85,7 +85,7 @@
                                     <td>{{ $r->commission_type }}</td>
                                     <td>{{ $r->commission_value }}</td>
                                     <td>
-                                        <form method="POST" action="{{ route('commission.rule.delete', $r) }}" onsubmit="return confirm('Delete?')">
+                                        <form method="POST" action="{{ route('commission.rule.delete', $r) }}" data-confirm="Delete this commission rule?">
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-sm btn-danger">Delete</button>

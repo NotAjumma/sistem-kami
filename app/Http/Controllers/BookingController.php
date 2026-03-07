@@ -1299,17 +1299,17 @@ class BookingController extends Controller
         // Info pembayaran
         if ($booking->payment_type === 'deposit') {
             if ($booking->paid_amount > 0) {
-                $text .= "*Status Pembayaran*: Deposit diterima\n";
+                $text .= "Status Pembayaran: Deposit diterima\n";
                 $text .= "Jumlah Deposit: RM" . number_format($booking->paid_amount, 2) . "\n";
             } else {
-                $text .= "*Status Pembayaran*: Tiada deposit dibayar\n";
+                $text .= "Status Pembayaran: Tiada deposit dibayar\n";
             }
             $text .= "Baki Perlu Dibayar: RM" . number_format(
                 ($booking->total_price + ($booking->service_charge ?? 0) - ($booking->discount ?? 0)) - $booking->paid_amount,
                 2
             ) . "\n\n";
         } else {
-            $text .= "*Status Pembayaran*: Penuh (Selesai)\n";
+            $text .= "Status Pembayaran: Penuh (Selesai)\n";
             $text .= "Jumlah Dibayar: RM" . number_format($booking->paid_amount, 2) . "\n\n";
         }
 
@@ -1328,7 +1328,7 @@ class BookingController extends Controller
         }
 
         if ($booking->addons->count()) {
-            $text .= "*Add Ons Dipilih:*\n";
+            $text .= "Add Ons Dipilih:\n";
 
             foreach ($booking->addons as $addon) {
 
@@ -1361,7 +1361,7 @@ class BookingController extends Controller
 
         $organizer = $booking->package->organizer;
 
-        $text .= "📍 *Lokasi Studio:*\n";
+        $text .= "📍 Lokasi Studio:\n";
         $text .= $organizer->office_name . "\n";
         $text .= $organizer->address_line1 . "\n";
         $text .= $organizer->postal_code . " " .
@@ -1397,12 +1397,109 @@ class BookingController extends Controller
 
         $text .= "Google Maps:\n{$mapsUrl}\n\n";
 
-        // Link WhatsApp (tanpa '+')
         $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $phone
             . '&text=' . urlencode($text);
 
+        // Try Fonnte if token exists; fall back to WhatsApp URL on failure
+        if ($authUser->fonnte_token) {
+
+            $fonntePhone = preg_replace('/[^0-9]/', '', $phone);
+            if (str_starts_with($fonntePhone, '0')) {
+                $fonntePhone = '6' . $fonntePhone;
+            }
+
+            // Build rich Fonnte message (reminder-style, no receipt URL)
+            $firstSlot  = $booking->vendorTimeSlots->first();
+            $slotDate   = $firstSlot ? \Carbon\Carbon::parse($firstSlot->booked_date_start)->format('d M Y') : '-';
+            $slotTime   = $firstSlot ? \Carbon\Carbon::parse($firstSlot->booked_time_start)->format('h:i A') : '';
+            $slotEnd    = ($firstSlot && $firstSlot->booked_time_end)
+                ? ' - ' . \Carbon\Carbon::parse($firstSlot->booked_time_end)->format('h:i A')
+                : '';
+
+            $balance    = ($booking->total_price + ($booking->service_charge ?? 0) - ($booking->discount ?? 0)) - $booking->paid_amount;
+            $payLines   = [];
+            if ($booking->payment_type === 'deposit') {
+                $payLines[] = "Deposit: RM" . number_format($booking->paid_amount, 2);
+                if ($balance > 0) {
+                    $payLines[] = "Baki: RM" . number_format($balance, 2);
+                }
+            } else {
+                $payLines[] = "Bayar Penuh: RM" . number_format($booking->paid_amount, 2);
+            }
+
+            $addressParts = array_filter([
+                $organizer->office_name,
+                $organizer->address_line1,
+                $organizer->city,
+                $organizer->state,
+            ]);
+            $addressLine = implode(', ', $addressParts);
+
+            $customerName = ucfirst(strtolower($data['name']));
+            $fonnteLines  = [
+                "Hai {$customerName}! 👋",
+                "",
+                "Tempahan anda telah berjaya dibuat!",
+                "",
+                "Pakej: {$booking->package->name}",
+            ];
+            foreach ($payLines as $pl) {
+                $fonnteLines[] = $pl;
+            }
+            $fonnteLines[] = "";
+            $fonnteLines[] = "📅 Tarikh: {$slotDate}";
+            $fonnteLines[] = "⏰ Masa: {$slotTime}{$slotEnd}";
+
+            if ($addressLine) {
+                $fonnteLines[] = "";
+                $fonnteLines[] = "📍 Lokasi: {$addressLine}";
+                $fonnteLines[] = $mapsUrl;
+            }
+
+            $fonnteLines[] = "";
+            $fonnteLines[] = "📄 Resit:";
+            $fonnteLines[] = "{$receiptUrl}";
+            $fonnteLines[] = "📝 Peringatan:";
+            $fonnteLines[] = "• Hadir 15 minit awal";
+            $fonnteLines[] = "• Sampin, tudung & kasut siap dipakai";
+            $fonnteLines[] = "• Lewat = tiada masa tambahan";
+            $fonnteLines[] = "";
+            $fonnteLines[] = "Terima kasih";
+            // $fonnteLines[] = "- {$authUser->name}";
+
+            $fonnteText = implode("\n", $fonnteLines);
+            try {
+                $fonnteResponse = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $authUser->fonnte_token,
+                ])->asForm()->post('https://api.fonnte.com/send', [
+                    'target'      => $fonntePhone,
+                    'message'     => $fonnteText,
+                    'countryCode' => '60',
+                ]);
+
+                if ($fonnteResponse->successful() && ($fonnteResponse->json('status') === true || $fonnteResponse->json('status') === 'true')) {
+                    return redirect()->back()->with([
+                        'success'     => 'Booking for ' . $data['name'] . ' was created successfully!',
+                        'fonnte_sent' => true,
+                    ]);
+                }
+
+                \Log::warning('Fonnte send after booking creation failed, falling back to WhatsApp URL', [
+                    'booking'  => $booking->booking_code,
+                    'phone'    => $fonntePhone,
+                    'msg_len'  => mb_strlen($fonnteText),
+                    'response' => $fonnteResponse->json(),
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Fonnte send after booking creation exception, falling back to WhatsApp URL', [
+                    'booking' => $booking->booking_code,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
+        }
+
         return redirect()->back()->with([
-            'success' => 'Booking for ' . $data['name'] . ' was created successfully!',
+            'success'      => 'Booking for ' . $data['name'] . ' was created successfully!',
             'whatsapp_url' => $whatsappUrl,
         ]);
 

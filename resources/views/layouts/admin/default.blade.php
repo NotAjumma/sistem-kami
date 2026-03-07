@@ -505,6 +505,47 @@
 		</script>
 	@endif -->
 	@stack('scripts')
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+	    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+	        form.addEventListener('submit', function (e) {
+	            e.preventDefault();
+	            const f = this;
+	            Swal.fire({
+	                title: 'Are you sure?',
+	                text: f.dataset.confirm,
+	                icon: 'warning',
+	                showCancelButton: true,
+	                confirmButtonColor: '#e55353',
+	                cancelButtonColor: '#6c757d',
+	                confirmButtonText: 'Yes, proceed!',
+	                cancelButtonText: 'Cancel'
+	            }).then(function (result) { if (result.isConfirmed) f.submit(); });
+	        });
+	    });
+	    document.querySelectorAll('a[data-confirm]').forEach(function (link) {
+	        link.addEventListener('click', function (e) {
+	            e.preventDefault();
+	            const href = this.href, target = this.target;
+	            Swal.fire({
+	                title: 'Are you sure?',
+	                text: this.dataset.confirm,
+	                icon: 'warning',
+	                showCancelButton: true,
+	                confirmButtonColor: '#e55353',
+	                cancelButtonColor: '#6c757d',
+	                confirmButtonText: 'Yes, proceed!',
+	                cancelButtonText: 'Cancel'
+	            }).then(function (result) {
+	                if (result.isConfirmed) {
+	                    if (target === '_blank') window.open(href, '_blank');
+	                    else window.location.href = href;
+	                }
+	            });
+	        });
+	    });
+	});
+	</script>
 </body>
 
 </html>

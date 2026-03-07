@@ -354,6 +354,16 @@
 
     @if(session('success'))
         <script>
+            @if(session('fonnte_sent'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: @json(session('success')) + ' Receipt sent automatically via WhatsApp.',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            @else
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
@@ -369,6 +379,7 @@
                     window.open(@json(session('whatsapp_url')), "_blank");
                 }
             });
+            @endif
         </script>
     @endif
 
@@ -542,6 +553,7 @@
 
                     // Set the hidden input value
                     document.getElementById("selected_date").value = formattedDate;
+                    filterAddonsBySpecialDate(formattedDate);
                     if (vendorTimeSlots.length > 0) {
                         const shouldHide =
                             currentLoopDate.getTime() < today.getTime() ||
@@ -583,6 +595,7 @@
             if (calendarData) renderCalendar(currentDate, calendarData, currentPackageId);
             document.getElementById("selected_date").value = "";
             document.getElementById("bookNowBtn").setAttribute("disabled", true);
+            document.querySelectorAll('[data-special-start]').forEach(w => w.style.display = '');
         });
 
         prevMonthBtn.addEventListener("click", () => {
@@ -616,6 +629,41 @@
                 bookNowBtn.removeAttribute('disabled');
 
             }
+        }
+
+        function filterAddonsBySpecialDate(dateStr) {
+            if (!dateStr) return;
+            const selected = new Date(dateStr);
+            selected.setHours(0, 0, 0, 0);
+
+            document.querySelectorAll('[data-special-start]').forEach(wrapper => {
+                const start = wrapper.dataset.specialStart;
+                const end   = wrapper.dataset.specialEnd;
+
+                if (!start || !end) {
+                    wrapper.style.display = '';
+                    return;
+                }
+
+                const startDate = new Date(start);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(end);
+                endDate.setHours(0, 0, 0, 0);
+
+                if (selected >= startDate && selected <= endDate) {
+                    wrapper.style.display = '';
+                    const cb = wrapper.querySelector('.addon-checkbox');
+                    if (cb) { cb.checked = true; cb.disabled = true; }
+                } else {
+                    wrapper.style.display = 'none';
+                    const cb = wrapper.querySelector('.addon-checkbox');
+                    if (cb) { cb.checked = false; cb.disabled = false; }
+                    const qtyInput = wrapper.querySelector('.addon-qty-input');
+                    if (qtyInput) qtyInput.value = 0;
+                }
+            });
+
+            updateFinalPrice();
         }
 
         function checkTimeSlotSelected(currentLoopDate) {
@@ -949,7 +997,7 @@
                 if (addon.is_qty == 1) {
 
                     html = `
-                    <div class="mb-3 addon-qty-wrapper">
+                    <div class="mb-3 addon-qty-wrapper" data-special-start="${addon.special_date_start ?? ''}" data-special-end="${addon.special_date_end ?? ''}">
                         <label class="form-label d-flex justify-content-between align-items-center">
                             <span>
                                 ${addon.name}
@@ -960,7 +1008,7 @@
                         <div class="input-group" style="max-width:150px;">
                             <button class="btn btn-outline-secondary qty-minus" type="button" data-id="${addon.id}">-</button>
 
-                            <input 
+                            <input
                                 type="number"
                                 class="form-control text-center addon-qty-input"
                                 name="addon_qty[${addon.id}]"
@@ -979,8 +1027,8 @@
 
                     // NORMAL ADDON (checkbox)
                     html = `
-                    <div class="form-check mb-2">
-                        <input 
+                    <div class="form-check mb-2" data-special-start="${addon.special_date_start ?? ''}" data-special-end="${addon.special_date_end ?? ''}">
+                        <input
                             class="form-check-input addon-checkbox"
                             type="checkbox"
                             name="addon_ids[]"
@@ -1060,7 +1108,7 @@
                 .catch(err => {
                     console.error(err);
                     loading.classList.add('d-none');
-                    alert('Failed to load calendar');
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load calendar.' });
                 });
         }
 

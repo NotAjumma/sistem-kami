@@ -9,8 +9,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">{{ $page_title }}</h4>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">{{ $page_title }}</h4>
+                        <a href="{{ route('organizer.business.package.create') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> New Package
+                        </a>
                     </div>
                     <div class="card-body">
                         <form method="GET" id="filterForm" class="mb-3 d-flex gap-2 flex-wrap">
@@ -54,6 +57,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Image</th>
+                                        <th>Order</th>
                                         <th>Category</th>
                                         <th>Package</th>
                                         <th>Base Price</th>
@@ -70,6 +75,16 @@
                                     @foreach ($packages as $index => $package)
                                         <tr >
                                             <td>{{ $packages->firstItem() + $index }}</td>
+                                            <td>
+                                                @php $cover = $package->images->firstWhere('is_cover', true) ?? $package->images->first(); @endphp
+                                                @if ($cover)
+                                                    <img src="{{ asset('storage/uploads/' . $authUser->id . '/packages/' . $package->id . '/' . $cover->url) }}"
+                                                        style="width:56px;height:56px;object-fit:cover;border-radius:6px;">
+                                                @else
+                                                    <span class="text-muted small">—</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $package->order_by }}</td>
                                             <td>{{ $package->category->name }}</td>
                                             <td>{{ $package->name }}</td>
                                             <td>RM{{ $package->base_price }}</td>
@@ -114,6 +129,12 @@
                                                         Actions
                                                     </button>
                                                     <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a href="{{ route('organizer.business.package.edit', $package->id) }}"
+                                                                class="dropdown-item">
+                                                                <i class="fas fa-edit me-1"></i> Edit
+                                                            </a>
+                                                        </li>
                                                         @if($package->payment_method === 'gform' && $package->status == 'pending' && !is_null($package->resit_path))
                                                             <li>
                                                                 <form action="{{ route('organizer.booking.verify', $package->id) }}"

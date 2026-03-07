@@ -12,6 +12,9 @@ class VendorOffDay extends Model
     protected $fillable = [
         'organizer_id',
         'off_date',
+        'day_of_week',
+        'start_time',
+        'end_time',
         'reason',
     ];
 

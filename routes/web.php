@@ -13,6 +13,7 @@ use App\Http\Controllers\OrganizerBusinessController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\SuperadminController;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
@@ -72,9 +73,31 @@ Route::get('/db-check', function () {
     }
 });
 
-// super admin
-Route::get('/notajumma/upload-image', [ImageUploadController::class, 'show'])->name('superadmin.show.upload');
-Route::post('/notajumma/upload-image', [ImageUploadController::class, 'upload'])->name('superadmin.upload-image');
+// ── Superadmin ───────────────────────────────────────────────────────────────
+Route::prefix('superadmin')->group(function () {
+    // Public
+    Route::get('/login',  [SuperadminController::class, 'showLogin'])->name('superadmin.login');
+    Route::post('/login', [SuperadminController::class, 'login'])->name('superadmin.login.post');
+
+    // Protected
+    Route::middleware('superadmin')->group(function () {
+        Route::post('/logout',                              [SuperadminController::class, 'logout'])->name('superadmin.logout');
+        Route::get('/dashboard',                            [SuperadminController::class, 'dashboard'])->name('superadmin.dashboard');
+        Route::get('/organizers',                           [SuperadminController::class, 'organizers'])->name('superadmin.organizers');
+        Route::get('/organizers/create',                    [SuperadminController::class, 'createOrganizer'])->name('superadmin.organizer.create');
+        Route::post('/organizers',                          [SuperadminController::class, 'storeOrganizer'])->name('superadmin.organizer.store');
+        Route::get('/organizers/{id}',                      [SuperadminController::class, 'organizerDetail'])->name('superadmin.organizer.detail');
+        Route::get('/organizers/{id}/edit',                 [SuperadminController::class, 'editOrganizer'])->name('superadmin.organizer.edit');
+        Route::patch('/organizers/{id}',                    [SuperadminController::class, 'updateOrganizer'])->name('superadmin.organizer.update');
+        Route::delete('/organizers/{id}',                   [SuperadminController::class, 'destroyOrganizer'])->name('superadmin.organizer.destroy');
+        Route::get('/organizers/{id}/impersonate',          [SuperadminController::class, 'impersonate'])->name('superadmin.impersonate');
+        Route::get('/stop-impersonate',                     [SuperadminController::class, 'stopImpersonate'])->name('superadmin.stop-impersonate');
+        Route::get('/settings',                             [SuperadminController::class, 'showSettings'])->name('superadmin.settings');
+        Route::post('/settings',                            [SuperadminController::class, 'saveSettings'])->name('superadmin.settings.save');
+        Route::get('/upload-image',                         [SuperadminController::class, 'showUploadImage'])->name('superadmin.upload-image');
+        Route::post('/upload-image',                        [ImageUploadController::class, 'upload'])->name('superadmin.upload-image.post');
+    });
+});
 
 // Used route
 Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
@@ -174,9 +197,14 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
-    Route::post('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
+    Route::post('/packages/create', 'storePackage')->name('organizer.business.package.store');
     Route::get('/packages', 'showPackages')->name('organizer.business.packages');
+    Route::get('/packages/{id}/edit', 'showEditPackage')->name('organizer.business.package.edit');
+    Route::patch('/packages/{id}', 'updatePackage')->name('organizer.business.package.update');
+    Route::delete('/packages/{id}', 'destroyPackage')->name('organizer.business.package.destroy');
     Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
+    Route::post('/packages/{id}/upload-image', 'uploadPackageImage')->name('organizer.business.package.upload-image');
+    Route::post('/packages/upload-temp-image', 'uploadTempImage')->name('organizer.business.package.upload-temp-image');
 
     Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
     Route::get('/booking/{id}', [OrganizerBusinessController::class, 'showBooking'])->name('organizer.business.booking.show');
@@ -206,6 +234,16 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::post('/wallet/withdraw', [OrganizerBusinessController::class, 'storeWithdraw'])->name('organizer.withdraw.store');
     Route::get('/settings', [OrganizerBusinessController::class, 'showSettings'])->name('organizer.business.settings');
     Route::post('/settings', [OrganizerBusinessController::class, 'updateSettings'])->name('organizer.business.settings.update');
+    Route::post('/settings/off-days', [OrganizerBusinessController::class, 'storeOffDay'])->name('organizer.business.settings.off-days.store');
+    Route::delete('/settings/off-days/{id}', [OrganizerBusinessController::class, 'destroyOffDay'])->name('organizer.business.settings.off-days.destroy');
+
+    // Time Slots
+    Route::get('/time-slots', [OrganizerBusinessController::class, 'showTimeSlots'])->name('organizer.business.time-slots');
+    Route::post('/time-slots', [OrganizerBusinessController::class, 'storeTimeSlot'])->name('organizer.business.time-slots.store');
+    Route::patch('/time-slots/{id}', [OrganizerBusinessController::class, 'updateTimeSlot'])->name('organizer.business.time-slots.update');
+    Route::delete('/time-slots/{id}', [OrganizerBusinessController::class, 'destroyTimeSlot'])->name('organizer.business.time-slots.destroy');
+    Route::post('/time-slots/{id}/images', [OrganizerBusinessController::class, 'uploadSlotImage'])->name('organizer.business.time-slots.image.upload');
+    Route::delete('/time-slots/{slotId}/images/{imageId}', [OrganizerBusinessController::class, 'destroySlotImage'])->name('organizer.business.time-slots.image.destroy');
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);

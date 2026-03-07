@@ -111,6 +111,14 @@
                         </li>
                     </ul>
                 </li>
+                <li>
+                    <a href="{{ route('organizer.business.time-slots') }}"
+                        class="{{ $currentRoute === 'organizer.business.time-slots' ? 'active' : '' }}"
+                        aria-expanded="false">
+                        <i class="material-symbols-outlined">schedule</i>
+                        <span class="nav-text">Time Slots</span>
+                    </a>
+                </li>
                 @endif
                 
                 <li class="{{ $isBookingRoute ? 'mm-active' : '' }}">
@@ -151,7 +159,7 @@
                     </ul>
                 </li>
                 <li class="{{ request()->routeIs('organizer.business.report.*') || request()->routeIs('commission.report') || request()->routeIs('organizer.transactions.*') ? 'mm-active' : '' }}">
-    
+
                     <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                         <i class="material-symbols-outlined">lab_profile</i>
                         <span class="nav-text">Reports</span>
@@ -182,6 +190,14 @@
 
                     </ul>
 
+                </li>
+                <li>
+                    <a href="{{ route('organizer.business.settings') }}"
+                        class="{{ request()->routeIs('organizer.business.settings*') ? 'active' : '' }}"
+                        aria-expanded="false">
+                        <i class="material-symbols-outlined">settings</i>
+                        <span class="nav-text">Settings</span>
+                    </a>
                 </li>
             </ul>
             @elseif($authUser->user->role == "worker")

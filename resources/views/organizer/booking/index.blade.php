@@ -469,16 +469,27 @@
 
                             if (response.success) {
 
-                                Swal.close(); // close loading
+                                Swal.close();
 
-                                window.open(response.url, '_blank');
-
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Receipt Ready!',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
+                                if (response.sent) {
+                                    // Sent automatically via Fonnte
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Receipt Sent!',
+                                        text: 'Receipt sent automatically via WhatsApp.',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    });
+                                } else {
+                                    // Manual — open WhatsApp link
+                                    window.open(response.url, '_blank');
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Receipt Ready!',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                }
 
                             }
                         },

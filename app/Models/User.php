@@ -9,13 +9,12 @@ class User extends Authenticatable
 {
     use HasApiTokens;
 
-    // If your table is 'users', no need to specify $table
-
     protected $fillable = [
         'username',
         'password',
         'role',
         'last_login',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -24,13 +23,17 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'last_login' => 'datetime',
+        'last_login'        => 'datetime',
         'email_verified_at' => 'datetime',
     ];
+
+    public function isSuperadmin(): bool
+    {
+        return $this->role === 'superadmin';
+    }
 
     public function organizer()
     {
         return $this->hasOne(Organizer::class, 'user_id');
     }
-
 }
