@@ -499,6 +499,75 @@ class OrganizerController extends Controller
     //     return redirect()->back()->with('error', 'This booking is already cancelled.');
     // }
 
+    public function showBooking($id)
+    {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        $booking = Booking::with([
+            'participant',
+            'event',
+            'bookingTickets',
+            'details',
+        ])
+            ->whereHas('event', fn($q) => $q->where('organizer_id', $authUser->id))
+            ->findOrFail($id);
+
+        $page_title = 'Booking Details';
+
+        return view('organizer.booking.show', compact('page_title', 'authUser', 'booking'));
+    }
+
+    public function editBooking($id)
+    {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        $booking = Booking::with([
+            'participant',
+            'event',
+            'bookingTickets',
+            'details',
+        ])
+            ->whereHas('event', fn($q) => $q->where('organizer_id', $authUser->id))
+            ->findOrFail($id);
+
+        $page_title = 'Edit Booking';
+
+        return view('organizer.booking.edit', compact('page_title', 'authUser', 'booking'));
+    }
+
+    public function updateBooking(Request $request, $id)
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        $booking = Booking::with(['participant', 'bookingTickets'])
+            ->whereHas('event', fn($q) => $q->where('organizer_id', $authUser->id))
+            ->findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled',
+        ]);
+
+        $booking->participant->update([
+            'name'  => $request->input('name', $booking->participant->name),
+            'phone' => $request->input('phone', $booking->participant->phone),
+            'email' => $request->input('email', $booking->participant->email),
+            'no_ic' => $request->input('no_ic', $booking->participant->no_ic),
+        ]);
+
+        $booking->update(['status' => $request->status]);
+
+        if ($request->hasFile('resit')) {
+            $file     = $request->file('resit');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images/receipts'), $filename);
+            $booking->update(['resit_path' => $filename]);
+        }
+
+        return redirect()
+            ->route('organizer.booking.show', $booking->id)
+            ->with('success', 'Booking updated successfully.');
+    }
+
     public function ticketCheckin($id)
     {
         $bookingTicket = BookingTicket::with('booking')->findOrFail($id);

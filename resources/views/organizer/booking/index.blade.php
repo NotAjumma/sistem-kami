@@ -133,10 +133,11 @@
                                             <td>
                                                 @php
                                                     $statusClass = match ($booking->status) {
-                                                        'pending' => 'warning',
+                                                        'pending'   => 'warning',
+                                                        'paid'      => 'secondary',
                                                         'confirmed' => 'success',
                                                         'cancelled' => 'danger',
-                                                        default => 'secondary',
+                                                        default     => 'secondary',
                                                     };
                                                 @endphp
                                                 <span class="badge bg-{{ $statusClass }}">
@@ -209,6 +210,30 @@
                                                         Actions
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end">
+                                                        <li>
+                                                            @if($packages)
+                                                                <a class="dropdown-item" href="{{ route('organizer.business.booking.show', $booking->id) }}">
+                                                                    <i class="fas fa-eye me-1"></i> View Details
+                                                                </a>
+                                                            @else
+                                                                <a class="dropdown-item" href="{{ route('organizer.booking.show', $booking->id) }}">
+                                                                    <i class="fas fa-eye me-1"></i> View Details
+                                                                </a>
+                                                            @endif
+                                                        </li>
+                                                        @if($booking->status !== 'cancelled')
+                                                            <li>
+                                                                @if($packages)
+                                                                    <a class="dropdown-item" href="{{ route('organizer.business.booking.edit', $booking->id) }}">
+                                                                        <i class="fas fa-edit me-1"></i> Edit Booking
+                                                                    </a>
+                                                                @else
+                                                                    <a class="dropdown-item" href="{{ route('organizer.booking.edit', $booking->id) }}">
+                                                                        <i class="fas fa-edit me-1"></i> Edit Booking
+                                                                    </a>
+                                                                @endif
+                                                            </li>
+                                                        @endif
                                                         @if($booking->payment_method === 'gform' && $booking->status == 'pending' && !is_null($booking->resit_path))
                                                             <li>
                                                                 <form action="{{ route('organizer.booking.verify', $booking->id) }}"
@@ -218,7 +243,7 @@
                                                                     <button type="button"
                                                                         class="dropdown-item text-success btn-verify-payment"
                                                                         data-booking-code="{{ $booking->booking_code }}">
-                                                                        <i class="fas fa-check"></i> Verify Payment
+                                                                        <i class="fas fa-check-circle me-1"></i> Verify Payment
                                                                     </button>
                                                                 </form>
                                                             </li>
@@ -233,7 +258,7 @@
                                                                         class="dropdown-item text-primary btn-make-full-payment"
                                                                         data-customer-name="{{ $booking->participant->name }}"
                                                                         data-booking-code="{{ $booking->booking_code }}">
-                                                                       Make Full Payment
+                                                                        <i class="fas fa-dollar-sign me-1"></i> Make Full Payment
                                                                     </button>
                                                                 </form>
                                                             </li>
@@ -247,7 +272,7 @@
                                                                     <button type="button"
                                                                         class="dropdown-item text-danger btn-cancel"
                                                                         data-booking-code="{{ $booking->booking_code }}">
-                                                                        <i class="fas fa-times"></i> Cancel
+                                                                        <i class="fas fa-ban me-1"></i> Cancel
                                                                     </button>
                                                                 </form>
                                                             </li>
@@ -256,7 +281,7 @@
                                                                     class="dropdown-item text-success btn-send-receipt"
                                                                     data-url="{{ route('organizer.business.booking.send-receipt', $booking->id) }}"
                                                                     data-customer-name="{{ $booking->participant->name }}">
-                                                                    Send Receipt via WhatsApp
+                                                                    <i class="fab fa-whatsapp me-1"></i> Send Receipt via WhatsApp
                                                                 </button>
                                                             </li>
                                                         @endif

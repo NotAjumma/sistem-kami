@@ -624,6 +624,147 @@ class OrganizerBusinessController extends Controller
 
     }
 
+    public function showBooking($id)
+    {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        $booking = Booking::with([
+            'participant',
+            'package',
+            'vendorTimeSlots.vendorTimeSlot',
+            'bookingAddons.addon',
+            'details',
+            'promoter',
+        ])
+            ->where('organizer_id', $authUser->id)
+            ->findOrFail($id);
+
+        $page_title = 'Booking Details';
+
+        return view('organizer.booking.show', compact('page_title', 'authUser', 'booking'));
+    }
+
+    public function editBooking($id)
+    {
+        $authUser = auth()->guard('organizer')->user()->load('user');
+
+        $booking = Booking::with([
+            'participant',
+            'package.addons',
+            'vendorTimeSlots.vendorTimeSlot',
+            'bookingAddons.addon',
+            'details',
+            'promoter',
+        ])
+            ->where('organizer_id', $authUser->id)
+            ->findOrFail($id);
+
+        $promoters = Worker::where('organizer_id', $authUser->id)
+            ->where('is_active', 2)
+            ->get();
+
+        // Keyed by addon_id for quick lookup in view
+        $currentAddons = $booking->bookingAddons->keyBy('addon_id');
+
+        $page_title = 'Edit Booking';
+
+        return view('organizer.booking.edit', compact('page_title', 'authUser', 'booking', 'promoters', 'currentAddons'));
+    }
+
+    public function updateBooking(Request $request, $id)
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        $booking = Booking::with(['participant', 'vendorTimeSlots', 'bookingAddons'])
+            ->where('organizer_id', $authUser->id)
+            ->findOrFail($id);
+
+        $request->validate([
+            'status'       => 'required|in:pending,paid,cancelled',
+            'payment_type' => 'required|in:deposit,full_payment',
+            'paid_amount'  => 'required|numeric|min:0',
+            'notes'        => 'nullable|string|max:1000',
+            'addons'       => 'nullable|array',
+            'addons.*'     => 'integer|min:0',
+            'details'      => 'nullable|array',
+            'details.*'    => 'nullable|string|max:1000',
+        ]);
+
+        // Participant fields
+        $booking->participant->update([
+            'name'  => $request->input('name', $booking->participant->name),
+            'phone' => $request->input('phone', $booking->participant->phone),
+            'email' => $request->filled('email') ? $request->input('email') : $booking->participant->email,
+        ]);
+
+        // Sync additional info (booking details)
+        foreach ($request->input('details', []) as $key => $value) {
+            $booking->details()->where('field_key', $key)->update(['field_value' => $value]);
+        }
+
+        // Sync vendor time slot notes
+        if ($request->filled('notes')) {
+            $booking->vendorTimeSlots()->update(['notes' => $request->notes]);
+        }
+
+        // Calculate current addon total before deleting
+        $currentAddonTotal = 0;
+        $booking->load('bookingAddons.addon');
+        foreach ($booking->bookingAddons as $ba) {
+            $currentAddonTotal += ($ba->addon->price ?? 0) * $ba->qty;
+        }
+        $basePrice = ($booking->total_price ?? 0) - $currentAddonTotal;
+
+        // Sync addons: addons[addon_id] = qty
+        $booking->bookingAddons()->delete();
+
+        $newAddonTotal = 0;
+        $addonPrices = \App\Models\PackageAddon::whereIn('id', array_keys($request->input('addons', [])))->get()->keyBy('id');
+
+        foreach ($request->input('addons', []) as $addonId => $qty) {
+            $qty = (int) $qty;
+            if ($qty > 0) {
+                \App\Models\BookingAddon::create([
+                    'booking_id' => $booking->id,
+                    'addon_id'   => (int) $addonId,
+                    'qty'        => $qty,
+                ]);
+                $newAddonTotal += ($addonPrices[$addonId]->price ?? 0) * $qty;
+            }
+        }
+
+        $newTotalPrice = $basePrice + $newAddonTotal;
+        $paidAmount    = (float) $request->paid_amount;
+        $paymentType   = $request->payment_type;
+
+        if ($paymentType === 'full_payment' && $paidAmount < $newTotalPrice) {
+            // Added addons: paid no longer covers total → downgrade to deposit
+            $paymentType = 'deposit';
+        } elseif ($paymentType === 'full_payment' && $paidAmount > $newTotalPrice) {
+            // Removed addons: overpaid → clamp paid down to new total (refund handled externally)
+            $paidAmount = $newTotalPrice;
+        }
+
+        $booking->update([
+            'status'       => $request->status,
+            'payment_type' => $paymentType,
+            'paid_amount'  => $paidAmount,
+            'total_price'  => $newTotalPrice,
+        ]);
+
+        // Receipt upload
+        if ($request->hasFile('resit')) {
+            $file     = $request->file('resit');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images/receipts'), $filename);
+            $booking->update(['resit_path' => $filename]);
+        }
+
+        return redirect()
+            ->route('organizer.business.booking.show', $booking->id)
+            ->with('success', 'Booking updated successfully.');
+    }
+
     public function showCreateBooking(Request $request)
     {
         $page_title = 'Create Booking';

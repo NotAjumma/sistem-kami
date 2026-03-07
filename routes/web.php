@@ -138,7 +138,9 @@ Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerCo
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('organizer.logout');
     Route::get('/bookings', 'bookings')->name('organizer.bookings');
+    Route::get('/booking/{id}', [OrganizerController::class, 'showBooking'])->name('organizer.booking.show');
     Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.booking.edit');
+    Route::patch('/booking/{id}/update', [OrganizerController::class, 'updateBooking'])->name('organizer.booking.update');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.booking.verify');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.tickets.confirmed');
     Route::patch('/ticket/{id}/check-in', 'ticketCheckin')->name('organizer.ticket.checkin');
@@ -177,7 +179,9 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
 
     Route::get('/bookings/json-public', [OrganizerBusinessController::class, 'getBookingsJson']);
-    Route::get('/booking/{id}/edit', [OrganizerController::class, 'editBooking'])->name('organizer.business.booking.edit');
+    Route::get('/booking/{id}', [OrganizerBusinessController::class, 'showBooking'])->name('organizer.business.booking.show');
+    Route::get('/booking/{id}/edit', [OrganizerBusinessController::class, 'editBooking'])->name('organizer.business.booking.edit');
+    Route::patch('/booking/{id}/update', [OrganizerBusinessController::class, 'updateBooking'])->name('organizer.business.booking.update');
     Route::patch('/booking/{id}/verify', [OrganizerController::class, 'verifyPayment'])->name('organizer.business.booking.verify');
     Route::patch('/booking/{id}/full_payment', 'makeFullPayment')->name('organizer.business.booking.full_payment');
     Route::get('/tickets/confirmed', 'ticketsConfirmed')->name('organizer.business.tickets.confirmed');

@@ -249,10 +249,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      const bookingCode = info.event.extendedProps.code;
+      const bookingId = info.event.extendedProps.booking_id;
 
-      if (bookingCode) {
-        window.open(`/organizer/business/bookings?search=${bookingCode}`, '_blank');
+      if (bookingId) {
+        window.open(`/organizer/business/booking/${bookingId}`, '_blank');
       }
     }
 
