@@ -26,10 +26,12 @@ class Booking extends Model
         'final_price',
         'extra_info',
         'paid_amount',
+        'reminder_sent_at',
     ];
 
     protected $casts = [
-        'extra_info' => 'array',
+        'extra_info'       => 'array',
+        'reminder_sent_at' => 'datetime',
     ];
 
     protected $appends = [

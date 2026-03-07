@@ -14,5 +14,8 @@ php artisan migrate --force
 # Run your Laravel artisan command to download receipts from Google Drive
 # php artisan drive:download-receipts
 
+# Run Laravel scheduler in background (fires every minute)
+(while true; do php artisan schedule:run >> /dev/null 2>&1; sleep 60; done) &
+
 # Start Laravel development server (adjust if you use something else)
 php artisan serve --host=0.0.0.0 --port=${PORT:-8080}

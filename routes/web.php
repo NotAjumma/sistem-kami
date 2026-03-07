@@ -204,6 +204,8 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('commission/report', [\App\Http\Controllers\Admin\CommissionReportController::class, 'index'])->name('commission.report');
     Route::get('/transactions', [OrganizerBusinessController::class, 'getTransactions'])->name('organizer.transactions.index');
     Route::post('/wallet/withdraw', [OrganizerBusinessController::class, 'storeWithdraw'])->name('organizer.withdraw.store');
+    Route::get('/settings', [OrganizerBusinessController::class, 'showSettings'])->name('organizer.business.settings');
+    Route::post('/settings', [OrganizerBusinessController::class, 'updateSettings'])->name('organizer.business.settings.update');
 
     Route::get('/preview-ticket/{booking}', function ($bookingId) {
         $booking = Booking::findOrFail($bookingId);

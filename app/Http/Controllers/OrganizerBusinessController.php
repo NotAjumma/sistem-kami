@@ -1516,4 +1516,31 @@ class OrganizerBusinessController extends Controller
 
         return back()->with('success', 'Transaction completed');
     }
+
+    public function showSettings()
+    {
+        $authUser   = auth()->guard('organizer')->user();
+        $page_title = 'Settings';
+
+        return view('organizer.settings', compact('page_title', 'authUser'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $authUser = auth()->guard('organizer')->user();
+
+        $request->validate([
+            'fonnte_token'          => 'nullable|string|max:500',
+            'reminder_quiet_start'  => 'required|integer|min:0|max:23',
+            'reminder_quiet_end'    => 'required|integer|min:0|max:23',
+        ]);
+
+        $authUser->update([
+            'fonnte_token'         => $request->input('fonnte_token'),
+            'reminder_quiet_start' => $request->input('reminder_quiet_start', 0),
+            'reminder_quiet_end'   => $request->input('reminder_quiet_end', 6),
+        ]);
+
+        return back()->with('success', 'Settings saved.');
+    }
 }

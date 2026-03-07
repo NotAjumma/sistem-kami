@@ -38,6 +38,9 @@ class Organizer extends Authenticatable
         'is_active',
         'visibility',
         'user_id',
+        'fonnte_token',
+        'reminder_quiet_start',
+        'reminder_quiet_end',
     ];
     protected $casts = [
         'banner_path' => 'array',
