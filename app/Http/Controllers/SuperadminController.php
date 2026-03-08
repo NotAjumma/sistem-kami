@@ -205,8 +205,9 @@ class SuperadminController extends Controller
             'is_gmaps_verified'    => 'boolean',
             'google_map_show'      => 'boolean',
             'fonnte_token'         => 'nullable|string|max:255',
-            'reminder_quiet_start' => 'nullable|date_format:H:i',
-            'reminder_quiet_end'   => 'nullable|date_format:H:i',
+            'reminder_quiet_start' => 'nullable|integer|min:0|max:23',
+            'reminder_quiet_end'   => 'nullable|integer|min:0|max:23',
+            'payment_qr'           => 'nullable|image|max:2048',
             'wallet_balance'       => 'nullable|numeric|min:0',
             'wallet_currency'      => 'nullable|string|max:10',
             'is_active'            => 'boolean',
@@ -243,6 +244,22 @@ class SuperadminController extends Controller
             'visibility'           => $request->visibility,
             'what_flow'            => $request->what_flow,
         ]);
+
+        if ($request->boolean('remove_payment_qr')) {
+            if ($organizer->payment_qr_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($organizer->payment_qr_path);
+            }
+            $organizer->update(['payment_qr_path' => null]);
+        } elseif ($request->hasFile('payment_qr')) {
+            if ($organizer->payment_qr_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($organizer->payment_qr_path);
+            }
+            $file     = $request->file('payment_qr');
+            $folder   = 'uploads/' . $organizer->id . '/qr';
+            $filename = 'payment_qr.' . $file->getClientOriginalExtension();
+            $file->storeAs($folder, $filename, 'public');
+            $organizer->update(['payment_qr_path' => $folder . '/' . $filename]);
+        }
 
         if ($organizer->user) {
             $userUpdate = ['username' => $request->username];
@@ -343,5 +360,36 @@ class SuperadminController extends Controller
     public function showUploadImage()
     {
         return view('superadmin.upload-image');
+    }
+
+    // ── REMINDERS ────────────────────────────────────────────────────────────
+
+    public function showReminders()
+    {
+        $now    = \Carbon\Carbon::now();
+        $cutoff = \Carbon\Carbon::now()->addHours(12);
+
+        $pendingCount = \App\Models\Booking::whereNotIn('status', ['cancelled'])
+            ->whereNull('reminder_sent_at')
+            ->whereHas('vendorTimeSlots', function ($q) use ($now, $cutoff) {
+                $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
+                    $now->toDateTimeString(),
+                    $cutoff->toDateTimeString(),
+                ]);
+            })
+            ->whereHas('organizer', function ($q) {
+                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
+            })
+            ->count();
+
+        return view('superadmin.reminders', compact('pendingCount'));
+    }
+
+    public function triggerReminders(Request $request)
+    {
+        \Illuminate\Support\Facades\Artisan::call('reminders:send');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return back()->with('reminder_output', trim($output))->with('success', 'Reminder command executed.');
     }
 }

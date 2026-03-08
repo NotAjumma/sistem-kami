@@ -13,7 +13,7 @@
     <h4 class="fw-bold mb-0">Edit: {{ $organizer->name }}</h4>
 </div>
 
-<form method="POST" action="{{ route('superadmin.organizer.update', $organizer->id) }}">
+<form method="POST" action="{{ route('superadmin.organizer.update', $organizer->id) }}" enctype="multipart/form-data">
     @csrf
     @method('PATCH')
 
@@ -175,14 +175,41 @@
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="form-label">Quiet Start</label>
-                            <input type="time" name="reminder_quiet_start" class="form-control"
-                                   value="{{ old('reminder_quiet_start', $organizer->reminder_quiet_start) }}">
+                            <select name="reminder_quiet_start" class="form-select">
+                                @for ($h = 0; $h < 24; $h++)
+                                    <option value="{{ $h }}" {{ (int) old('reminder_quiet_start', $organizer->reminder_quiet_start ?? 0) === $h ? 'selected' : '' }}>
+                                        {{ str_pad($h, 2, '0', STR_PAD_LEFT) }}:00
+                                    </option>
+                                @endfor
+                            </select>
                         </div>
                         <div class="col-6">
                             <label class="form-label">Quiet End</label>
-                            <input type="time" name="reminder_quiet_end" class="form-control"
-                                   value="{{ old('reminder_quiet_end', $organizer->reminder_quiet_end) }}">
+                            <select name="reminder_quiet_end" class="form-select">
+                                @for ($h = 0; $h < 24; $h++)
+                                    <option value="{{ $h }}" {{ (int) old('reminder_quiet_end', $organizer->reminder_quiet_end ?? 6) === $h ? 'selected' : '' }}>
+                                        {{ str_pad($h, 2, '0', STR_PAD_LEFT) }}:00
+                                    </option>
+                                @endfor
+                            </select>
                         </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="mb-0">
+                        <label class="form-label">Payment QR Code</label>
+                        @if ($organizer->payment_qr_path)
+                            <div class="mb-2">
+                                <img src="{{ $organizer->payment_qr_url }}" alt="Payment QR" style="max-height:120px; border:1px solid #dee2e6; border-radius:6px; padding:3px;">
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="remove_payment_qr" value="1" id="removeQrSA">
+                                <label class="form-check-label text-danger small" for="removeQrSA">Remove current QR code</label>
+                            </div>
+                        @endif
+                        <input type="file" name="payment_qr" class="form-control" accept="image/*">
+                        <div class="form-text text-muted">Upload payment QR (DuitNow, bank QR). Attached to WhatsApp reminders. Max 2MB.</div>
                     </div>
                 </div>
             </div>
