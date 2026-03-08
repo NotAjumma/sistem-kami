@@ -256,7 +256,7 @@ class SuperadminController extends Controller
             }
             $file     = $request->file('payment_qr');
             $folder   = 'uploads/' . $organizer->id . '/qr';
-            $filename = 'payment_qr.' . $file->getClientOriginalExtension();
+            $filename = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs($folder, $filename, 'public');
             $organizer->update(['payment_qr_path' => $folder . '/' . $filename]);
         }
