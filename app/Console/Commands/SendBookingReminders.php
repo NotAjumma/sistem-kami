@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class SendBookingReminders extends Command
 {
@@ -203,16 +204,19 @@ class SendBookingReminders extends Command
             // Send payment QR image as a separate message if configured
             if ($organizer->payment_qr_path) {
                 sleep(2);
-                $qrUrl = $organizer->payment_qr_url;
 
-                Log::info('Fonnte QR send', ['url' => $qrUrl, 'filename' => $qrFilename]);
+                $filePath = Storage::disk('public')->path($organizer->payment_qr_path);
+                $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
+                $filename = basename($organizer->payment_qr_path);
+
+                $this->info("  QR file: {$filePath}");
 
                 $qrResponse = Http::withHeaders([
                     'Authorization' => $organizer->fonnte_token,
-                ])->asForm()->post('https://api.fonnte.com/send', [
+                ])->attach('file', file_get_contents($filePath), $filename, ['Content-Type' => $mimeType])
+                  ->post('https://api.fonnte.com/send', [
                     'target'      => $phone,
                     'message'     => 'QR Kod Pembayaran 💳',
-                    'url'         => $qrUrl,
                     'countryCode' => '60',
                 ]);
 
