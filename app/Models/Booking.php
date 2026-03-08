@@ -8,6 +8,28 @@ class Booking extends Model
 {
     protected $table = 'bookings';
 
+    // ── Status ───────────────────────────────────────────────────────────────
+    const STATUS_PENDING   = 'pending';    // created, awaiting payment
+    const STATUS_PAID      = 'paid';       // payment received (sistemkami gateway)
+    const STATUS_CONFIRMED = 'confirmed';  // manually confirmed (gform / admin)
+    const STATUS_COMPLETED = 'completed';  // booking fulfilled
+    const STATUS_CANCELLED = 'cancelled';  // booking cancelled
+    const STATUS_FAILED    = 'failed';     // payment failed
+
+    /** Statuses considered as "revenue" (paid + upcoming) */
+    const REVENUE_STATUSES = [self::STATUS_PAID, self::STATUS_CONFIRMED, self::STATUS_COMPLETED, self::STATUS_PENDING];
+
+    /** Statuses that count as active/valid bookings (not cancelled/failed) */
+    const ACTIVE_STATUSES  = [self::STATUS_PENDING, self::STATUS_PAID, self::STATUS_CONFIRMED, self::STATUS_COMPLETED];
+
+    // ── Payment Type ─────────────────────────────────────────────────────────
+    const PAYMENT_TYPE_FULL_PAYMENT = 'full_payment';
+    const PAYMENT_TYPE_DEPOSIT      = 'deposit';
+
+    // ── Payment Method ───────────────────────────────────────────────────────
+    const PAYMENT_METHOD_SISTEMKAMI = 'sistemkami';
+    const PAYMENT_METHOD_GFORM      = 'gform';
+
     protected $fillable = [
         'participant_id',
         'event_id',

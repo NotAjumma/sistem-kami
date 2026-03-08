@@ -174,26 +174,33 @@ class OrganizerController extends Controller
         $start = Carbon::today()->startOfDay();
         $end   = Carbon::today()->endOfDay();
 
-        // Combined query
-        $totalVisitToday = VisitorAction::whereBetween('created_at', [$start, $end])
-            ->where(function ($query) use ($organizerId, $packageIds) {
-                $query->where(function ($q) use ($organizerId) {
-                    $q->where('action', 'visit_page')
-                    ->where('page', 'profile')
-                    ->where('reference_id', $organizerId);
-                })
-                ->orWhere(function ($q) use ($packageIds) {
-                    if ($packageIds->isNotEmpty()) {
-                        $q->where('action', 'view_package')
-                        ->whereIn('reference_id', $packageIds);
-                    }
-                });
+        // Shared condition closure
+        $condition = function ($query) use ($organizerId, $packageIds) {
+            $query->where(function ($q) use ($organizerId) {
+                $q->where('action', 'visit_page')
+                  ->where('page', 'profile')
+                  ->where('reference_id', $organizerId);
             })
+            ->orWhere(function ($q) use ($packageIds) {
+                if ($packageIds->isNotEmpty()) {
+                    $q->where('action', 'view_package')
+                      ->whereIn('reference_id', $packageIds);
+                }
+            });
+        };
+
+        $totalVisitToday = VisitorAction::whereBetween('created_at', [$start, $end])
+            ->where($condition)
+            ->distinct('visitor_id')
+            ->count('visitor_id');
+
+        $totalVisitAllTime = VisitorAction::where($condition)
             ->distinct('visitor_id')
             ->count('visitor_id');
 
         return response()->json([
-            'total_visits_today' => $totalVisitToday
+            'total_visits_today'    => $totalVisitToday,
+            'total_visits_all_time' => $totalVisitAllTime,
         ]);
     }
 

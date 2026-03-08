@@ -34,6 +34,8 @@
                     <th>Phone</th>
                     <th>Packages</th>
                     <th>Bookings</th>
+                    <th>Revenue</th>
+                    <th>Wallet</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -51,6 +53,8 @@
                     <td>{{ $org->phone ?? '-' }}</td>
                     <td>{{ $org->packages_count }}</td>
                     <td>{{ $org->bookings_count }}</td>
+                    <td class="small">RM {{ number_format($org->revenue ?? 0, 2) }}</td>
+                    <td class="small">RM {{ number_format($org->wallet_balance ?? 0, 2) }}</td>
                     <td>
                         <span class="badge bg-{{ $org->is_active ? 'success' : 'secondary' }}">
                             {{ $org->is_active ? 'Active' : 'Inactive' }}
@@ -107,7 +111,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="9" class="text-center text-muted py-4">No organizers found.</td></tr>
+                <tr><td colspan="11" class="text-center text-muted py-4">No organizers found.</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -71,7 +71,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <div class="fs-3 fw-bold text-info">RM {{ number_format($bookingStats['revenue'], 2) }}</div>
-                <div class="text-muted small">Revenue</div>
+                <div class="text-muted small">Revenue (Paid + Upcoming)</div>
             </div>
         </div>
     </div>

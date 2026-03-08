@@ -7,6 +7,7 @@ use App\Models\Organizer;
 use App\Models\Booking;
 use App\Models\Package;
 use App\Models\User;
+use App\Models\VisitorAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -58,10 +59,14 @@ class SuperadminController extends Controller
     public function dashboard()
     {
         $stats = [
-            'organizers' => Organizer::count(),
-            'bookings'   => Booking::count(),
-            'packages'   => Package::count(),
-            'revenue'    => Booking::whereIn('status', ['confirmed', 'completed', 'pending'])->sum('final_price'),
+            'organizers'      => Organizer::count(),
+            'bookings'        => Booking::count(),
+            'packages'        => Package::count(),
+            'revenue'         => Booking::whereIn('status', Booking::REVENUE_STATUSES)->sum('final_price'),
+            'home_visits'         => VisitorAction::where('action', 'visit_page')->where('page', 'home')->whereDate('created_at', today())->count(),
+            'profile_visits'      => VisitorAction::where('action', 'visit_page')->where('page', 'profile')->whereDate('created_at', today())->count(),
+            'home_visits_all'     => VisitorAction::where('action', 'visit_page')->where('page', 'home')->count(),
+            'profile_visits_all'  => VisitorAction::where('action', 'visit_page')->where('page', 'profile')->count(),
         ];
 
         $recentOrganizers = Organizer::latest()->take(5)->get();
@@ -75,7 +80,7 @@ class SuperadminController extends Controller
                 'organizers.id',
                 'organizers.name',
                 DB::raw('COUNT(bookings.id) as bookings_count'),
-                DB::raw('SUM(CASE WHEN bookings.status IN ("confirmed","completed") THEN bookings.final_price ELSE 0 END) as confirmed_revenue'),
+                DB::raw("SUM(CASE WHEN bookings.status IN ('paid','confirmed','completed','pending') THEN bookings.final_price ELSE 0 END) as revenue"),
             ])
             ->groupBy('organizers.id', 'organizers.name')
             ->orderByDesc('bookings_count')
@@ -83,7 +88,7 @@ class SuperadminController extends Controller
 
         $chartLabels   = $orgStats->pluck('name');
         $chartBookings = $orgStats->pluck('bookings_count');
-        $chartRevenue  = $orgStats->pluck('confirmed_revenue')->map(fn($v) => round((float)$v, 2));
+        $chartRevenue  = $orgStats->pluck('revenue')->map(fn($v) => round((float)$v, 2));
 
         return view('superadmin.dashboard', compact(
             'stats', 'recentOrganizers',
@@ -95,7 +100,10 @@ class SuperadminController extends Controller
 
     public function organizers(Request $request)
     {
-        $query = Organizer::withCount(['packages', 'bookings'])->with('user');
+        $revenueStatuses = Booking::REVENUE_STATUSES;
+        $query = Organizer::withCount(['packages', 'bookings'])
+            ->withSum(['bookings as revenue' => fn($q) => $q->whereIn('status', $revenueStatuses)], 'final_price')
+            ->with('user');
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -254,7 +262,7 @@ class SuperadminController extends Controller
             'confirmed' => Booking::where('organizer_id', $id)->where('status', 'confirmed')->count(),
             'pending'   => Booking::where('organizer_id', $id)->where('status', 'pending')->count(),
             'revenue'   => Booking::where('organizer_id', $id)
-                                  ->whereIn('status', ['confirmed', 'completed'])
+                                  ->whereIn('status', Booking::REVENUE_STATUSES)
                                   ->sum('final_price'),
         ];
 

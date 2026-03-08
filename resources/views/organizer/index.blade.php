@@ -8,6 +8,9 @@
             justify-content: center;
             align-items: center;
         }
+        .chart-num span {
+            font-size: 11px;
+        }
     </style>
 @endpush
 @section('content')
@@ -26,10 +29,10 @@
                                                 <i class="fa-solid fa-sort-down me-2"></i>
                                                 Total User Visit Today
                                             </p>
-                                            <h2 class="font-w600 mb-0" id="total-visit-today">
+                                            <h2 class="font-w600 mb-1" id="total-visit-today">
                                                 <span class="spinner-border spinner-border-sm text-light" role="status"></span>
                                             </h2>
-
+                                            <p class="mb-0 small opacity-75">All time: <span id="total-visit-all-time">—</span></p>
                                         </div>
                                         <div class="dlab-swiper-circle">
                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="45" viewBox="0 0 24 24">
@@ -914,9 +917,11 @@
                 method: 'GET',
                 success: function(data) {
                     $('#total-visit-today').text(data.total_visits_today + ' user');
+                    $('#total-visit-all-time').text(data.total_visits_all_time + ' user');
                 },
                 error: function() {
                     $('#total-visit-today').text('0 user');
+                    $('#total-visit-all-time').text('0 user');
                 }
             });
         }
