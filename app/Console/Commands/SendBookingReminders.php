@@ -179,7 +179,7 @@ class SendBookingReminders extends Command
         $lines[] = "";
         $lines[] = "Kerjasama anda amat dihargai. Jumpa nanti! 😊";
 
-        if ($organizer->payment_qr_path) {
+        if ($organizer->payment_qr_path && $booking->payment_type === 'deposit' && $balance > 0) {
             $lines[] = "";
             $lines[] = "💳 QR Kod Pembayaran:";
             $lines[] = $organizer->payment_qr_url;
