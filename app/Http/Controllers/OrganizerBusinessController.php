@@ -1935,13 +1935,32 @@ class OrganizerBusinessController extends Controller
             'fonnte_token'          => 'nullable|string|max:500',
             'reminder_quiet_start'  => 'required|integer|min:0|max:23',
             'reminder_quiet_end'    => 'required|integer|min:0|max:23',
+            'payment_qr'            => 'nullable|image|max:2048',
         ]);
 
-        $authUser->update([
+        $data = [
             'fonnte_token'         => $request->input('fonnte_token'),
             'reminder_quiet_start' => $request->input('reminder_quiet_start', 0),
             'reminder_quiet_end'   => $request->input('reminder_quiet_end', 6),
-        ]);
+        ];
+
+        if ($request->boolean('remove_payment_qr')) {
+            if ($authUser->payment_qr_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($authUser->payment_qr_path);
+            }
+            $data['payment_qr_path'] = null;
+        } elseif ($request->hasFile('payment_qr')) {
+            if ($authUser->payment_qr_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($authUser->payment_qr_path);
+            }
+            $file     = $request->file('payment_qr');
+            $folder   = 'uploads/' . $authUser->id . '/qr';
+            $filename = 'payment_qr.' . $file->getClientOriginalExtension();
+            $file->storeAs($folder, $filename, 'public');
+            $data['payment_qr_path'] = $folder . '/' . $filename;
+        }
+
+        $authUser->update($data);
 
         return back()->with('success', 'Settings saved.');
     }

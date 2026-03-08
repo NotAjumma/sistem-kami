@@ -49,6 +49,7 @@ class Organizer extends Authenticatable
         'google_map_show',
         'logo_path',
         'banner_path',
+        'payment_qr_path',
         'wallet_balance',
         'wallet_currency',
         'wallet_history',
@@ -125,5 +126,14 @@ class Organizer extends Authenticatable
         }
 
         return asset('storage/uploads/default-organizer-logo.jpg');
+    }
+
+    public function getPaymentQrUrlAttribute(): ?string
+    {
+        if ($this->payment_qr_path) {
+            return asset('storage/' . $this->payment_qr_path);
+        }
+
+        return null;
     }
 }

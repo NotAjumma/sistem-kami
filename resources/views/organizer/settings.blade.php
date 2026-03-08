@@ -161,7 +161,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('organizer.business.settings.update') }}" method="POST">
+                    <form action="{{ route('organizer.business.settings.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Fonnte API Token</label>
@@ -219,6 +219,31 @@
                                 </div>
                             </div>
                             <div class="form-text text-muted">Reminders will not be sent between these hours. Default: 12am – 6am.</div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment QR Code</label>
+                            <div class="form-text text-muted mb-2">Upload your payment QR (DuitNow, bank QR, etc.). It will be attached to WhatsApp reminders so customers can pay easily.</div>
+
+                            @if ($authUser->payment_qr_path)
+                                <div class="mb-2">
+                                    <img src="{{ $authUser->payment_qr_url }}" alt="Payment QR" style="max-height:150px; border:1px solid #dee2e6; border-radius:6px; padding:4px;">
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="remove_payment_qr" value="1" id="removeQr">
+                                    <label class="form-check-label text-danger small" for="removeQr">Remove current QR code</label>
+                                </div>
+                            @endif
+
+                            <input type="file" name="payment_qr" class="form-control @error('payment_qr') is-invalid @enderror" accept="image/*">
+                            @error('payment_qr')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @if (!$authUser->payment_qr_path)
+                                <div class="form-text text-muted">No QR uploaded yet.</div>
+                            @endif
                         </div>
 
                         <div class="d-flex gap-2">

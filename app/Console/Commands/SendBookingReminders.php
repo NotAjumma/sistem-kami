@@ -183,6 +183,7 @@ class SendBookingReminders extends Command
         $message = implode("\n", $lines);
 
         try {
+            // Send text reminder first
             $response = Http::withHeaders([
                 'Authorization' => $organizer->fonnte_token,
             ])->asForm()->post('https://api.fonnte.com/send', [
@@ -191,16 +192,36 @@ class SendBookingReminders extends Command
                 'countryCode' => '60',
             ]);
 
-            if ($response->successful() && ($response->json('status') === true || $response->json('status') === 'true')) {
-                return true;
+            if (!$response->successful() || ($response->json('status') !== true && $response->json('status') !== 'true')) {
+                Log::warning('Fonnte reminder failed', [
+                    'booking'  => $booking->booking_code,
+                    'response' => $response->json(),
+                ]);
+                return false;
             }
 
-            Log::warning('Fonnte reminder failed', [
-                'booking' => $booking->booking_code,
-                'response' => $response->json(),
-            ]);
+            // Send payment QR image as a separate message if configured
+            if ($organizer->payment_qr_path) {
+                sleep(2);
+                $qrUrl      = $organizer->payment_qr_url;
+                $qrFilename = basename($organizer->payment_qr_path);
 
-            return false;
+                Log::info('Fonnte QR send', ['url' => $qrUrl, 'filename' => $qrFilename]);
+
+                $qrResponse = Http::withHeaders([
+                    'Authorization' => $organizer->fonnte_token,
+                ])->asForm()->post('https://api.fonnte.com/send', [
+                    'target'      => $phone,
+                    'message'     => 'QR Kod Pembayaran 💳',
+                    'url'         => $qrUrl,
+                    'filename'    => $qrFilename,
+                    'countryCode' => '60',
+                ]);
+
+                Log::info('Fonnte QR response', ['response' => $qrResponse->json()]);
+            }
+
+            return true;
 
         } catch (\Exception $e) {
             Log::error('Fonnte reminder exception', [
