@@ -389,6 +389,15 @@
 })();
 </script>
 <script>
+const HC_GROUP_ICONS = {
+    'Infrastructure':      'fa-server',
+    'Profile Page':        'fa-user-circle',
+    'Date / Time / Slots': 'fa-calendar-days',
+    'Booking Flow':        'fa-cart-shopping',
+    'Forms & Buttons':     'fa-hand-pointer',
+    'Page Views':          'fa-file-lines',
+};
+
 function runHealthCheck() {
     const btn     = document.getElementById('runHealthCheckBtn');
     const summary = document.getElementById('healthCheckSummary');
@@ -396,7 +405,6 @@ function runHealthCheck() {
     const content = document.getElementById('healthCheckContent');
     const runAt   = document.getElementById('healthCheckRunAt');
 
-    // Show modal & loading state
     content.innerHTML = '';
     runAt.textContent = '';
     loading.classList.remove('d-none');
@@ -415,40 +423,57 @@ function runHealthCheck() {
             summary.textContent = data.summary;
 
             const allPassed = data.passed === data.total;
-            const badgeClass = allPassed ? 'bg-success' : (data.passed > 0 ? 'bg-warning text-dark' : 'bg-danger');
+
+            // Group results
+            const groups = {};
+            data.results.forEach(r => {
+                if (!groups[r.group]) groups[r.group] = [];
+                groups[r.group].push(r);
+            });
 
             let html = `<div class="alert alert-${allPassed ? 'success' : 'warning'} d-flex align-items-center gap-2 mb-3">
                 <i class="fa-solid fa-${allPassed ? 'circle-check' : 'triangle-exclamation'} fs-5"></i>
                 <strong>${data.summary}</strong>
-            </div>
-            <table class="table table-sm table-hover mb-0">
-                <thead class="table-light">
-                    <tr><th style="width:200px">Check</th><th>Status</th><th>Detail</th><th class="text-end">ms</th></tr>
-                </thead>
-                <tbody>`;
+            </div>`;
 
-            data.results.forEach(r => {
-                const icon  = r.status === 'pass'
-                    ? '<i class="fa-solid fa-circle-check text-success"></i>'
-                    : '<i class="fa-solid fa-circle-xmark text-danger"></i>';
-                const rowClass = r.status === 'pass' ? '' : 'table-danger';
-                html += `<tr class="${rowClass}">
-                    <td class="fw-semibold small">${r.name}</td>
-                    <td>${icon} <span class="small">${r.status.toUpperCase()}</span></td>
-                    <td class="small text-muted">${r.detail}</td>
-                    <td class="text-end small text-muted">${r.ms}</td>
-                </tr>`;
-            });
+            for (const [group, rows] of Object.entries(groups)) {
+                const groupPassed  = rows.filter(r => r.status === 'pass').length;
+                const groupTotal   = rows.length;
+                const groupAllPass = groupPassed === groupTotal;
+                const icon         = HC_GROUP_ICONS[group] || 'fa-circle-dot';
 
-            html += '</tbody></table>';
+                html += `<div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-1 px-1">
+                        <i class="fa-solid ${icon} small text-secondary"></i>
+                        <span class="fw-semibold small text-uppercase text-secondary" style="letter-spacing:.05em">${group}</span>
+                        <span class="badge ${groupAllPass ? 'bg-success' : 'bg-danger'} ms-auto">${groupPassed}/${groupTotal}</span>
+                    </div>
+                    <table class="table table-sm table-hover mb-0 border rounded">
+                        <tbody>`;
+
+                rows.forEach(r => {
+                    const chk      = r.status === 'pass'
+                        ? '<i class="fa-solid fa-circle-check text-success"></i>'
+                        : '<i class="fa-solid fa-circle-xmark text-danger"></i>';
+                    const rowClass = r.status === 'pass' ? '' : 'table-danger';
+                    html += `<tr class="${rowClass}">
+                        <td style="width:185px" class="fw-semibold small ps-2">${r.name}</td>
+                        <td style="width:60px">${chk}</td>
+                        <td class="small text-muted">${r.detail}</td>
+                        <td class="text-end small text-muted pe-2" style="width:50px">${r.ms}ms</td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table></div>`;
+            }
+
             content.innerHTML = html;
-
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
         })
         .catch(err => {
             loading.classList.add('d-none');
-            content.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to run health check: ${err.message}</div>`;
+            content.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed: ${err.message}</div>`;
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
         });
