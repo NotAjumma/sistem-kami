@@ -131,7 +131,7 @@ class Organizer extends Authenticatable
     public function getPaymentQrUrlAttribute(): ?string
     {
         if ($this->payment_qr_path) {
-            return asset('storage/' . $this->payment_qr_path);
+            return route('organizer.payment.qr', $this->slug);
         }
 
         return null;

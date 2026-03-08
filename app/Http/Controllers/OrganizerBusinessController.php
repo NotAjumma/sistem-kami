@@ -1955,7 +1955,7 @@ class OrganizerBusinessController extends Controller
             }
             $file     = $request->file('payment_qr');
             $folder   = 'uploads/' . $authUser->id . '/qr';
-            $filename = 'payment_qr.' . $file->getClientOriginalExtension();
+            $filename = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs($folder, $filename, 'public');
             $data['payment_qr_path'] = $folder . '/' . $filename;
         }

@@ -114,6 +114,13 @@ Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->na
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
+Route::get('/qr/{slug}', function ($slug) {
+    $organizer = \App\Models\Organizer::where('slug', $slug)->whereNotNull('payment_qr_path')->firstOrFail();
+    $path      = \Illuminate\Support\Facades\Storage::disk('public')->path($organizer->payment_qr_path);
+    $mime      = mime_content_type($path) ?: 'image/jpeg';
+    return response()->file($path, ['Content-Type' => $mime]);
+})->name('organizer.payment.qr');
+
 Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
