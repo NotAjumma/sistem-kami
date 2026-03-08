@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class SendBookingReminders extends Command
 {
@@ -179,12 +178,16 @@ class SendBookingReminders extends Command
         $lines[] = "• Lewat = tiada masa tambahan";
         $lines[] = "";
         $lines[] = "Kerjasama anda amat dihargai. Jumpa nanti! 😊";
-        // $lines[] = "- {$organizer->name}";
+
+        if ($organizer->payment_qr_path) {
+            $lines[] = "";
+            $lines[] = "💳 QR Kod Pembayaran:";
+            $lines[] = $organizer->payment_qr_url;
+        }
 
         $message = implode("\n", $lines);
 
         try {
-            // Send text reminder first
             $response = Http::withHeaders([
                 'Authorization' => $organizer->fonnte_token,
             ])->asForm()->post('https://api.fonnte.com/send', [
@@ -199,30 +202,6 @@ class SendBookingReminders extends Command
                     'response' => $response->json(),
                 ]);
                 return false;
-            }
-
-            // Send payment QR image as a separate message if configured
-            if ($organizer->payment_qr_path) {
-                sleep(2);
-
-                $filePath = Storage::disk('public')->path($organizer->payment_qr_path);
-                $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
-                $filename = basename($organizer->payment_qr_path);
-
-                $this->info("  QR file: {$filePath}");
-
-                $qrResponse = Http::withHeaders([
-                    'Authorization' => $organizer->fonnte_token,
-                ])->attach('file', file_get_contents($filePath), $filename, ['Content-Type' => $mimeType])
-                  ->post('https://api.fonnte.com/send', [
-                    'target'      => $phone,
-                    'message'     => 'QR Kod Pembayaran 💳',
-                    'countryCode' => '60',
-                ]);
-
-                $this->info("  QR response: " . json_encode($qrResponse->json()));
-            } else {
-                $this->info("  No payment QR configured for this organizer.");
             }
 
             return true;
