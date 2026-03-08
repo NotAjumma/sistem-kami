@@ -203,8 +203,7 @@ class SendBookingReminders extends Command
             // Send payment QR image as a separate message if configured
             if ($organizer->payment_qr_path) {
                 sleep(2);
-                $qrUrl      = $organizer->payment_qr_url;
-                $qrFilename = basename($organizer->payment_qr_path);
+                $qrUrl = $organizer->payment_qr_url;
 
                 Log::info('Fonnte QR send', ['url' => $qrUrl, 'filename' => $qrFilename]);
 
@@ -214,7 +213,6 @@ class SendBookingReminders extends Command
                     'target'      => $phone,
                     'message'     => 'QR Kod Pembayaran 💳',
                     'url'         => $qrUrl,
-                    'filename'    => $qrFilename,
                     'countryCode' => '60',
                 ]);
 
