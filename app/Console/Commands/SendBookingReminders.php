@@ -206,7 +206,7 @@ class SendBookingReminders extends Command
                 $qrUrl      = $organizer->payment_qr_url;
                 $qrFilename = basename($organizer->payment_qr_path);
 
-                Log::info('Fonnte QR send', ['url' => $qrUrl, 'filename' => $qrFilename]);
+                $this->info("  QR URL: {$qrUrl}");
 
                 $qrResponse = Http::withHeaders([
                     'Authorization' => $organizer->fonnte_token,
@@ -218,7 +218,9 @@ class SendBookingReminders extends Command
                     'countryCode' => '60',
                 ]);
 
-                Log::info('Fonnte QR response', ['response' => $qrResponse->json()]);
+                $this->info("  QR response: " . json_encode($qrResponse->json()));
+            } else {
+                $this->info("  No payment QR configured for this organizer.");
             }
 
             return true;
