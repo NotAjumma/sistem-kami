@@ -61,7 +61,7 @@ class BusinessController extends Controller
                 'image'         => $package->images->first()
                     ? asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url)
                     : asset('storage/logo-blue-full.png'),
-
+                'canonical'     => url('/' . $organizer->slug . '/' . $package->slug),
             ];
         }
 
@@ -80,6 +80,7 @@ class BusinessController extends Controller
                 "{$appName} vendor",
             ])),
             'image'             => $seoImage,
+            'canonical'         => url('/' . $organizer->slug),
         ];
     }
 
@@ -87,23 +88,16 @@ class BusinessController extends Controller
     {
         $isPrivateRoute = $request->routeIs('business.profile.private');
 
-        if ($isPrivateRoute) {
-            $organizer = Organizer::with([
-                'inactivePackages.discounts',
-                'inactivePackages.category',
-                'inactivePackages.images',
-                'inactivePackages.images',
-                'gallery',
-            ])->where('slug', $slug)->firstOrFail();
-        } else {
-            $organizer = Organizer::with([
-                'activePackages.discounts',
-                'activePackages.category',
-                'activePackages.images',
-                'activePackages.images',
-                'gallery',
-            ])->where('slug', $slug)->firstOrFail();
-        }
+        $packageRelation = $isPrivateRoute ? 'inactivePackages' : 'activePackages';
+
+        $organizer = Organizer::with([
+            $packageRelation . '.discounts',
+            $packageRelation . '.category',
+            $packageRelation . '.images',
+            $packageRelation . '.addons',
+            $packageRelation . '.items',
+            'gallery',
+        ])->where('slug', $slug)->firstOrFail();
 
         $ref = trim($request->query('ref')); // buang space depan belakang
 
@@ -142,63 +136,39 @@ class BusinessController extends Controller
         }
 
         $seo = $this->page_seo($organizer);
-        $allActivePackages = $organizer->activePackages()->get();
-        
-        if ($isPrivateRoute) {
-            $allActivePackages = $organizer->inactivePackages()->get();
-        }
+
+        // Use already-eager-loaded collection — no extra queries
+        $allActivePackages = $isPrivateRoute
+            ? $organizer->inactivePackages
+            : $organizer->activePackages;
 
         $packageCategories = \App\Models\PackageCategory::whereIn(
             'id',
-            $allActivePackages->pluck('category_id')->unique()
+            $allActivePackages->pluck('category_id')->filter()->unique()
         )->get();
-        
-        if ($isPrivateRoute) {
-            $packagesQuery = $organizer->inactivePackages()->with([
-                'addons',
-                'items',
-                'discounts',
-                'category',
-                'images'
-            ]);
-        } else {
-            $packagesQuery = $organizer->activePackages()->with([
-                'addons',
-                'items',
-                'discounts',
-                'category',
-                'images'
-            ]);
-        }
-        
-        
 
-        // Filter by keyword (searching name or description)
+        // Filter in-memory using already-loaded collection
+        $packages = $allActivePackages;
+
         if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $packagesQuery->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%$keyword%")
-                    ->orWhere('description', 'like', "%$keyword%");
-            });
+            $keyword = strtolower($request->keyword);
+            $packages = $packages->filter(function ($p) use ($keyword) {
+                return str_contains(strtolower($p->name ?? ''), $keyword)
+                    || str_contains(strtolower(strip_tags($p->description ?? '')), $keyword);
+            })->values();
         }
 
-        // Filter by package category
         if ($request->filled('package_category')) {
             $category = PackageCategory::where('slug', $request->package_category)->first();
             if ($category) {
-                $packagesQuery->where('category_id', $category->id);
+                $packages = $packages->filter(fn($p) => $p->category_id == $category->id)->values();
             }
         }
 
-        $slots = VendorTimeSlot::with([
-                'images',
-            ])->where('is_active', 1)
+        $slots = VendorTimeSlot::with(['images'])
+            ->where('is_active', 1)
             ->where('organizer_id', $organizer->id)
             ->get();
-
-            // \Log::info("slots");
-            // \Log::info($slots);
-        $packages = $packagesQuery->get();
         $page_title = $organizer->name;
 
         $limitReachedDays   = [];      
@@ -238,13 +208,13 @@ class BusinessController extends Controller
             })->values();
         }
 
-        return view('home.business.profile', compact(
+        $response = response()->view('home.business.profile', compact(
             'organizer',
             'packages',
             'slots',
             'packageCategories',
             'page_title',
-            'seo', 
+            'seo',
             'timeSlots',
             'offDays',
             'bookedDates',
@@ -254,6 +224,13 @@ class BusinessController extends Controller
             'whatsappNumbers',
             'promoter',
         ));
+
+        // Only cache non-personalised responses (no ?ref= promoter tracking)
+        if (!$request->filled('ref') && !$isPrivateRoute) {
+            $response->headers->set('Cache-Control', 'public, max-age=300, s-maxage=600');
+        }
+
+        return $response;
     }
 
     public function showPackage(Request $request, $organizerSlug, $packageSlug)

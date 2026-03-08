@@ -50,8 +50,12 @@
 	<meta name="twitter:description" content="{{ $seoDescription }}">
 	<meta name="twitter:image" content="{{ $seoImage }}">
 	<meta name="twitter:card" content="summary_large_image">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="{{ url()->current() }}">
+	<meta property="og:site_name" content="{{ config('app.name') }}">
 
 	<title>{{ $seoTitle }}</title>
+	<link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,17 +73,39 @@
 			<link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
 		@endforeach
 	@endif
+	<!-- Preconnect to external domains -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
 	<link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
-	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins&display=swap" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+	<!-- Bootstrap Icons: async-load -->
+	<link rel="preload" as="style"
+		href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+	</noscript>
 
-	<script src="https://cdn.tailwindcss.com"></script>
-	<script src="//unpkg.com/alpinejs" defer></script>
+	<!-- Google Fonts: async-load all 4 families in one request -->
+	<link rel="preload" as="style"
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap">
+	</noscript>
 
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+	<!-- Font Awesome: async-load (used only in footer icons) -->
+	<link rel="preload" as="style"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	</noscript>
+
+	<link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
+	<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 	<style>
 		.content-body {
 			margin-left: 0 !important;
@@ -161,6 +187,7 @@
         }
 	</style>
 	@stack('styles')
+	@stack('json_ld')
 </head>
 
 <body class="bg-white text-gray-900">
@@ -382,17 +409,17 @@
 
 	@if(!empty(config('dz.public.global.js.top')))
 		@foreach(config('dz.public.global.js.top') as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 	@if(!empty(config('dz.public.pagelevel.js.' . $action)))
 		@foreach(config('dz.public.pagelevel.js.' . $action) as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 	@if(!empty(config('dz.public.global.js.bottom')))
 		@foreach(config('dz.public.global.js.bottom') as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 

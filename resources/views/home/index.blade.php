@@ -1,8 +1,6 @@
 @extends('home.homeLayout')
 @push('styles')
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
-
         body {
             font-family: "Poppins", sans-serif;
         }
@@ -481,6 +479,28 @@
         }
     </style>
 @endpush
+
+@push('json_ld')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{ config('app.name') }}",
+    "url": "{{ url('/') }}",
+    "logo": "{{ asset('images/SISTEM-KAMI-LOGO.png') }}",
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "011-2406-9291",
+        "contactType": "customer service",
+        "areaServed": "MY"
+    },
+    "sameAs": [
+        "https://www.instagram.com/sistemkami/"
+    ]
+}
+</script>
+@endpush
+
 @section('content')
     <main class="">
         <!-- Hero Section -->
@@ -641,7 +661,9 @@
 
                                     <img src="{{ $organizer->first_package->display_image_url }}"
                                         class="d-block w-100 package-img"
-                                        alt="{{ $organizer->name }}">
+                                        alt="{{ $organizer->name }}"
+                                        width="400" height="260"
+                                        {{ $loop->first ? 'loading=eager' : 'loading=lazy' }}>
 
                                     <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">
                                         <div class="event-organizer text-primary" title="Organizer">By

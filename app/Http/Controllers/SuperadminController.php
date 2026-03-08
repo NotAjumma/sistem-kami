@@ -11,6 +11,8 @@ use App\Models\VisitorAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -94,6 +96,143 @@ class SuperadminController extends Controller
             'stats', 'recentOrganizers',
             'chartLabels', 'chartBookings', 'chartRevenue'
         ));
+    }
+
+    // ── HEALTH CHECK ─────────────────────────────────────────────────────────
+
+    public function healthCheck()
+    {
+        $results = [];
+
+        // Helper to record a check
+        $check = function (string $name, callable $fn) use (&$results) {
+            $start = microtime(true);
+            try {
+                $detail = $fn();
+                $results[] = [
+                    'name'   => $name,
+                    'status' => 'pass',
+                    'detail' => $detail,
+                    'ms'     => round((microtime(true) - $start) * 1000),
+                ];
+            } catch (\Throwable $e) {
+                $results[] = [
+                    'name'   => $name,
+                    'status' => 'fail',
+                    'detail' => $e->getMessage(),
+                    'ms'     => round((microtime(true) - $start) * 1000),
+                ];
+            }
+        };
+
+        // 1. Database connection
+        $check('Database Connection', function () {
+            DB::connection()->getPdo();
+            return 'Connected to ' . DB::connection()->getDatabaseName();
+        });
+
+        // 2. Key tables accessible
+        $check('Core Tables', function () {
+            $counts = [
+                'organizers' => DB::table('organizers')->count(),
+                'bookings'   => DB::table('bookings')->count(),
+                'packages'   => DB::table('packages')->count(),
+                'users'      => DB::table('users')->count(),
+            ];
+            return implode(', ', array_map(fn($t, $c) => "$t: $c", array_keys($counts), $counts));
+        });
+
+        // 3. Storage writable
+        $check('Storage Write', function () {
+            $path = 'health_check_' . now()->timestamp . '.tmp';
+            Storage::put($path, 'ok');
+            Storage::delete($path);
+            return 'Disk writable';
+        });
+
+        // 4. Storage symlink (public/storage accessible)
+        $check('Storage Symlink', function () {
+            $link = public_path('storage');
+            if (!file_exists($link)) {
+                throw new \Exception('public/storage symlink missing — run php artisan storage:link');
+            }
+            return 'Symlink exists';
+        });
+
+        // 5. APP_KEY set
+        $check('App Key', function () {
+            $key = config('app.key');
+            if (empty($key)) {
+                throw new \Exception('APP_KEY not set');
+            }
+            return 'Set (' . strlen(base64_decode(str_replace('base64:', '', $key))) * 8 . '-bit)';
+        });
+
+        // 6. Cache read/write
+        $check('Cache Read/Write', function () {
+            $key = 'health_check_' . now()->timestamp;
+            cache()->put($key, 'ok', 5);
+            $val = cache()->get($key);
+            cache()->forget($key);
+            if ($val !== 'ok') throw new \Exception('Cache value mismatch');
+            return 'Cache driver: ' . config('cache.default');
+        });
+
+        // 7. Key routes registered
+        $check('Key Routes Registered', function () {
+            $routes = ['index', 'search', 'superadmin.login', 'superadmin.dashboard'];
+            $missing = [];
+            foreach ($routes as $name) {
+                if (!\Illuminate\Support\Facades\Route::has($name)) {
+                    $missing[] = $name;
+                }
+            }
+            if (!empty($missing)) {
+                throw new \Exception('Missing routes: ' . implode(', ', $missing));
+            }
+            return implode(', ', $routes);
+        });
+
+        // 8. Key views exist
+        $check('Key Views Exist', function () {
+            $views = ['home.index', 'home.homeLayout', 'superadmin.dashboard', 'superadmin.login'];
+            $missing = [];
+            foreach ($views as $v) {
+                if (!\Illuminate\Support\Facades\View::exists($v)) {
+                    $missing[] = $v;
+                }
+            }
+            if (!empty($missing)) {
+                throw new \Exception('Missing views: ' . implode(', ', $missing));
+            }
+            return count($views) . ' views found';
+        });
+
+        // 9. Active organizers with packages
+        $check('Active Organizers', function () {
+            $active   = \App\Models\Organizer::where('is_active', true)->count();
+            $inactive = \App\Models\Organizer::where('is_active', false)->count();
+            if ($active === 0) throw new \Exception('No active organizers found');
+            return "Active: $active, Inactive: $inactive";
+        });
+
+        // 10. Latest booking readable
+        $check('Latest Booking', function () {
+            $booking = \App\Models\Booking::latest()->first();
+            if (!$booking) return 'No bookings yet';
+            return "Latest: #{$booking->booking_code} ({$booking->status})";
+        });
+
+        $passed = count(array_filter($results, fn($r) => $r['status'] === 'pass'));
+        $total  = count($results);
+
+        return response()->json([
+            'summary' => "$passed / $total checks passed",
+            'passed'  => $passed,
+            'total'   => $total,
+            'results' => $results,
+            'ran_at'  => now()->format('d M Y, H:i:s'),
+        ]);
     }
 
     // ── ORGANIZERS ───────────────────────────────────────────────────────────

@@ -3,6 +3,41 @@
 @section('content')
 <div class="row">
 
+    {{-- ── Site Health Check ───────────────────────────────────────────── --}}
+    <div class="col-12 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <button id="runHealthCheckBtn" class="btn btn-outline-info btn-sm" onclick="runHealthCheck()">
+                <i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check
+            </button>
+            <span id="healthCheckSummary" class="text-muted small"></span>
+        </div>
+    </div>
+
+    {{-- ── Health Check Modal ───────────────────────────────────────────── --}}
+    <div class="modal fade" id="healthCheckModal" tabindex="-1" aria-labelledby="healthCheckModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="healthCheckModalLabel">
+                        <i class="fa-solid fa-stethoscope me-2 text-info"></i>Site Health Check
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="healthCheckLoading" class="text-center py-4 d-none">
+                        <div class="spinner-border text-info" role="status"></div>
+                        <p class="mt-2 text-muted">Running checks…</p>
+                    </div>
+                    <div id="healthCheckContent"></div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <small id="healthCheckRunAt" class="text-muted"></small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── Stat Cards (Swiper) ─────────────────────────────────────────── --}}
     <div class="col-xl-12">
         <div class="row main-card">
@@ -352,5 +387,71 @@
         },
     });
 })();
+</script>
+<script>
+function runHealthCheck() {
+    const btn     = document.getElementById('runHealthCheckBtn');
+    const summary = document.getElementById('healthCheckSummary');
+    const loading = document.getElementById('healthCheckLoading');
+    const content = document.getElementById('healthCheckContent');
+    const runAt   = document.getElementById('healthCheckRunAt');
+
+    // Show modal & loading state
+    content.innerHTML = '';
+    runAt.textContent = '';
+    loading.classList.remove('d-none');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Running…';
+    summary.textContent = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('healthCheckModal'));
+    modal.show();
+
+    fetch('{{ route("superadmin.health-check") }}')
+        .then(r => r.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            runAt.textContent = 'Ran at: ' + data.ran_at;
+            summary.textContent = data.summary;
+
+            const allPassed = data.passed === data.total;
+            const badgeClass = allPassed ? 'bg-success' : (data.passed > 0 ? 'bg-warning text-dark' : 'bg-danger');
+
+            let html = `<div class="alert alert-${allPassed ? 'success' : 'warning'} d-flex align-items-center gap-2 mb-3">
+                <i class="fa-solid fa-${allPassed ? 'circle-check' : 'triangle-exclamation'} fs-5"></i>
+                <strong>${data.summary}</strong>
+            </div>
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th style="width:200px">Check</th><th>Status</th><th>Detail</th><th class="text-end">ms</th></tr>
+                </thead>
+                <tbody>`;
+
+            data.results.forEach(r => {
+                const icon  = r.status === 'pass'
+                    ? '<i class="fa-solid fa-circle-check text-success"></i>'
+                    : '<i class="fa-solid fa-circle-xmark text-danger"></i>';
+                const rowClass = r.status === 'pass' ? '' : 'table-danger';
+                html += `<tr class="${rowClass}">
+                    <td class="fw-semibold small">${r.name}</td>
+                    <td>${icon} <span class="small">${r.status.toUpperCase()}</span></td>
+                    <td class="small text-muted">${r.detail}</td>
+                    <td class="text-end small text-muted">${r.ms}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            content.innerHTML = html;
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
+        })
+        .catch(err => {
+            loading.classList.add('d-none');
+            content.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to run health check: ${err.message}</div>`;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
+        });
+}
 </script>
 @endpush

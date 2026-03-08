@@ -636,6 +636,26 @@
     </style>
 @endpush
 
+@push('json_ld')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "{{ $organizer->name ?? '' }}",
+    "description": "{{ Str::limit(strip_tags($organizer->description ?? ''), 200) }}",
+    "url": "{{ url('/' . ($organizer->slug ?? $organizer->id)) }}",
+    "image": "{{ $seo['image'] ?? asset('images/og-default.jpg') }}",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{{ $organizer->city ?? '' }}",
+        "addressRegion": "{{ $organizer->state ?? '' }}",
+        "addressCountry": "MY"
+    },
+    "telephone": "{{ $organizer->phone ?? '' }}"
+}
+</script>
+@endpush
+
 @section('content')
     <div class="container">
 

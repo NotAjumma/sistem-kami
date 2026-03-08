@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('reminders:send')->everyMinute(); // for testing
         $schedule->command('reminders:send')->hourly();
+        $schedule->command('sitemap:generate')->daily();
     }
 
     /**

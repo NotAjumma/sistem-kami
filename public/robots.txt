@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Disallow: /organizer/
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /worker/
+Disallow: /private/
+Disallow: /checkout
+Allow: /
+Allow: /search
+
+Sitemap: https://sistemkami.com/sitemap.xml

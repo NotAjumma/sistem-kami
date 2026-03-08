@@ -96,6 +96,7 @@ Route::prefix('superadmin')->group(function () {
         Route::post('/settings',                            [SuperadminController::class, 'saveSettings'])->name('superadmin.settings.save');
         Route::get('/upload-image',                         [SuperadminController::class, 'showUploadImage'])->name('superadmin.upload-image');
         Route::post('/upload-image',                        [ImageUploadController::class, 'upload'])->name('superadmin.upload-image.post');
+        Route::get('/health-check',                         [SuperadminController::class, 'healthCheck'])->name('superadmin.health-check');
     });
 });
 
@@ -103,7 +104,7 @@ Route::prefix('superadmin')->group(function () {
 Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
 Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->name('toyyibpay.status');
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
-Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
+Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.booking.callback');
 Route::get('/booking/receipt/{booking_code}', [BookingController::class, 'bookingReceipt'])->name('booking.receipt');
 Route::get('/receipt/{booking_code}', [BookingController::class, 'bookingReceiptPackage'])->name('booking.receipt.package');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
