@@ -3,8 +3,8 @@ FROM php:8.3-fpm
 # System dependencies
 RUN apt-get update && apt-get install -y \
     nginx unzip git curl libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libxml2-dev zip ca-certificates \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libonig-dev libxml2-dev zip ca-certificates libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd opcache
 
 # Node.js
@@ -20,6 +20,9 @@ RUN echo "[www]\nlisten = 127.0.0.1:9000" > /usr/local/etc/php-fpm.d/zz-listen.c
 
 # PHP OPcache for production
 RUN echo "opcache.enable=1\nopcache.memory_consumption=128\nopcache.max_accelerated_files=10000\nopcache.validate_timestamps=0" > /usr/local/etc/php/conf.d/opcache.ini
+
+# Raise memory limit for image processing (CLI + FPM)
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
 
 WORKDIR /app
 
