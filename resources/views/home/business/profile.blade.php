@@ -3,7 +3,13 @@
     <link rel="preload" as="style" href="{{ asset('css/profile.css') }}" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ asset('css/profile.css') }}"></noscript>
     @if(!empty($packages) && $packages->first() && !empty($packages->first()->images) && $packages->first()->images->first())
-        <link rel="preload" as="image" href="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $packages->first()->id . '/' . $packages->first()->images->first()->url) }}">
+        @php
+            $lcpImg = $packages->first()->images->first();
+            $lcpPath = 'uploads/' . $organizer->id . '/packages/' . $packages->first()->id . '/' . $lcpImg->url;
+            $lcpWebp = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $lcpPath);
+            $preloadPath = \Illuminate\Support\Facades\Storage::disk('public')->exists($lcpWebp) ? $lcpWebp : $lcpPath;
+        @endphp
+        <link rel="preload" as="image" href="{{ asset('storage/' . $preloadPath) }}">
     @endif
 @endpush
 
@@ -164,12 +170,22 @@
                                     @if(!empty($package->images) && count($package->images) > 0)
                                         @foreach($package->images as $img)
                                             <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                                <img src="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $img->url) }}"
-                                                    class="d-block w-100"
-                                                    style="height:260px; object-fit:cover;"
-                                                    alt="{{ $img->alt_text ?? $package->name }}"
-                                                    @if($loop->parent->first && $loop->first) fetchpriority="high" loading="eager" @else loading="lazy" decoding="async" @endif
-                                                    width="600" height="260">
+                                                @php
+                                                    $imgPath = 'uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $img->url;
+                                                    $webpPath = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $imgPath);
+                                                    $hasWebp = \Illuminate\Support\Facades\Storage::disk('public')->exists($webpPath);
+                                                @endphp
+                                                <picture>
+                                                    @if($hasWebp)
+                                                        <source srcset="{{ asset('storage/' . $webpPath) }}" type="image/webp">
+                                                    @endif
+                                                    <img src="{{ asset('storage/' . $imgPath) }}"
+                                                        class="d-block w-100"
+                                                        style="height:260px; object-fit:cover;"
+                                                        alt="{{ $img->alt_text ?? $package->name }}"
+                                                        @if($loop->parent->first && $loop->first) fetchpriority="high" loading="eager" @else loading="lazy" decoding="async" @endif
+                                                        width="600" height="260">
+                                                </picture>
                                             </div>
                                         @endforeach
                                     @else
