@@ -98,15 +98,22 @@
 		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
 	</style>
 
+	<!-- Track when the 2 layout-critical CSS files finish loading, then hide the page loader -->
+	<script>
+		var _cssReady=0;
+		function _onCssReady(){if(++_cssReady>=2){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}}}
+		setTimeout(function(){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}},3000);
+	</script>
+
 	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
 	<!-- onload also injects font-display:swap AFTER this CSS loads so our declaration wins over all.min.css @font-face -->
 	<link rel="preload" as="style" href="{{ asset('css/style-public.min.css') }}"
-		onload="this.onload=null;this.rel='stylesheet';var s=document.createElement('style');s.textContent='@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-solid-900.woff2&quot;) format(&quot;woff2&quot;);font-weight:900;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-regular-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Brands&quot;;src:url(&quot;/webfonts/fa-brands-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}';document.head.appendChild(s)">
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady();var s=document.createElement('style');s.textContent='@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-solid-900.woff2&quot;) format(&quot;woff2&quot;);font-weight:900;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-regular-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Brands&quot;;src:url(&quot;/webfonts/fa-brands-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}';document.head.appendChild(s)">
 	<noscript><link class="main-css" href="{{ asset('css/style-public.min.css') }}" rel="stylesheet"></noscript>
 
 	<!-- Tailwind CSS: async-load -->
 	<link rel="preload" as="style" href="{{ asset('css/tailwind.min.css') }}"
-		onload="this.onload=null;this.rel='stylesheet'">
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady()">
 	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.min.css') }}"></noscript>
 
 	<!-- Bootstrap Icons: async-load -->
@@ -210,6 +217,12 @@
 </head>
 
 <body class="bg-white text-gray-900">
+
+	<!-- Page loader: shown while layout CSS loads async, fades out when ready -->
+	<div id="page-loader" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease">
+		<div style="width:44px;height:44px;border:3px solid #e5e7eb;border-top-color:#001f4d;border-radius:50%;animation:sk 0.8s linear infinite"></div>
+	</div>
+	<style>@keyframes sk{to{transform:rotate(360deg)}}</style>
 
 	<!--**********************************
         Main wrapper start
