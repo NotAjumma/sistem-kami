@@ -60,7 +60,7 @@ class BusinessController extends Controller
                 ])),
                 'image'         => $package->images->first()
                     ? asset('storage/uploads/' . $organizer->id . '/packages/' . $package->id . '/' . $package->images->first()->url)
-                    : asset('storage/logo-blue-full.png'),
+                    : asset('images/SISTEM-KAMI-LOGO.png'),
                 'canonical'     => url('/' . $organizer->slug . '/' . $package->slug),
             ];
         }
@@ -88,6 +88,18 @@ class BusinessController extends Controller
     {
         $isPrivateRoute = $request->routeIs('business.profile.private');
 
+        // Server-side cache for public profiles (5 min) — bypasses DB on repeat visits
+        $cacheKey = null;
+        if (!$isPrivateRoute && !$request->filled('ref') && !$request->filled('keyword') && !$request->filled('package_category')) {
+            $cacheKey = 'profile_page:' . $slug;
+            $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
+            if ($cached) {
+                return response($cached)
+                    ->header('Content-Type', 'text/html')
+                    ->header('Cache-Control', 'public, max-age=300, s-maxage=600');
+            }
+        }
+
         $packageRelation = $isPrivateRoute ? 'inactivePackages' : 'activePackages';
 
         $organizer = Organizer::with([
@@ -96,7 +108,6 @@ class BusinessController extends Controller
             $packageRelation . '.images',
             $packageRelation . '.addons',
             $packageRelation . '.items',
-            'gallery',
         ])->where('slug', $slug)->firstOrFail();
 
         $ref = trim($request->query('ref')); // buang space depan belakang
@@ -208,7 +219,7 @@ class BusinessController extends Controller
             })->values();
         }
 
-        $response = response()->view('home.business.profile', compact(
+        $html = view('home.business.profile', compact(
             'organizer',
             'packages',
             'slots',
@@ -223,9 +234,16 @@ class BusinessController extends Controller
             'weekRangeBlock',
             'whatsappNumbers',
             'promoter',
-        ));
+        ))->render();
 
-        // Only cache non-personalised responses (no ?ref= promoter tracking)
+        // Store in cache for 5 minutes (non-personalised pages only)
+        if ($cacheKey) {
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $html, 300);
+        }
+
+        $response = response($html);
+
+        // Only set browser cache for non-personalised responses
         if (!$request->filled('ref') && !$isPrivateRoute) {
             $response->headers->set('Cache-Control', 'public, max-age=300, s-maxage=600');
         }

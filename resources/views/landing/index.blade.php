@@ -1,16 +1,37 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <title>
-        Sistem Kami
-    </title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <title>Sistem Kami | Event Organizer &amp; Vendor Booking Platform</title>
+    <meta name="description" content="Sistem Kami builds custom and ready-made systems to help your business work better — simple, fast, and tailored for you. Event organizer, vendor booking, and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="Sistem Kami | Event Organizer &amp; Vendor Booking Platform">
+    <meta property="og:description" content="Sistem Kami builds custom and ready-made systems to help your business work better — simple, fast, and tailored for you.">
+    <meta property="og:image" content="{{ asset('images/SISTEM-KAMI-LOGO.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sistem Kami | Event Organizer &amp; Vendor Booking Platform">
+    <meta name="twitter:description" content="Sistem Kami builds custom and ready-made systems to help your business work better — simple, fast, and tailored for you.">
+    <meta name="twitter:image" content="{{ asset('images/SISTEM-KAMI-LOGO.png') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
 
         body {
             font-family: "Poppins", sans-serif;
@@ -192,13 +213,13 @@
             <div class="mt-10 flex items-center space-x-10 max-w-md">
                 <img alt="Border company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/d3fd383c-735d-41e2-d454-d369a5da6204.jpg"
-                    width="80" />
+                    width="80" loading="lazy" decoding="async" />
                 <img alt="hues company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/75b95c7e-e315-470e-d749-abb4e02c9aad.jpg"
-                    width="80" />
+                    width="80" loading="lazy" decoding="async" />
                 <img alt="Leafe company logo" class="h-6 object-contain" height="24"
                     src="https://storage.googleapis.com/a1aa/image/789f6300-112c-432d-d426-1a285cd1d308.jpg"
-                    width="80" />
+                    width="80" loading="lazy" decoding="async" />
             </div>
             <!-- <div class="mt-10 max-w-xs relative">
                 <div class="ticket">
@@ -250,7 +271,7 @@
                     <img alt="Back view of a speaker raising hand on stage in front of audience"
                         class="rounded-md w-full object-cover" height="250"
                         src="https://storage.googleapis.com/a1aa/image/dc8a4b65-dbed-4031-a2ce-c4bc52329c0e.jpg"
-                        width="400" />
+                        width="400" loading="lazy" decoding="async" />
                     <button
                         class="mt-3 bg-white text-gray-900 text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-100 transition"
                         type="button">
@@ -313,7 +334,7 @@ Custom or ready-made systems — made simple for you.
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
                     height="400"
                     src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
-                    width="280" />
+                    width="280" loading="lazy" decoding="async" />
                 <button
                     class="absolute bottom-4 left-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
                     type="button">
@@ -344,7 +365,7 @@ Custom or ready-made systems — made simple for you.
                 <img alt="Silhouette of an artist on stage with spotlight and smoke" class="rounded-md shadow-lg"
                     height="400"
                     src="https://storage.googleapis.com/a1aa/image/1edf274c-0c5d-44a5-8263-c3e6f4be3526.jpg"
-                    width="280" />
+                    width="280" loading="lazy" decoding="async" />
                 <button
                     class="absolute bottom-4 left-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
                     type="button">
@@ -430,14 +451,14 @@ Custom or ready-made systems — made simple for you.
             <img alt="Background silhouettes of people at concert with dark overlay"
                 class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none select-none"
                 height="300" src="https://storage.googleapis.com/a1aa/image/19541d07-888e-4f94-3539-c0e925b86cee.jpg"
-                style="z-index:0" width="1200" />
+                style="z-index:0" width="1200" loading="lazy" decoding="async" />
         </section>
     </main>
     <footer
         class="bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
         <div class="mb-4 md:mb-0 flex items-center space-x-2 font-semibold select-none">
             <img alt="Sistem Kami logo icon" class="w-6 h-6 object-contain" height="24"
-                src="https://storage.googleapis.com/a1aa/image/501f42d5-3fc2-42e0-434a-b77bbd7fba90.jpg" width="24" />
+                src="https://storage.googleapis.com/a1aa/image/501f42d5-3fc2-42e0-434a-b77bbd7fba90.jpg" width="24" loading="lazy" decoding="async" />
             <span>
                 Sistem Kami
             </span>
