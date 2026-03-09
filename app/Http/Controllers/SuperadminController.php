@@ -406,8 +406,13 @@ class SuperadminController extends Controller
         }
 
         $cmd = $commands[$key];
-        \Illuminate\Support\Facades\Artisan::call($cmd['command'], array_fill_keys($cmd['args'], true));
-        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call($cmd['command'], array_fill_keys($cmd['args'], true));
+            $output = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $output = 'ERROR: ' . $e->getMessage();
+        }
 
         return back()
             ->with('cmd_output', trim($output) ?: '(no output)')
