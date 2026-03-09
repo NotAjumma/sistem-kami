@@ -55,15 +55,16 @@ class HomeController extends Controller
                 })
                 ->values();
 
-            $eventCategories = Cache::remember('home.event_categories', now()->addHours(1), function () {
-                return Category::whereNull('parent_id')
-                    ->orderBy('order_by')
-                    ->get();
+            // Only categories that have at least one active package
+            $packageCategories = Cache::remember('home.package_categories', now()->addMinutes(10), function () {
+                return PackageCategory::whereHas('packages', function ($q) {
+                    $q->where('status', 'active');
+                })->orderBy('name')->get();
             });
 
             $seo = ['canonical' => url('/')];
 
-            return view('home.index', compact('packages', 'eventCategories', 'organizers', 'seo'))->render();
+            return view('home.index', compact('packages', 'packageCategories', 'organizers', 'seo'))->render();
         });
 
         return response($html)
@@ -71,51 +72,80 @@ class HomeController extends Controller
             ->header('Cache-Control', 'public, max-age=300, s-maxage=600');
     }
 
+    public function about()
+    {
+        $seo = [
+            'title' => 'About Us | Sistem Kami',
+            'description' => 'Learn about Sistem Kami — a booking and business management platform designed to help service providers and organizers manage packages, schedules, and customers.',
+            'canonical' => url('/about'),
+        ];
+
+        return view('home.about', compact('seo'));
+    }
+
     public function search(Request $request)
     {
         $page_title = "Sistem Kami | Search";
-        $query = Event::with(['organizer', 'tickets'])
-            ->where('status', '1'); // Only active events
-        // \Log::info('request');
-        // \Log::info($request->all());
 
-        // Filter by keyword (title or description)
+        $query = Package::with([
+            'organizer',
+            'category',
+            'images' => function ($q) {
+                $q->where('is_cover', true)->orderBy('sort_order');
+            },
+            'vendorTimeSlots.images' => function ($q) {
+                $q->orderByDesc('is_cover')->orderBy('sort_order');
+            },
+        ])->where('status', 'active');
+
+        // Filter by keyword (package name/description or organizer name)
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
-
             $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', "%$keyword%")
-                    ->orWhere('description', 'like', "%$keyword%");
+                $q->where('name', 'like', "%$keyword%")
+                    ->orWhere('description', 'like', "%$keyword%")
+                    ->orWhereHas('organizer', function ($oq) use ($keyword) {
+                        $oq->where('name', 'like', "%$keyword%");
+                    });
             });
         }
 
-        // Filter by location (district, state, or country)
+        // Filter by location (organizer city, state, or country)
         if ($request->filled('location')) {
             $location = $request->location;
-            $query->where(function ($q) use ($location) {
-                $q->where('district', 'like', "%$location%")
+            $query->whereHas('organizer', function ($q) use ($location) {
+                $q->where('city', 'like', "%$location%")
                     ->orWhere('state', 'like', "%$location%")
                     ->orWhere('country', 'like', "%$location%");
             });
         }
 
-        // Filter by category
+        // Filter by package category
         if ($request->filled('category')) {
-            $category = Category::where('slug', $request->category)->first();
+            $category = PackageCategory::where('slug', $request->category)->first();
             if ($category) {
                 $query->where('category_id', $category->id);
             }
         }
 
-        // Future: Add filters for package type, price range...
+        $packages = $query->orderBy('order_by')->get();
 
-        $events = $query->get();
+        // Group by organizer (same as homepage)
+        $organizers = $packages
+            ->groupBy('organizer_id')
+            ->map(function ($group) {
+                $organizer = $group->first()->organizer;
+                $organizer->first_package = $group->first();
+                $organizer->search_packages = $group;
+                return $organizer;
+            })
+            ->values();
 
-        $eventCategories = Category::whereNull('parent_id')
-            ->orderBy('order_by')
-            ->get();
+        $packageCategories = PackageCategory::whereHas('packages', function ($q) {
+            $q->where('status', 'active');
+        })->orderBy('name')->get();
 
-        return view('home.search', compact('events', 'eventCategories', 'page_title'));
+        return view('home.search', compact('packages', 'organizers', 'packageCategories', 'page_title'));
     }
 
     public function log(Request $request)

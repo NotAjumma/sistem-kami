@@ -45,65 +45,25 @@
                         <button type="submit" class="btn btn-seek w-100" aria-label="Seek Jobs Button">Search</button>
                     </div>
                 </form>
-                <nav class="filters-scroll mt-3" aria-label="Event filters">
-                    <!-- Event Category Dropdown -->
+                <nav class="filters-scroll mt-3" aria-label="Category filters">
+                    <!-- Package Category Dropdown -->
+                    @if($packageCategories->count())
                     <div class="dropdown d-inline-block me-2">
                         <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            Event Category
+                            Category
                         </button>
                         <ul class="dropdown-menu">
-                            @foreach ($eventCategories as $category)
+                            @foreach ($packageCategories as $category)
                                 <li>
                                     <a class="dropdown-item"
-                                        href="{{ route('search', array_merge(request()->query(), ['category' => $category->slug])) }}">
+                                        href="{{ route('search', ['category' => $category->slug]) }}">
                                         {{ $category->name }}
                                     </a>
                                 </li>
                             @endforeach
                         </ul>
                     </div>
-
-                    <!-- Package Type Dropdown -->
-                    {{-- <div class="dropdown d-inline-block me-2">
-                        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            Package Type
-                        </button>
-                        <ul class="dropdown-menu">
-                            @foreach ($packageTypes as $package)
-                            <li>
-                                <a class="dropdown-item" href="?package={{ $package->slug }}">
-                                    {{ $package->name }}
-                                </a>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </div> --}}
-
-                    <!-- Price Range -->
-                    <!-- Price Range Dropdown -->
-                    <!-- <div class="dropdown d-inline-block">
-                                            <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                Price
-                                            </button>
-                                            <div class="dropdown-menu p-3"
-                                                style="min-width: 250px; overflow: visible; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);">
-                                                <div style="width: 260px;">
-                                                    <label for="priceRangeMin" class="form-label">Min Price</label>
-                                                    <input type="range" class="form-range w-100" id="priceRangeMin" min="0" max="1000" step="10"
-                                                        value="100" oninput="document.getElementById('minPriceOutput').value = this.value">
-                                                    <output id="minPriceOutput">100</output>
-
-                                                    <label for="priceRangeMax" class="form-label mt-3">Max Price</label>
-                                                    <input type="range" class="form-range w-100" id="priceRangeMax" min="0" max="1000" step="10"
-                                                        value="800" oninput="document.getElementById('maxPriceOutput').value = this.value">
-                                                    <output id="maxPriceOutput">800</output>
-
-                                                    <div class="mt-3 text-end">
-                                                        <button type="button" class="btn btn-sm btn-primary">Apply</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div> -->
+                    @endif
                 </nav>
             </div>
         </section>

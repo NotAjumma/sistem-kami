@@ -116,6 +116,7 @@ Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->n
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/qr/{slug}', function ($slug) {
     $organizer = \App\Models\Organizer::where('slug', $slug)->whereNotNull('payment_qr_path')->firstOrFail();

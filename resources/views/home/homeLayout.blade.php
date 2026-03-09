@@ -256,7 +256,8 @@
 					<!-- Desktop Menu -->
 					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900">
 						<li><a class="hover:underline" href="/">Home</a></li>
-						
+						<li><a class="hover:underline" href="{{ route('about') }}">About Us</a></li>
+
 						<!-- Contact Us WhatsApp Button -->
 						<li>
 							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." 
@@ -302,6 +303,10 @@
 			<div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
 				<button class="btn btn-primary" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
 					<a class="dropdown-item" href="/">Home</a>
+				</button>
+
+				<button class="btn btn-primary mt-3" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
+					<a class="dropdown-item" href="{{ route('about') }}">About Us</a>
 				</button>
 
 				<button class="btn btn-primary mt-3" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
@@ -356,60 +361,86 @@
 		<!--**********************************
             Footer start
         ***********************************-->
-		<footer
-			class="container bg-gray-900 text-gray-400 text-xs py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center mx-auto mt-5">
-			<div class="container">
+		<footer class="mt-5" style="background: linear-gradient(135deg, #001f4d 0%, #001233 100%);">
+			<!-- Top wave separator -->
+			<svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-top:-1px;">
+				<path d="M0 60L48 52C96 44 192 28 288 20C384 12 480 12 576 18C672 24 768 36 864 40C960 44 1056 40 1152 34C1248 28 1344 20 1392 16L1440 12V60H0Z" fill="#001f4d"/>
+			</svg>
+
+			<div class="container py-5">
 				<div class="row">
-					<!-- About Section -->
-					<div class="col-md-4 mb-3">
-						<h6 class="text-light pb-3">About Us</h6>
-						<p class="small">
-							SistemKami.com is a booking and business management platform 
-							designed to help studios and service providers manage packages, 
-							schedules, and customers more efficiently. 
-							<br><br>
-							We simplify your operations so you can focus on growing your business.
+					<!-- Brand & Description -->
+					<div class="col-lg-4 col-md-6 mb-4">
+						<a href="/" class="d-inline-block mb-3">
+							<img src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" alt="Sistem Kami" style="height: 36px; filter: brightness(0) invert(1);">
+						</a>
+						<p class="small mb-4" style="color: rgba(255,255,255,0.6); line-height: 1.7;">
+							A booking and business management platform designed to help studios and service providers
+							manage packages, schedules, and customers more efficiently.
 						</p>
+						<!-- Social Links -->
+						<div class="d-flex gap-2">
+							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda."
+								target="_blank"
+								class="d-flex align-items-center justify-content-center rounded-circle"
+								style="width:36px;height:36px;background:rgba(255,255,255,0.1);color:#fff;transition:background 0.3s;"
+								onmouseover="this.style.background='#25D366'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+								<i class="fab fa-whatsapp"></i>
+							</a>
+							<a href="https://www.instagram.com/sistemkami/" target="_blank"
+								class="d-flex align-items-center justify-content-center rounded-circle"
+								style="width:36px;height:36px;background:rgba(255,255,255,0.1);color:#fff;transition:background 0.3s;"
+								onmouseover="this.style.background='#E1306C'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+								<i class="fab fa-instagram"></i>
+							</a>
+						</div>
 					</div>
 
 					<!-- Quick Links -->
-					<div class="col-md-4 mb-3">
-						<h6 class="text-light pb-3">Quick Links</h6>
-						<ul class="list-unstyled">
-							<li><a href="{{ url('/') }}" class="text-light text-decoration-none">Home</a></li>
-							<li><a href="{{ route('organizer.login') }}"
-									class="text-light text-decoration-none">Organizer Login</a></li>
-							<li><a href="{{ route('organizer.register') }}"
-									class="text-light text-decoration-none">Organizer Register</a></li>
+					<div class="col-lg-2 col-md-6 col-6 mb-4">
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">Quick Links</h6>
+						<ul class="list-unstyled" style="font-size: 0.85rem;">
+							<li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Home</a></li>
+							<li class="mb-2"><a href="{{ route('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">About Us</a></li>
+							<li class="mb-2"><a href="{{ route('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Search</a></li>
+						</ul>
+					</div>
+
+					<!-- For Organizers -->
+					<div class="col-lg-3 col-md-6 col-6 mb-4">
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">For Organizers</h6>
+						<ul class="list-unstyled" style="font-size: 0.85rem;">
+							<li class="mb-2"><a href="{{ route('organizer.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Organizer Login</a></li>
+							<li class="mb-2"><a href="{{ route('organizer.register') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Organizer Register</a></li>
+							<li class="mb-2"><a href="{{ route('organizer.worker.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Worker Login</a></li>
 						</ul>
 					</div>
 
 					<!-- Contact Info -->
-					<div class="col-md-4 mb-3">
-						<h6 class="text-light pb-3">Contact Us</h6>
-						<address class="small">
-							Ipoh<br>
-							Perak, Malaysia<br>
-							Phone: 011-2406-9291<br>
-							Email: <a href="mailto:salessistemkami@gmail.com" class="text-light">salessistemkami@gmail.com</a>
-						</address>
+					<div class="col-lg-3 col-md-6 mb-4">
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">Contact Us</h6>
+						<ul class="list-unstyled small" style="color: rgba(255,255,255,0.6);">
+							<li class="mb-2 d-flex align-items-start gap-2">
+								<i class="fas fa-map-marker-alt mt-1" style="color: rgba(255,255,255,0.4); min-width: 14px;"></i>
+								<span>Ipoh, Perak, Malaysia</span>
+							</li>
+							<li class="mb-2 d-flex align-items-center gap-2">
+								<i class="fas fa-phone" style="color: rgba(255,255,255,0.4); min-width: 14px;"></i>
+								<span>011-2406-9291</span>
+							</li>
+							<li class="mb-2 d-flex align-items-center gap-2">
+								<i class="fas fa-envelope" style="color: rgba(255,255,255,0.4); min-width: 14px;"></i>
+								<a href="mailto:salessistemkami@gmail.com" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">salessistemkami@gmail.com</a>
+							</li>
+						</ul>
 					</div>
 				</div>
 
-				<hr class="bg-secondary" />
-
-				<div class="d-flex justify-content-between align-items-center pt-3">
-					<small>&copy; {{ date('Y') }} Sistem Kami. All rights reserved.</small>
-					<div>
-						<!-- <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a> -->
-						<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." 
-						target="_blank" 
-						class="text-light me-3">
-							<i class="fab fa-whatsapp"></i>
-						</a>
-
-						<a href="https://www.instagram.com/sistemkami/" target="_blank" class="text-light me-3"><i class="fab fa-instagram"></i></a>
-						<!-- <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a> -->
+				<!-- Bottom bar -->
+				<div class="pt-4 mt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+					<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+						<small style="color: rgba(255,255,255,0.4);">&copy; {{ date('Y') }} Sistem Kami. All rights reserved.</small>
+						<small style="color: rgba(255,255,255,0.3);">Made with <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.7rem;"></i> in Malaysia</small>
 					</div>
 				</div>
 			</div>

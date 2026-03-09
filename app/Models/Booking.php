@@ -17,7 +17,7 @@ class Booking extends Model
     const STATUS_FAILED    = 'failed';     // payment failed
 
     /** Statuses considered as "revenue" (paid + upcoming) */
-    const REVENUE_STATUSES = [self::STATUS_PAID, self::STATUS_CONFIRMED, self::STATUS_COMPLETED, self::STATUS_PENDING];
+    const REVENUE_STATUSES = [self::STATUS_PAID, self::STATUS_CONFIRMED, self::STATUS_COMPLETED];
 
     /** Statuses that count as active/valid bookings (not cancelled/failed) */
     const ACTIVE_STATUSES  = [self::STATUS_PENDING, self::STATUS_PAID, self::STATUS_CONFIRMED, self::STATUS_COMPLETED];
