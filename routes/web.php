@@ -99,6 +99,8 @@ Route::prefix('superadmin')->group(function () {
         Route::get('/health-check',                         [SuperadminController::class, 'healthCheck'])->name('superadmin.health-check');
         Route::get('/reminders',                            [SuperadminController::class, 'showReminders'])->name('superadmin.reminders');
         Route::post('/reminders/trigger',                   [SuperadminController::class, 'triggerReminders'])->name('superadmin.reminders.trigger');
+        Route::get('/commands',                             [SuperadminController::class, 'showCommands'])->name('superadmin.commands');
+        Route::post('/commands/run',                        [SuperadminController::class, 'runCommand'])->name('superadmin.commands.run');
     });
 });
 

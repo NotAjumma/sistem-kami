@@ -86,20 +86,22 @@
 	<style>
 		/* Override style.css opacity:0 — show content immediately */
 		#main-wrapper.show{opacity:1!important}
+		/* Prevent CLS: restrict transitions to opacity only, not all layout properties */
+		#main-wrapper{transition:opacity 0.25s ease-in !important}
+		.content-body{transition:none !important}
+		.content-body.default-height{min-height:100vh}
 		/* Header skeleton */
 		.header-bg{background:#fff;min-height:64px}
 		/* Search section skeleton */
 		.search-section{background:#001f4d;min-height:120px}
 		/* Card images prevent CLS */
 		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
-		/* Override Font Awesome font-display:block to swap */
-		@font-face{font-family:"Font Awesome 5 Free";font-display:swap}
-		@font-face{font-family:"Font Awesome 5 Brands";font-display:swap}
 	</style>
 
 	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
+	<!-- onload also injects font-display:swap AFTER this CSS loads so our declaration wins over all.min.css @font-face -->
 	<link rel="preload" as="style" href="{{ asset('css/style-public.min.css') }}"
-		onload="this.onload=null;this.rel='stylesheet'">
+		onload="this.onload=null;this.rel='stylesheet';var s=document.createElement('style');s.textContent='@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-solid-900.woff2&quot;) format(&quot;woff2&quot;);font-weight:900;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-regular-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Brands&quot;;src:url(&quot;/webfonts/fa-brands-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}';document.head.appendChild(s)">
 	<noscript><link class="main-css" href="{{ asset('css/style-public.min.css') }}" rel="stylesheet"></noscript>
 
 	<!-- Tailwind CSS: async-load -->
@@ -222,7 +224,7 @@
 						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}"
 						alt="Sistem Kami Logo"
 						class="h-10 w-auto"
-						width="160" height="40"
+						style="height:40px;width:auto"
 						fetchpriority="high"
 					>
 				</a>
