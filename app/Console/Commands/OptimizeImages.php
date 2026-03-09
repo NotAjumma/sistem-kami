@@ -9,7 +9,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class OptimizeImages extends Command
 {
-    protected $signature   = 'images:optimize {--quality=90 : WebP quality 1-100}';
+    protected $signature   = 'images:optimize {--quality=90 : WebP quality 1-100} {--force : Overwrite existing WebP files}';
     protected $description = 'Generate WebP versions of all uploaded package/slot images';
 
     public function handle(): int
@@ -31,7 +31,7 @@ class OptimizeImages extends Command
 
             $webpPath = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $file);
 
-            if ($disk->exists($webpPath)) {
+            if ($disk->exists($webpPath) && !$this->option('force')) {
                 $skipped++;
                 continue;
             }
@@ -40,7 +40,10 @@ class OptimizeImages extends Command
                 $sourceFull = $disk->path($file);
                 $webpFull   = $disk->path($webpPath);
 
-                $manager->read($sourceFull)->toWebp(quality: $quality)->save($webpFull);
+                $manager->read($sourceFull)
+                    ->scaleDown(width: 1200, height: 900)
+                    ->toWebp(quality: $quality)
+                    ->save($webpFull);
                 $count++;
                 $this->line("  ✓ {$file}");
             } catch (\Throwable $e) {

@@ -344,4 +344,74 @@ class SuperadminController extends Controller
     {
         return view('superadmin.upload-image');
     }
+
+    // ── REMINDERS ────────────────────────────────────────────────────────────
+
+    public function showReminders()
+    {
+        $now    = \Carbon\Carbon::now();
+        $cutoff = \Carbon\Carbon::now()->addHours(12);
+
+        $pendingCount = \App\Models\Booking::whereNotIn('status', ['cancelled'])
+            ->whereNull('reminder_sent_at')
+            ->whereHas('vendorTimeSlots', function ($q) use ($now, $cutoff) {
+                $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
+                    $now->toDateTimeString(),
+                    $cutoff->toDateTimeString(),
+                ]);
+            })
+            ->whereHas('organizer', function ($q) {
+                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
+            })
+            ->count();
+
+        return view('superadmin.reminders', compact('pendingCount'));
+    }
+
+    public function triggerReminders(Request $request)
+    {
+        \Illuminate\Support\Facades\Artisan::call('reminders:send');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return back()->with('reminder_output', trim($output))->with('success', 'Reminder command executed.');
+    }
+
+    // Whitelist of runnable commands: key => [label, command, args, description, danger]
+    private function commandList(): array
+    {
+        return [
+            'images_optimize'       => ['label' => 'Generate WebP (new only)',    'command' => 'images:optimize',  'args' => [],             'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',       'danger' => false],
+            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)', 'command' => 'images:optimize',  'args' => ['--force'],    'description' => 'Regenerates WebP for ALL uploaded images, including previously converted ones. Use after changing resize/quality settings.', 'danger' => true],
+            'storage_link'          => ['label' => 'Storage Link',                'command' => 'storage:link',     'args' => ['--force'],    'description' => 'Creates (or recreates) the public/storage symlink pointing to storage/app/public.',            'danger' => false],
+            'config_cache'          => ['label' => 'Cache Config',                'command' => 'config:cache',     'args' => [],             'description' => 'Compiles all config files into a single cached file for faster loading.',                       'danger' => false],
+            'route_cache'           => ['label' => 'Cache Routes',                'command' => 'route:cache',      'args' => [],             'description' => 'Compiles all routes into a single cached file for faster route matching.',                     'danger' => false],
+            'view_cache'            => ['label' => 'Cache Views',                 'command' => 'view:cache',       'args' => [],             'description' => 'Pre-compiles all Blade templates.',                                                              'danger' => false],
+            'optimize_clear'        => ['label' => 'Clear All Caches',            'command' => 'optimize:clear',   'args' => [],             'description' => 'Clears config, route, view, and application caches. Use after code changes.',                  'danger' => false],
+        ];
+    }
+
+    public function showCommands()
+    {
+        return view('superadmin.commands', ['commands' => $this->commandList()]);
+    }
+
+    public function runCommand(Request $request)
+    {
+        $request->validate(['command_key' => 'required|string']);
+        $commands = $this->commandList();
+        $key      = $request->input('command_key');
+
+        if (!array_key_exists($key, $commands)) {
+            return back()->with('error', 'Unknown command.');
+        }
+
+        $cmd = $commands[$key];
+        \Illuminate\Support\Facades\Artisan::call($cmd['command'], array_fill_keys($cmd['args'], true));
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return back()
+            ->with('cmd_output', trim($output) ?: '(no output)')
+            ->with('cmd_ran', $cmd['label'])
+            ->with('success', "Command '{$cmd['label']}' executed.");
+    }
 }

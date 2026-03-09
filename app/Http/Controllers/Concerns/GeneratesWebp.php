@@ -37,7 +37,10 @@ trait GeneratesWebp
             }
 
             $manager = new ImageManager(new Driver());
-            $manager->read($sourceFull)->toWebp(quality: $quality)->save($webpFull);
+            $manager->read($sourceFull)
+                ->scaleDown(width: 1200, height: 900)
+                ->toWebp(quality: $quality)
+                ->save($webpFull);
         } catch (\Throwable $e) {
             // Non-fatal — log but don't break upload response
             logger()->warning("WebP generation failed for {$storagePath}: " . $e->getMessage());
