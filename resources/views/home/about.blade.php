@@ -224,6 +224,18 @@
                         </p>
                     </div>
                 </div>
+                <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
+                    <div class="feature-card p-4 h-100">
+                        <div class="feature-icon" style="background: rgba(99, 102, 241, 0.1);">
+                            <i class="fas fa-robot fa-lg" style="color: #6366f1;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">AI Chatbot Assistant</h5>
+                        <p class="text-muted small mb-0">
+                            AI-powered chatbot that handles customer inquiries, guides them through
+                            the booking process, and provides instant answers 24/7 — without you lifting a finger.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

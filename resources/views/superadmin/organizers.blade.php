@@ -34,8 +34,9 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Packages</th>
-                        <th>Bookings</th>
-                        <th>Revenue</th>
+                        <th>Active Bookings</th>
+                        <th>Today</th>
+                        <th>Revenue ↓</th>
                         <th>Wallet</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -53,7 +54,14 @@
                         <td>{{ $org->email ?? '-' }}</td>
                         <td>{{ $org->phone ?? '-' }}</td>
                         <td>{{ $org->packages_count }}</td>
-                        <td>{{ $org->bookings_count }}</td>
+                        <td>{{ $org->active_bookings_count }}</td>
+                        <td>
+                            @if($org->today_bookings_count > 0)
+                                <span class="badge bg-success">{{ $org->today_bookings_count }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td class="small">RM {{ number_format($org->revenue ?? 0, 2) }}</td>
                         <td class="small">RM {{ number_format($org->wallet_balance ?? 0, 2) }}</td>
                         <td>
@@ -112,7 +120,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="11" class="text-center text-muted py-4">No organizers found.</td></tr>
+                    <tr><td colspan="12" class="text-center text-muted py-4">No organizers found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

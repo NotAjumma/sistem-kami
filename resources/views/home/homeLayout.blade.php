@@ -8,14 +8,21 @@
 <html lang="en">
 
 <head>
-	<!-- Google tag (gtag.js) -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WF0W2KJX24"></script>
+	<!-- Google Analytics (loaded only after cookie consent) -->
 	<script>
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
+	// Default: deny analytics until user consents
+	gtag('consent', 'default', { analytics_storage: 'denied' });
+	</script>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-WF0W2KJX24"></script>
+	<script>
 	gtag('js', new Date());
-
 	gtag('config', 'G-WF0W2KJX24');
+	// If previously consented, grant immediately
+	if (localStorage.getItem('sk_cookie_consent') === 'accepted') {
+		gtag('consent', 'update', { analytics_storage: 'granted' });
+	}
 	</script>
 
 	<!-- Meta -->
@@ -98,40 +105,41 @@
 		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
 	</style>
 
-	<!-- Track when the 2 layout-critical CSS files finish loading, then hide the page loader -->
+	<!-- Hide page loader only after ALL layout-critical CSS files have loaded -->
 	<script>
 		var _cssReady=0;
-		function _onCssReady(){if(++_cssReady>=2){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}}}
-		setTimeout(function(){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}},3000);
+		function _hideLoader(){var l=document.getElementById('page-loader');if(l&&!l._done){l._done=true;l.style.opacity='0';setTimeout(function(){if(l.parentNode)l.parentNode.removeChild(l);},350);}}
+		function _onCssReady(){if(++_cssReady>=4)_hideLoader();}
+		// Hard fallback: hide after 6s no matter what
+		setTimeout(_hideLoader,6000);
 	</script>
 
-	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
-	<!-- onload also injects font-display:swap AFTER this CSS loads so our declaration wins over all.min.css @font-face -->
+	<!-- Main CSS (counts toward loader) -->
 	<link rel="preload" as="style" href="{{ asset('css/style-public.min.css') }}"
 		onload="this.onload=null;this.rel='stylesheet';_onCssReady();var s=document.createElement('style');s.textContent='@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-solid-900.woff2&quot;) format(&quot;woff2&quot;);font-weight:900;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-regular-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Brands&quot;;src:url(&quot;/webfonts/fa-brands-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}';document.head.appendChild(s)">
 	<noscript><link class="main-css" href="{{ asset('css/style-public.min.css') }}" rel="stylesheet"></noscript>
 
-	<!-- Tailwind CSS: async-load -->
+	<!-- Tailwind CSS (counts toward loader) -->
 	<link rel="preload" as="style" href="{{ asset('css/tailwind.min.css') }}"
 		onload="this.onload=null;this.rel='stylesheet';_onCssReady()">
 	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.min.css') }}"></noscript>
 
-	<!-- Bootstrap Icons: async-load -->
+	<!-- Bootstrap Icons (counts toward loader — affects icon layout) -->
 	<link rel="preload" as="style"
 		href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-		onload="this.onload=null;this.rel='stylesheet'">
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady()">
 	<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"></noscript>
 
-	<!-- Google Fonts: async-load with display=swap -->
+	<!-- Google Fonts: async-load (font-display:swap, does not block layout) -->
 	<link rel="preload" as="style"
 		href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
 		onload="this.onload=null;this.rel='stylesheet'">
 	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"></noscript>
 
-	<!-- Font Awesome: async-load -->
+	<!-- Font Awesome (counts toward loader — affects icon layout) -->
 	<link rel="preload" as="style"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-		onload="this.onload=null;this.rel='stylesheet'">
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady()">
 	<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
 
 	<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" defer></script>
@@ -244,24 +252,45 @@
 
 				<!-- Hamburger button (Mobile only) -->
 				<div class="lg:hidden">
-					<button id="menu-toggle" class="text-gray-800 focus:outline-none">
-						<!-- Hamburger Icon -->
-						<svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<button id="menu-toggle" aria-label="Open menu" style="background:none;border:none;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+						<svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="#1a2942" stroke-width="2.2" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+						</svg>
+						<svg id="menu-icon-close" class="w-6 h-6" fill="none" stroke="#1a2942" stroke-width="2.2" viewBox="0 0 24 24" style="display:none;">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 						</svg>
 					</button>
 				</div>
 
 				<div class="hidden lg:flex gap-3 align-items-center">
 					<!-- Desktop Menu -->
-					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900">
+					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900" style="align-items:center;">
 						<li><a class="hover:underline" href="/">Home</a></li>
 						<li><a class="hover:underline" href="{{ route('about') }}">About Us</a></li>
 
+						<!-- Pages Dropdown -->
+						<li class="relative">
+							<button type="button" id="pages-menu-button"
+								style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit;color:inherit;font-weight:inherit;"
+								aria-haspopup="true">
+								Pages
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+								</svg>
+							</button>
+							<div id="pages-menu" class="absolute z-10 hidden mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style="min-width:180px;left:0;">
+								<div class="py-1 text-xs text-gray-700" role="menu">
+									<a href="{{ route('faq') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">FAQ</a>
+									<a href="{{ route('privacy-policy') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Privacy Policy</a>
+									<a href="{{ route('terms') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Terms &amp; Conditions</a>
+								</div>
+							</div>
+						</li>
+
 						<!-- Contact Us WhatsApp Button -->
 						<li>
-							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." 
-							target="_blank" 
+							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda."
+							target="_blank"
 							class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
 								Contact Us
 							</a>
@@ -299,32 +328,54 @@
 
 			</nav>
 
-			<!-- Mobile Menu -->
-			<div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
-				<button class="btn btn-primary" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
-					<a class="dropdown-item" href="/">Home</a>
-				</button>
+			<!-- Mobile Menu: clean dark slide-down panel -->
+			<div id="mobile-menu" class="lg:hidden" style="display:none; background:#001f4d; border-top:1px solid rgba(255,255,255,0.1);">
+				<div style="padding:8px 12px 16px;">
 
-				<button class="btn btn-primary mt-3" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
-					<a class="dropdown-item" href="{{ route('about') }}">About Us</a>
-				</button>
+					<a href="/" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25H8.25V21.75H3.75A.75.75 0 013 21V9.75z"/></svg>
+						Home
+					</a>
 
-				<button class="btn btn-primary mt-3" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
-					<a class="dropdown-item" href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda.">
-						Contact Us</a>
-				</button>
+					<a href="{{ route('about') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+						About Us
+					</a>
 
-				<div class="dropdown mt-3">
-					<button class="btn btn-primary dropdown-toggle" type="button" id="menuDropdown"
-						data-bs-toggle="dropdown" aria-expanded="false" style="width: 90%; text-align: start; padding: 0.65rem 1rem;">
-						Organizer
+					<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." target="_blank" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'" onmouseout="this.style.background='transparent'">
+						<svg style="width:18px;height:18px;color:#25D366;" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+						Contact Us
+					</a>
+
+					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
+
+					{{-- Pages collapsible --}}
+					<button id="mobile-pages-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						<span>Pages</span>
+						<svg id="mobile-pages-chevron" style="width:16px;height:16px;transition:transform 0.25s;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
 					</button>
-					<ul class="dropdown-menu" aria-labelledby="menuDropdown">
-						<li><a class="dropdown-item" href="{{ route('organizer.login') }}">Login</a></li>
-						<li><a class="dropdown-item" href="{{ route('organizer.register') }}">Register</a>
-						</li>
-						<li><a class="dropdown-item" href="{{ route('organizer.worker.login') }}">Worker Login</a></li>
-					</ul>
+					<div id="mobile-pages-submenu" style="display:none;padding-left:12px;">
+						<a href="{{ route('faq') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">FAQ</a>
+						<a href="{{ route('privacy-policy') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Privacy Policy</a>
+						<a href="{{ route('terms') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Terms &amp; Conditions</a>
+					</div>
+
+					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
+
+					<div style="padding:6px 14px 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.35);">Organizer</div>
+
+					<a href="{{ route('organizer.login') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						Login
+					</a>
+
+					<a href="{{ route('organizer.register') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						Register
+					</a>
+
+					<a href="{{ route('organizer.worker.login') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						Worker Login
+					</a>
+
 				</div>
 			</div>
 		</header>
@@ -403,6 +454,7 @@
 							<li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Home</a></li>
 							<li class="mb-2"><a href="{{ route('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">About Us</a></li>
 							<li class="mb-2"><a href="{{ route('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Search</a></li>
+							<li class="mb-2"><a href="{{ route('faq') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">FAQ</a></li>
 						</ul>
 					</div>
 
@@ -440,7 +492,11 @@
 				<div class="pt-4 mt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
 					<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
 						<small style="color: rgba(255,255,255,0.4);">&copy; {{ date('Y') }} Sistem Kami. All rights reserved.</small>
-						<small style="color: rgba(255,255,255,0.3);">Made with <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.7rem;"></i> in Malaysia</small>
+						<div class="d-flex gap-3 flex-wrap justify-content-center">
+							<a href="{{ route('privacy-policy') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Privacy Policy</a>
+							<a href="{{ route('terms') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Terms &amp; Conditions</a>
+							<small style="color: rgba(255,255,255,0.3);">Made with <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.7rem;"></i> in Malaysia</small>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -498,10 +554,77 @@
 
 	@stack('scripts')
 	<script>
+		// Desktop Pages dropdown
+		var pb=document.getElementById('pages-menu-button'),pm=document.getElementById('pages-menu');
+		if(pb&&pm){pb.addEventListener('click',function(e){e.stopPropagation();pm.classList.toggle('hidden')});document.addEventListener('click',function(e){if(!pb.contains(e.target)&&!pm.contains(e.target))pm.classList.add('hidden')})}
+		// Desktop organizer dropdown
 		var b=document.getElementById('organizer-menu-button'),m=document.getElementById('organizer-menu');
 		if(b&&m){b.addEventListener('click',function(){m.classList.toggle('hidden')});document.addEventListener('click',function(e){if(!b.contains(e.target)&&!m.contains(e.target))m.classList.add('hidden')})}
-		var t=document.getElementById('menu-toggle'),mm=document.getElementById('mobile-menu');
-		if(t&&mm){t.addEventListener('click',function(){mm.classList.toggle('hidden')})}
+		// Mobile menu toggle with icon swap
+		(function(){
+			var t=document.getElementById('menu-toggle');
+			var mm=document.getElementById('mobile-menu');
+			var iOpen=document.getElementById('menu-icon-open');
+			var iClose=document.getElementById('menu-icon-close');
+			if(!t||!mm)return;
+			var open=false;
+			t.addEventListener('click',function(){
+				open=!open;
+				mm.style.display=open?'block':'none';
+				if(iOpen)iOpen.style.display=open?'none':'block';
+				if(iClose)iClose.style.display=open?'block':'none';
+			});
+		})();
+		// Mobile Pages submenu toggle
+		(function(){
+			var btn=document.getElementById('mobile-pages-toggle');
+			var sub=document.getElementById('mobile-pages-submenu');
+			var chv=document.getElementById('mobile-pages-chevron');
+			if(!btn||!sub)return;
+			var open=false;
+			btn.addEventListener('click',function(){
+				open=!open;
+				sub.style.display=open?'block':'none';
+				if(chv)chv.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+			});
+		})();
+	</script>
+
+	{{-- ── Cookie Consent Banner ─────────────────────────────────── --}}
+	<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a2942;border-top:1px solid rgba(255,255,255,0.1);padding:14px 20px;">
+		<div style="max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
+			<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.8);flex:1;min-width:220px;">
+				We use cookies to improve your experience and analyze site traffic.
+				See our <a href="{{ route('privacy-policy') }}" style="color:#93c5fd;text-decoration:underline;">Privacy Policy</a> for details.
+			</p>
+			<div style="display:flex;gap:8px;flex-shrink:0;">
+				<button id="cookie-decline" style="padding:7px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.7);font-size:0.82rem;cursor:pointer;">
+					Decline
+				</button>
+				<button id="cookie-accept" style="padding:7px 18px;border-radius:6px;border:none;background:#3b82f6;color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;">
+					Accept All
+				</button>
+			</div>
+		</div>
+	</div>
+	<script>
+	(function () {
+		var consent = localStorage.getItem('sk_cookie_consent');
+		var banner  = document.getElementById('cookie-banner');
+
+		if (!consent) banner.style.display = 'block';
+
+		document.getElementById('cookie-accept').addEventListener('click', function () {
+			localStorage.setItem('sk_cookie_consent', 'accepted');
+			banner.style.display = 'none';
+			if (typeof gtag === 'function') gtag('consent', 'update', { analytics_storage: 'granted' });
+		});
+
+		document.getElementById('cookie-decline').addEventListener('click', function () {
+			localStorage.setItem('sk_cookie_consent', 'declined');
+			banner.style.display = 'none';
+		});
+	})();
 	</script>
 </body>
 </html>

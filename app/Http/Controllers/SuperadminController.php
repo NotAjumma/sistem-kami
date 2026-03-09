@@ -61,11 +61,14 @@ class SuperadminController extends Controller
 
     public function dashboard()
     {
+        $activeStatuses    = Booking::ACTIVE_STATUSES;
+        $collectedStatuses = ['paid', 'confirmed', 'completed'];
+
         $stats = [
             'organizers'      => Organizer::count(),
-            'bookings'        => Booking::count(),
+            'bookings'        => Booking::whereIn('status', $activeStatuses)->count(),
             'packages'        => Package::count(),
-            'revenue'         => Booking::whereIn('status', Booking::REVENUE_STATUSES)->sum('final_price'),
+            'revenue'         => Booking::whereIn('status', $collectedStatuses)->sum('final_price'),
             'home_visits'         => VisitorAction::where('action', 'visit_page')->where('page', 'home')->whereDate('created_at', today())->count(),
             'profile_visits'      => VisitorAction::where('action', 'visit_page')->where('page', 'profile')->whereDate('created_at', today())->count(),
             'home_visits_all'     => VisitorAction::where('action', 'visit_page')->where('page', 'home')->count(),
@@ -74,18 +77,21 @@ class SuperadminController extends Controller
 
         $recentOrganizers = Organizer::latest()->take(5)->get();
 
-        // Per-organizer chart — active organizers ranked by bookings
+        // Per-organizer chart — all organizers ranked by active bookings
         $orgStats = DB::table('organizers')
-            ->leftJoin('bookings', 'organizers.id', '=', 'bookings.organizer_id')
-            ->where('organizers.is_active', true)
+            ->leftJoin('bookings', function ($join) use ($collectedStatuses) {
+                $join->on('organizers.id', '=', 'bookings.organizer_id')
+                     ->whereIn('bookings.status', $collectedStatuses);
+            })
             ->whereNull('organizers.deleted_at')
             ->select([
                 'organizers.id',
                 'organizers.name',
                 DB::raw('COUNT(bookings.id) as bookings_count'),
-                DB::raw("SUM(CASE WHEN bookings.status IN ('paid','confirmed','completed','pending') THEN bookings.final_price ELSE 0 END) as revenue"),
+                DB::raw('SUM(COALESCE(bookings.final_price, 0)) as revenue'),
             ])
             ->groupBy('organizers.id', 'organizers.name')
+            ->having('bookings_count', '>', 0)
             ->orderByDesc('bookings_count')
             ->get();
 
@@ -110,9 +116,19 @@ class SuperadminController extends Controller
 
     public function organizers(Request $request)
     {
-        $revenueStatuses = Booking::REVENUE_STATUSES;
-        $query = Organizer::withCount(['packages', 'bookings'])
-            ->withSum(['bookings as revenue' => fn($q) => $q->whereIn('status', $revenueStatuses)], 'final_price')
+        $activeStatuses    = Booking::ACTIVE_STATUSES;
+        $collectedStatuses = ['paid', 'confirmed', 'completed'];
+
+        $query = Organizer::withCount([
+                'packages',
+                'bookings',
+                'bookings as active_bookings_count' => fn($q) => $q->whereIn('status', $activeStatuses),
+                'bookings as today_bookings_count'  => fn($q) => $q->whereDate('created_at', today()),
+            ])
+            ->withSum(
+                ['bookings as revenue' => fn($q) => $q->whereIn('status', $collectedStatuses)],
+                'final_price'
+            )
             ->with('user');
 
         if ($request->filled('search')) {
@@ -122,7 +138,7 @@ class SuperadminController extends Controller
             });
         }
 
-        $organizers = $query->orderBy('is_active', 'desc')->oldest()->paginate(20)->withQueryString();
+        $organizers = $query->orderByDesc('revenue')->orderByDesc('active_bookings_count')->paginate(20)->withQueryString();
 
         return view('superadmin.organizers', compact('organizers'));
     }
@@ -409,7 +425,26 @@ class SuperadminController extends Controller
 
     public function showCommands()
     {
-        return view('superadmin.commands', ['commands' => $this->commandList()]);
+        $now    = Carbon::now();
+        $cutoff = Carbon::now()->addHours(12);
+
+        $pendingCount = Booking::whereNotIn('status', ['cancelled'])
+            ->whereNull('reminder_sent_at')
+            ->whereHas('vendorTimeSlots', function ($q) use ($now, $cutoff) {
+                $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
+                    $now->toDateTimeString(),
+                    $cutoff->toDateTimeString(),
+                ]);
+            })
+            ->whereHas('organizer', function ($q) {
+                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
+            })
+            ->count();
+
+        return view('superadmin.commands', [
+            'commands'     => $this->commandList(),
+            'pendingCount' => $pendingCount,
+        ]);
     }
 
     public function readCommandLog(string $key)

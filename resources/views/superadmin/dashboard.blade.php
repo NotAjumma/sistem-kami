@@ -2,42 +2,6 @@
 @section('title', 'Dashboard')
 @section('content')
 <div class="row">
-
-    {{-- ── Site Health Check ───────────────────────────────────────────── --}}
-    <div class="col-12 mb-3">
-        <div class="d-flex align-items-center gap-2">
-            <button id="runHealthCheckBtn" class="btn btn-outline-info btn-sm" onclick="runHealthCheck()">
-                <i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check
-            </button>
-            <span id="healthCheckSummary" class="text-muted small"></span>
-        </div>
-    </div>
-
-    {{-- ── Health Check Modal ───────────────────────────────────────────── --}}
-    <div class="modal fade" id="healthCheckModal" tabindex="-1" aria-labelledby="healthCheckModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="healthCheckModalLabel">
-                        <i class="fa-solid fa-stethoscope me-2 text-info"></i>Site Health Check
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="healthCheckLoading" class="text-center py-4 d-none">
-                        <div class="spinner-border text-info" role="status"></div>
-                        <p class="mt-2 text-muted">Running checks…</p>
-                    </div>
-                    <div id="healthCheckContent"></div>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <small id="healthCheckRunAt" class="text-muted"></small>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ── Stat Cards (Swiper) ─────────────────────────────────────────── --}}
     <div class="col-xl-12">
         <div class="row main-card">
@@ -68,7 +32,7 @@
                         <div class="card card-box bg-warning">
                             <div class="card-header border-0 pb-0">
                                 <div class="chart-num">
-                                    <p><i class="fa-solid fa-sort-down me-2"></i>Total Bookings</p>
+                                    <p><i class="fa-solid fa-sort-down me-2"></i>Active Bookings</p>
                                     <h2 class="font-w600 mb-0">{{ number_format($stats['bookings']) }}</h2>
                                 </div>
                                 <div class="dlab-swiper-circle">
@@ -178,8 +142,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold">Organizer Performance — Bookings & Revenue (Active Only)</h6>
-                <span class="text-muted small">Sorted by highest bookings</span>
+                <h6 class="mb-0 fw-bold">Organizer Performance — Active Bookings & Revenue</h6>
+                <span class="text-muted small">Excludes cancelled & failed · sorted by bookings</span>
             </div>
             <div class="card-body">
                 <canvas id="salesChart" style="height:320px;max-height:320px;"></canvas>
@@ -387,96 +351,5 @@
         },
     });
 })();
-</script>
-<script>
-const HC_GROUP_ICONS = {
-    'Infrastructure':      'fa-server',
-    'Profile Page':        'fa-user-circle',
-    'Date / Time / Slots': 'fa-calendar-days',
-    'Booking Flow':        'fa-cart-shopping',
-    'Forms & Buttons':     'fa-hand-pointer',
-    'Page Views':          'fa-file-lines',
-};
-
-function runHealthCheck() {
-    const btn     = document.getElementById('runHealthCheckBtn');
-    const summary = document.getElementById('healthCheckSummary');
-    const loading = document.getElementById('healthCheckLoading');
-    const content = document.getElementById('healthCheckContent');
-    const runAt   = document.getElementById('healthCheckRunAt');
-
-    content.innerHTML = '';
-    runAt.textContent = '';
-    loading.classList.remove('d-none');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Running…';
-    summary.textContent = '';
-
-    const modal = new bootstrap.Modal(document.getElementById('healthCheckModal'));
-    modal.show();
-
-    fetch('{{ route("superadmin.health-check") }}')
-        .then(r => r.json())
-        .then(data => {
-            loading.classList.add('d-none');
-            runAt.textContent = 'Ran at: ' + data.ran_at;
-            summary.textContent = data.summary;
-
-            const allPassed = data.passed === data.total;
-
-            // Group results
-            const groups = {};
-            data.results.forEach(r => {
-                if (!groups[r.group]) groups[r.group] = [];
-                groups[r.group].push(r);
-            });
-
-            let html = `<div class="alert alert-${allPassed ? 'success' : 'warning'} d-flex align-items-center gap-2 mb-3">
-                <i class="fa-solid fa-${allPassed ? 'circle-check' : 'triangle-exclamation'} fs-5"></i>
-                <strong>${data.summary}</strong>
-            </div>`;
-
-            for (const [group, rows] of Object.entries(groups)) {
-                const groupPassed  = rows.filter(r => r.status === 'pass').length;
-                const groupTotal   = rows.length;
-                const groupAllPass = groupPassed === groupTotal;
-                const icon         = HC_GROUP_ICONS[group] || 'fa-circle-dot';
-
-                html += `<div class="mb-3">
-                    <div class="d-flex align-items-center gap-2 mb-1 px-1">
-                        <i class="fa-solid ${icon} small text-secondary"></i>
-                        <span class="fw-semibold small text-uppercase text-secondary" style="letter-spacing:.05em">${group}</span>
-                        <span class="badge ${groupAllPass ? 'bg-success' : 'bg-danger'} ms-auto">${groupPassed}/${groupTotal}</span>
-                    </div>
-                    <table class="table table-sm table-hover mb-0 border rounded">
-                        <tbody>`;
-
-                rows.forEach(r => {
-                    const chk      = r.status === 'pass'
-                        ? '<i class="fa-solid fa-circle-check text-success"></i>'
-                        : '<i class="fa-solid fa-circle-xmark text-danger"></i>';
-                    const rowClass = r.status === 'pass' ? '' : 'table-danger';
-                    html += `<tr class="${rowClass}">
-                        <td style="width:185px" class="fw-semibold small ps-2">${r.name}</td>
-                        <td style="width:60px">${chk}</td>
-                        <td class="small text-muted">${r.detail}</td>
-                        <td class="text-end small text-muted pe-2" style="width:50px">${r.ms}ms</td>
-                    </tr>`;
-                });
-
-                html += `</tbody></table></div>`;
-            }
-
-            content.innerHTML = html;
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
-        })
-        .catch(err => {
-            loading.classList.add('d-none');
-            content.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed: ${err.message}</div>`;
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Site Health Check';
-        });
-}
 </script>
 @endpush

@@ -83,6 +83,39 @@ class HomeController extends Controller
         return view('home.about', compact('seo'));
     }
 
+    public function faq()
+    {
+        $seo = [
+            'title' => 'FAQ | Sistem Kami',
+            'description' => 'Frequently asked questions about Sistem Kami — how it works, pricing, booking management, and more.',
+            'canonical' => url('/faq'),
+        ];
+
+        return view('home.faq', compact('seo'));
+    }
+
+    public function privacyPolicy()
+    {
+        $seo = [
+            'title' => 'Privacy Policy | Sistem Kami',
+            'description' => 'Read the Sistem Kami privacy policy — how we collect, use, and protect your personal data.',
+            'canonical' => url('/privacy-policy'),
+        ];
+
+        return view('home.privacy-policy', compact('seo'));
+    }
+
+    public function terms()
+    {
+        $seo = [
+            'title' => 'Terms & Conditions | Sistem Kami',
+            'description' => 'Read the Sistem Kami terms and conditions governing the use of our platform.',
+            'canonical' => url('/terms-and-conditions'),
+        ];
+
+        return view('home.terms', compact('seo'));
+    }
+
     public function search(Request $request)
     {
         $page_title = "Sistem Kami | Search";

@@ -2,6 +2,41 @@
 @push('styles')
     <link rel="preload" as="style" href="{{ asset('css/home.css') }}" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ asset('css/home.css') }}"></noscript>
+    <style>
+    .feature-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 31, 77, 0.12);
+    }
+    .feature-card .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1); }
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+    .stagger-5 { transition-delay: 0.5s; }
+    .stagger-6 { transition-delay: 0.6s; }
+    </style>
 @endpush
 
 @push('json_ld')
@@ -206,134 +241,98 @@
             </div>
         </section>
 
-        <!-- Opinions Section -->
-        <div class="container-fluid courses overflow-hidden py-5">
+        <!-- Features Section -->
+        <section class="py-5" style="background: linear-gradient(135deg, #001f4d 0%, #001233 100%);">
             <div class="container">
-                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
-                    <!-- <h4 class="text-primary"> Our Features</h4> -->
-                    <h2 class="section-title display-4 text-white mb-4">Our Features</h2>
-                    <!-- <p class="text-white mb-0">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tenetur adipisci
-                                facilis cupiditate recusandae aperiam temporibus corporis itaque quis facere, numquam, ad culpa
-                                deserunt sint dolorem autem obcaecati, ipsam mollitia hic.
-                            </p> -->
+                <div class="text-center mx-auto mb-5 fade-in-up" style="max-width: 800px;">
+                    <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">Features</p>
+                    <h2 class="fw-bold mb-3" style="font-size: 2rem; color: #fff !important;">Everything You Need in One Platform</h2>
+                    <p style="color: rgba(255,255,255,0.65); margin-bottom:0;">Manage and grow your business with powerful tools built for you.</p>
                 </div>
-                <div class="row gy-4 gx-0 justify-content-center">
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3"> Event Ticketing Made Easy</div>
-                                <p class="mb-4">Empower organizers to create, promote, and sell tickets for any
-                                    event—concerts, esports, workshops, and more.
-                                </p>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-calendar-check fa-lg" style="color: #001f4d;"></i>
                             </div>
+                            <h5 class="fw-bold mb-2">Booking System</h5>
+                            <p class="text-muted small mb-0">
+                                Package-based booking with deposit options, automatic confirmation,
+                                receipt generation, and multiple payment methods. Also supports manual booking
+                                where customers are directed to WhatsApp for personal confirmation.
+                            </p>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3">Vendor & Service Management</div>
-                                <p class="mb-4">Business owners like wedding planners, photographers, and caterers can
-                                    showcase and manage their services seamlessly.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-2">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-boxes fa-lg" style="color: #001f4d;"></i>
                             </div>
+                            <h5 class="fw-bold mb-2">Package & Time Slot Management</h5>
+                            <p class="text-muted small mb-0">
+                                Create packages with pricing, add-ons, and images. Manage time slots
+                                with capacity tracking, off-days, and availability control.
+                            </p>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3">Smart Booking Calendar</div>
-                                <p class="mb-4">Allow customers to check real-time availability and book services with an
-                                    interactive, user-friendly calendar system.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-3">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-credit-card fa-lg" style="color: #001f4d;"></i>
                             </div>
+                            <h5 class="fw-bold mb-2">Secure Payment Processing</h5>
+                            <p class="text-muted small mb-0">
+                                Integrated with Toyyibpay and Stripe payment gateways for smooth, secure transactions.
+                                Supports QR payments and automatic payment tracking.
+                            </p>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3">Secure & Streamlined Payments</div>
-                                <p class="mb-4">Integrated payment gateways ensure smooth, secure transactions for both
-                                    event tickets and service bookings.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-4">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-chart-line fa-lg" style="color: #001f4d;"></i>
                             </div>
+                            <h5 class="fw-bold mb-2">Dashboard & Analytics</h5>
+                            <p class="text-muted small mb-0">
+                                Track sales, manage bookings, and monitor performance in real-time
+                                with an intuitive dashboard and detailed reports.
+                            </p>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3">Dashboard & Analytics</div>
-                                <p class="mb-4">Gain full control with an intuitive dashboard—track sales, manage bookings,
-                                    and monitor your performance in real-time.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-5">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-users-cog fa-lg" style="color: #001f4d;"></i>
                             </div>
+                            <h5 class="fw-bold mb-2">Worker & Commission Management</h5>
+                            <p class="text-muted small mb-0">
+                                Assign workers to tasks, track commissions with flexible rules,
+                                and manage your team's performance effortlessly.
+                            </p>
                         </div>
                     </div>
-                    <!-- <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.2s">
-                        <div class="courses-item">
-                            <div class="courses-item-inner p-4">
-                                <div class="d-inline-block h4 mb-3">Centralized Platform for All</div>
-                                <p class="mb-4">Whether you're planning an event or offering services, Sistem Kami brings
-                                    everything under one roof—simple, scalable, and powerful.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-6">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
+                                <i class="fas fa-bell fa-lg" style="color: #001f4d;"></i>
                             </div>
-                        </div>
-                    </div> -->
-                </div>
-            </div>
-        </div>
-
-        <section class="how-it-works py-5">
-            <div class="container">
-                <div class="text-center mb-5">
-                    <h2 class="fw-bold" style="font-size: 1.2rem;">How It Works</h2>
-                    <p class="">Simple steps for organizers, vendors, and customers to get started.</p>
-                </div>
-                <div class="row text-center">
-                    <!-- Event Organizer -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card position-relative h-100">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <i class="fa-solid fa-calendar-check fa-2x text-primary"></i>
-                                </div>
-                                <h5 class="card-title">For Event Organizers</h5>
-                                <p class="card-text">
-                                    Create and publish your events, set ticket pricing, track bookings, and manage
-                                    participants — all in one place.
-                                </p>
-                            </div>
+                            <h5 class="fw-bold mb-2">Notifications</h5>
+                            <p class="text-muted small mb-0">
+                                Automated WhatsApp and email notifications for payment confirmations,
+                                booking reminders, and receipt delivery.
+                            </p>
                         </div>
                     </div>
-
-                    <!-- Service Vendor -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card position-relative h-100">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <i class="fa-solid fa-briefcase fa-2x text-primary"></i>
-                                </div>
-                                <h5 class="card-title">For Service Vendors</h5>
-                                <p class="card-text">
-                                    List your services like photography or wedding planning, manage calendar availability,
-                                    and accept client bookings easily.
-                                </p>
+                    <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
+                        <div class="feature-card p-4 h-100">
+                            <div class="feature-icon" style="background: rgba(99, 102, 241, 0.1);">
+                                <i class="fas fa-robot fa-lg" style="color: #6366f1;"></i>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Customers -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card position-relative h-100">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <i class="fa-solid fa-user-check fa-2x text-primary"></i>
-                                </div>
-                                <h5 class="card-title">For Customers</h5>
-                                <p class="card-text">
-                                    Discover exciting events, book your favorite vendors, and manage all your tickets and
-                                    bookings in one account.
-                                </p>
-                            </div>
+                            <h5 class="fw-bold mb-2">AI Chatbot Assistant</h5>
+                            <p class="text-muted small mb-0">
+                                AI-powered chatbot that handles customer inquiries, guides them through
+                                the booking process, and provides instant answers 24/7 — without you lifting a finger.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -342,106 +341,26 @@
 
     </main>
 
-    <!-- Cookie Consent Banner -->
-    <div id="cookieConsent" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div style="display:flex;gap:12px;align-items:center;">
-            <div class="icon-info" style="width:48px;height:48px;background:#001f4d;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;">i</div>
-            <div>
-                <div style="font-weight:700;margin-bottom:4px;">We use cookies to give you the best online experience.</div>
-                <div style="font-size:0.95rem;color:#4b5563;">By continuing to browse the site you are agreeing to our use of cookies.</div>
-            </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <button id="cookieDecline" class="btn btn-outline-secondary">Decline</button>
-            <button id="cookieAccept" class="btn btn-primary">Accept</button>
-        </div>
-    </div>
 @endsection
 
 @push('scripts')
     <script>
-        (function(){
-            const COOKIE_NAME = 'cookie_consent';
-            const QUEUE_KEY = 'visitor_log_queue';
-
-            function getCookie(name) {
-                const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-                return v ? v.pop() : null;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Visitor log (consent-aware)
+            if (localStorage.getItem('sk_cookie_consent') === 'accepted') {
+                fetch('/visitor-log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ action: 'visit_page', page: 'home' })
+                }).catch(function(){});
             }
-            function setCookie(name, value, days=365) {
-                const d = new Date();
-                d.setTime(d.getTime() + (days*24*60*60*1000));
-                document.cookie = name + '=' + value + ';path=/;expires=' + d.toUTCString();
-            }
-
-            function queueLog(payload) {
-                try {
-                    const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-                    q.push(payload);
-                    localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
-                } catch(e){ console.error(e); }
-            }
-
-            function flushQueue() {
-                try {
-                    const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-                    q.forEach(item => {
-                        fetch('/visitor-log', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(item)
-                        }).catch(err => console.error('Logging failed', err));
-                    });
-                    localStorage.removeItem(QUEUE_KEY);
-                } catch(e){ console.error(e); }
-            }
-
-            function sendVisitorLog(payload) {
-                const consent = getCookie(COOKIE_NAME);
-                if (consent === '1') {
-                    fetch('/visitor-log', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify(payload)
-                    }).then(res => res.json())
-                    .then(data => console.log('Visitor logged', data))
-                    .catch(err => console.error('Logging failed', err));
-                } else {
-                    // store until user accepts
-                    queueLog(payload);
-                }
-            }
-
-            // show banner if consent not set
-            document.addEventListener('DOMContentLoaded', function() {
-                const consent = getCookie(COOKIE_NAME);
-                const banner = document.getElementById('cookieConsent');
-                if (!consent) {
-                    banner.style.display = 'flex';
-                }
-
-                document.getElementById('cookieAccept').addEventListener('click', function(){
-                    setCookie(COOKIE_NAME, '1', 365);
-                    banner.style.display = 'none';
-                    flushQueue();
+            // Scroll animations for feature cards
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
                 });
-
-                document.getElementById('cookieDecline').addEventListener('click', function(){
-                    setCookie(COOKIE_NAME, '0', 365);
-                    banner.style.display = 'none';
-                    // clear any queued logs to respect decline
-                    localStorage.removeItem(QUEUE_KEY);
-                });
-
-                // original visitor log replaced with consent-aware sender
-                sendVisitorLog({ action: 'visit_page', page: 'home' });
-            });
-        })();
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-in-up').forEach(function(el) { observer.observe(el); });
+        });
     </script>
 @endpush

@@ -70,7 +70,7 @@ class OrganizerBusinessController extends Controller
             ->whereHas('booking', fn($q) => $q->where('organizer_id', $organizerId)->where('status', 'confirmed'))
             ->count();
         $totalBookings = Booking::where('organizer_id', $organizerId)->count();
-        $totalIncome = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->sum('final_price');
+        $totalIncome = Booking::where('organizer_id', $organizerId)->whereIn('status', ['paid', 'confirmed', 'completed'])->sum('final_price');
         $pendingBookings = Booking::where('organizer_id', $organizerId)->where('status', 'pending')->count();
         $confirmBookings = Booking::where('organizer_id', $organizerId)->where('status', 'confirmed')->count();
 

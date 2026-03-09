@@ -830,21 +830,6 @@
         </div>
     </div>
 
-    <!-- Cookie Consent Banner -->
-    <div id="cookieConsent" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div style="display:flex;gap:12px;align-items:center;">
-            <div class="icon-info" style="width:48px;height:48px;background:#001f4d;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;">i</div>
-            <div>
-                <div style="font-weight:700;margin-bottom:4px;">We use cookies to give you the best online experience.</div>
-                <div style="font-size:0.95rem;color:#4b5563;">By continuing to browse the site you are agreeing to our use of cookies.</div>
-            </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <button id="cookieDecline" class="btn btn-outline-secondary">Decline</button>
-            <button id="cookieAccept" class="btn btn-primary">Accept</button>
-        </div>
-    </div>
-
 @endsection
 
 @push('scripts')
@@ -1535,87 +1520,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script>
-    (function(){
-        const COOKIE_NAME = 'cookie_consent';
-        const QUEUE_KEY = 'visitor_log_queue';
-
-        function getCookie(name) {
-            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-            return v ? v.pop() : null;
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('sk_cookie_consent') === 'accepted') {
+            fetch('/visitor-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ action: 'visit_page', page: 'profile', reference_id: "{{ $organizer->id }}", uri: window.location.href })
+            }).catch(function(){});
         }
-        function setCookie(name, value, days=365) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days*24*60*60*1000));
-            document.cookie = name + '=' + value + ';path=/;expires=' + d.toUTCString();
-        }
-
-        function queueLog(payload) {
-            try {
-                const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-                q.push(payload);
-                localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
-            } catch(e){ console.error(e); }
-        }
-
-        function flushQueue() {
-            try {
-                const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-                q.forEach(item => {
-                    fetch('/visitor-log', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify(item)
-                    }).catch(err => console.error('Logging failed', err));
-                });
-                localStorage.removeItem(QUEUE_KEY);
-            } catch(e){ console.error(e); }
-        }
-
-        function sendVisitorLog(payload) {
-            const consent = getCookie(COOKIE_NAME);
-            if (consent === '1') {
-                fetch('/visitor-log', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(payload)
-                }).then(res => res.json())
-                .then(data => console.log('Visitor logged', data))
-                .catch(err => console.error('Logging failed', err));
-            } else {
-                // store until user accepts
-                queueLog(payload);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const consent = getCookie(COOKIE_NAME);
-            const banner = document.getElementById('cookieConsent');
-            if (!consent) {
-                banner.style.display = 'flex';
-            }
-
-            document.getElementById('cookieAccept').addEventListener('click', function(){
-                setCookie(COOKIE_NAME, '1', 365);
-                banner.style.display = 'none';
-                flushQueue();
-            });
-
-            document.getElementById('cookieDecline').addEventListener('click', function(){
-                setCookie(COOKIE_NAME, '0', 365);
-                banner.style.display = 'none';
-                localStorage.removeItem(QUEUE_KEY);
-            });
-
-            // send profile visit log (consent-aware)
-            sendVisitorLog({ action: 'visit_page', page: 'profile', reference_id: "{{ $organizer->id }}", uri: window.location.href });
-        });
-    })();
+    });
 </script>
     <!-- calendar script -->
     

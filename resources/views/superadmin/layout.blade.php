@@ -114,14 +114,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('superadmin.reminders') }}"
-                           class="{{ request()->routeIs('superadmin.reminders*') ? 'active' : '' }}"
-                           aria-expanded="false">
-                            <i class="material-symbols-outlined">notifications</i>
-                            <span class="nav-text">Reminders</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ route('superadmin.commands') }}"
                            class="{{ request()->routeIs('superadmin.commands*') ? 'active' : '' }}"
                            aria-expanded="false">
