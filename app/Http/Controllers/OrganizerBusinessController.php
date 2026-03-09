@@ -23,11 +23,14 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Concerns\GeneratesWebp;
 
 class OrganizerBusinessController extends Controller
 {
+    use GeneratesWebp;
+
     public function dashboard()
     {
         $page_title = 'Dashboard';
@@ -532,6 +535,7 @@ class OrganizerBusinessController extends Controller
         $filename  = \Illuminate\Support\Str::uuid() . '.' . $extension;
         $folder    = "uploads/{$authUser->id}/packages/{$package->id}";
         $file->storeAs($folder, $filename, 'public');
+        $this->generateWebp("{$folder}/{$filename}");
 
         $image = $package->images()->create([
             'url'        => $filename,
@@ -2016,6 +2020,7 @@ class OrganizerBusinessController extends Controller
         $filename  = \Illuminate\Support\Str::uuid() . '.' . $extension;
         $folder    = "uploads/{$authUser->id}/slots/{$slot->id}";
         $file->storeAs($folder, $filename, 'public');
+        $this->generateWebp("{$folder}/{$filename}");
 
         $image = SlotImage::create([
             'slot_id'    => $slot->id,

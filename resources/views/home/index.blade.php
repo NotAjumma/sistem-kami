@@ -183,11 +183,16 @@
                                         {{ $organizer->category ?? '' }}
                                     </div>
 
-                                    <img src="{{ $organizer->first_package->display_image_url }}"
-                                        class="d-block w-100 package-img"
-                                        alt="{{ $organizer->name }}"
-                                        width="400" height="260"
-                                        @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" decoding="async" @endif>
+                                    <picture>
+                                        @if($organizer->first_package->display_image_webp_url)
+                                            <source srcset="{{ $organizer->first_package->display_image_webp_url }}" type="image/webp">
+                                        @endif
+                                        <img src="{{ $organizer->first_package->display_image_url }}"
+                                            class="d-block w-100 package-img"
+                                            alt="{{ $organizer->name }}"
+                                            width="400" height="260"
+                                            @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" decoding="async" @endif>
+                                    </picture>
 
                                     <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">
                                         <div class="event-organizer text-primary" title="Organizer">By

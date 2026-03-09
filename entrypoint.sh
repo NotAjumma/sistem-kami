@@ -9,6 +9,9 @@ php artisan route:clear
 
 php artisan storage:link --force 2>/dev/null || true
 
+# Generate WebP versions for existing uploaded images (skips already-converted files)
+php artisan images:optimize --quiet 2>/dev/null || true
+
 echo "Running migrations..."
 php artisan migrate --force
 
