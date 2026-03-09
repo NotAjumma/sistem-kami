@@ -26,8 +26,7 @@ return [
 					// bootstrap-select removed: not used on any public page
 				],
 				'bottom'=> [
-					'js/custom.min.js',
-					'js/dlabnav-init.js',
+					// custom.min.js & dlabnav-init.js removed: admin theme JS not used on public pages
 				],
 			],
 		],

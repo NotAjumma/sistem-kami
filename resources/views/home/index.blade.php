@@ -663,7 +663,7 @@
                                         class="d-block w-100 package-img"
                                         alt="{{ $organizer->name }}"
                                         width="400" height="260"
-                                        {{ $loop->first ? 'loading=eager' : 'loading=lazy' }}>
+                                        @if($loop->first) fetchpriority="high" loading="eager" @else loading="lazy" decoding="async" @endif>
 
                                     <div class="card-body px-3 pb-3 pt-0" style="margin-top: 12px;">
                                         <div class="event-organizer text-primary" title="Organizer">By
