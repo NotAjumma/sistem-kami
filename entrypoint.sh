@@ -7,6 +7,8 @@ php artisan view:clear
 php artisan config:clear
 php artisan route:clear
 
+php artisan storage:link --force 2>/dev/null || true
+
 echo "Running migrations..."
 php artisan migrate --force
 
