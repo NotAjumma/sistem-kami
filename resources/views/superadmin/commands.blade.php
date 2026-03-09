@@ -43,15 +43,23 @@
                         php artisan {{ $cmd['command'] }}{{ count($cmd['args']) ? ' ' . implode(' ', $cmd['args']) : '' }}
                     </code>
                 </div>
-                <form method="POST" action="{{ route('superadmin.commands.run') }}"
-                      @if($cmd['danger']) data-confirm="This will overwrite existing files. Are you sure?" @endif>
-                    @csrf
-                    <input type="hidden" name="command_key" value="{{ $key }}">
-                    <button type="submit" class="btn btn-sm {{ $cmd['danger'] ? 'btn-warning' : 'btn-primary' }} text-nowrap">
-                        <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">play_arrow</i>
-                        Run
-                    </button>
-                </form>
+                <div class="d-flex flex-column gap-2 align-items-end">
+                    <form method="POST" action="{{ route('superadmin.commands.run') }}"
+                          @if($cmd['danger']) data-confirm="This will overwrite existing files. Are you sure?" @endif>
+                        @csrf
+                        <input type="hidden" name="command_key" value="{{ $key }}">
+                        <button type="submit" class="btn btn-sm {{ $cmd['danger'] ? 'btn-warning' : 'btn-primary' }} text-nowrap">
+                            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">play_arrow</i>
+                            Run
+                        </button>
+                    </form>
+                    @if(!empty($cmd['background']))
+                        <a href="{{ route('superadmin.commands.log', $key) }}" class="btn btn-sm btn-outline-secondary text-nowrap">
+                            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">article</i>
+                            Read Log
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
         @endforeach
