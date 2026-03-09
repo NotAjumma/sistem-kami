@@ -652,12 +652,10 @@
 
                 if (selected >= startDate && selected <= endDate) {
                     wrapper.style.display = '';
-                    const cb = wrapper.querySelector('.addon-checkbox');
-                    if (cb) { cb.checked = true; cb.disabled = true; }
                 } else {
                     wrapper.style.display = 'none';
                     const cb = wrapper.querySelector('.addon-checkbox');
-                    if (cb) { cb.checked = false; cb.disabled = false; }
+                    if (cb) { cb.checked = false; }
                     const qtyInput = wrapper.querySelector('.addon-qty-input');
                     if (qtyInput) qtyInput.value = 0;
                 }
