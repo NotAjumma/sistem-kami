@@ -31,7 +31,7 @@
 		$defaultDescription = "$appName provides a platform for event organizers to host and manage events, and for vendors to list and manage their services and bookings — all in one place.";
 		$defaultKeywords 	= "$appName, Event Organizer System, Vendor Management, Event Booking, Vendor Services, Event Platform, Booking System, Event Tools, Custom Software, Business Platform, Online Booking, Event Management, Vendor Marketplace, SaaS Event Platform, Business Automation, Cloud Solutions";
 		$defaultTitle 		= "$appName | Event Organizer & Vendor Booking Platform";
-		$defaultImage 		= asset('images/logo-blue-full.png');
+		$defaultImage 		= asset('images/SISTEM-KAMI-LOGO.png');
 
 		// If $seo exists, extract it for convenience
 		$seoTitle 		= $seo['title'] ?? ($page_title ?? $defaultTitle);
@@ -59,6 +59,14 @@
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Preconnect to external domains (must be before any resource loads) -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+	<link rel="dns-prefetch" href="https://unpkg.com">
+
 	<!-- FAVICONS ICON -->
 	<link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 	@if(!empty(config('dz.public.pagelevel.css.' . $action)))
@@ -73,38 +81,47 @@
 			<link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
 		@endforeach
 	@endif
-	<!-- Preconnect to external domains -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-	<link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
+	<!-- Critical inline CSS for above-the-fold content (prevents FOUC & CLS) -->
+	<style>
+		/* Override style.css opacity:0 — show content immediately */
+		#main-wrapper.show{opacity:1!important}
+		/* Header skeleton */
+		.header-bg{background:#fff;min-height:64px}
+		/* Search section skeleton */
+		.search-section{background:#001f4d;min-height:120px}
+		/* Card images prevent CLS */
+		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
+	</style>
+
+	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
+	<link rel="preload" as="style" href="{{ asset('css/style.min.css') }}"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link class="main-css" href="{{ asset('css/style.min.css') }}" rel="stylesheet"></noscript>
+
+	<!-- Tailwind CSS: async-load -->
+	<link rel="preload" as="style" href="{{ asset('css/tailwind.css') }}"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.css') }}"></noscript>
+
 	<!-- Bootstrap Icons: async-load -->
 	<link rel="preload" as="style"
 		href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-	</noscript>
+	<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"></noscript>
 
-	<!-- Google Fonts: async-load all 4 families in one request -->
+	<!-- Google Fonts: async-load with display=swap -->
 	<link rel="preload" as="style"
 		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap">
-	</noscript>
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"></noscript>
 
-	<!-- Font Awesome: async-load (used only in footer icons) -->
+	<!-- Font Awesome: async-load -->
 	<link rel="preload" as="style"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-	</noscript>
+	<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
 
-	<link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
 	<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 	<style>
 		.content-body {
@@ -116,6 +133,7 @@
         h3,
         h6 {
             font-family: 'Playfair Display', serif !important;
+            font-display: swap;
         }
 
 		.bg-gray-900 {
@@ -192,32 +210,21 @@
 
 <body class="bg-white text-gray-900">
 
-	<!--*******************
-        Preloader start
-    ********************-->
-	<div id="preloader">
-		<div class="lds-ripple">
-			<div></div>
-			<div></div>
-		</div>
-	</div>
-	<!--*******************
-        Preloader end
-    ********************-->
-
 	<!--**********************************
         Main wrapper start
     ***********************************-->
-	<div id="main-wrapper" class="bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
+	<div id="main-wrapper" class="show bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
 		
 		<header class="header-bg w-full border-b border-gray-200">
 			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 				<!-- Logo -->
 				<a href="/">
-					<img 
-						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" 
+					<img
+						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}"
 						alt="Sistem Kami Logo"
 						class="h-10 w-auto"
+						width="160" height="40"
+						fetchpriority="high"
 					>
 				</a>
 

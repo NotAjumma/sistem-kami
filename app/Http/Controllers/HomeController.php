@@ -21,49 +21,54 @@ class HomeController extends Controller
 
     public function index()
     {
-        $packages = Cache::remember('home.packages', now()->addMinutes(10), function () {
-            return Package::with([
-                'organizer',
-                'category',
+        // Full page cache for 5 minutes — avoids DB + Blade rendering on repeat visits
+        $html = Cache::remember('home_page_html', 300, function () {
+            $packages = Cache::remember('home.packages', now()->addMinutes(10), function () {
+                return Package::with([
+                    'organizer',
+                    'category',
 
-                // Package cover image sahaja
-                'images' => function ($query) {
-                    $query->where('is_cover', true)
-                        ->orderBy('sort_order');
-                },
+                    // Package cover image sahaja
+                    'images' => function ($query) {
+                        $query->where('is_cover', true)
+                            ->orderBy('sort_order');
+                    },
 
-                // Vendor slots + slot images
-                'vendorTimeSlots.images' => function ($query) {
-                    $query->orderByDesc('is_cover')
-                        ->orderBy('sort_order');
-                },
-            ])
-            ->where('status', 'active')
-            ->orderBy('order_by')
-            ->get();
-        });
-
-        // derive organizers from packages (unique)
-        $organizers = $packages
-            ->groupBy('organizer_id')
-            ->map(function ($group) {
-                $organizer = $group->first()->organizer;
-                $organizer->first_package = $group->first();
-                return $organizer;
-            })
-            ->values();
-
-        $eventCategories = Cache::remember('home.event_categories', now()->addHours(1), function () {
-            return Category::whereNull('parent_id')
+                    // Vendor slots + slot images
+                    'vendorTimeSlots.images' => function ($query) {
+                        $query->orderByDesc('is_cover')
+                            ->orderBy('sort_order');
+                    },
+                ])
+                ->where('status', 'active')
                 ->orderBy('order_by')
                 ->get();
+            });
+
+            // derive organizers from packages (unique)
+            $organizers = $packages
+                ->groupBy('organizer_id')
+                ->map(function ($group) {
+                    $organizer = $group->first()->organizer;
+                    $organizer->first_package = $group->first();
+                    return $organizer;
+                })
+                ->values();
+
+            $eventCategories = Cache::remember('home.event_categories', now()->addHours(1), function () {
+                return Category::whereNull('parent_id')
+                    ->orderBy('order_by')
+                    ->get();
+            });
+
+            $seo = ['canonical' => url('/')];
+
+            return view('home.index', compact('packages', 'eventCategories', 'organizers', 'seo'))->render();
         });
 
-        $seo = ['canonical' => url('/')];
-
-        $response = response()->view('home.index', compact('packages', 'eventCategories', 'organizers', 'seo'));
-        $response->headers->set('Cache-Control', 'public, max-age=300, s-maxage=600');
-        return $response;
+        return response($html)
+            ->header('Content-Type', 'text/html')
+            ->header('Cache-Control', 'public, max-age=300, s-maxage=600');
     }
 
     public function search(Request $request)
