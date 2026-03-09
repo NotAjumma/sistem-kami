@@ -18,16 +18,15 @@ return [
 	'public' => [
 		'global' => [
 			'css' => [
-					'vendor/bootstrap-select/dist/css/bootstrap-select.min.css',
+				// bootstrap-select removed: not used on any public page
 			],
 			'js' => [
 				'top'=> [
 					'vendor/global/global.min.js',
-					'vendor/bootstrap-select/dist/js/bootstrap-select.min.js',
+					// bootstrap-select removed: not used on any public page
 				],
 				'bottom'=> [
-					'js/custom.min.js',
-					'js/dlabnav-init.js',
+					// custom.min.js & dlabnav-init.js removed: admin theme JS not used on public pages
 				],
 			],
 		],

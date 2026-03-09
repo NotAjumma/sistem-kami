@@ -20,21 +20,25 @@
         content="Sistem Kami, Business Software, Custom Software, Web Applications, Ready-made Systems, Laravel, Tailor-made Solutions, Business Tools, Productivity Software, Admin Dashboard, CRM, ERP, POS, Custom Web Development, Business Automation, Scalable Software, Business Platform, UI Kit, Responsive Design, Software as a Service, Custom Dashboards, Web UI, SaaS Platform, Software for SMEs, Business Management, Cloud Solutions">
     <meta name="description"
         content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-    <meta property="og:title" content="Sistem Kami | Smart, Simple, Custom Business Software">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og_title', 'Sistem Kami | Smart, Simple, Custom Business Software')">
     <meta property="og:description"
         content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-    <meta property="og:image" content="">
+    <meta property="og:image" content="@yield('og_image', asset('images/SISTEM-KAMI-LOGO.png'))">
     <meta name="format-detection" content="telephone=no">
-    <meta name="twitter:title" content="Sistem Kami | Smart, Simple, Custom Business Software">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', 'Sistem Kami | Smart, Simple, Custom Business Software')">
     <meta name="twitter:description"
         content="@yield('page_description', $page_description ?? 'We build custom and ready-made systems to help your business work better — simple, fast, and tailored for you.')">
-    <meta name="twitter:image" content="">
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/SISTEM-KAMI-LOGO.png'))">
 
     <!-- MOBILE SPECIFIC -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- FAVICONS ICON -->
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <!-- Canonical -->
+    <link rel="canonical" href="{{ url()->current() }}">
     @if (!empty(config('dz.public.pagelevel.css.' . $action)))
         @foreach (config('dz.public.pagelevel.css.' . $action) as $style)
             <link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
@@ -47,9 +51,12 @@
             <link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
         @endforeach
     @endif
+    <!-- Preconnect to font origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&display=swap">
 </head>
 
 <body>
@@ -66,17 +73,17 @@
     <!-- Required vendors -->
     @if (!empty(config('dz.public.global.js.top')))
         @foreach (config('dz.public.global.js.top') as $script)
-            <script src="{{ asset($script) }}" type="text/javascript"></script>
+            <script src="{{ asset($script) }}" type="text/javascript" defer></script>
         @endforeach
     @endif
     @if (!empty(config('dz.public.pagelevel.js.' . $action)))
         @foreach (config('dz.public.pagelevel.js.' . $action) as $script)
-            <script src="{{ asset($script) }}" type="text/javascript"></script>
+            <script src="{{ asset($script) }}" type="text/javascript" defer></script>
         @endforeach
     @endif
     @if (!empty(config('dz.public.global.js.bottom')))
         @foreach (config('dz.public.global.js.bottom') as $script)
-            <script src="{{ asset($script) }}" type="text/javascript"></script>
+            <script src="{{ asset($script) }}" type="text/javascript" defer></script>
         @endforeach
     @endif
 

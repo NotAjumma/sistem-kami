@@ -11,6 +11,9 @@ use App\Models\VisitorAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use App\Services\HealthCheckService;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -94,6 +97,13 @@ class SuperadminController extends Controller
             'stats', 'recentOrganizers',
             'chartLabels', 'chartBookings', 'chartRevenue'
         ));
+    }
+
+    // ── HEALTH CHECK ─────────────────────────────────────────────────────────
+
+    public function healthCheck()
+    {
+        return response()->json(HealthCheckService::run());
     }
 
     // ── ORGANIZERS ───────────────────────────────────────────────────────────
@@ -319,7 +329,10 @@ class SuperadminController extends Controller
     public function showSettings()
     {
         $settings = [
-            'tinymce_api_key' => AppSetting::get('tinymce_api_key', ''),
+            'tinymce_api_key'    => AppSetting::get('tinymce_api_key', ''),
+            'resend_api_key'     => AppSetting::get('resend_api_key', ''),
+            'health_check_from'  => AppSetting::get('health_check_from', 'onboarding@resend.dev'),
+            'health_check_email' => AppSetting::get('health_check_email', 'salessistemkami@gmail.com'),
         ];
 
         return view('superadmin.settings', compact('settings'));
@@ -328,10 +341,16 @@ class SuperadminController extends Controller
     public function saveSettings(Request $request)
     {
         $request->validate([
-            'tinymce_api_key' => 'nullable|string|max:255',
+            'tinymce_api_key'    => 'nullable|string|max:255',
+            'resend_api_key'     => 'nullable|string|max:255',
+            'health_check_from'  => 'nullable|email|max:255',
+            'health_check_email' => 'nullable|email|max:255',
         ]);
 
-        AppSetting::set('tinymce_api_key', $request->input('tinymce_api_key'));
+        AppSetting::set('tinymce_api_key',    $request->input('tinymce_api_key'));
+        AppSetting::set('resend_api_key',     $request->input('resend_api_key'));
+        AppSetting::set('health_check_from',  $request->input('health_check_from'));
+        AppSetting::set('health_check_email', $request->input('health_check_email'));
 
         return back()->with('success', 'Settings saved.');
     }
@@ -372,5 +391,76 @@ class SuperadminController extends Controller
         $output = \Illuminate\Support\Facades\Artisan::output();
 
         return back()->with('reminder_output', trim($output))->with('success', 'Reminder command executed.');
+    }
+
+    // Whitelist of runnable commands: key => [label, command, args, description, danger]
+    private function commandList(): array
+    {
+        return [
+            'images_optimize'       => ['label' => 'Generate WebP (new only)',    'command' => 'images:optimize',  'args' => [],          'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',       'danger' => false, 'background' => false],
+            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)', 'command' => 'images:optimize',  'args' => ['--force'], 'description' => 'Regenerates WebP for ALL uploaded images. Runs in background — check the log file for progress.', 'danger' => true,  'background' => true],
+            'storage_link'          => ['label' => 'Storage Link',                'command' => 'storage:link',     'args' => ['--force'],    'description' => 'Creates (or recreates) the public/storage symlink pointing to storage/app/public.',            'danger' => false],
+            'config_cache'          => ['label' => 'Cache Config',                'command' => 'config:cache',     'args' => [],             'description' => 'Compiles all config files into a single cached file for faster loading.',                       'danger' => false],
+            'route_cache'           => ['label' => 'Cache Routes',                'command' => 'route:cache',      'args' => [],             'description' => 'Compiles all routes into a single cached file for faster route matching.',                     'danger' => false],
+            'view_cache'            => ['label' => 'Cache Views',                 'command' => 'view:cache',       'args' => [],             'description' => 'Pre-compiles all Blade templates.',                                                              'danger' => false],
+            'optimize_clear'        => ['label' => 'Clear All Caches',            'command' => 'optimize:clear',   'args' => [],             'description' => 'Clears config, route, view, and application caches. Use after code changes.',                  'danger' => false],
+        ];
+    }
+
+    public function showCommands()
+    {
+        return view('superadmin.commands', ['commands' => $this->commandList()]);
+    }
+
+    public function readCommandLog(string $key)
+    {
+        $commands = $this->commandList();
+        if (!array_key_exists($key, $commands) || empty($commands[$key]['background'])) {
+            abort(404);
+        }
+        $logFile = storage_path('logs/cmd-' . $key . '.log');
+        $output  = file_exists($logFile) ? file_get_contents($logFile) : '(log file not found — command may not have run yet)';
+
+        return back()
+            ->with('cmd_output', trim($output) ?: '(empty log)')
+            ->with('cmd_ran', $commands[$key]['label'] . ' — Log');
+    }
+
+    public function runCommand(Request $request)
+    {
+        $request->validate(['command_key' => 'required|string']);
+        $commands = $this->commandList();
+        $key      = $request->input('command_key');
+
+        if (!array_key_exists($key, $commands)) {
+            return back()->with('error', 'Unknown command.');
+        }
+
+        $cmd = $commands[$key];
+
+        // Long-running commands: fire-and-forget in background, write output to log file
+        if (!empty($cmd['background'])) {
+            $logFile = storage_path('logs/cmd-' . $key . '.log');
+            $args    = implode(' ', $cmd['args']);
+            $artisan = base_path('artisan');
+            exec("php {$artisan} {$cmd['command']} {$args} > " . escapeshellarg($logFile) . " 2>&1 &");
+
+            return back()
+                ->with('cmd_output', "Started in background.\nLog: storage/logs/cmd-{$key}.log\n\nRefresh this page after a minute to read the log.")
+                ->with('cmd_ran', $cmd['label'])
+                ->with('success', "Command '{$cmd['label']}' started in background.");
+        }
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call($cmd['command'], array_fill_keys($cmd['args'], true));
+            $output = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $output = 'ERROR: ' . $e->getMessage();
+        }
+
+        return back()
+            ->with('cmd_output', trim($output) ?: '(no output)')
+            ->with('cmd_ran', $cmd['label'])
+            ->with('success', "Command '{$cmd['label']}' executed.");
     }
 }

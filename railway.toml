@@ -1,0 +1,6 @@
+[deploy]
+# Run health check report (emails on failure) right after every deploy
+# then start the web server
+startCommand = "bash start.sh"
+healthcheckPath = "/superadmin/login"
+healthcheckTimeout = 30

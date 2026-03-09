@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Package extends Model
 {
@@ -142,5 +143,33 @@ class Package extends Model
         }
 
         return asset('storage/uploads/default-organizer-logo.jpg');
+    }
+
+    /**
+     * WebP version of the display image for the home page card (null if no webp available).
+     */
+    public function getDisplayImageWebpUrlAttribute(): ?string
+    {
+        $image = $this->images()->first();
+        if ($image) {
+            $storagePath = 'uploads/' . $this->organizer_id . '/packages/' . $this->id . '/' . $image->url;
+            $webpPath    = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $storagePath);
+            if (Storage::disk('public')->exists($webpPath)) {
+                return asset('storage/' . $webpPath);
+            }
+        }
+
+        foreach ($this->vendorTimeSlots as $slot) {
+            $slotImage = $slot->images->first();
+            if ($slotImage) {
+                $storagePath = 'uploads/' . $this->organizer_id . '/slots/' . $slot->id . '/' . $slotImage->url;
+                $webpPath    = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $storagePath);
+                if (Storage::disk('public')->exists($webpPath)) {
+                    return asset('storage/' . $webpPath);
+                }
+            }
+        }
+
+        return null;
     }
 }

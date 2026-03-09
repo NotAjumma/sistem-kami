@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Helper\VisitorLogger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,45 +21,54 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Previously fetched events for homepage; removed per requirement
+        // Full page cache for 5 minutes — avoids DB + Blade rendering on repeat visits
+        $html = Cache::remember('home_page_html', 300, function () {
+            $packages = Cache::remember('home.packages', now()->addMinutes(10), function () {
+                return Package::with([
+                    'organizer',
+                    'category',
 
-        $packages = Package::with([
-            'organizer',
-            'category',
+                    // Package cover image sahaja
+                    'images' => function ($query) {
+                        $query->where('is_cover', true)
+                            ->orderBy('sort_order');
+                    },
 
-            // Package cover image sahaja
-            'images' => function ($query) {
-                $query->where('is_cover', true)
-                    ->orderBy('sort_order');
-            },
+                    // Vendor slots + slot images
+                    'vendorTimeSlots.images' => function ($query) {
+                        $query->orderByDesc('is_cover')
+                            ->orderBy('sort_order');
+                    },
+                ])
+                ->where('status', 'active')
+                ->orderBy('order_by')
+                ->get();
+            });
 
-            // Vendor slots + slot images
-            'vendorTimeSlots.images' => function ($query) {
-                $query->orderByDesc('is_cover')
-                    ->orderBy('sort_order');
-            },
+            // derive organizers from packages (unique)
+            $organizers = $packages
+                ->groupBy('organizer_id')
+                ->map(function ($group) {
+                    $organizer = $group->first()->organizer;
+                    $organizer->first_package = $group->first();
+                    return $organizer;
+                })
+                ->values();
 
-        ])
-        ->where('status', 'active')
-        ->orderBy('order_by')
-        ->get();
+            $eventCategories = Cache::remember('home.event_categories', now()->addHours(1), function () {
+                return Category::whereNull('parent_id')
+                    ->orderBy('order_by')
+                    ->get();
+            });
 
-        // derive organizers from packages (unique)
-        $organizers = $packages
-            ->groupBy('organizer_id')
-            ->map(function ($group) {
-                $organizer = $group->first()->organizer;
-                $organizer->first_package = $group->first();
-                return $organizer;
-            })
-            ->values();
+            $seo = ['canonical' => url('/')];
 
-        $eventCategories = Category::whereNull('parent_id')
-            ->orderBy('order_by')
-            ->get();
-        // $packageTypes = PackageCategory::all();
+            return view('home.index', compact('packages', 'eventCategories', 'organizers', 'seo'))->render();
+        });
 
-        return view('home.index', compact('packages', 'eventCategories', 'organizers'));
+        return response($html)
+            ->header('Content-Type', 'text/html')
+            ->header('Cache-Control', 'public, max-age=300, s-maxage=600');
     }
 
     public function search(Request $request)

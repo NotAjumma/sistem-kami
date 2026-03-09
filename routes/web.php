@@ -99,6 +99,9 @@ Route::prefix('superadmin')->group(function () {
         Route::get('/health-check',                         [SuperadminController::class, 'healthCheck'])->name('superadmin.health-check');
         Route::get('/reminders',                            [SuperadminController::class, 'showReminders'])->name('superadmin.reminders');
         Route::post('/reminders/trigger',                   [SuperadminController::class, 'triggerReminders'])->name('superadmin.reminders.trigger');
+        Route::get('/commands',                             [SuperadminController::class, 'showCommands'])->name('superadmin.commands');
+        Route::post('/commands/run',                        [SuperadminController::class, 'runCommand'])->name('superadmin.commands.run');
+        Route::get('/commands/log/{key}',                   [SuperadminController::class, 'readCommandLog'])->name('superadmin.commands.log');
     });
 });
 
@@ -106,7 +109,7 @@ Route::prefix('superadmin')->group(function () {
 Route::get('/checkout2', [ToyyibpayController::class, 'createBill'])->name('toyyibpay.checkout');
 Route::get('/toyyibpay-status', [ToyyibpayController::class, 'paymentStatus'])->name('toyyibpay.status');
 Route::get('/toyyibpay-callback', [ToyyibpayController::class, 'callback'])->name('toyyibpay.callback');
-Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.callback');
+Route::get('/toyyibpay/callback', [BookingController::class, 'handleCallback'])->name('toyyibpay.booking.callback');
 Route::get('/booking/receipt/{booking_code}', [BookingController::class, 'bookingReceipt'])->name('booking.receipt');
 Route::get('/receipt/{booking_code}', [BookingController::class, 'bookingReceiptPackage'])->name('booking.receipt.package');
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
@@ -165,7 +168,7 @@ Route::get('/fishing/leaderboard/latest-update', function () {
     $timestamp = \App\Models\FishingLeaderboardResult::max('updated_at');
     return response()->json(['updated_at' => $timestamp]);
 });
-Route::get('/fishing/leaderboard/partial', 'App\Http\Controllers\Worker\FishingController@renderLeaderboardPartial');
+// Route::get('/fishing/leaderboard/partial', 'App\Http\Controllers\Worker\FishingController@renderLeaderboardPartial'); // disabled: controller missing
 
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');

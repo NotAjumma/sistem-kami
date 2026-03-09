@@ -14,6 +14,11 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('reminders:send')->everyMinute(); // for testing
         $schedule->command('reminders:send')->hourly();
+        $schedule->command('sitemap:generate')->daily();
+
+        // Health check — daily at 8 AM MYT (UTC+8 → stored as UTC 00:00)
+        // Emails only when failures found; use --force to always email
+        $schedule->command('health:report')->dailyAt('00:00');
     }
 
     /**

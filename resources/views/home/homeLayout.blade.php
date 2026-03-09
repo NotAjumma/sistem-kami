@@ -31,7 +31,7 @@
 		$defaultDescription = "$appName provides a platform for event organizers to host and manage events, and for vendors to list and manage their services and bookings — all in one place.";
 		$defaultKeywords 	= "$appName, Event Organizer System, Vendor Management, Event Booking, Vendor Services, Event Platform, Booking System, Event Tools, Custom Software, Business Platform, Online Booking, Event Management, Vendor Marketplace, SaaS Event Platform, Business Automation, Cloud Solutions";
 		$defaultTitle 		= "$appName | Event Organizer & Vendor Booking Platform";
-		$defaultImage 		= asset('images/logo-blue-full.png');
+		$defaultImage 		= asset('images/SISTEM-KAMI-LOGO.png');
 
 		// If $seo exists, extract it for convenience
 		$seoTitle 		= $seo['title'] ?? ($page_title ?? $defaultTitle);
@@ -50,11 +50,23 @@
 	<meta name="twitter:description" content="{{ $seoDescription }}">
 	<meta name="twitter:image" content="{{ $seoImage }}">
 	<meta name="twitter:card" content="summary_large_image">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="{{ url()->current() }}">
+	<meta property="og:site_name" content="{{ config('app.name') }}">
 
 	<title>{{ $seoTitle }}</title>
+	<link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Preconnect to external domains (must be before any resource loads) -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+
 	<!-- FAVICONS ICON -->
 	<link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 	@if(!empty(config('dz.public.pagelevel.css.' . $action)))
@@ -69,26 +81,66 @@
 			<link href="{{ asset($style) }}" rel="stylesheet" type="text/css" />
 		@endforeach
 	@endif
-	<link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
-	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins&display=swap" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-	<script src="https://cdn.tailwindcss.com"></script>
-	<script src="//unpkg.com/alpinejs" defer></script>
+	<!-- Critical inline CSS for above-the-fold content (prevents FOUC & CLS) -->
+	<style>
+		/* Override style.css opacity:0 — show content immediately */
+		#main-wrapper.show{opacity:1!important}
+		/* Prevent CLS: restrict transitions to opacity only, not all layout properties */
+		#main-wrapper{transition:opacity 0.25s ease-in !important}
+		.content-body{transition:none !important}
+		.content-body.default-height{min-height:100vh}
+		/* Header skeleton */
+		.header-bg{background:#fff;min-height:64px}
+		/* Search section skeleton */
+		.search-section{background:#001f4d;min-height:120px}
+		/* Card images prevent CLS */
+		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
+	</style>
 
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+	<!-- Track when the 2 layout-critical CSS files finish loading, then hide the page loader -->
+	<script>
+		var _cssReady=0;
+		function _onCssReady(){if(++_cssReady>=2){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}}}
+		setTimeout(function(){var l=document.getElementById('page-loader');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300);}},3000);
+	</script>
+
+	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
+	<!-- onload also injects font-display:swap AFTER this CSS loads so our declaration wins over all.min.css @font-face -->
+	<link rel="preload" as="style" href="{{ asset('css/style-public.min.css') }}"
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady();var s=document.createElement('style');s.textContent='@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-solid-900.woff2&quot;) format(&quot;woff2&quot;);font-weight:900;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Free&quot;;src:url(&quot;/webfonts/fa-regular-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}@font-face{font-family:&quot;Font Awesome 5 Brands&quot;;src:url(&quot;/webfonts/fa-brands-400.woff2&quot;) format(&quot;woff2&quot;);font-weight:400;font-display:swap}';document.head.appendChild(s)">
+	<noscript><link class="main-css" href="{{ asset('css/style-public.min.css') }}" rel="stylesheet"></noscript>
+
+	<!-- Tailwind CSS: async-load -->
+	<link rel="preload" as="style" href="{{ asset('css/tailwind.min.css') }}"
+		onload="this.onload=null;this.rel='stylesheet';_onCssReady()">
+	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.min.css') }}"></noscript>
+
+	<!-- Bootstrap Icons: async-load -->
+	<link rel="preload" as="style"
+		href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"></noscript>
+
+	<!-- Google Fonts: async-load with display=swap -->
+	<link rel="preload" as="style"
+		href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"></noscript>
+
+	<!-- Font Awesome: async-load -->
+	<link rel="preload" as="style"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+		onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
+
+	<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" defer></script>
 	<style>
 		.content-body {
 			margin-left: 0 !important;
 		}
 
-		h1,
-        h2,
-        h3,
-        h6 {
+		h1,h2,h3,h6 {
             font-family: 'Playfair Display', serif !important;
         }
 
@@ -161,36 +213,32 @@
         }
 	</style>
 	@stack('styles')
+	@stack('json_ld')
 </head>
 
 <body class="bg-white text-gray-900">
 
-	<!--*******************
-        Preloader start
-    ********************-->
-	<div id="preloader">
-		<div class="lds-ripple">
-			<div></div>
-			<div></div>
-		</div>
+	<!-- Page loader: shown while layout CSS loads async, fades out when ready -->
+	<div id="page-loader" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease">
+		<div style="width:44px;height:44px;border:3px solid #e5e7eb;border-top-color:#001f4d;border-radius:50%;animation:sk 0.8s linear infinite"></div>
 	</div>
-	<!--*******************
-        Preloader end
-    ********************-->
+	<style>@keyframes sk{to{transform:rotate(360deg)}}</style>
 
 	<!--**********************************
         Main wrapper start
     ***********************************-->
-	<div id="main-wrapper" class="bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
+	<div id="main-wrapper" class="show bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
 		
 		<header class="header-bg w-full border-b border-gray-200">
 			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 				<!-- Logo -->
 				<a href="/">
-					<img 
-						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" 
+					<img
+						src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}"
 						alt="Sistem Kami Logo"
 						class="h-10 w-auto"
+						style="height:40px;width:auto"
+						fetchpriority="high"
 					>
 				</a>
 
@@ -382,17 +430,17 @@
 
 	@if(!empty(config('dz.public.global.js.top')))
 		@foreach(config('dz.public.global.js.top') as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 	@if(!empty(config('dz.public.pagelevel.js.' . $action)))
 		@foreach(config('dz.public.pagelevel.js.' . $action) as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 	@if(!empty(config('dz.public.global.js.bottom')))
 		@foreach(config('dz.public.global.js.bottom') as $script)
-			<script src="{{ asset($script) }}" type="text/javascript"></script>
+			<script src="{{ asset($script) }}" type="text/javascript" defer></script>
 		@endforeach
 	@endif
 
@@ -419,29 +467,10 @@
 
 	@stack('scripts')
 	<script>
-		const button = document.getElementById('organizer-menu-button');
-		const menu = document.getElementById('organizer-menu');
-
-		button.addEventListener('click', () => {
-			menu.classList.toggle('hidden');
-		});
-
-		// Optional: close when clicking outside
-		document.addEventListener('click', (e) => {
-			if (!button.contains(e.target) && !menu.contains(e.target)) {
-				menu.classList.add('hidden');
-			}
-		});
-	</script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const toggleButton = document.getElementById('menu-toggle');
-			const mobileMenu = document.getElementById('mobile-menu');
-
-			toggleButton.addEventListener('click', function () {
-				mobileMenu.classList.toggle('hidden');
-			});
-		});
+		var b=document.getElementById('organizer-menu-button'),m=document.getElementById('organizer-menu');
+		if(b&&m){b.addEventListener('click',function(){m.classList.toggle('hidden')});document.addEventListener('click',function(e){if(!b.contains(e.target)&&!m.contains(e.target))m.classList.add('hidden')})}
+		var t=document.getElementById('menu-toggle'),mm=document.getElementById('mobile-menu');
+		if(t&&mm){t.addEventListener('click',function(){mm.classList.toggle('hidden')})}
 	</script>
 </body>
 </html>

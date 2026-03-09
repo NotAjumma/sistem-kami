@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\GeneratesWebp;
 use Illuminate\Http\Request;
 
 class ImageUploadController extends Controller
 {
+    use GeneratesWebp;
     // Tunjuk form upload
     public function show()
     {
@@ -38,6 +40,9 @@ class ImageUploadController extends Controller
         $folder = "uploads/$organizerId/$type/$packageId";
 
         $path = $file->storeAs($folder, $name, 'public');
+
+        // Generate WebP version for faster page loads
+        $this->generateWebp($path);
 
         $url = asset('storage/' . $path);
 

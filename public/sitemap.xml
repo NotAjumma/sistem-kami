@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+    <url>
+        <loc>http://127.0.0.1:8000</loc>
+    
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/search</loc>
+    
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/secret-maker-solution</loc>
+        <lastmod>2026-03-06T05:23:10+08:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/dayangyunk</loc>
+        <lastmod>2026-03-08T04:38:27+08:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/nylensa</loc>
+        <lastmod>2026-03-06T05:23:37+08:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/leeya-jasmin</loc>
+        <lastmod>2026-03-06T05:23:40+08:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/kame2-project-studio</loc>
+        <lastmod>2026-03-06T05:23:42+08:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://127.0.0.1:8000/studio-maker</loc>
+        <lastmod>2026-03-06T05:23:44+08:00</lastmod>
+
+            </url>
+</urlset>
