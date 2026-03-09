@@ -1,21 +1,27 @@
 #!/bin/sh
 
-# Optional: print start info
-echo "Starting container and running drive:download-receipts..."
+echo "Starting container..."
 
 php artisan optimize:clear
 php artisan view:clear
 php artisan config:clear
 php artisan route:clear
 
+php artisan storage:link --force 2>/dev/null || true
+
 echo "Running migrations..."
 php artisan migrate --force
 
-# Run your Laravel artisan command to download receipts from Google Drive
-# php artisan drive:download-receipts
+# Cache config/routes/views for production
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
 # Run Laravel scheduler in background (fires every minute)
 (while true; do php artisan schedule:run >> /dev/null 2>&1; sleep 60; done) &
 
-# Start Laravel development server (adjust if you use something else)
-php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# Start PHP-FPM in background
+php-fpm -D
+
+# Start Nginx in foreground
+nginx -g 'daemon off;'

@@ -1,6 +1,10 @@
 @extends('home.homeLayout')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <link rel="preload" as="style" href="{{ asset('css/profile.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('css/profile.css') }}"></noscript>
+    @if(!empty($packages) && $packages->first() && !empty($packages->first()->images) && $packages->first()->images->first())
+        <link rel="preload" as="image" href="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $packages->first()->id . '/' . $packages->first()->images->first()->url) }}">
+    @endif
 @endpush
 
 @push('json_ld')

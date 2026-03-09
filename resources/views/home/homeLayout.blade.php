@@ -65,7 +65,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-	<link rel="dns-prefetch" href="https://unpkg.com">
+
 
 	<!-- FAVICONS ICON -->
 	<link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
@@ -92,17 +92,20 @@
 		.search-section{background:#001f4d;min-height:120px}
 		/* Card images prevent CLS */
 		.package-img,.carousel-item img{width:100%;height:260px;object-fit:cover}
+		/* Override Font Awesome font-display:block to swap */
+		@font-face{font-family:"Font Awesome 5 Free";font-display:swap}
+		@font-face{font-family:"Font Awesome 5 Brands";font-display:swap}
 	</style>
 
 	<!-- Main CSS: async-load (minified, non-critical for first paint) -->
-	<link rel="preload" as="style" href="{{ asset('css/style.min.css') }}"
+	<link rel="preload" as="style" href="{{ asset('css/style-public.min.css') }}"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript><link class="main-css" href="{{ asset('css/style.min.css') }}" rel="stylesheet"></noscript>
+	<noscript><link class="main-css" href="{{ asset('css/style-public.min.css') }}" rel="stylesheet"></noscript>
 
 	<!-- Tailwind CSS: async-load -->
-	<link rel="preload" as="style" href="{{ asset('css/tailwind.css') }}"
+	<link rel="preload" as="style" href="{{ asset('css/tailwind.min.css') }}"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.css') }}"></noscript>
+	<noscript><link rel="stylesheet" href="{{ asset('css/tailwind.min.css') }}"></noscript>
 
 	<!-- Bootstrap Icons: async-load -->
 	<link rel="preload" as="style"
@@ -112,9 +115,9 @@
 
 	<!-- Google Fonts: async-load with display=swap -->
 	<link rel="preload" as="style"
-		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"
 		onload="this.onload=null;this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Press+Start+2P&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"></noscript>
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap"></noscript>
 
 	<!-- Font Awesome: async-load -->
 	<link rel="preload" as="style"
@@ -122,18 +125,14 @@
 		onload="this.onload=null;this.rel='stylesheet'">
 	<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
 
-	<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+	<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" defer></script>
 	<style>
 		.content-body {
 			margin-left: 0 !important;
 		}
 
-		h1,
-        h2,
-        h3,
-        h6 {
+		h1,h2,h3,h6 {
             font-family: 'Playfair Display', serif !important;
-            font-display: swap;
         }
 
 		.bg-gray-900 {
@@ -453,29 +452,10 @@
 
 	@stack('scripts')
 	<script>
-		const button = document.getElementById('organizer-menu-button');
-		const menu = document.getElementById('organizer-menu');
-
-		button.addEventListener('click', () => {
-			menu.classList.toggle('hidden');
-		});
-
-		// Optional: close when clicking outside
-		document.addEventListener('click', (e) => {
-			if (!button.contains(e.target) && !menu.contains(e.target)) {
-				menu.classList.add('hidden');
-			}
-		});
-	</script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const toggleButton = document.getElementById('menu-toggle');
-			const mobileMenu = document.getElementById('mobile-menu');
-
-			toggleButton.addEventListener('click', function () {
-				mobileMenu.classList.toggle('hidden');
-			});
-		});
+		var b=document.getElementById('organizer-menu-button'),m=document.getElementById('organizer-menu');
+		if(b&&m){b.addEventListener('click',function(){m.classList.toggle('hidden')});document.addEventListener('click',function(e){if(!b.contains(e.target)&&!m.contains(e.target))m.classList.add('hidden')})}
+		var t=document.getElementById('menu-toggle'),mm=document.getElementById('mobile-menu');
+		if(t&&mm){t.addEventListener('click',function(){mm.classList.toggle('hidden')})}
 	</script>
 </body>
 </html>
