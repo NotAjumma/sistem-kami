@@ -101,6 +101,7 @@ Route::prefix('superadmin')->group(function () {
         Route::post('/reminders/trigger',                   [SuperadminController::class, 'triggerReminders'])->name('superadmin.reminders.trigger');
         Route::get('/commands',                             [SuperadminController::class, 'showCommands'])->name('superadmin.commands');
         Route::post('/commands/run',                        [SuperadminController::class, 'runCommand'])->name('superadmin.commands.run');
+        Route::get('/commands/log/{key}',                   [SuperadminController::class, 'readCommandLog'])->name('superadmin.commands.log');
     });
 });
 
@@ -160,7 +161,7 @@ Route::get('/fishing/leaderboard/latest-update', function () {
     $timestamp = \App\Models\FishingLeaderboardResult::max('updated_at');
     return response()->json(['updated_at' => $timestamp]);
 });
-Route::get('/fishing/leaderboard/partial', 'App\Http\Controllers\Worker\FishingController@renderLeaderboardPartial');
+// Route::get('/fishing/leaderboard/partial', 'App\Http\Controllers\Worker\FishingController@renderLeaderboardPartial'); // disabled: controller missing
 
 Route::prefix('organizer')->middleware('auth:organizer')->controller(OrganizerController::class)->group(function () {
     Route::get('/dashboard', 'dashboard')->name('organizer.dashboard');

@@ -380,8 +380,8 @@ class SuperadminController extends Controller
     private function commandList(): array
     {
         return [
-            'images_optimize'       => ['label' => 'Generate WebP (new only)',    'command' => 'images:optimize',  'args' => [],             'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',       'danger' => false],
-            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)', 'command' => 'images:optimize',  'args' => ['--force'],    'description' => 'Regenerates WebP for ALL uploaded images, including previously converted ones. Use after changing resize/quality settings.', 'danger' => true],
+            'images_optimize'       => ['label' => 'Generate WebP (new only)',    'command' => 'images:optimize',  'args' => [],          'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',       'danger' => false, 'background' => false],
+            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)', 'command' => 'images:optimize',  'args' => ['--force'], 'description' => 'Regenerates WebP for ALL uploaded images. Runs in background — check the log file for progress.', 'danger' => true,  'background' => true],
             'storage_link'          => ['label' => 'Storage Link',                'command' => 'storage:link',     'args' => ['--force'],    'description' => 'Creates (or recreates) the public/storage symlink pointing to storage/app/public.',            'danger' => false],
             'config_cache'          => ['label' => 'Cache Config',                'command' => 'config:cache',     'args' => [],             'description' => 'Compiles all config files into a single cached file for faster loading.',                       'danger' => false],
             'route_cache'           => ['label' => 'Cache Routes',                'command' => 'route:cache',      'args' => [],             'description' => 'Compiles all routes into a single cached file for faster route matching.',                     'danger' => false],
@@ -395,6 +395,20 @@ class SuperadminController extends Controller
         return view('superadmin.commands', ['commands' => $this->commandList()]);
     }
 
+    public function readCommandLog(string $key)
+    {
+        $commands = $this->commandList();
+        if (!array_key_exists($key, $commands) || empty($commands[$key]['background'])) {
+            abort(404);
+        }
+        $logFile = storage_path('logs/cmd-' . $key . '.log');
+        $output  = file_exists($logFile) ? file_get_contents($logFile) : '(log file not found — command may not have run yet)';
+
+        return back()
+            ->with('cmd_output', trim($output) ?: '(empty log)')
+            ->with('cmd_ran', $commands[$key]['label'] . ' — Log');
+    }
+
     public function runCommand(Request $request)
     {
         $request->validate(['command_key' => 'required|string']);
@@ -406,6 +420,19 @@ class SuperadminController extends Controller
         }
 
         $cmd = $commands[$key];
+
+        // Long-running commands: fire-and-forget in background, write output to log file
+        if (!empty($cmd['background'])) {
+            $logFile = storage_path('logs/cmd-' . $key . '.log');
+            $args    = implode(' ', $cmd['args']);
+            $artisan = base_path('artisan');
+            exec("php {$artisan} {$cmd['command']} {$args} > " . escapeshellarg($logFile) . " 2>&1 &");
+
+            return back()
+                ->with('cmd_output', "Started in background.\nLog: storage/logs/cmd-{$key}.log\n\nRefresh this page after a minute to read the log.")
+                ->with('cmd_ran', $cmd['label'])
+                ->with('success', "Command '{$cmd['label']}' started in background.");
+        }
 
         try {
             \Illuminate\Support\Facades\Artisan::call($cmd['command'], array_fill_keys($cmd['args'], true));

@@ -9,15 +9,12 @@ php artisan route:clear
 
 php artisan storage:link --force 2>/dev/null || true
 
-# Generate WebP versions for existing uploaded images (skips already-converted files)
-php artisan images:optimize --quiet 2>/dev/null || true
-
 echo "Running migrations..."
 php artisan migrate --force
 
 # Cache config/routes/views for production
 php artisan config:cache
-php artisan route:cache
+php artisan route:cache 2>/dev/null || echo "Warning: route:cache failed (check for missing controllers), continuing without route cache"
 php artisan view:cache
 
 # Run Laravel scheduler in background (fires every minute)
