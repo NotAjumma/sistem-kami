@@ -431,6 +431,9 @@
 			<script src="{{ asset($script) }}" type="text/javascript"></script>
 		@endforeach
 	@endif
+	<!-- Admin theme JS: loaded here instead of dz.php global to avoid loading on public pages -->
+	<script src="{{ asset('js/dlabnav-init.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/custom.min.js') }}" type="text/javascript"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 	<script>
