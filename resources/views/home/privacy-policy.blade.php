@@ -43,8 +43,8 @@
 
 <section class="policy-hero text-white text-center">
     <div class="container">
-        <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">Privacy Policy</h1>
-        <p class="mb-0" style="color: rgba(255,255,255,0.7);">Last updated: {{ date('d F Y') }}</p>
+        <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">{{ __('privacy.hero_heading') }}</h1>
+        <p class="mb-0" style="color: rgba(255,255,255,0.7);">{{ __('privacy.last_updated') }} {{ date('d F Y') }}</p>
     </div>
 </section>
 
@@ -52,7 +52,7 @@
     <div class="container" style="max-width: 780px;">
 
         <div class="policy-toc">
-            <div class="fw-semibold mb-2" style="font-size:0.88rem; color:#001f4d;">Contents</div>
+            <div class="fw-semibold mb-2" style="font-size:0.88rem; color:#001f4d;">{{ __('privacy.contents') }}</div>
             <ol class="mb-0 ps-3" style="line-height:2">
                 <li><a href="#info-we-collect">Information We Collect</a></li>
                 <li><a href="#how-we-use">How We Use Your Information</a></li>

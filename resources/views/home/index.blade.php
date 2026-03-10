@@ -58,6 +58,39 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "{{ config('app.name') }}",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "Online booking system in Malaysia for event organizers and vendors. Manage packages, schedules, and customer bookings all in one platform.",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "MYR"
+    },
+    "url": "{{ url('/') }}",
+    "areaServed": {
+        "@type": "Country",
+        "name": "Malaysia"
+    }
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ config('app.name') }}",
+    "url": "{{ url('/') }}",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ url('/search') }}?keyword={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
 @endpush
 
 @section('content')
@@ -65,19 +98,20 @@
         <!-- Hero Section -->
         <section class="search-section w-100 pt-0 pb-16 mt-0">
             <div class="container-search container mt-0">
-                <form class="row g-2 align-items-center justify-content-center" method="GET" action="{{ route('search') }}">
+                <h1 class="visually-hidden">{{ __('home.hero_h1', ['app' => config('app.name')]) }}</h1>
+                <form class="row g-2 align-items-center justify-content-center" method="GET" action="{{ lroute('search') }}">
                     <div class="col-12 col-sm-5">
                         <label for="inputWhat" class="form-label visually-hidden">What</label>
-                        <input type="text" name="keyword" class="form-control" id="inputWhat" placeholder="Enter keywords"
+                        <input type="text" name="keyword" class="form-control" id="inputWhat" placeholder="{{ __('home.search_keyword_placeholder') }}"
                             aria-label="What" />
                     </div>
                     <div class="col-12 col-sm-5">
                         <label for="inputWhere" class="form-label visually-hidden">Where</label>
                         <input type="text" name="location" class="form-control" id="inputWhere"
-                            placeholder="Enter district, city, or state" aria-label="Where" />
+                            placeholder="{{ __('home.search_location_placeholder') }}" aria-label="Where" />
                     </div>
                     <div class="col-12 col-sm-2 text-sm-start text-center">
-                        <button type="submit" class="btn btn-seek w-100" aria-label="Seek Jobs Button">Search</button>
+                        <button type="submit" class="btn btn-seek w-100" aria-label="Seek Jobs Button">{{ __('home.search_button') }}</button>
                     </div>
                 </form>
                 <nav class="filters-scroll mt-3" aria-label="Category filters">
@@ -91,7 +125,7 @@
                             @foreach ($packageCategories as $category)
                                 <li>
                                     <a class="dropdown-item"
-                                        href="{{ route('search', ['category' => $category->slug]) }}">
+                                        href="{{ lroute('search', ['category' => $category->slug]) }}">
                                         {{ $category->name }}
                                     </a>
                                 </li>
@@ -111,7 +145,7 @@
         <!-- Service Providers Section -->
         <section class="container pt-10 pb-16 md:pb-20 lg:pb-24">
             <div>
-                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 2.2rem;">Service Providers</h2>
+                <h2 class="text-center mb-4 fw-bold" style="user-select: text; font-size: 2.2rem;">{{ __('home.service_providers') }}</h2>
                 <div class="row g-4 justify-content-center">
                     @foreach ($organizers as $organizer)
                         @php
@@ -172,7 +206,7 @@
                         @endphp
 
                         <div class="col-12 col-sm-6 col-xl-3 col-lg-4 col-md-6">
-                            <a href="{{ url('/' . ($organizer->slug ?? $organizer->id)) }}">
+                            <a href="{{ lroute('business.profile', ['slug' => $organizer->slug ?? $organizer->id]) }}">
                                 <div class="card position-relative">
                                     <div class="bookmark-icon" title="Category">
                                         {{ $organizer->category ?? '' }}
@@ -204,7 +238,7 @@
                                                         <li style="font-size:0.95rem;">{{ Str::limit($pkg->name, 60) }}</li>
                                                     @endforeach
                                                     @if($orgPackages->count() > 3)
-                                                        <li style="font-size:0.95rem;">and more ...</li>
+                                                        <li style="font-size:0.95rem;">{{ __('home.and_more') }}</li>
                                                     @endif
                                                 </ul>
                                             @else
@@ -245,9 +279,9 @@
         <section class="py-5" style="background: linear-gradient(135deg, #001f4d 0%, #001233 100%);">
             <div class="container">
                 <div class="text-center mx-auto mb-5 fade-in-up" style="max-width: 800px;">
-                    <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">Features</p>
-                    <h2 class="fw-bold mb-3" style="font-size: 2rem; color: #fff !important;">Everything You Need in One Platform</h2>
-                    <p style="color: rgba(255,255,255,0.65); margin-bottom:0;">Manage and grow your business with powerful tools built for you.</p>
+                    <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">{{ __('home.features_label') }}</p>
+                    <h2 class="fw-bold mb-3" style="font-size: 2rem; color: #fff !important;">{{ __('home.features_heading') }}</h2>
+                    <p style="color: rgba(255,255,255,0.65); margin-bottom:0;">{{ __('home.features_sub') }}</p>
                 </div>
                 <div class="row g-4 justify-content-center">
                     <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
@@ -255,11 +289,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-calendar-check fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Booking System</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.booking_system') }}</h5>
                             <p class="text-muted small mb-0">
-                                Package-based booking with deposit options, automatic confirmation,
-                                receipt generation, and multiple payment methods. Also supports manual booking
-                                where customers are directed to WhatsApp for personal confirmation.
+                                {{ __('home.booking_system_desc') }}
                             </p>
                         </div>
                     </div>
@@ -268,10 +300,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-boxes fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Package & Time Slot Management</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.package_slot') }}</h5>
                             <p class="text-muted small mb-0">
-                                Create packages with pricing, add-ons, and images. Manage time slots
-                                with capacity tracking, off-days, and availability control.
+                                {{ __('home.package_slot_desc') }}
                             </p>
                         </div>
                     </div>
@@ -280,10 +311,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-credit-card fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Secure Payment Processing</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.secure_payment') }}</h5>
                             <p class="text-muted small mb-0">
-                                Integrated with Toyyibpay and Stripe payment gateways for smooth, secure transactions.
-                                Supports QR payments and automatic payment tracking.
+                                {{ __('home.secure_payment_desc') }}
                             </p>
                         </div>
                     </div>
@@ -292,10 +322,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-chart-line fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Dashboard & Analytics</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.dashboard_analytics') }}</h5>
                             <p class="text-muted small mb-0">
-                                Track sales, manage bookings, and monitor performance in real-time
-                                with an intuitive dashboard and detailed reports.
+                                {{ __('home.dashboard_analytics_desc') }}
                             </p>
                         </div>
                     </div>
@@ -304,10 +333,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-users-cog fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Worker & Commission Management</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.worker_commission') }}</h5>
                             <p class="text-muted small mb-0">
-                                Assign workers to tasks, track commissions with flexible rules,
-                                and manage your team's performance effortlessly.
+                                {{ __('home.worker_commission_desc') }}
                             </p>
                         </div>
                     </div>
@@ -316,10 +344,9 @@
                             <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                                 <i class="fas fa-bell fa-lg" style="color: #001f4d;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Notifications</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.notifications') }}</h5>
                             <p class="text-muted small mb-0">
-                                Automated WhatsApp and email notifications for payment confirmations,
-                                booking reminders, and receipt delivery.
+                                {{ __('home.notifications_desc') }}
                             </p>
                         </div>
                     </div>
@@ -328,10 +355,9 @@
                             <div class="feature-icon" style="background: rgba(99, 102, 241, 0.1);">
                                 <i class="fas fa-robot fa-lg" style="color: #6366f1;"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">AI Chatbot Assistant</h5>
+                            <h5 class="fw-bold mb-2">{{ __('home.ai_chatbot') }}</h5>
                             <p class="text-muted small mb-0">
-                                AI-powered chatbot that handles customer inquiries, guides them through
-                                the booking process, and provides instant answers 24/7 — without you lifting a finger.
+                                {{ __('home.ai_chatbot_desc') }}
                             </p>
                         </div>
                     </div>

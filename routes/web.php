@@ -115,12 +115,21 @@ Route::get('/receipt/{booking_code}', [BookingController::class, 'bookingReceipt
 Route::post('/webform-booking', [BookingController::class, 'webFormBooking'])->name('webform.booking');
 Route::post('/tickets/select', [BookingController::class, 'storeSelection'])->name('tickets.select');
 Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout');
-Route::get('/', [HomeController::class, 'index'])->name('index');
-Route::get('/about',                [HomeController::class, 'about'])->name('about');
-Route::get('/faq',                  [HomeController::class, 'faq'])->name('faq');
-Route::get('/privacy-policy',       [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
-Route::get('/terms-and-conditions', [HomeController::class, 'terms'])->name('terms');
-Route::get('/search', [HomeController::class, 'search'])->name('search');
+// ── Locale-aware public routes ────────────────────────────────────────────────
+$homeRoutes = function () {
+    Route::get('/',                     [HomeController::class, 'index'])->name('index');
+    Route::get('/about',                [HomeController::class, 'about'])->name('about');
+    Route::get('/faq',                  [HomeController::class, 'faq'])->name('faq');
+    Route::get('/privacy-policy',       [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
+    Route::get('/terms-and-conditions', [HomeController::class, 'terms'])->name('terms');
+    Route::get('/search',               [HomeController::class, 'search'])->name('search');
+};
+
+// Bahasa Melayu home routes first (fixed bm/ prefix, more specific)
+Route::group(['prefix' => 'bm', 'as' => 'bm.', 'locale' => 'ms', 'middleware' => 'setlocale'], $homeRoutes);
+
+// English home routes (no prefix)
+Route::group(['locale' => 'en', 'middleware' => 'setlocale'], $homeRoutes);
 Route::get('/qr/{slug}', function ($slug) {
     $organizer = \App\Models\Organizer::where('slug', $slug)->whereNotNull('payment_qr_path')->firstOrFail();
     $path      = \Illuminate\Support\Facades\Storage::disk('public')->path($organizer->payment_qr_path);
@@ -282,10 +291,17 @@ Route::get('/private/{slug}', [BusinessController::class, 'showProfile'])->name(
 Route::get('/private/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package.private');
 Route::get('/checkout/package', [BookingController::class, 'showCheckoutPackage'])->name('business.checkout_package');
 Route::post('/select/package', [BookingController::class, 'storeSelectionPackage'])->name('business.select_package');
-Route::get('/{slug}', [BusinessController::class, 'showProfile'])->name('business.profile');
-Route::get('/{organizerSlug}/{packageSlug}', [BusinessController::class, 'showPackage'])->name('business.package');
-Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
 Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackage'])->name('webform.booking_package');
+
+// Locale-aware profile routes — BM first (fixed prefix, more specific) then EN (wildcard)
+$profileRoutes = function () {
+    Route::get('/{slug}',                                [BusinessController::class, 'showProfile'])->name('business.profile');
+    Route::get('/{organizerSlug}/{packageSlug}',         [BusinessController::class, 'showPackage'])->name('business.package');
+    Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
+};
+// BM registered first so bm/{slug} is matched before EN's /{organizerSlug}/{packageSlug} can catch bm/xxx
+Route::group(['prefix' => 'bm', 'as' => 'bm.', 'locale' => 'ms', 'middleware' => 'setlocale'], $profileRoutes);
+Route::group(['locale' => 'en', 'middleware' => 'setlocale'], $profileRoutes);
 Route::get('/organizer/{id}/banners', [BusinessController::class, 'getBanners']);
 Route::get('/organizer/{id}/packages/images', [BusinessController::class, 'getPackageImages']);
 Route::get('/organizer/{id}/slots/images', [BusinessController::class, 'getSlotImages']);

@@ -21,8 +21,9 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Full page cache for 5 minutes — avoids DB + Blade rendering on repeat visits
-        $html = Cache::remember('home_page_html', 300, function () {
+        // Full page cache per locale for 5 minutes — avoids DB + Blade rendering on repeat visits
+        $locale = app()->getLocale();
+        $html = Cache::remember("home_page_html_{$locale}", 300, function () {
             $packages = Cache::remember('home.packages', now()->addMinutes(10), function () {
                 return Package::with([
                     'organizer',
@@ -62,7 +63,12 @@ class HomeController extends Controller
                 })->orderBy('name')->get();
             });
 
-            $seo = ['canonical' => url('/')];
+            $appName = config('app.name', 'Sistem Kami');
+            $seo = [
+                'title'       => "$appName | Online Booking System Malaysia — Event & Vendor Booking",
+                'description' => "$appName is an online booking system in Malaysia for event organizers and vendors. Manage packages, schedules, and customer bookings — all in one platform.",
+                'canonical'   => url('/'),
+            ];
 
             return view('home.index', compact('packages', 'packageCategories', 'organizers', 'seo'))->render();
         });
@@ -75,9 +81,9 @@ class HomeController extends Controller
     public function about()
     {
         $seo = [
-            'title' => 'About Us | Sistem Kami',
-            'description' => 'Learn about Sistem Kami — a booking and business management platform designed to help service providers and organizers manage packages, schedules, and customers.',
-            'canonical' => url('/about'),
+            'title'       => __('seo.about.title'),
+            'description' => __('seo.about.description'),
+            'canonical'   => url('/about'),
         ];
 
         return view('home.about', compact('seo'));
@@ -86,9 +92,9 @@ class HomeController extends Controller
     public function faq()
     {
         $seo = [
-            'title' => 'FAQ | Sistem Kami',
-            'description' => 'Frequently asked questions about Sistem Kami — how it works, pricing, booking management, and more.',
-            'canonical' => url('/faq'),
+            'title'       => __('seo.faq.title'),
+            'description' => __('seo.faq.description'),
+            'canonical'   => url('/faq'),
         ];
 
         return view('home.faq', compact('seo'));
@@ -97,9 +103,9 @@ class HomeController extends Controller
     public function privacyPolicy()
     {
         $seo = [
-            'title' => 'Privacy Policy | Sistem Kami',
-            'description' => 'Read the Sistem Kami privacy policy — how we collect, use, and protect your personal data.',
-            'canonical' => url('/privacy-policy'),
+            'title'       => __('seo.privacy.title'),
+            'description' => __('seo.privacy.description'),
+            'canonical'   => url('/privacy-policy'),
         ];
 
         return view('home.privacy-policy', compact('seo'));
@@ -108,9 +114,9 @@ class HomeController extends Controller
     public function terms()
     {
         $seo = [
-            'title' => 'Terms & Conditions | Sistem Kami',
-            'description' => 'Read the Sistem Kami terms and conditions governing the use of our platform.',
-            'canonical' => url('/terms-and-conditions'),
+            'title'       => __('seo.terms.title'),
+            'description' => __('seo.terms.description'),
+            'canonical'   => url('/terms-and-conditions'),
         ];
 
         return view('home.terms', compact('seo'));
@@ -118,7 +124,7 @@ class HomeController extends Controller
 
     public function search(Request $request)
     {
-        $page_title = "Sistem Kami | Search";
+        $page_title = __('seo.search.title');
 
         $query = Package::with([
             'organizer',

@@ -14,7 +14,7 @@
                         <div class="position-relative">
                             <label for="inputWhat" class="form-label visually-hidden">What</label>
                             <input type="text" name="keyword" class="form-control pe-5" id="inputWhat"
-                                placeholder="Enter keywords" value="{{ request()->input('keyword') }}" aria-label="What" />
+                                placeholder="{{ __('search.search_keyword_placeholder') }}" value="{{ request()->input('keyword') }}" aria-label="What" />
                             @if(request()->filled('keyword'))
                                 <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2"
                                     data-bs-toggle="tooltip" title="Clear"
@@ -31,7 +31,7 @@
                         <div class="position-relative">
                             <label for="inputWhere" class="form-label visually-hidden">Where</label>
                             <input type="text" name="location" class="form-control pe-5" id="inputWhere"
-                                placeholder="Enter district, city, or state" value="{{ request()->input('location') }}"
+                                placeholder="{{ __('search.search_location_placeholder') }}" value="{{ request()->input('location') }}"
                                 aria-label="Where" />
                             @if(request()->filled('location'))
                                 <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2"
@@ -44,7 +44,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-sm-2 text-sm-start text-center">
-                        <button type="submit" class="btn btn-seek w-100" aria-label="Search Button">Search</button>
+                        <button type="submit" class="btn btn-seek w-100" aria-label="Search Button">{{ __('search.search_button') }}</button>
                     </div>
                 </form>
                 <nav class="filters-scroll mt-3" aria-label="Category filters">
@@ -83,7 +83,7 @@
         <section class="container pb-16">
             <div>
                 <span class="job-count" aria-live="polite" aria-atomic="true">
-                    {{ trans_choice(':count result|:count results', $organizers->count(), ['count' => $organizers->count()]) }}
+                    {{ trans_choice(__('search.result') . '|' . __('search.results'), $organizers->count(), ['count' => $organizers->count()]) }}
                 </span>
 
                 <div class="row g-4 justify-content-start">
@@ -116,7 +116,7 @@
                         @endphp
 
                         <div class="col-12 col-sm-6 col-xl-3 col-lg-4 col-md-6 mt-5">
-                            <a href="{{ url('/' . ($organizer->slug ?? $organizer->id)) }}">
+                            <a href="{{ lroute('business.profile', ['slug' => $organizer->slug ?? $organizer->id]) }}">
                                 <div class="card position-relative">
                                     <div class="bookmark-icon" title="Category">
                                         {{ $organizer->category ?? '' }}
@@ -150,7 +150,7 @@
                                                         <li style="font-size:0.95rem;">{{ Str::limit($pkg->name, 60) }}</li>
                                                     @endforeach
                                                     @if($orgPackages->count() > 3)
-                                                        <li style="font-size:0.95rem;">and more ...</li>
+                                                        <li style="font-size:0.95rem;">{{ __('search.and_more') }}</li>
                                                     @endif
                                                 </ul>
                                             @else
@@ -188,7 +188,7 @@
                 @if($organizers->isEmpty())
                     <div class="text-center py-5 mt-4">
                         <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No results found. Try different keywords or location.</p>
+                        <p class="text-muted">{{ __('search.no_results') }}</p>
                     </div>
                 @endif
             </div>

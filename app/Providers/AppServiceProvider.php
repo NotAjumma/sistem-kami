@@ -43,5 +43,6 @@ class AppServiceProvider extends ServiceProvider
         if (!file_exists(public_path('storage'))) {
             Artisan::call('storage:link');
         }
+
     }
 }

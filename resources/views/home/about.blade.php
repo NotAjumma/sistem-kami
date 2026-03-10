@@ -77,10 +77,10 @@
     <section style="background: linear-gradient(135deg, #001f4d 0%, #003080 100%); padding: 80px 0 60px;">
         <div class="container text-center">
             <div class="fade-in-up">
-                <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">About Us</p>
-                <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">We Build Tools That <br class="d-none d-md-block">Empower Your Business</h1>
+                <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">{{ __('about.hero_label') }}</p>
+                <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">{{ __('about.hero_heading') }}</h1>
                 <p class="lead mb-0" style="max-width: 700px; margin: 0 auto; font-family: 'Poppins', sans-serif; color: rgba(255,255,255,0.7);">
-                    Smart, simple, custom business software designed to help businesses work better with tailored solutions.
+                    {{ __('about.hero_sub') }}
                 </p>
             </div>
         </div>
@@ -90,16 +90,12 @@
     <section class="py-5 bg-white">
         <div class="container" style="max-width: 900px;">
             <div class="text-center mb-5 fade-in-up">
-                <h2 class="fw-bold mb-4" style="font-size: 1.8rem; color: #001f4d;">Who We Are</h2>
+                <h2 class="fw-bold mb-4" style="font-size: 1.8rem; color: #001f4d;">{{ __('about.who_we_are_heading') }}</h2>
                 <p style="font-size: 1.05rem; color: #545454; line-height: 1.8;">
-                    <strong>SistemKami.com</strong> is a booking and business management platform
-                    designed to help studios, service providers, and event organizers manage packages,
-                    schedules, and customers more efficiently.
+                    {{ __('about.who_we_are_p1') }}
                 </p>
                 <p style="font-size: 1.05rem; color: #545454; line-height: 1.8;">
-                    We simplify your operations so you can focus on growing your business.
-                    Whether you're a wedding planner, photographer, caterer, or any service-based business,
-                    Sistem Kami brings everything under one roof — simple, scalable, and powerful.
+                    {{ __('about.who_we_are_p2') }}
                 </p>
             </div>
 
@@ -110,9 +106,9 @@
                         <div class="mb-3">
                             <i class="fas fa-bullseye fa-2x" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold">Our Mission</h5>
+                        <h5 class="fw-bold">{{ __('about.mission_heading') }}</h5>
                         <p class="text-muted small mb-0">
-                            To empower businesses with smart, affordable tools that simplify daily operations and drive growth.
+                            {{ __('about.mission_desc') }}
                         </p>
                     </div>
                 </div>
@@ -121,9 +117,9 @@
                         <div class="mb-3">
                             <i class="fas fa-eye fa-2x" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold">Our Vision</h5>
+                        <h5 class="fw-bold">{{ __('about.vision_heading') }}</h5>
                         <p class="text-muted small mb-0">
-                            To be the go-to platform for service providers and organizers in Southeast Asia.
+                            {{ __('about.vision_desc') }}
                         </p>
                     </div>
                 </div>
@@ -132,9 +128,9 @@
                         <div class="mb-3">
                             <i class="fas fa-heart fa-2x" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold">Our Values</h5>
+                        <h5 class="fw-bold">{{ __('about.values_heading') }}</h5>
                         <p class="text-muted small mb-0">
-                            Simplicity, reliability, and putting our customers first in everything we build.
+                            {{ __('about.values_desc') }}
                         </p>
                     </div>
                 </div>
@@ -146,9 +142,9 @@
     <section class="py-5" style="background: #f8fafc;">
         <div class="container">
             <div class="text-center mx-auto mb-5 fade-in-up" style="max-width: 800px;">
-                <p class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem;">Features</p>
-                <h2 class="fw-bold mb-3" style="font-size: 2rem; color: #001f4d;">Everything You Need in One Platform</h2>
-                <p class="text-muted">Manage and grow your business with powerful tools built for you.</p>
+                <p class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem;">{{ __('about.features_label') }}</p>
+                <h2 class="fw-bold mb-3" style="font-size: 2rem; color: #001f4d;">{{ __('about.features_heading') }}</h2>
+                <p class="text-muted">{{ __('about.features_sub') }}</p>
             </div>
             <div class="row g-4 justify-content-center">
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
@@ -156,7 +152,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-calendar-check fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Booking System</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.booking_system') }}</h5>
                         <p class="text-muted small mb-0">
                             Package-based booking with deposit options, automatic confirmation,
                             receipt generation, and multiple payment methods. Also supports manual booking
@@ -169,7 +165,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-boxes fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Package & Time Slot Management</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.package_slot') }}</h5>
                         <p class="text-muted small mb-0">
                             Create packages with pricing, add-ons, and images. Manage time slots
                             with capacity tracking, off-days, and availability control.
@@ -181,7 +177,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-credit-card fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Secure Payment Processing</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.secure_payment') }}</h5>
                         <p class="text-muted small mb-0">
                             Integrated with Toyyibpay and Stripe payment gateways for smooth, secure transactions.
                             Supports QR payments and automatic payment tracking.
@@ -193,7 +189,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-chart-line fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Dashboard & Analytics</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.dashboard_analytics') }}</h5>
                         <p class="text-muted small mb-0">
                             Track sales, manage bookings, and monitor performance in real-time
                             with an intuitive dashboard and detailed reports.
@@ -205,7 +201,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-users-cog fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Worker & Commission Management</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.worker_commission') }}</h5>
                         <p class="text-muted small mb-0">
                             Assign workers to tasks, track commissions with flexible rules,
                             and manage your team's performance effortlessly.
@@ -217,7 +213,7 @@
                         <div class="feature-icon" style="background: rgba(0, 31, 77, 0.08);">
                             <i class="fas fa-bell fa-lg" style="color: #001f4d;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">Notifications</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.notifications') }}</h5>
                         <p class="text-muted small mb-0">
                             Automated WhatsApp and email notifications for payment confirmations,
                             booking reminders, and receipt delivery.
@@ -229,7 +225,7 @@
                         <div class="feature-icon" style="background: rgba(99, 102, 241, 0.1);">
                             <i class="fas fa-robot fa-lg" style="color: #6366f1;"></i>
                         </div>
-                        <h5 class="fw-bold mb-2">AI Chatbot Assistant</h5>
+                        <h5 class="fw-bold mb-2">{{ __('home.ai_chatbot') }}</h5>
                         <p class="text-muted small mb-0">
                             AI-powered chatbot that handles customer inquiries, guides them through
                             the booking process, and provides instant answers 24/7 — without you lifting a finger.
@@ -243,9 +239,9 @@
     <!-- CTA Section -->
     <section class="cta-section py-5">
         <div class="container text-center py-4 fade-in-up" style="max-width: 700px;">
-            <h2 class="fw-bold mb-3 text-white" style="font-size: 1.8rem;">Ready to Get Started?</h2>
+            <h2 class="fw-bold mb-3 text-white" style="font-size: 1.8rem;">{{ __('about.cta_heading') }}</h2>
             <p class="mb-4" style="color: rgba(255,255,255,0.7);">
-                Join hundreds of businesses already using Sistem Kami to manage their bookings and grow their operations.
+                {{ __('about.cta_sub') }}
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="{{ route('organizer.register') }}" class="btn btn-light fw-bold px-4 py-2" style="color: #001f4d;">

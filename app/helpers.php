@@ -2,6 +2,13 @@
 
 use Illuminate\Support\Str;
 
+if (!function_exists('lroute')) {
+    function lroute(string $name, array $parameters = []): string
+    {
+        return \App\Helpers\LocaleUrl::route($name, $parameters);
+    }
+}
+
 if (!function_exists('format_my_phone')) {
     /**
      * Format a phone number based on country.

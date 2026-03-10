@@ -5,7 +5,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB' }}">
 
 <head>
 	<!-- Google Analytics (loaded only after cookie consent) -->
@@ -35,9 +35,9 @@
 	@php
 		// Default meta values
 		$appName 			= config('app.name', 'Sistem Kami');
-		$defaultDescription = "$appName provides a platform for event organizers to host and manage events, and for vendors to list and manage their services and bookings — all in one place.";
-		$defaultKeywords 	= "$appName, Event Organizer System, Vendor Management, Event Booking, Vendor Services, Event Platform, Booking System, Event Tools, Custom Software, Business Platform, Online Booking, Event Management, Vendor Marketplace, SaaS Event Platform, Business Automation, Cloud Solutions";
-		$defaultTitle 		= "$appName | Event Organizer & Vendor Booking Platform";
+		$defaultDescription = "$appName is an online booking system in Malaysia for event organizers and vendors. Manage packages, schedules, and customer bookings — all in one platform.";
+		$defaultKeywords 	= "$appName, Booking System Malaysia, Online Booking System Malaysia, Event Booking System Malaysia, Vendor Booking System Malaysia, Event Organizer System, Vendor Management, Event Booking, Vendor Services, Event Platform, Booking System, Event Tools, Custom Software, Business Platform, Online Booking, Event Management, Vendor Marketplace, SaaS Event Platform, Business Automation, Cloud Solutions";
+		$defaultTitle 		= "$appName | Online Booking System Malaysia — Event & Vendor Booking";
 		$defaultImage 		= asset('images/SISTEM-KAMI-LOGO.png');
 
 		// If $seo exists, extract it for convenience
@@ -63,6 +63,15 @@
 
 	<title>{{ $seoTitle }}</title>
 	<link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
+	{{-- hreflang: helps Google index both language versions --}}
+	<link rel="alternate" hreflang="en" href="{{ \App\Helpers\LocaleUrl::alternate('en') }}">
+	<link rel="alternate" hreflang="ms" href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}">
+	<link rel="alternate" hreflang="x-default" href="{{ \App\Helpers\LocaleUrl::alternate('en') }}">
+
+	<!-- Geo targeting -->
+	<meta name="geo.region" content="MY">
+	<meta name="geo.placename" content="Malaysia">
+	<meta name="language" content="en-MY">
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -265,24 +274,24 @@
 				<div class="hidden lg:flex gap-3 align-items-center">
 					<!-- Desktop Menu -->
 					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900" style="align-items:center;">
-						<li><a class="hover:underline" href="/">Home</a></li>
-						<li><a class="hover:underline" href="{{ route('about') }}">About Us</a></li>
+						<li><a class="hover:underline" href="{{ lroute('index') }}">{{ __('nav.home') }}</a></li>
+						<li><a class="hover:underline" href="{{ lroute('about') }}">{{ __('nav.about_us') }}</a></li>
 
 						<!-- Pages Dropdown -->
 						<li class="relative">
 							<button type="button" id="pages-menu-button"
 								style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit;color:inherit;font-weight:inherit;"
 								aria-haspopup="true">
-								Pages
+								{{ __('nav.pages') }}
 								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 									<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
 								</svg>
 							</button>
 							<div id="pages-menu" class="absolute z-10 hidden mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style="min-width:180px;left:0;">
 								<div class="py-1 text-xs text-gray-700" role="menu">
-									<a href="{{ route('faq') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">FAQ</a>
-									<a href="{{ route('privacy-policy') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Privacy Policy</a>
-									<a href="{{ route('terms') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Terms &amp; Conditions</a>
+									<a href="{{ lroute('faq') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.faq') }}</a>
+									<a href="{{ lroute('privacy-policy') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.privacy_policy') }}</a>
+									<a href="{{ lroute('terms') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.terms') }}</a>
 								</div>
 							</div>
 						</li>
@@ -292,7 +301,7 @@
 							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda."
 							target="_blank"
 							class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-								Contact Us
+								{{ __('nav.contact_us') }}
 							</a>
 						</li>
 					</ul>
@@ -303,7 +312,7 @@
 						<button type="button"
 							class="btn btn-primary inline-flex justify-center text-xs font-normal text-gray-900"
 							id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
-							Organizer
+							{{ __('nav.organizer') }}
 							<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
 								<path fill-rule="evenodd"
 									d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
@@ -316,14 +325,29 @@
 							<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
 								aria-labelledby="organizer-menu-button">
 								<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
-									role="menuitem">Login</a>
+									role="menuitem">{{ __('nav.organizer_login') }}</a>
 								<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
-									role="menuitem">Register</a>
+									role="menuitem">{{ __('nav.organizer_register') }}</a>
 								<a href="{{ route('organizer.worker.login') }}"
-									class="block px-4 py-2 hover:bg-gray-100" role="menuitem">Worker Login</a>
+									class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.worker_login') }}</a>
 							</div>
 						</div>
 					</div>
+				</div>
+
+				{{-- Language Switcher (Desktop) --}}
+				<div style="display:flex;align-items:center;gap:4px;margin-left:8px;">
+					@if(app()->getLocale() === 'ms')
+						<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}"
+						   style="padding:5px 10px;border-radius:6px;border:1px solid #d1d5db;color:#6b7280;text-decoration:none;font-size:0.8rem;font-weight:600;"
+						   title="Switch to English">EN</a>
+						<span style="padding:5px 10px;border-radius:6px;background:#001f4d;color:#fff;font-size:0.8rem;font-weight:600;">BM</span>
+					@else
+						<span style="padding:5px 10px;border-radius:6px;background:#001f4d;color:#fff;font-size:0.8rem;font-weight:600;">EN</span>
+						<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}"
+						   style="padding:5px 10px;border-radius:6px;border:1px solid #d1d5db;color:#6b7280;text-decoration:none;font-size:0.8rem;font-weight:600;"
+						   title="Tukar ke Bahasa Melayu">BM</a>
+					@endif
 				</div>
 
 			</nav>
@@ -332,45 +356,58 @@
 			<div id="mobile-menu" class="lg:hidden" style="display:none; background:#001f4d; border-top:1px solid rgba(255,255,255,0.1);">
 				<div style="padding:8px 12px 16px;">
 
-					<a href="/" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+					{{-- Language Switcher (Mobile) --}}
+					<div style="display:flex;gap:8px;padding:6px 14px 10px;">
+						@if(app()->getLocale() === 'ms')
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}"
+							   style="padding:5px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600;">EN</a>
+							<span style="padding:5px 14px;border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;font-weight:600;">BM</span>
+						@else
+							<span style="padding:5px 14px;border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;font-weight:600;">EN</span>
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}"
+							   style="padding:5px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600;">BM</a>
+						@endif
+					</div>
+
+					<a href="{{ lroute('index') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
 						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25H8.25V21.75H3.75A.75.75 0 013 21V9.75z"/></svg>
-						Home
+						{{ __('nav.home') }}
 					</a>
 
-					<a href="{{ route('about') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+					<a href="{{ lroute('about') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
 						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-						About Us
+						{{ __('nav.about_us') }}
 					</a>
 
 					<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." target="_blank" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'" onmouseout="this.style.background='transparent'">
 						<svg style="width:18px;height:18px;color:#25D366;" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-						Contact Us
+						{{ __('nav.contact_us') }}
 					</a>
 
 					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
 
 					{{-- Pages collapsible --}}
 					<button id="mobile-pages-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						<span>Pages</span>
+						<span>{{ __('nav.pages') }}</span>
 						<svg id="mobile-pages-chevron" style="width:16px;height:16px;transition:transform 0.25s;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
 					</button>
 					<div id="mobile-pages-submenu" style="display:none;padding-left:12px;">
-						<a href="{{ route('faq') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">FAQ</a>
-						<a href="{{ route('privacy-policy') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Privacy Policy</a>
-						<a href="{{ route('terms') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Terms &amp; Conditions</a>
+						<a href="{{ lroute('faq') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.faq') }}</a>
+						<a href="{{ lroute('privacy-policy') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.privacy_policy') }}</a>
+						<a href="{{ lroute('terms') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.terms') }}</a>
 					</div>
 
 					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
 
 					{{-- Organizer collapsible --}}
 					<button id="mobile-org-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						<span>Organizer</span>
+						<span>{{ __('nav.organizer') }}</span>
 						<svg id="mobile-org-chevron" style="width:16px;height:16px;transition:transform 0.25s;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
 					</button>
 					<div id="mobile-org-submenu" style="display:none;padding-left:12px;">
-						<a href="{{ route('organizer.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Login</a>
-						<a href="{{ route('organizer.register') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Register</a>
-						<a href="{{ route('organizer.worker.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Worker Login</a>
+						<a href="{{ route('organizer.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.organizer_login') }}</a>
+						<a href="{{ route('organizer.register') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.organizer_register') }}</a>
+						<a href="{{ route('organizer.worker.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">{{ __('nav.worker_login') }}</a>
 					</div>
 
 				</div>
@@ -419,7 +456,7 @@
 				<div class="row">
 					<!-- Brand & Description -->
 					<div class="col-lg-4 col-md-6 mb-4">
-						<a href="/" class="d-inline-block mb-3">
+						<a href="{{ lroute('index') }}" class="d-inline-block mb-3">
 							<img src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" alt="Sistem Kami" style="height: 36px; filter: brightness(0) invert(1);">
 						</a>
 						<p class="small mb-4" style="color: rgba(255,255,255,0.6); line-height: 1.7;">
@@ -446,30 +483,30 @@
 
 					<!-- Quick Links -->
 					<div class="col-lg-2 col-md-6 col-6 mb-4">
-						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">Quick Links</h6>
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">{{ __('nav.quick_links') }}</h6>
 						<ul class="list-unstyled" style="font-size: 0.85rem;">
-							<li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Home</a></li>
-							<li class="mb-2"><a href="{{ route('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">About Us</a></li>
-							<li class="mb-2"><a href="{{ route('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Search</a></li>
-							<li class="mb-2"><a href="{{ route('faq') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">FAQ</a></li>
-							<li class="mb-2"><a href="{{ route('privacy-policy') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Privacy Policy</a></li>
-							<li class="mb-2"><a href="{{ route('terms') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Terms &amp; Conditions</a></li>
+							<li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.home') }}</a></li>
+							<li class="mb-2"><a href="{{ lroute('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.about_us') }}</a></li>
+							<li class="mb-2"><a href="{{ lroute('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.search') }}</a></li>
+							<li class="mb-2"><a href="{{ lroute('faq') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.faq') }}</a></li>
+							<li class="mb-2"><a href="{{ lroute('privacy-policy') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.privacy_policy') }}</a></li>
+							<li class="mb-2"><a href="{{ lroute('terms') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.terms') }}</a></li>
 						</ul>
 					</div>
 
 					<!-- For Organizers -->
 					<div class="col-lg-3 col-md-6 col-6 mb-4">
-						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">For Organizers</h6>
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">{{ __('nav.for_organizers') }}</h6>
 						<ul class="list-unstyled" style="font-size: 0.85rem;">
-							<li class="mb-2"><a href="{{ route('organizer.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Organizer Login</a></li>
-							<li class="mb-2"><a href="{{ route('organizer.register') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Organizer Register</a></li>
-							<li class="mb-2"><a href="{{ route('organizer.worker.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Worker Login</a></li>
+							<li class="mb-2"><a href="{{ route('organizer.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.organizer') }} {{ __('nav.organizer_login') }}</a></li>
+							<li class="mb-2"><a href="{{ route('organizer.register') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.organizer') }} {{ __('nav.organizer_register') }}</a></li>
+							<li class="mb-2"><a href="{{ route('organizer.worker.login') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.worker_login') }}</a></li>
 						</ul>
 					</div>
 
 					<!-- Contact Info -->
 					<div class="col-lg-3 col-md-6 mb-4">
-						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">Contact Us</h6>
+						<h6 class="text-white fw-bold mb-3" style="font-size: 0.9rem;">{{ __('nav.contact') }}</h6>
 						<ul class="list-unstyled small" style="color: rgba(255,255,255,0.6);">
 							<li class="mb-2 d-flex align-items-start gap-2">
 								<i class="fas fa-map-marker-alt mt-1" style="color: rgba(255,255,255,0.4); min-width: 14px;"></i>
@@ -490,11 +527,11 @@
 				<!-- Bottom bar -->
 				<div class="pt-4 mt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
 					<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-						<small style="color: rgba(255,255,255,0.4);">&copy; {{ date('Y') }} Sistem Kami. All rights reserved.</small>
+						<small style="color: rgba(255,255,255,0.4);">&copy; {{ date('Y') }} Sistem Kami. {{ __('nav.copyright') }}</small>
 						<div class="d-flex gap-3 flex-wrap justify-content-center">
-							<a href="{{ route('privacy-policy') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Privacy Policy</a>
-							<a href="{{ route('terms') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Terms &amp; Conditions</a>
-							<small style="color: rgba(255,255,255,0.3);">Made with <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.7rem;"></i> in Malaysia</small>
+							<a href="{{ lroute('privacy-policy') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">{{ __('nav.privacy_policy') }}</a>
+							<a href="{{ lroute('terms') }}" style="color:rgba(255,255,255,0.35);font-size:0.78rem;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">{{ __('nav.terms') }}</a>
+							<small style="color: rgba(255,255,255,0.3);">{{ __('nav.made_in_malaysia') }}</small>
 						</div>
 					</div>
 				</div>
@@ -606,15 +643,14 @@
 	<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a2942;border-top:1px solid rgba(255,255,255,0.1);padding:14px 20px;">
 		<div style="max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
 			<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.8);flex:1;min-width:220px;">
-				We use cookies to improve your experience and analyze site traffic.
-				See our <a href="{{ route('privacy-policy') }}" style="color:#93c5fd;text-decoration:underline;">Privacy Policy</a> for details.
+				{{ __('nav.cookie_text', ['link' => '<a href="' . lroute('privacy-policy') . '" style="color:#93c5fd;text-decoration:underline;">' . __('nav.privacy_policy') . '</a>']) }}
 			</p>
 			<div style="display:flex;gap:8px;flex-shrink:0;">
 				<button id="cookie-decline" style="padding:7px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.7);font-size:0.82rem;cursor:pointer;">
-					Decline
+					{{ __('nav.cookie_decline') }}
 				</button>
 				<button id="cookie-accept" style="padding:7px 18px;border-radius:6px;border:none;background:#3b82f6;color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;">
-					Accept All
+					{{ __('nav.cookie_accept') }}
 				</button>
 			</div>
 		</div>

@@ -91,7 +91,7 @@ class BusinessController extends Controller
         // Server-side cache for public profiles (5 min) — bypasses DB on repeat visits
         $cacheKey = null;
         if (!$isPrivateRoute && !$request->filled('ref') && !$request->filled('keyword') && !$request->filled('package_category')) {
-            $cacheKey = 'profile_page:' . $slug;
+            $cacheKey = 'profile_page:' . app()->getLocale() . ':' . $slug;
             $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
             if ($cached) {
                 return response($cached)
