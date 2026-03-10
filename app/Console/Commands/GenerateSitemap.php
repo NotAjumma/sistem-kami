@@ -18,7 +18,11 @@ class GenerateSitemap extends Command
 
         // Static pages
         $sitemap->add(Url::create('/')->setPriority(1.0)->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY));
-        $sitemap->add(Url::create('/search')->setPriority(0.7)->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY));
+        $sitemap->add(Url::create('/search')->setPriority(0.8)->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY));
+        $sitemap->add(Url::create('/about')->setPriority(0.6)->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY));
+        $sitemap->add(Url::create('/faq')->setPriority(0.7)->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY));
+        $sitemap->add(Url::create('/privacy-policy')->setPriority(0.3)->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY));
+        $sitemap->add(Url::create('/terms-and-conditions')->setPriority(0.3)->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY));
 
         // Public organizer profiles
         Organizer::where('is_active', true)

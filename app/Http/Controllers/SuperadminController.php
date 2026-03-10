@@ -420,6 +420,7 @@ class SuperadminController extends Controller
             'route_cache'           => ['label' => 'Cache Routes',                'command' => 'route:cache',      'args' => [],             'description' => 'Compiles all routes into a single cached file for faster route matching.',                     'danger' => false],
             'view_cache'            => ['label' => 'Cache Views',                 'command' => 'view:cache',       'args' => [],             'description' => 'Pre-compiles all Blade templates.',                                                              'danger' => false],
             'optimize_clear'        => ['label' => 'Clear All Caches',            'command' => 'optimize:clear',   'args' => [],             'description' => 'Clears config, route, view, and application caches. Use after code changes.',                  'danger' => false],
+            'sitemap_generate'      => ['label' => 'Generate Sitemap',             'command' => 'sitemap:generate', 'args' => [],             'description' => 'Regenerates public/sitemap.xml with all public pages and organizer profiles using the live APP_URL.',  'danger' => false],
         ];
     }
 
