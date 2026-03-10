@@ -106,7 +106,7 @@ class BusinessController extends Controller
             $packageRelation . '.discounts',
             $packageRelation . '.category',
             $packageRelation . '.images',
-            $packageRelation . '.addons',
+            $packageRelation . '.addons' => fn($q) => $q->where('is_active', true),
             $packageRelation . '.items',
         ])->where('slug', $slug)->firstOrFail();
 

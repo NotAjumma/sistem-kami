@@ -362,19 +362,16 @@
 
 					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
 
-					<div style="padding:6px 14px 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.35);">Organizer</div>
-
-					<a href="{{ route('organizer.login') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						Login
-					</a>
-
-					<a href="{{ route('organizer.register') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						Register
-					</a>
-
-					<a href="{{ route('organizer.worker.login') }}" style="display:flex;align-items:center;gap:12px;padding:11px 14px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						Worker Login
-					</a>
+					{{-- Organizer collapsible --}}
+					<button id="mobile-org-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						<span>Organizer</span>
+						<svg id="mobile-org-chevron" style="width:16px;height:16px;transition:transform 0.25s;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+					</button>
+					<div id="mobile-org-submenu" style="display:none;padding-left:12px;">
+						<a href="{{ route('organizer.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Login</a>
+						<a href="{{ route('organizer.register') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Register</a>
+						<a href="{{ route('organizer.worker.login') }}" style="display:block;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">Worker Login</a>
+					</div>
 
 				</div>
 			</div>
@@ -455,6 +452,8 @@
 							<li class="mb-2"><a href="{{ route('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">About Us</a></li>
 							<li class="mb-2"><a href="{{ route('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Search</a></li>
 							<li class="mb-2"><a href="{{ route('faq') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">FAQ</a></li>
+							<li class="mb-2"><a href="{{ route('privacy-policy') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Privacy Policy</a></li>
+							<li class="mb-2"><a href="{{ route('terms') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Terms &amp; Conditions</a></li>
 						</ul>
 					</div>
 
@@ -580,6 +579,19 @@
 			var btn=document.getElementById('mobile-pages-toggle');
 			var sub=document.getElementById('mobile-pages-submenu');
 			var chv=document.getElementById('mobile-pages-chevron');
+			if(!btn||!sub)return;
+			var open=false;
+			btn.addEventListener('click',function(){
+				open=!open;
+				sub.style.display=open?'block':'none';
+				if(chv)chv.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+			});
+		})();
+		// Mobile Organizer submenu toggle
+		(function(){
+			var btn=document.getElementById('mobile-org-toggle');
+			var sub=document.getElementById('mobile-org-submenu');
+			var chv=document.getElementById('mobile-org-chevron');
 			if(!btn||!sub)return;
 			var open=false;
 			btn.addEventListener('click',function(){

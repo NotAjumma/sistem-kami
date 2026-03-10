@@ -20,6 +20,7 @@ class PackageAddon extends Model
         'special_date_start',
         'special_date_end',
         'special_date',
+        'is_active',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class PackageAddon extends Model
         'is_required'        => 'boolean',
         'is_qty'             => 'boolean',
         'is_time'            => 'boolean',
+        'is_active'          => 'boolean',
         'special_date_start' => 'date',
         'special_date_end'   => 'date',
         'special_date'       => 'date',

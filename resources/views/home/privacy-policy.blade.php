@@ -43,7 +43,7 @@
 
 <section class="policy-hero text-white text-center">
     <div class="container">
-        <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">Privacy Policy</h1>
+        <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">Privacy Policy</h1>
         <p class="mb-0" style="color: rgba(255,255,255,0.7);">Last updated: {{ date('d F Y') }}</p>
     </div>
 </section>

@@ -259,22 +259,24 @@
                     <table class="table table-bordered table-sm related-table mb-0">
                         <thead class="table">
                             <tr>
-                                <th style="width:14%">Name</th>
-                                <th style="width:10%">Hint</th>
-                                <th style="width:12%">Description</th>
-                                <th style="width:8%">Price (RM)</th>
-                                <th style="width:7%">Time (min)</th>
-                                <th style="width:6%" class="text-center">Is Time</th>
-                                <th style="width:6%" class="text-center">Is Qty</th>
-                                <th style="width:6%" class="text-center">Required</th>
-                                <th style="width:10%">Special From</th>
-                                <th style="width:10%">Special To</th>
+                                <th style="width:13%">Name</th>
+                                <th style="width:9%">Hint</th>
+                                <th style="width:11%">Description</th>
+                                <th style="width:7%">Price (RM)</th>
+                                <th style="width:6%">Time (min)</th>
+                                <th style="width:5%" class="text-center">Is Time</th>
+                                <th style="width:5%" class="text-center">Is Qty</th>
+                                <th style="width:5%" class="text-center">Required</th>
+                                <th style="width:9%">Special From</th>
+                                <th style="width:9%">Special To</th>
+                                <th style="width:6%" class="text-center">Active</th>
                                 <th style="width:4%"></th>
                             </tr>
                         </thead>
                         <tbody id="addons-wrapper">
                             @forelse ($package->addons as $i => $addon)
-                            <tr class="addon-row">
+                            <tr class="addon-row {{ $addon->is_active ? '' : 'table-secondary' }}">
+                                <input type="hidden" name="addons[{{ $i }}][id]" value="{{ $addon->id }}">
                                 <td><input type="text" name="addons[{{ $i }}][name]" class="form-control form-control-sm" value="{{ $addon->name }}"></td>
                                 <td><input type="text" name="addons[{{ $i }}][hint]" class="form-control form-control-sm" value="{{ $addon->hint }}"></td>
                                 <td><input type="text" name="addons[{{ $i }}][description]" class="form-control form-control-sm" value="{{ $addon->description }}"></td>
@@ -285,6 +287,7 @@
                                 <td class="text-center"><input type="checkbox" name="addons[{{ $i }}][is_required]" value="1" class="form-check-input" {{ $addon->is_required ? 'checked' : '' }}></td>
                                 <td><input type="date" name="addons[{{ $i }}][special_date_start]" class="form-control form-control-sm" value="{{ $addon->special_date_start ? $addon->special_date_start->format('Y-m-d') : '' }}"></td>
                                 <td><input type="date" name="addons[{{ $i }}][special_date_end]" class="form-control form-control-sm" value="{{ $addon->special_date_end ? $addon->special_date_end->format('Y-m-d') : '' }}"></td>
+                                <td class="text-center"><input type="checkbox" name="addons[{{ $i }}][is_active]" value="1" class="form-check-input" {{ $addon->is_active ? 'checked' : '' }} title="Toggle to show/hide this addon for new bookings"></td>
                                 <td><i class="fas fa-times text-danger btn-remove-row" onclick="removeRow(this)"></i></td>
                             </tr>
                             @empty
@@ -299,6 +302,7 @@
                                 <td class="text-center"><input type="checkbox" name="addons[0][is_required]" value="1" class="form-check-input"></td>
                                 <td><input type="date" name="addons[0][special_date_start]" class="form-control form-control-sm"></td>
                                 <td><input type="date" name="addons[0][special_date_end]" class="form-control form-control-sm"></td>
+                                <td class="text-center"><input type="checkbox" name="addons[0][is_active]" value="1" class="form-check-input" checked></td>
                                 <td></td>
                             </tr>
                             @endforelse
@@ -541,6 +545,7 @@
             <td class="text-center"><input type="checkbox" name="addons[${i}][is_required]" value="1" class="form-check-input"></td>
             <td><input type="date" name="addons[${i}][special_date_start]" class="form-control form-control-sm"></td>
             <td><input type="date" name="addons[${i}][special_date_end]" class="form-control form-control-sm"></td>
+            <td class="text-center"><input type="checkbox" name="addons[${i}][is_active]" value="1" class="form-check-input" checked></td>
             <td><i class="fas fa-times text-danger btn-remove-row" onclick="removeRow(this)"></i></td>
         </tr>`);
     }

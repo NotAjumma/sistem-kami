@@ -453,19 +453,41 @@ class OrganizerBusinessController extends Controller
             ]);
         }
 
-        // Sync Addons
-        $package->addons()->delete();
+        // Sync Addons — upsert to preserve booking history
+        $existingAddonIds = $package->addons->pluck('id')->toArray();
+        $submittedAddonIds = [];
+
         foreach ($request->input('addons', []) as $addon) {
             if (empty($addon['name'])) continue;
-            $package->addons()->create([
-                'name'         => $addon['name'],
-                'hint'         => $addon['hint'] ?? null,
-                'description'  => $addon['description'] ?? null,
-                'price'        => $addon['price'] ?? 0,
-                'is_required'  => isset($addon['is_required']),
-                'is_time'      => isset($addon['is_time']),
-                'time_minutes' => $addon['time_minutes'] ?? null,
-            ]);
+
+            $addonData = [
+                'name'               => $addon['name'],
+                'hint'               => $addon['hint'] ?? null,
+                'description'        => $addon['description'] ?? null,
+                'price'              => $addon['price'] ?? 0,
+                'is_required'        => isset($addon['is_required']),
+                'is_qty'             => isset($addon['is_qty']),
+                'is_time'            => isset($addon['is_time']),
+                'time_minutes'       => $addon['time_minutes'] ?? null,
+                'special_date_start' => $addon['special_date_start'] ?? null,
+                'special_date_end'   => $addon['special_date_end'] ?? null,
+                'is_active'          => isset($addon['is_active']),
+            ];
+
+            if (!empty($addon['id'])) {
+                $package->addons()->where('id', (int) $addon['id'])->update($addonData);
+                $submittedAddonIds[] = (int) $addon['id'];
+            } else {
+                $addonData['is_active'] = true;
+                $new = $package->addons()->create($addonData);
+                $submittedAddonIds[] = $new->id;
+            }
+        }
+
+        // Mark removed addons as inactive instead of deleting (preserves booking history)
+        $removedIds = array_diff($existingAddonIds, $submittedAddonIds);
+        if (!empty($removedIds)) {
+            $package->addons()->whereIn('id', $removedIds)->update(['is_active' => false]);
         }
 
         // Sync Discounts
@@ -1088,7 +1110,7 @@ class OrganizerBusinessController extends Controller
             ->select('id', 'name', 'organizer_id', 'package_slot_quantity')
             ->where('organizer_id', $authUser->id)
             ->with([
-                'addons',
+                'addons' => fn($q) => $q->where('is_active', true),
                 'items',
                 'discounts',
                 'category',

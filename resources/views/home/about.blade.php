@@ -74,12 +74,12 @@
 @section('content')
 <main class="bg-white">
     <!-- Hero Section -->
-    <section class="bg-white py-5">
-        <div class="container text-center py-4">
+    <section style="background: linear-gradient(135deg, #001f4d 0%, #003080 100%); padding: 80px 0 60px;">
+        <div class="container text-center">
             <div class="fade-in-up">
-                <p class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem;">About Us</p>
-                <h1 class="fw-bold mb-3" style="font-size: 2.5rem; color: #001f4d;">We Build Tools That <br class="d-none d-md-block">Empower Your Business</h1>
-                <p class="lead mb-0 text-muted" style="max-width: 700px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
+                <p class="fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em; font-size: 0.85rem; color: rgba(255,255,255,0.55);">About Us</p>
+                <h1 class="fw-bold mb-3" style="font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff !important;">We Build Tools That <br class="d-none d-md-block">Empower Your Business</h1>
+                <p class="lead mb-0" style="max-width: 700px; margin: 0 auto; font-family: 'Poppins', sans-serif; color: rgba(255,255,255,0.7);">
                     Smart, simple, custom business software designed to help businesses work better with tailored solutions.
                 </p>
             </div>

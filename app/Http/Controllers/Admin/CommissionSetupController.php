@@ -147,6 +147,7 @@ class CommissionSetupController extends Controller
         $authUser = auth()->guard('organizer')->user();
 
         $addons = \App\Models\PackageAddon::where('package_id', $packageId)
+            ->where('is_active', true)
             ->whereHas('package', function ($q) use ($authUser) {
                 $q->where('organizer_id', $authUser->id);
             })
