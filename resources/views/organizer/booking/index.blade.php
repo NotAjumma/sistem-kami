@@ -13,59 +13,52 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">{{ $page_title }}</h4>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">{{ $page_title }}</h4>
+                        <a href="{{ route('organizer.business.booking.create') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> Create Booking
+                        </a>
                     </div>
                     <div class="card-body">
-                        <form method="GET" id="filterForm" class="mb-3 d-flex gap-2 flex-wrap">
-                            {{-- Status dropdown --}}
-                            <select name="status" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All</option>
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
-                                </option>
-                                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid
-                                </option>
-                                <!-- <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
-                                </option> -->
-                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                </option>
-                            </select>
-
-                            @if ($events)
-                            <select name="event_search" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All Events</option>
-                                @foreach ($events as $event)
-                                    <option value="{{ $event->title }}" {{ request('event_search') == $event->title ? 'selected' : '' }}>
-                                        {{ $event->title }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <form method="GET" id="filterForm" class="row g-2 mb-3">
+                            <div class="col-md-2">
+                                <select name="status" onchange="this.form.submit()" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                </select>
+                            </div>
+                            @if($events)
+                            <div class="col-md-2">
+                                <select name="event_search" onchange="this.form.submit()" class="form-control">
+                                    <option value="">All Events</option>
+                                    @foreach ($events as $event)
+                                        <option value="{{ $event->title }}" {{ request('event_search') == $event->title ? 'selected' : '' }}>
+                                            {{ $event->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @endif
-
                             @if($packages)
-                            <select name="event_search" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All Packages</option>
-                                @foreach ($packages as $package)
-                                    <option value="{{ $package->name }}" {{ request('event_search') == $package->name ? 'selected' : '' }}>
-                                        {{ $package->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="col-md-2">
+                                <select name="event_search" onchange="this.form.submit()" class="form-control">
+                                    <option value="">All Packages</option>
+                                    @foreach ($packages as $package)
+                                        <option value="{{ $package->name }}" {{ request('event_search') == $package->name ? 'selected' : '' }}>
+                                            {{ $package->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @endif
-
-
-                            {{-- Search input --}}
-                            <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                                placeholder="Search bookings..." style="width: 250px;">
-
-                            {{-- Buttons wrapper --}}
-                            <div class="d-flex gap-2 flex-grow-1 flex-wrap flex-md-nowrap"
-                                style="width: 100%; max-width: 200px;">
-                                <button type="submit" class="btn btn-primary flex-fill">Filter</button>
-                                <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-info flex-fill">Clear</a>
+                            <div class="col-md-2">
+                                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search bookings...">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                                <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-info">Clear</a>
                             </div>
                         </form>
 

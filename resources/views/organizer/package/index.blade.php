@@ -16,39 +16,31 @@
                         </a>
                     </div>
                     <div class="card-body">
-                        <form method="GET" id="filterForm" class="mb-3 d-flex gap-2 flex-wrap">
-                            {{-- Status dropdown --}}
-                            <select name="status" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All</option>
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
-                                </option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active
-                                </option>
-                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                </option>
-                            </select>
-
-                            <select name="category_search" onchange="document.getElementById('filterForm').submit()"
-                                class="form-select" style="width: 250px;">
-                                <option value="">All Categories</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->name }}" {{ request('category_search') == $category->name ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-
-                            {{-- Search input --}}
-                            <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                                placeholder="Search package..." style="width: 250px;">
-
-                            {{-- Buttons wrapper --}}
-                            <div class="d-flex gap-2 flex-grow-1 flex-wrap flex-md-nowrap"
-                                style="width: 100%; max-width: 200px;">
-                                <button type="submit" class="btn btn-primary flex-fill">Filter</button>
-                                <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-info flex-fill">Clear</a>
+                        <form method="GET" id="filterForm" class="row g-2 mb-3">
+                            <div class="col-md-2">
+                                <select name="status" onchange="this.form.submit()" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="category_search" onchange="this.form.submit()" class="form-control">
+                                    <option value="">All Categories</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->name }}" {{ request('category_search') == $category->name ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search package...">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                                <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-info">Clear</a>
                             </div>
                         </form>
 

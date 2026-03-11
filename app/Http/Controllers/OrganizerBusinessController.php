@@ -1518,15 +1518,60 @@ class OrganizerBusinessController extends Controller
         return redirect()->back()->with('error', 'Cannot verify this booking.');
     }
 
-    public function overviewReport()
+    public function overviewReport(Request $request)
     {
         $page_title = 'Overview';
         $main_title = 'Report';
-        $authUser = auth()->guard('organizer')->user()->load('user');
+        $authUser   = auth()->guard('organizer')->user()->load('user');
+        $organizerId = $authUser->id;
 
-        return view('organizer.report.overview_report',
-            compact('page_title','main_title','authUser')
-        );
+        $incomeQuery = Booking::where('organizer_id', $organizerId)->where('status', 'paid');
+
+        if ($request->filled('from')) {
+            $incomeQuery->whereDate('created_at', '>=', $request->input('from'));
+        }
+        if ($request->filled('to')) {
+            $incomeQuery->whereDate('created_at', '<=', $request->input('to'));
+        }
+
+        $incomeBookings = $incomeQuery->with(['package', 'addons'])->get();
+
+        $paidIncome    = $incomeBookings->where('payment_type', 'full_payment')->sum('final_price');
+        $depositPaid   = $incomeBookings->where('payment_type', 'deposit')->sum('paid_amount');
+        $depositTotal  = $incomeBookings->where('payment_type', 'deposit')->sum('final_price');
+        $pendingIncome = $depositTotal - $depositPaid;
+        $totalReceived = $paidIncome + $depositPaid;
+
+        $packageBreakdown = [];
+        $addonBreakdown   = [];
+        foreach ($incomeBookings as $b) {
+            $pkgId   = $b->package_id;
+            $pkgName = $b->package->name ?? 'Unknown';
+            if (!isset($packageBreakdown[$pkgId])) {
+                $packageBreakdown[$pkgId] = ['name' => $pkgName, 'bookings' => 0, 'income' => 0.0];
+            }
+            $packageBreakdown[$pkgId]['bookings']++;
+            $packageBreakdown[$pkgId]['income'] += (float) $b->final_price;
+
+            foreach ($b->addons as $addon) {
+                $qty  = $addon->pivot->qty ?? 1;
+                $name = $addon->name;
+                if (!isset($addonBreakdown[$name])) {
+                    $addonBreakdown[$name] = ['qty' => 0, 'income' => 0.0];
+                }
+                $addonBreakdown[$name]['qty']    += $qty;
+                $addonBreakdown[$name]['income'] += (float) $addon->price * $qty;
+            }
+        }
+
+        uasort($packageBreakdown, fn($a, $b) => $b['income'] <=> $a['income']);
+        uasort($addonBreakdown,   fn($a, $b) => $b['income'] <=> $a['income']);
+
+        return view('organizer.report.overview_report', compact(
+            'page_title', 'main_title', 'authUser',
+            'paidIncome', 'depositPaid', 'pendingIncome', 'totalReceived',
+            'packageBreakdown', 'addonBreakdown'
+        ));
     }
 
     public function packageChartData()

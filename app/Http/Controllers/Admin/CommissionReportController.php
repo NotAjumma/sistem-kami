@@ -113,6 +113,17 @@ class CommissionReportController extends Controller
             $workerTotals[$payout->reference_id]['payout'] += abs($payout->amount); // store positive value for display
         }
 
+        // Include organizer's own withdrawals as their payout
+        if (isset($workerTotals[$organizerId])) {
+            $organizerWithdrawals = WalletTransaction::where('organizer_id', $organizerId)
+                ->where('type', 'withdrawal')
+                ->get();
+
+            foreach ($organizerWithdrawals as $withdrawal) {
+                $workerTotals[$organizerId]['payout'] += abs($withdrawal->amount);
+            }
+        }
+
         if ($request->wantsJson() || $request->input('export') == 'json') {
             return response()->json(['report' => $report, 'summary' => $summary]);
         }
@@ -192,6 +203,7 @@ class CommissionReportController extends Controller
         $packages = \App\Models\Package::where('organizer_id', $organizerId)
             ->where('status', 'active')
             ->get();
+
 
         return view('admin.commission.report', compact(
             'report',
