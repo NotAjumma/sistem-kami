@@ -51,11 +51,11 @@
                 <label class="form-label fw-semibold">
                     <i class="fa-solid fa-stethoscope me-1 text-info"></i> Send Report To
                 </label>
-                <input type="email" class="form-control" name="health_check_email"
-                       value="{{ old('health_check_email', $settings['health_check_email']) }}"
+                <input type="email" class="form-control" name="report_email"
+                       value="{{ old('report_email', $settings['report_email']) }}"
                        placeholder="e.g. salessistemkami@gmail.com">
                 <div class="form-text">
-                    Report is emailed here when issues are found (daily at 8 AM MYT) and on every Railway deploy.
+                    All system reports go here — health check, reminders, new/cancelled bookings, daily summary.
                     Test: <code>php artisan health:report --force</code>
                 </div>
             </div>

@@ -407,3 +407,144 @@ Route::prefix('jiade')
         Route::post('/ajax/message', 'ajax_message')->name('ajax_message');
 
     });
+
+// Preview emails (local only)
+if (app()->environment('local')) {
+    Route::get('/dev/preview/booking-created', function () {
+        $booking = \App\Models\Booking::with(['organizer', 'participant', 'package', 'vendorTimeSlots', 'addons'])
+            ->latest()->first();
+
+        if (!$booking) {
+            return 'No bookings found.';
+        }
+
+        return view('emails.booking_created', compact('booking'));
+    });
+
+    Route::get('/dev/preview/daily-booking-report', function () {
+        $report = [
+            'date'           => '11 Mac 2026',
+            'total_bookings' => 3,
+            'total_revenue'  => 1800.00,
+            'organizers'     => [
+                [
+                    'name'          => 'Studio Maisarah',
+                    'total'         => 2,
+                    'total_revenue' => 1300.00,
+                    'bookings'      => [
+                        [
+                            'booking_code'   => 'BK-20260311-001',
+                            'participant'    => 'Nurul Aina binti Razali',
+                            'phone'          => '60123456789',
+                            'package'        => 'Pakej Perkahwinan Mewah',
+                            'addons'         => 'Bunga Telur, Hantaran',
+                            'slot_date'      => '15 Apr 2026',
+                            'slot_time'      => '10:00 AM',
+                            'payment_type'   => 'deposit',
+                            'amount'         => 1500.00,
+                            'paid_amount'    => 500.00,
+                            'status'         => 'confirmed',
+                            'payment_method' => 'sistemkami',
+                            'created_at'     => '09:32 AM',
+                        ],
+                        [
+                            'booking_code'   => 'BK-20260311-002',
+                            'participant'    => 'Siti Hajar binti Ahmad',
+                            'phone'          => '60198765432',
+                            'package'        => 'Pakej Akad Nikah',
+                            'addons'         => '',
+                            'slot_date'      => '20 Apr 2026',
+                            'slot_time'      => '02:00 PM',
+                            'payment_type'   => 'full_payment',
+                            'amount'         => 800.00,
+                            'paid_amount'    => 800.00,
+                            'status'         => 'paid',
+                            'payment_method' => 'sistemkami',
+                            'created_at'     => '02:15 PM',
+                        ],
+                    ],
+                ],
+                [
+                    'name'          => 'Foto Aisyah Studio',
+                    'total'         => 1,
+                    'total_revenue' => 500.00,
+                    'bookings'      => [
+                        [
+                            'booking_code'   => 'BK-20260311-003',
+                            'participant'    => 'Farah Diyana binti Ismail',
+                            'phone'          => '60111234567',
+                            'package'        => 'Pakej Bertunang',
+                            'addons'         => '',
+                            'slot_date'      => '25 Apr 2026',
+                            'slot_time'      => '09:00 AM',
+                            'payment_type'   => 'deposit',
+                            'amount'         => 600.00,
+                            'paid_amount'    => 500.00,
+                            'status'         => 'confirmed',
+                            'payment_method' => 'gform',
+                            'created_at'     => '04:50 PM',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        return view('emails.daily_booking_report', compact('report'));
+    });
+
+    Route::get('/dev/preview/reminder-report', function () {
+        $report = [
+            'ran_at'        => '11 Mar 2026, 08:00 AM',
+            'total_sent'    => 2,
+            'total_failed'  => 1,
+            'total_skipped' => 1,
+            'organizers'    => [
+                [
+                    'name'     => 'Studio Maisarah',
+                    'sent'     => 2,
+                    'failed'   => 1,
+                    'bookings' => [
+                        [
+                            'booking_code' => 'BK-20260311-001',
+                            'participant'  => 'Nurul Aina binti Razali',
+                            'phone'        => '60123456789',
+                            'package'      => 'Pakej Perkahwinan Mewah',
+                            'slot_date'    => '11 Mac 2026',
+                            'slot_time'    => '10:00 AM',
+                            'status'       => 'sent',
+                            'wa_message'   => "Hai Nurul Aina! 👋\n\nIni adalah peringatan bahawa tempahan anda akan bermula tidak lama lagi!\n\nPakej: Pakej Perkahwinan Mewah\n💰 Baki: RM500.00\n\n📅 Tarikh: 11 Mac 2026\n⏰ Masa: 10:00 AM - 01:00 PM\n\n📍 Lokasi: Studio Maisarah, No 12 Jalan Kenanga, Taman Bunga, Kuala Lumpur\n\n📝 Peringatan:\n• Hadir 15 minit awal\n• Sampin, tudung & kasut siap dipakai\n• Lewat = tiada masa tambahan\n\nKerjasama anda amat dihargai. Jumpa nanti! 😊",
+                        ],
+                        [
+                            'booking_code' => 'BK-20260311-002',
+                            'participant'  => 'Siti Hajar binti Ahmad',
+                            'phone'        => '60198765432',
+                            'package'      => 'Pakej Akad Nikah',
+                            'slot_date'    => '11 Mac 2026',
+                            'slot_time'    => '02:00 PM',
+                            'status'       => 'sent',
+                            'wa_message'   => "Hai Siti Hajar! 👋\n\nIni adalah peringatan bahawa tempahan anda akan bermula tidak lama lagi!\n\nPakej: Pakej Akad Nikah\n\n📅 Tarikh: 11 Mac 2026\n⏰ Masa: 02:00 PM - 04:00 PM\n\n📍 Lokasi: Studio Maisarah, No 12 Jalan Kenanga, Taman Bunga, Kuala Lumpur\n\n📝 Peringatan:\n• Hadir 15 minit awal\n• Sampin, tudung & kasut siap dipakai\n• Lewat = tiada masa tambahan\n\nKerjasama anda amat dihargai. Jumpa nanti! 😊",
+                        ],
+                        [
+                            'booking_code' => 'BK-20260311-003',
+                            'participant'  => 'Farah Diyana binti Ismail',
+                            'phone'        => '',
+                            'package'      => 'Pakej Bertunang',
+                            'slot_date'    => '11 Mac 2026',
+                            'slot_time'    => '09:00 AM',
+                            'status'       => 'failed',
+                            'wa_message'   => '',
+                        ],
+                    ],
+                ],
+                [
+                    'name'     => 'Foto Aisyah Studio',
+                    'sent'     => 0,
+                    'failed'   => 0,
+                    'bookings' => [],
+                ],
+            ],
+        ];
+
+        return view('emails.reminder_report', compact('report'));
+    });
+}

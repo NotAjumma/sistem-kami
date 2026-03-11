@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\ReminderReportMail;
+use App\Models\AppSetting;
 use App\Models\Booking;
 use App\Models\Organizer;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SendBookingReminders extends Command
 {
@@ -18,14 +21,25 @@ class SendBookingReminders extends Command
     {
         $now    = Carbon::now();
         $hour   = (int) $now->format('H');
+        // Look back 2 hours to catch slots missed due to scheduler downtime/restarts
+        $start  = Carbon::now()->subHours(2);
         $cutoff = Carbon::now()->addHours(12);
 
         $organizers = Organizer::whereNotNull('fonnte_token')
             ->where('fonnte_token', '!=', '')
             ->get();
 
+        $report = [
+            'ran_at'        => $now->setTimezone('Asia/Kuala_Lumpur')->format('d M Y, h:i A'),
+            'total_sent'    => 0,
+            'total_failed'  => 0,
+            'total_skipped' => 0,
+            'organizers'    => [],
+        ];
+
         if ($organizers->isEmpty()) {
             $this->info('No organizers with Fonnte token configured.');
+            $this->sendReport($report);
             return;
         }
 
@@ -35,6 +49,7 @@ class SendBookingReminders extends Command
 
             if ($this->isDuringQuietHours($hour, $quietStart, $quietEnd)) {
                 $this->info("Organizer {$organizer->name}: quiet hours ({$quietStart}:00–{$quietEnd}:00). Skipping.");
+                $report['total_skipped']++;
                 continue;
             }
 
@@ -42,30 +57,76 @@ class SendBookingReminders extends Command
                 ->where('organizer_id', $organizer->id)
                 ->whereNotIn('status', ['cancelled'])
                 ->whereNull('reminder_sent_at')
-                ->whereHas('vendorTimeSlots', function ($q) use ($now, $cutoff) {
+                ->whereHas('vendorTimeSlots', function ($q) use ($start, $cutoff) {
                     $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
-                        $now->toDateTimeString(),
+                        $start->toDateTimeString(),
                         $cutoff->toDateTimeString(),
                     ]);
                 })
                 ->get();
 
-            foreach ($bookings as $booking) {
-                $sent = $this->sendReminder($booking, $organizer);
+            $orgEntry = [
+                'name'     => $organizer->name,
+                'sent'     => 0,
+                'failed'   => 0,
+                'bookings' => [],
+            ];
 
-                if ($sent) {
+            foreach ($bookings as $booking) {
+                $result = $this->sendReminder($booking, $organizer);
+
+                $slot     = $booking->vendorTimeSlots->first();
+                $slotDate = $slot ? Carbon::parse($slot->booked_date_start)->format('d M Y') : '-';
+                $slotTime = $slot ? Carbon::parse($slot->booked_time_start)->format('h:i A') : '-';
+
+                $orgEntry['bookings'][] = [
+                    'booking_code' => $booking->booking_code,
+                    'participant'  => $booking->participant->name ?? '-',
+                    'phone'        => $result['phone'],
+                    'package'      => $booking->package->name ?? '-',
+                    'slot_date'    => $slotDate,
+                    'slot_time'    => $slotTime,
+                    'status'       => $result['success'] ? 'sent' : 'failed',
+                    'wa_message'   => $result['message'],
+                ];
+
+                if ($result['success']) {
                     $booking->update(['reminder_sent_at' => now()]);
                     $this->info("Reminder sent for booking {$booking->booking_code}");
+                    $orgEntry['sent']++;
+                    $report['total_sent']++;
                 } else {
                     $this->warn("Failed to send reminder for booking {$booking->booking_code}");
+                    $orgEntry['failed']++;
+                    $report['total_failed']++;
                 }
 
                 // Random delay 5–15 seconds between each message to avoid WA ban
                 sleep(rand(5, 15));
             }
+
+            $report['organizers'][] = $orgEntry;
         }
 
         $this->info('Done.');
+        $this->sendReport($report);
+    }
+
+    private function sendReport(array $report): void
+    {
+        $to = AppSetting::get('report_email');
+
+        if (!$to) {
+            return;
+        }
+
+        try {
+            Mail::to($to)->send(new ReminderReportMail($report));
+            $this->info("Report emailed to {$to}");
+        } catch (\Exception $e) {
+            Log::error('Failed to send reminder report email', ['error' => $e->getMessage()]);
+            $this->warn("Could not send report email: {$e->getMessage()}");
+        }
     }
 
     private function isDuringQuietHours(int $hour, int $start, int $end): bool
@@ -80,13 +141,15 @@ class SendBookingReminders extends Command
         return $hour >= $start || $hour < $end;
     }
 
-    private function sendReminder(Booking $booking, Organizer $organizer): bool
+    private function sendReminder(Booking $booking, Organizer $organizer): array
     {
+        $fail = fn(string $msg = '') => ['success' => false, 'message' => $msg, 'phone' => ''];
+
         $participant = $booking->participant;
         $phone       = $participant->whatsapp_number ?: $participant->phone;
 
         if (!$phone) {
-            return false;
+            return $fail();
         }
 
         // Normalize phone: strip leading 0, prefix 60
@@ -201,17 +264,17 @@ class SendBookingReminders extends Command
                     'booking'  => $booking->booking_code,
                     'response' => $response->json(),
                 ]);
-                return false;
+                return $fail($message);
             }
 
-            return true;
+            return ['success' => true, 'message' => $message, 'phone' => $phone];
 
         } catch (\Exception $e) {
             Log::error('Fonnte reminder exception', [
                 'booking' => $booking->booking_code,
                 'error'   => $e->getMessage(),
             ]);
-            return false;
+            return $fail($message);
         }
     }
 }

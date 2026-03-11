@@ -32,7 +32,7 @@ class PaymentConfirmed extends Mailable
         // $pdf = Pdf::loadView('emails.ticket_pdf', ['booking' => $this->booking]);
 
         \Log::info($this->booking);
-        return $this->subject('Payment Confirmation')
+        return $this->subject(mail_env_tag() . ' Payment Confirmation')
             ->view('emails.payment_confirmed_package')
             ->with([
                 'booking' => $this->booking,
@@ -48,7 +48,7 @@ class PaymentConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmed',
+            subject: mail_env_tag() . ' Payment Confirmed',
         );
     }
 

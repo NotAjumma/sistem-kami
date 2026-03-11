@@ -13,12 +13,15 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('reminders:send')->everyMinute(); // for testing
-        $schedule->command('reminders:send')->hourly();
+        $schedule->command('reminders:send')->everyFifteenMinutes();
         $schedule->command('sitemap:generate')->daily();
 
         // Health check — daily at 8 AM MYT (UTC+8 → stored as UTC 00:00)
         // Emails only when failures found; use --force to always email
         $schedule->command('health:report')->dailyAt('00:00');
+
+        // Daily booking report — 11 PM MYT (UTC+8 → UTC 15:00)
+        $schedule->command('bookings:daily-report')->dailyAt('15:00');
     }
 
     /**

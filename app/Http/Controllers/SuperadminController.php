@@ -348,7 +348,7 @@ class SuperadminController extends Controller
             'tinymce_api_key'    => AppSetting::get('tinymce_api_key', ''),
             'resend_api_key'     => AppSetting::get('resend_api_key', ''),
             'health_check_from'  => AppSetting::get('health_check_from', 'onboarding@resend.dev'),
-            'health_check_email' => AppSetting::get('health_check_email', 'salessistemkami@gmail.com'),
+            'report_email'       => AppSetting::get('report_email', 'salessistemkami@gmail.com'),
         ];
 
         return view('superadmin.settings', compact('settings'));
@@ -360,13 +360,13 @@ class SuperadminController extends Controller
             'tinymce_api_key'    => 'nullable|string|max:255',
             'resend_api_key'     => 'nullable|string|max:255',
             'health_check_from'  => 'nullable|email|max:255',
-            'health_check_email' => 'nullable|email|max:255',
+            'report_email'       => 'nullable|email|max:255',
         ]);
 
         AppSetting::set('tinymce_api_key',    $request->input('tinymce_api_key'));
         AppSetting::set('resend_api_key',     $request->input('resend_api_key'));
         AppSetting::set('health_check_from',  $request->input('health_check_from'));
-        AppSetting::set('health_check_email', $request->input('health_check_email'));
+        AppSetting::set('report_email',       $request->input('report_email'));
 
         return back()->with('success', 'Settings saved.');
     }

@@ -376,7 +376,7 @@
             if (localStorage.getItem('sk_cookie_consent') === 'accepted') {
                 fetch('/visitor-log', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'visit_page', page: 'home' })
                 }).catch(function(){});
             }

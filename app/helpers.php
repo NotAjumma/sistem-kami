@@ -73,3 +73,15 @@ if (!function_exists('format_payment_datetime')) {
         return $datetime?->format('d M Y, g:i A') ?? '-';
     }
 }
+
+if (!function_exists('mail_env_tag')) {
+    function mail_env_tag(): string
+    {
+        return match (app()->environment()) {
+            'production' => '[PROD]',
+            'staging'    => '[STG]',
+            'local'      => '[LOCAL]',
+            default      => '[' . strtoupper(app()->environment()) . ']',
+        };
+    }
+}

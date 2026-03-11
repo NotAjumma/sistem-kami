@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Booking;
+use App\Observers\BookingObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
@@ -44,5 +46,6 @@ class AppServiceProvider extends ServiceProvider
             Artisan::call('storage:link');
         }
 
+        Booking::observe(BookingObserver::class);
     }
 }

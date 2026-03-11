@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class HealthCheckMail extends Mailable
+class DailyBookingReportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -16,17 +16,16 @@ class HealthCheckMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $passed = $this->report['passed'];
-        $total  = $this->report['total'];
-        $status = $passed === $total ? '✅ All OK' : '⚠️ Issues Found';
+        $total = $this->report['total_bookings'];
+        $date  = $this->report['date'];
 
         return new Envelope(
-            subject: mail_env_tag() . " [Sistem Kami] Health Check — $status ($passed/$total) — {$this->report['ran_at']}",
+            subject: mail_env_tag() . " [Sistem Kami] Daily Booking Report — {$total} bookings — {$date}",
         );
     }
 
     public function content(): Content
     {
-        return new Content(view: 'emails.health_check_report');
+        return new Content(view: 'emails.daily_booking_report');
     }
 }

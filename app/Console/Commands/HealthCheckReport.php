@@ -31,11 +31,11 @@ class HealthCheckReport extends Command
         $this->line('');
         $this->line("<fg=$color>Result: {$report['summary']}</>");
 
-        $email     = AppSetting::get('health_check_email', 'salessistemkami@gmail.com');
+        $email     = AppSetting::get('report_email', 'salessistemkami@gmail.com');
         $resendKey = AppSetting::get('resend_api_key', '');
 
         if (empty($email)) {
-            $this->warn('No health_check_email in settings — skipping email.');
+            $this->warn('No report_email in settings — skipping email.');
             return $failed > 0 ? self::FAILURE : self::SUCCESS;
         }
 
