@@ -15,7 +15,7 @@ class BookingObserver
     {
         $to = AppSetting::get('report_email');
 
-        if (!$to) {
+        if (!$to || !configure_resend_mailer()) {
             return;
         }
 
@@ -39,7 +39,7 @@ class BookingObserver
 
         $to = AppSetting::get('report_email');
 
-        if (!$to) {
+        if (!$to || !configure_resend_mailer()) {
             return;
         }
 

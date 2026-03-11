@@ -85,3 +85,38 @@ if (!function_exists('mail_env_tag')) {
         };
     }
 }
+
+if (!function_exists('configure_resend_mailer')) {
+    /**
+     * Apply Resend SMTP config at runtime using the DB-stored API key.
+     * Call this before any Mail::send() outside of HealthCheckReport.
+     * Returns false if resend_api_key is not configured.
+     */
+    function configure_resend_mailer(): bool
+    {
+        // Staging: suppress all emails except health check (which configures itself directly)
+        if (app()->environment('staging')) {
+            return false;
+        }
+
+        $resendKey = \App\Models\AppSetting::get('resend_api_key', '');
+
+        if (empty($resendKey)) {
+            return false;
+        }
+
+        $fromEmail = \App\Models\AppSetting::get('health_check_from', 'onboarding@resend.dev');
+        $fromName  = \App\Models\AppSetting::get('health_check_from_name', 'Sistem Kami');
+
+        \Illuminate\Support\Facades\Config::set('mail.default', 'smtp');
+        \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',       'smtp.resend.com');
+        \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',       465);
+        \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption', 'ssl');
+        \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username',   'resend');
+        \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password',   $resendKey);
+        \Illuminate\Support\Facades\Config::set('mail.from.address',            $fromEmail);
+        \Illuminate\Support\Facades\Config::set('mail.from.name',               $fromName);
+
+        return true;
+    }
+}

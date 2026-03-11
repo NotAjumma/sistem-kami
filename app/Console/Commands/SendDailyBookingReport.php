@@ -22,7 +22,7 @@ class SendDailyBookingReport extends Command
     {
         $to = AppSetting::get('report_email');
 
-        if (!$to) {
+        if (!$to || !configure_resend_mailer()) {
             $this->info('No report_email configured in app_settings. Skipping.');
             return;
         }
