@@ -125,9 +125,10 @@ $homeRoutes = function () {
     Route::get('/search',               [HomeController::class, 'search'])->name('search');
 };
 
-// Bahasa Melayu home routes first (fixed bm/ prefix, more specific)
+// Mandarin home routes (fixed zh/ prefix)
+Route::group(['prefix' => 'zh', 'as' => 'zh.', 'locale' => 'zh', 'middleware' => 'setlocale'], $homeRoutes);
+// Bahasa Melayu home routes (fixed bm/ prefix)
 Route::group(['prefix' => 'bm', 'as' => 'bm.', 'locale' => 'ms', 'middleware' => 'setlocale'], $homeRoutes);
-
 // English home routes (no prefix)
 Route::group(['locale' => 'en', 'middleware' => 'setlocale'], $homeRoutes);
 Route::get('/qr/{slug}', function ($slug) {
@@ -299,7 +300,8 @@ $profileRoutes = function () {
     Route::get('/{organizerSlug}/{packageSlug}',         [BusinessController::class, 'showPackage'])->name('business.package');
     Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
 };
-// BM registered first so bm/{slug} is matched before EN's /{organizerSlug}/{packageSlug} can catch bm/xxx
+// Fixed prefixes first (zh, bm) so zh/{slug} and bm/{slug} match before EN's wildcard /{organizerSlug}/{packageSlug}
+Route::group(['prefix' => 'zh', 'as' => 'zh.', 'locale' => 'zh', 'middleware' => 'setlocale'], $profileRoutes);
 Route::group(['prefix' => 'bm', 'as' => 'bm.', 'locale' => 'ms', 'middleware' => 'setlocale'], $profileRoutes);
 Route::group(['locale' => 'en', 'middleware' => 'setlocale'], $profileRoutes);
 Route::get('/organizer/{id}/banners', [BusinessController::class, 'getBanners']);

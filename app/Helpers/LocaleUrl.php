@@ -7,17 +7,17 @@ use Illuminate\Support\Facades\Route;
 
 class LocaleUrl
 {
+    const PREFIXES = ['bm.' => 'ms', 'zh.' => 'zh'];
+    const ROUTE_AS  = ['en' => '', 'ms' => 'bm.', 'zh' => 'zh.'];
+
     /**
      * Generate a locale-aware URL for a named route.
-     * In English: route('about'), in BM: route('bm.about')
      */
     public static function route(string $name, array $parameters = []): string
     {
-        $locale = App::getLocale();
-        $routeName = $locale === 'en' ? $name : "bm.{$name}";
-
+        $as = self::ROUTE_AS[App::getLocale()] ?? '';
         try {
-            return route($routeName, $parameters);
+            return route($as . $name, $parameters);
         } catch (\Exception $e) {
             return '/';
         }
@@ -25,28 +25,32 @@ class LocaleUrl
 
     /**
      * Return the equivalent URL for the given target locale on the current page.
-     * Used by the language switcher to generate the alternate language link.
      */
     public static function alternate(string $targetLocale): string
     {
+        $fallbacks = ['en' => url('/'), 'ms' => url('/bm'), 'zh' => url('/zh')];
         $currentRoute = Route::currentRouteName();
 
         if (!$currentRoute) {
-            return $targetLocale === 'en' ? url('/') : url('/bm');
+            return $fallbacks[$targetLocale] ?? url('/');
         }
 
-        // Strip 'bm.' prefix if present to get the base route name
-        $baseName = str_starts_with($currentRoute, 'bm.') ? substr($currentRoute, 3) : $currentRoute;
+        // Strip any locale prefix to get the base route name
+        $baseName = $currentRoute;
+        foreach (array_keys(self::PREFIXES) as $pfx) {
+            if (str_starts_with($currentRoute, $pfx)) {
+                $baseName = substr($currentRoute, strlen($pfx));
+                break;
+            }
+        }
 
-        $targetRouteName = $targetLocale === 'en' ? $baseName : "bm.{$baseName}";
-
-        // Pass current route parameters (e.g. slug for profile pages)
+        $as = self::ROUTE_AS[$targetLocale] ?? '';
         $params = Route::current()?->parameters() ?? [];
 
         try {
-            return route($targetRouteName, $params);
+            return route($as . $baseName, $params);
         } catch (\Exception $e) {
-            return $targetLocale === 'en' ? url('/') : url('/bm');
+            return $fallbacks[$targetLocale] ?? url('/');
         }
     }
 }

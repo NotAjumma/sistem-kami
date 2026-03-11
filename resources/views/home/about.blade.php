@@ -153,11 +153,7 @@
                             <i class="fas fa-calendar-check fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.booking_system') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Package-based booking with deposit options, automatic confirmation,
-                            receipt generation, and multiple payment methods. Also supports manual booking
-                            where customers are directed to WhatsApp for personal confirmation.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.booking_system_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-2">
@@ -166,10 +162,7 @@
                             <i class="fas fa-boxes fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.package_slot') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Create packages with pricing, add-ons, and images. Manage time slots
-                            with capacity tracking, off-days, and availability control.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.package_slot_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-3">
@@ -178,10 +171,7 @@
                             <i class="fas fa-credit-card fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.secure_payment') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Integrated with Toyyibpay and Stripe payment gateways for smooth, secure transactions.
-                            Supports QR payments and automatic payment tracking.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.secure_payment_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-4">
@@ -190,10 +180,7 @@
                             <i class="fas fa-chart-line fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.dashboard_analytics') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Track sales, manage bookings, and monitor performance in real-time
-                            with an intuitive dashboard and detailed reports.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.dashboard_analytics_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-5">
@@ -202,10 +189,7 @@
                             <i class="fas fa-users-cog fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.worker_commission') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Assign workers to tasks, track commissions with flexible rules,
-                            and manage your team's performance effortlessly.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.worker_commission_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-6">
@@ -214,10 +198,7 @@
                             <i class="fas fa-bell fa-lg" style="color: #001f4d;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.notifications') }}</h5>
-                        <p class="text-muted small mb-0">
-                            Automated WhatsApp and email notifications for payment confirmations,
-                            booking reminders, and receipt delivery.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.notifications_desc') }}</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4 fade-in-up stagger-1">
@@ -226,10 +207,7 @@
                             <i class="fas fa-robot fa-lg" style="color: #6366f1;"></i>
                         </div>
                         <h5 class="fw-bold mb-2">{{ __('home.ai_chatbot') }}</h5>
-                        <p class="text-muted small mb-0">
-                            AI-powered chatbot that handles customer inquiries, guides them through
-                            the booking process, and provides instant answers 24/7 — without you lifting a finger.
-                        </p>
+                        <p class="text-muted small mb-0">{{ __('home.ai_chatbot_desc') }}</p>
                     </div>
                 </div>
             </div>
@@ -245,12 +223,12 @@
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="{{ route('organizer.register') }}" class="btn btn-light fw-bold px-4 py-2" style="color: #001f4d;">
-                    Register as Organizer
+                    {{ __('about.cta_register') }}
                 </a>
                 <a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda."
                    target="_blank"
                    class="btn btn-outline-light px-4 py-2">
-                    <i class="fab fa-whatsapp me-1"></i> Contact Us
+                    <i class="fab fa-whatsapp me-1"></i> {{ __('about.cta_contact') }}
                 </a>
             </div>
         </div>

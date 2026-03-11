@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\App;
 
 class SetLocale
 {
-    public const SUPPORTED = ['en', 'ms'];
+    public const SUPPORTED = ['en', 'ms', 'zh'];
     public const DEFAULT   = 'en';
 
     public function handle(Request $request, Closure $next): mixed

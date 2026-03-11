@@ -5,7 +5,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB' }}">
+<html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : (app()->getLocale() === 'zh' ? 'zh-Hans' : 'en-GB') }}">
 
 <head>
 	<!-- Google Analytics (loaded only after cookie consent) -->
@@ -63,9 +63,10 @@
 
 	<title>{{ $seoTitle }}</title>
 	<link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
-	{{-- hreflang: helps Google index both language versions --}}
+	{{-- hreflang: helps Google index all language versions --}}
 	<link rel="alternate" hreflang="en" href="{{ \App\Helpers\LocaleUrl::alternate('en') }}">
 	<link rel="alternate" hreflang="ms" href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}">
+	<link rel="alternate" hreflang="zh-Hans" href="{{ \App\Helpers\LocaleUrl::alternate('zh') }}">
 	<link rel="alternate" hreflang="x-default" href="{{ \App\Helpers\LocaleUrl::alternate('en') }}">
 
 	<!-- Geo targeting -->
@@ -247,7 +248,7 @@
 	<div id="main-wrapper" class="show bg-base {{ in_array($page, array('dashboard', 'dashboard_2')) ? 'wallet-open active' : '' }}">
 		
 		<header class="header-bg w-full border-b border-gray-200">
-			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+			<nav class="container mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8" style="position:relative;">
 				<!-- Logo -->
 				<a href="/">
 					<img
@@ -259,8 +260,26 @@
 					>
 				</a>
 
-				<!-- Hamburger button (Mobile only) -->
-				<div class="lg:hidden">
+				<!-- Mobile right side: language dropdown + hamburger -->
+				<div class="lg:hidden flex items-center" style="gap:6px;">
+					{{-- Mobile language dropdown --}}
+					<div style="position:relative;" id="mobile-lang-wrapper">
+						<button id="mobile-lang-btn" type="button"
+							style="background:none;border:1px solid #d1d5db;padding:5px 9px;cursor:pointer;display:flex;align-items:center;gap:4px;border-radius:8px;font-size:0.8rem;font-weight:600;color:#1a2942;"
+							aria-label="Select language">
+							@if(app()->getLocale() === 'ms') BM
+							@elseif(app()->getLocale() === 'zh') 中文
+							@else EN
+							@endif
+							<svg style="width:12px;height:12px;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+						</button>
+						<div id="mobile-lang-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:100px;z-index:200;">
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;border-radius:8px 8px 0 0;{{ app()->getLocale()==='en' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">EN <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">English</span></a>
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;{{ app()->getLocale()==='ms' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">BM <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">Melayu</span></a>
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('zh') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;border-radius:0 0 8px 8px;{{ app()->getLocale()==='zh' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">中文 <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">普通话</span></a>
+						</div>
+					</div>
+					{{-- Hamburger --}}
 					<button id="menu-toggle" aria-label="Open menu" style="background:none;border:none;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
 						<svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="#1a2942" stroke-width="2.2" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -271,84 +290,100 @@
 					</button>
 				</div>
 
-				<div class="hidden lg:flex gap-3 align-items-center">
-					<!-- Desktop Menu -->
-					<ul class="hidden lg:flex space-x-6 text-md font-normal text-gray-900" style="align-items:center;">
-						<li><a class="hover:underline" href="{{ lroute('index') }}">{{ __('nav.home') }}</a></li>
-						<li><a class="hover:underline" href="{{ lroute('about') }}">{{ __('nav.about_us') }}</a></li>
+				<!-- Desktop Center Nav -->
+				<ul class="hidden lg:flex space-x-6 text-sm font-normal text-gray-900" style="position:absolute;left:50%;transform:translateX(-50%);align-items:center;list-style:none;margin:0;padding:0;">
+					<li><a class="hover:underline" href="{{ lroute('index') }}">{{ __('nav.home') }}</a></li>
+					<li><a class="hover:underline" href="{{ lroute('about') }}">{{ __('nav.about_us') }}</a></li>
 
-						<!-- Pages Dropdown -->
-						<li class="relative">
-							<button type="button" id="pages-menu-button"
-								style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit;color:inherit;font-weight:inherit;"
-								aria-haspopup="true">
-								{{ __('nav.pages') }}
-								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-								</svg>
-							</button>
-							<div id="pages-menu" class="absolute z-10 hidden mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style="min-width:180px;left:0;">
-								<div class="py-1 text-xs text-gray-700" role="menu">
-									<a href="{{ lroute('faq') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.faq') }}</a>
-									<a href="{{ lroute('privacy-policy') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.privacy_policy') }}</a>
-									<a href="{{ lroute('terms') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.terms') }}</a>
-								</div>
+					<!-- Pages Dropdown -->
+					<li class="relative">
+						<button type="button" id="pages-menu-button"
+							style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit;color:inherit;font-weight:inherit;"
+							aria-haspopup="true">
+							{{ __('nav.pages') }}
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+							</svg>
+						</button>
+						<div id="pages-menu" class="absolute z-10 hidden mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style="min-width:180px;left:0;">
+							<div class="py-1 text-xs text-gray-700" role="menu">
+								<a href="{{ lroute('faq') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.faq') }}</a>
+								<a href="{{ lroute('privacy-policy') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.privacy_policy') }}</a>
+								<a href="{{ lroute('terms') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.terms') }}</a>
 							</div>
-						</li>
+						</div>
+					</li>
+				</ul>
 
-						<!-- Contact Us WhatsApp Button -->
-						<li>
-							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda."
-							target="_blank"
-							class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-								{{ __('nav.contact_us') }}
+				<!-- Desktop Right: Contact Us + Organizer + Lang -->
+				<div class="hidden lg:flex items-center" style="gap:8px;">
+
+					<!-- Contact Us Dropdown -->
+					<div style="position:relative;" id="contact-menu-wrapper">
+						<button id="contact-menu-button" type="button"
+							style="background:#22c55e;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.85rem;font-weight:600;transition:background 0.2s;"
+							onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+							{{ __('nav.contact_us') }}
+							<svg style="width:12px;height:12px;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+						</button>
+						<div id="contact-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:180px;z-index:200;">
+							<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." target="_blank"
+								style="display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:0.85rem;font-weight:500;color:#374151;text-decoration:none;border-radius:8px 8px 0 0;"
+								onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">
+								<span style="width:28px;height:28px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+									<svg style="width:15px;height:15px;fill:#fff;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+								</span>
+								WhatsApp
 							</a>
-						</li>
-					</ul>
+							<a href="mailto:salessistemkami@gmail.com"
+								style="display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:0.85rem;font-weight:500;color:#374151;text-decoration:none;border-radius:0 0 8px 8px;"
+								onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''">
+								<span style="width:28px;height:28px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+									<svg style="width:14px;height:14px;fill:#fff;" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+								</span>
+								Email
+							</a>
+						</div>
+					</div>
 
-
-					<!-- Organizer Menu (Desktop) -->
-					<div class="hidden lg:block relative">
+					<!-- Organizer Dropdown -->
+					<div style="position:relative;">
 						<button type="button"
 							class="btn btn-primary inline-flex justify-center text-xs font-normal text-gray-900"
 							id="organizer-menu-button" aria-expanded="true" aria-haspopup="true">
 							{{ __('nav.organizer') }}
 							<svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd"
-									d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-									clip-rule="evenodd" />
+								<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
 							</svg>
 						</button>
-
-						<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-							id="organizer-menu">
-							<div class="py-1 text-xs text-gray-700" role="menu" aria-orientation="vertical"
-								aria-labelledby="organizer-menu-button">
-								<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100"
-									role="menuitem">{{ __('nav.organizer_login') }}</a>
-								<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100"
-									role="menuitem">{{ __('nav.organizer_register') }}</a>
-								<a href="{{ route('organizer.worker.login') }}"
-									class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.worker_login') }}</a>
+						<div class="absolute z-10 hidden mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" id="organizer-menu">
+							<div class="py-1 text-xs text-gray-700" role="menu">
+								<a href="{{ route('organizer.login') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.organizer_login') }}</a>
+								<a href="{{ route('organizer.register') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.organizer_register') }}</a>
+								<a href="{{ route('organizer.worker.login') }}" class="block px-4 py-2 hover:bg-gray-100" role="menuitem">{{ __('nav.worker_login') }}</a>
 							</div>
 						</div>
 					</div>
-				</div>
 
-				{{-- Language Switcher (Desktop) --}}
-				<div style="display:flex;align-items:center;gap:4px;margin-left:8px;">
-					@if(app()->getLocale() === 'ms')
-						<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}"
-						   style="padding:5px 10px;border-radius:6px;border:1px solid #d1d5db;color:#6b7280;text-decoration:none;font-size:0.8rem;font-weight:600;"
-						   title="Switch to English">EN</a>
-						<span style="padding:5px 10px;border-radius:6px;background:#001f4d;color:#fff;font-size:0.8rem;font-weight:600;">BM</span>
-					@else
-						<span style="padding:5px 10px;border-radius:6px;background:#001f4d;color:#fff;font-size:0.8rem;font-weight:600;">EN</span>
-						<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}"
-						   style="padding:5px 10px;border-radius:6px;border:1px solid #d1d5db;color:#6b7280;text-decoration:none;font-size:0.8rem;font-weight:600;"
-						   title="Tukar ke Bahasa Melayu">BM</a>
-					@endif
-				</div>
+					<!-- Language Dropdown -->
+					<div style="position:relative;" id="desktop-lang-wrapper">
+						<button id="desktop-lang-btn" type="button"
+							style="background:none;border:1px solid #d1d5db;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;border-radius:8px;font-size:0.8rem;font-weight:600;color:#1a2942;transition:background 0.2s;"
+							aria-label="Select language">
+							@if(app()->getLocale() === 'ms') BM
+							@elseif(app()->getLocale() === 'zh') 中文
+							@else EN
+							@endif
+							<svg style="width:12px;height:12px;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.657a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+						</button>
+					<div id="desktop-lang-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:110px;z-index:200;">
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;border-radius:8px 8px 0 0;{{ app()->getLocale()==='en' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">EN <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">English</span></a>
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;{{ app()->getLocale()==='ms' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">BM <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">Melayu</span></a>
+							<a href="{{ \App\Helpers\LocaleUrl::alternate('zh') }}" style="display:flex;align-items:center;gap:6px;padding:9px 14px;font-size:0.82rem;font-weight:600;text-decoration:none;border-radius:0 0 8px 8px;{{ app()->getLocale()==='zh' ? 'color:#001f4d;background:#f0f4ff;' : 'color:#6b7280;background:#fff;' }}">中文 <span style="font-size:0.7rem;font-weight:400;color:#9ca3af;">普通话</span></a>
+						</div>
+					</div>
+
+				</div>{{-- end desktop right --}}
 
 			</nav>
 
@@ -356,20 +391,7 @@
 			<div id="mobile-menu" class="lg:hidden" style="display:none; background:#001f4d; border-top:1px solid rgba(255,255,255,0.1);">
 				<div style="padding:8px 12px 16px;">
 
-					{{-- Language Switcher (Mobile) --}}
-					<div style="display:flex;gap:8px;padding:6px 14px 10px;">
-						@if(app()->getLocale() === 'ms')
-							<a href="{{ \App\Helpers\LocaleUrl::alternate('en') }}"
-							   style="padding:5px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600;">EN</a>
-							<span style="padding:5px 14px;border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;font-weight:600;">BM</span>
-						@else
-							<span style="padding:5px 14px;border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;font-weight:600;">EN</span>
-							<a href="{{ \App\Helpers\LocaleUrl::alternate('ms') }}"
-							   style="padding:5px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600;">BM</a>
-						@endif
-					</div>
-
-					<a href="{{ lroute('index') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+						<a href="{{ lroute('index') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
 						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75v-5.25H8.25V21.75H3.75A.75.75 0 013 21V9.75z"/></svg>
 						{{ __('nav.home') }}
 					</a>
@@ -379,12 +401,30 @@
 						{{ __('nav.about_us') }}
 					</a>
 
-					<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." target="_blank" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'" onmouseout="this.style.background='transparent'">
-						<svg style="width:18px;height:18px;color:#25D366;" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+				{{-- Contact Us collapsible --}}
+				<button id="mobile-contact-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+					<span style="display:flex;align-items:center;gap:12px;">
+						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
 						{{ __('nav.contact_us') }}
+					</span>
+					<svg id="mobile-contact-chevron" style="width:16px;height:16px;transition:transform 0.25s;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+				</button>
+				<div id="mobile-contact-submenu" style="display:none;padding-left:12px;">
+					<a href="https://wa.me/601123053082?text=Hi%20SistemKami,%20saya%20nak%20tanya%20tentang%20platform%20anda." target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'" onmouseout="this.style.background='transparent'">
+						<span style="width:24px;height:24px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+							<svg style="width:13px;height:13px;fill:#fff;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+						</span>
+						WhatsApp
 					</a>
+					<a href="mailto:salessistemkami@gmail.com" style="display:flex;align-items:center;gap:10px;padding:10px 14px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:0.88rem;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.15)'" onmouseout="this.style.background='transparent'">
+						<span style="width:24px;height:24px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+							<svg style="width:13px;height:13px;fill:#fff;" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+						</span>
+						Email
+					</a>
+				</div>
 
-					<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
+				<div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 14px;"></div>
 
 					{{-- Pages collapsible --}}
 					<button id="mobile-pages-toggle" type="button" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:none;border:none;color:rgba(255,255,255,0.9);font-size:0.95rem;font-weight:500;border-radius:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
@@ -460,8 +500,7 @@
 							<img src="{{ asset('images/SISTEM-KAMI-LOGO.png') }}" alt="Sistem Kami" style="height: 36px; filter: brightness(0) invert(1);">
 						</a>
 						<p class="small mb-4" style="color: rgba(255,255,255,0.6); line-height: 1.7;">
-							A booking and business management platform designed to help studios and service providers
-							manage packages, schedules, and customers more efficiently.
+							{{ __('nav.footer_tagline') }}
 						</p>
 						<!-- Social Links -->
 						<div class="d-flex gap-2">
@@ -596,6 +635,12 @@
 		// Desktop organizer dropdown
 		var b=document.getElementById('organizer-menu-button'),m=document.getElementById('organizer-menu');
 		if(b&&m){b.addEventListener('click',function(){m.classList.toggle('hidden')});document.addEventListener('click',function(e){if(!b.contains(e.target)&&!m.contains(e.target))m.classList.add('hidden')})}
+		// Desktop language dropdown
+		(function(){var dlb=document.getElementById('desktop-lang-btn'),dlm=document.getElementById('desktop-lang-menu');if(!dlb||!dlm)return;dlb.addEventListener('click',function(e){e.stopPropagation();dlm.style.display=dlm.style.display==='none'?'block':'none'});document.addEventListener('click',function(e){if(!dlb.contains(e.target)&&!dlm.contains(e.target))dlm.style.display='none'})})();
+		// Desktop Contact Us dropdown
+		(function(){var cb=document.getElementById('contact-menu-button'),cm=document.getElementById('contact-menu');if(!cb||!cm)return;cb.addEventListener('click',function(e){e.stopPropagation();cm.style.display=cm.style.display==='none'?'block':'none'});document.addEventListener('click',function(e){if(!cb.contains(e.target)&&!cm.contains(e.target))cm.style.display='none'})})();
+		// Mobile language dropdown
+		(function(){var mlb=document.getElementById('mobile-lang-btn'),mlm=document.getElementById('mobile-lang-menu');if(!mlb||!mlm)return;mlb.addEventListener('click',function(e){e.stopPropagation();mlm.style.display=mlm.style.display==='none'?'block':'none'});document.addEventListener('click',function(e){if(!mlb.contains(e.target)&&!mlm.contains(e.target))mlm.style.display='none'})})();
 		// Mobile menu toggle with icon swap
 		(function(){
 			var t=document.getElementById('menu-toggle');
@@ -609,6 +654,19 @@
 				mm.style.display=open?'block':'none';
 				if(iOpen)iOpen.style.display=open?'none':'block';
 				if(iClose)iClose.style.display=open?'block':'none';
+			});
+		})();
+		// Mobile Contact submenu toggle
+		(function(){
+			var btn=document.getElementById('mobile-contact-toggle');
+			var sub=document.getElementById('mobile-contact-submenu');
+			var chv=document.getElementById('mobile-contact-chevron');
+			if(!btn||!sub)return;
+			var open=false;
+			btn.addEventListener('click',function(){
+				open=!open;
+				sub.style.display=open?'block':'none';
+				if(chv)chv.style.transform=open?'rotate(180deg)':'rotate(0deg)';
 			});
 		})();
 		// Mobile Pages submenu toggle
@@ -643,7 +701,7 @@
 	<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a2942;border-top:1px solid rgba(255,255,255,0.1);padding:14px 20px;">
 		<div style="max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
 			<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.8);flex:1;min-width:220px;">
-				{{ __('nav.cookie_text', ['link' => '<a href="' . lroute('privacy-policy') . '" style="color:#93c5fd;text-decoration:underline;">' . __('nav.privacy_policy') . '</a>']) }}
+				{!! __('nav.cookie_text', ['link' => '<a href="' . lroute('privacy-policy') . '" style="color:#93c5fd;text-decoration:underline;">' . __('nav.privacy_policy') . '</a>']) !!}
 			</p>
 			<div style="display:flex;gap:8px;flex-shrink:0;">
 				<button id="cookie-decline" style="padding:7px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.7);font-size:0.82rem;cursor:pointer;">
