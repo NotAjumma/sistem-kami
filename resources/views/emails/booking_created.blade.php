@@ -64,12 +64,26 @@
     <div class="row">
       <div class="lbl">Amount Paid</div>
       <div class="val">
-        <strong>RM{{ number_format($booking->paid_amount ?? 0, 2) }}</strong>
-        @if($booking->payment_type === 'deposit' && $booking->balance > 0)
-          <span style="color:#9ca3af;font-size:12px;margin-left:6px;">(Balance: RM{{ number_format($booking->balance, 2) }})</span>
+        @if(($booking->paid_amount ?? 0) > 0)
+          <strong>RM{{ number_format($booking->paid_amount, 2) }}</strong>
+          @if($booking->payment_type === 'deposit')
+            <span style="color:#6d28d9;font-size:11px;margin-left:6px;font-weight:600;">DEPOSIT</span>
+          @endif
+        @else
+          <span style="color:#9ca3af;">-</span>
         @endif
       </div>
     </div>
+    @if($booking->payment_type === 'deposit')
+    <div class="row">
+      <div class="lbl">Total Price</div>
+      <div class="val">RM{{ number_format($booking->final_price ?? $booking->total_price ?? 0, 2) }}</div>
+    </div>
+    <div class="row">
+      <div class="lbl">Balance Due</div>
+      <div class="val"><strong style="color:#dc2626;">RM{{ number_format($booking->balance, 2) }}</strong></div>
+    </div>
+    @endif
 
     <div class="section-title">Package & Slot</div>
 
@@ -108,10 +122,14 @@
       <div class="lbl">Phone / WA</div>
       <div class="val">{{ $booking->participant->whatsapp_number ?: ($booking->participant->phone ?? '-') }}</div>
     </div>
-    @if($booking->participant->email ?? false)
+    @php
+      $participantEmail = $booking->participant->email ?? null;
+      $organizerEmail   = $booking->organizer->email ?? null;
+    @endphp
+    @if($participantEmail && $participantEmail !== $organizerEmail)
     <div class="row">
       <div class="lbl">Email</div>
-      <div class="val">{{ $booking->participant->email }}</div>
+      <div class="val">{{ $participantEmail }}</div>
     </div>
     @endif
 

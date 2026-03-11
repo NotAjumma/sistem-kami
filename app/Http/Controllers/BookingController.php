@@ -21,7 +21,10 @@ use App\Models\BookingFormField;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Mail\BookingCreatedMail;
+use App\Mail\BookingFailedMail;
 use App\Mail\PaymentConfirmed;
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
 use App\Services\ToyyibPayService;
@@ -1283,6 +1286,20 @@ class BookingController extends Controller
 
             DB::commit();
 
+            // Send booking created report email (after commit so paid_amount is correct)
+            try {
+                $reportTo = AppSetting::get('report_email');
+                if ($reportTo && configure_resend_mailer()) {
+                    $booking->load(['organizer', 'participant', 'package', 'vendorTimeSlots', 'addons']);
+                    Mail::to($reportTo)->send(new BookingCreatedMail($booking));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send booking created email', [
+                    'booking' => $booking->booking_code,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
+
             // return redirect()->route('booking.receipt.package', $booking->booking_code);
             $receiptUrl = route('booking.receipt.package', $booking->booking_code);
 
@@ -1511,9 +1528,31 @@ class BookingController extends Controller
                 'message'   => $e->getMessage(),
                 'input'     => $request->all()
             ]);
-            return redirect()->back()->with('error', 'Booking failed!');
 
-            // return back()->with('error', 'Pendaftaran gagal: ' . $e->getMessage());
+            // Send failure report email
+            try {
+                $reportTo = AppSetting::get('report_email');
+                if ($reportTo && configure_resend_mailer()) {
+                    $authUser = $authUser ?? auth()->guard('organizer')->user();
+                    $context  = array_filter([
+                        'package'          => isset($package) ? ($package->name ?? null) : null,
+                        'participant_name'  => $request->input('name'),
+                        'selected_date'    => $request->input('selected_date'),
+                        'payment_type'     => $request->input('payment_type'),
+                        'deposit_amount'   => $request->input('deposit_amount'),
+                        'addon_ids'        => $request->input('addon_ids'),
+                    ]);
+                    Mail::to($reportTo)->send(new BookingFailedMail(
+                        organizerName: $authUser->name ?? '-',
+                        errorMessage:  $e->getMessage(),
+                        context:       $context,
+                    ));
+                }
+            } catch (\Exception $mailEx) {
+                \Log::error('Failed to send booking failed email', ['error' => $mailEx->getMessage()]);
+            }
+
+            return redirect()->back()->with('error', 'Booking failed!');
         }
     }
 
