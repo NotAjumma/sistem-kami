@@ -249,7 +249,6 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/report/package-addon-chart', 'addOnChartData')->name('organizer.business.report.package.addon.chart');
     Route::get('/report/slot-chart', 'slotChartData')->name('organizer.business.report.slot.chart');
 
-
     Route::get('commission/setup', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'index'])->name('commission.setup');
     Route::post('commission/setup', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'store'])->name('commission.setup.store');
     Route::post('commission/setup/promoter', [\App\Http\Controllers\Admin\CommissionSetupController::class, 'savePromoter'])->name('commission.setup.promoter');
