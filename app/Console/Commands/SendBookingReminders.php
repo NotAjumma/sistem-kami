@@ -30,6 +30,25 @@ class SendBookingReminders extends Command
         $start  = Carbon::now()->subHours(2);
         $cutoff = Carbon::now()->addHours(12);
 
+        // Quick check: any pending reminders at all?
+        $pendingCount = Booking::whereNotIn('status', ['cancelled'])
+            ->whereNull('reminder_sent_at')
+            ->whereHas('vendorTimeSlots', function ($q) use ($start, $cutoff) {
+                $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
+                    $start->toDateTimeString(),
+                    $cutoff->toDateTimeString(),
+                ]);
+            })
+            ->whereHas('organizer', function ($q) {
+                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
+            })
+            ->count();
+
+        if ($pendingCount === 0) {
+            $this->info('No pending reminders. Skipping.');
+            return;
+        }
+
         $organizers = Organizer::whereNotNull('fonnte_token')
             ->where('fonnte_token', '!=', '')
             ->get();
@@ -41,12 +60,6 @@ class SendBookingReminders extends Command
             'total_skipped' => 0,
             'organizers'    => [],
         ];
-
-        if ($organizers->isEmpty()) {
-            $this->info('No organizers with Fonnte token configured.');
-            $this->sendReport($report);
-            return;
-        }
 
         foreach ($organizers as $organizer) {
             $quietStart = (int) ($organizer->reminder_quiet_start ?? 0);
@@ -114,7 +127,13 @@ class SendBookingReminders extends Command
         }
 
         $this->info('Done.');
-        $this->sendReport($report);
+
+        // Only send report email if something was actually sent or failed
+        if ($report['total_sent'] > 0 || $report['total_failed'] > 0) {
+            $this->sendReport($report);
+        } else {
+            $this->info('Nothing sent (all in quiet hours or no bookings). Skipping report email.');
+        }
     }
 
     private function sendReport(array $report): void
