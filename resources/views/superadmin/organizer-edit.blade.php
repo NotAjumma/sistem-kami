@@ -172,6 +172,13 @@
                         <input type="text" name="fonnte_token" class="form-control"
                                value="{{ old('fonnte_token', $organizer->fonnte_token) }}">
                     </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="auto_send_receipt" value="1" id="autoSendReceipt"
+                               {{ old('auto_send_receipt', $organizer->auto_send_receipt ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="autoSendReceipt">Auto-send WhatsApp receipt after booking</label>
+                        <div class="form-text text-muted">When enabled, automatically sends booking receipt via Fonnte after organizer creates a booking.</div>
+                    </div>
+
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="form-label">Quiet Start</label>

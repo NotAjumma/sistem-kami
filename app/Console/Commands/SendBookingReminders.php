@@ -19,6 +19,11 @@ class SendBookingReminders extends Command
 
     public function handle(): void
     {
+        if (app()->environment('staging')) {
+            $this->info('Skipped — reminders are disabled on staging.');
+            return;
+        }
+
         $now    = Carbon::now();
         $hour   = (int) $now->format('H');
         // Look back 2 hours to catch slots missed due to scheduler downtime/restarts

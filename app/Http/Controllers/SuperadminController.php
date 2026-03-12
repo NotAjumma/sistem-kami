@@ -221,6 +221,7 @@ class SuperadminController extends Controller
             'is_gmaps_verified'    => 'boolean',
             'google_map_show'      => 'boolean',
             'fonnte_token'         => 'nullable|string|max:255',
+            'auto_send_receipt'    => 'boolean',
             'reminder_quiet_start' => 'nullable|integer|min:0|max:23',
             'reminder_quiet_end'   => 'nullable|integer|min:0|max:23',
             'payment_qr'           => 'nullable|image|max:2048',
@@ -252,6 +253,7 @@ class SuperadminController extends Controller
             'is_gmaps_verified'    => $request->boolean('is_gmaps_verified'),
             'google_map_show'      => $request->boolean('google_map_show'),
             'fonnte_token'         => $request->fonnte_token,
+            'auto_send_receipt'    => $request->boolean('auto_send_receipt'),
             'reminder_quiet_start' => $request->reminder_quiet_start,
             'reminder_quiet_end'   => $request->reminder_quiet_end,
             'wallet_balance'       => $request->wallet_balance,
@@ -409,18 +411,21 @@ class SuperadminController extends Controller
         return back()->with('reminder_output', trim($output))->with('success', 'Reminder command executed.');
     }
 
-    // Whitelist of runnable commands: key => [label, command, args, description, danger]
+    // Whitelist of runnable commands: key => [label, command, args, description, danger, background]
     private function commandList(): array
     {
         return [
-            'images_optimize'       => ['label' => 'Generate WebP (new only)',    'command' => 'images:optimize',  'args' => [],          'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',       'danger' => false, 'background' => false],
-            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)', 'command' => 'images:optimize',  'args' => ['--force'], 'description' => 'Regenerates WebP for ALL uploaded images. Runs in background — check the log file for progress.', 'danger' => true,  'background' => true],
-            'storage_link'          => ['label' => 'Storage Link',                'command' => 'storage:link',     'args' => ['--force'],    'description' => 'Creates (or recreates) the public/storage symlink pointing to storage/app/public.',            'danger' => false],
-            'config_cache'          => ['label' => 'Cache Config',                'command' => 'config:cache',     'args' => [],             'description' => 'Compiles all config files into a single cached file for faster loading.',                       'danger' => false],
-            'route_cache'           => ['label' => 'Cache Routes',                'command' => 'route:cache',      'args' => [],             'description' => 'Compiles all routes into a single cached file for faster route matching.',                     'danger' => false],
-            'view_cache'            => ['label' => 'Cache Views',                 'command' => 'view:cache',       'args' => [],             'description' => 'Pre-compiles all Blade templates.',                                                              'danger' => false],
-            'optimize_clear'        => ['label' => 'Clear All Caches',            'command' => 'optimize:clear',   'args' => [],             'description' => 'Clears config, route, view, and application caches. Use after code changes.',                  'danger' => false],
-            'sitemap_generate'      => ['label' => 'Generate Sitemap',             'command' => 'sitemap:generate', 'args' => [],             'description' => 'Regenerates public/sitemap.xml with all public pages and organizer profiles using the live APP_URL.',  'danger' => false],
+            'reminders_send'        => ['label' => 'WhatsApp Reminders',           'command' => 'reminders:send',          'args' => [], 'description' => 'Send WhatsApp reminders to customers with bookings starting soon. Report email will also be sent.', 'danger' => false, 'background' => true],
+            'daily_report'          => ['label' => 'Daily Booking Report',          'command' => 'bookings:daily-report',   'args' => [], 'description' => 'Generate and email the daily booking summary with per-organizer stats and visitor data.',              'danger' => false, 'background' => true],
+            'health_report'         => ['label' => 'Health Check Report',           'command' => 'health:report',           'args' => ['--force'], 'description' => 'Run all health checks and email the report (--force always sends email).',                   'danger' => false, 'background' => true],
+            'images_optimize'       => ['label' => 'Generate WebP (new only)',      'command' => 'images:optimize',         'args' => [], 'description' => 'Converts new uploaded images to WebP. Skips files that already have a .webp version.',               'danger' => false, 'background' => false],
+            'images_optimize_force' => ['label' => 'Regenerate All WebP (force)',   'command' => 'images:optimize',         'args' => ['--force'], 'description' => 'Regenerates WebP for ALL uploaded images. Runs in background.',                                 'danger' => true,  'background' => true],
+            'storage_link'          => ['label' => 'Storage Link',                  'command' => 'storage:link',            'args' => ['--force'], 'description' => 'Creates (or recreates) the public/storage symlink pointing to storage/app/public.',            'danger' => false],
+            'config_cache'          => ['label' => 'Cache Config',                  'command' => 'config:cache',            'args' => [], 'description' => 'Compiles all config files into a single cached file for faster loading.',                               'danger' => false],
+            'route_cache'           => ['label' => 'Cache Routes',                  'command' => 'route:cache',             'args' => [], 'description' => 'Compiles all routes into a single cached file for faster route matching.',                             'danger' => false],
+            'view_cache'            => ['label' => 'Cache Views',                   'command' => 'view:cache',              'args' => [], 'description' => 'Pre-compiles all Blade templates.',                                                                      'danger' => false],
+            'optimize_clear'        => ['label' => 'Clear All Caches',              'command' => 'optimize:clear',          'args' => [], 'description' => 'Clears config, route, view, and application caches. Use after code changes.',                          'danger' => false],
+            'sitemap_generate'      => ['label' => 'Generate Sitemap',              'command' => 'sitemap:generate',        'args' => [], 'description' => 'Regenerates public/sitemap.xml with all public pages and organizer profiles.',                         'danger' => false],
         ];
     }
 
@@ -462,6 +467,38 @@ class SuperadminController extends Controller
             ->with('cmd_ran', $commands[$key]['label'] . ' — Log');
     }
 
+    /**
+     * AJAX endpoint: poll log file content for live streaming.
+     */
+    public function pollCommandLog(string $key)
+    {
+        $commands = $this->commandList();
+        if (!array_key_exists($key, $commands) || empty($commands[$key]['background'])) {
+            return response()->json(['error' => 'Invalid command'], 404);
+        }
+
+        $logFile  = storage_path('logs/cmd-' . $key . '.log');
+        $pidFile  = storage_path('logs/cmd-' . $key . '.pid');
+        $output   = file_exists($logFile) ? file_get_contents($logFile) : '';
+        $running  = false;
+
+        if (file_exists($pidFile)) {
+            $pid = (int) trim(file_get_contents($pidFile));
+            // Check if process is still running (POSIX signal 0 = test if alive)
+            if ($pid > 0 && file_exists("/proc/{$pid}")) {
+                $running = true;
+            } elseif ($pid > 0) {
+                // Try posix_kill as fallback (works on macOS too)
+                $running = function_exists('posix_kill') ? posix_kill($pid, 0) : false;
+            }
+        }
+
+        return response()->json([
+            'output'  => trim($output) ?: '(waiting for output...)',
+            'running' => $running,
+        ]);
+    }
+
     public function runCommand(Request $request)
     {
         $request->validate(['command_key' => 'required|string']);
@@ -469,20 +506,40 @@ class SuperadminController extends Controller
         $key      = $request->input('command_key');
 
         if (!array_key_exists($key, $commands)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Unknown command.'], 422);
+            }
             return back()->with('error', 'Unknown command.');
         }
 
         $cmd = $commands[$key];
 
-        // Long-running commands: fire-and-forget in background, write output to log file
+        // Background commands: fire-and-forget, write output to log file
         if (!empty($cmd['background'])) {
             $logFile = storage_path('logs/cmd-' . $key . '.log');
+            $pidFile = storage_path('logs/cmd-' . $key . '.pid');
             $args    = implode(' ', $cmd['args']);
             $artisan = base_path('artisan');
-            exec("php {$artisan} {$cmd['command']} {$args} > " . escapeshellarg($logFile) . " 2>&1 &");
+
+            // Clear previous log
+            file_put_contents($logFile, '');
+
+            // Start in background and capture PID
+            $shellCmd = "php {$artisan} {$cmd['command']} {$args} > " . escapeshellarg($logFile) . " 2>&1 & echo $!";
+            $pid = trim(shell_exec($shellCmd));
+            file_put_contents($pidFile, $pid);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'started',
+                    'key'    => $key,
+                    'label'  => $cmd['label'],
+                    'pid'    => $pid,
+                ]);
+            }
 
             return back()
-                ->with('cmd_output', "Started in background.\nLog: storage/logs/cmd-{$key}.log\n\nRefresh this page after a minute to read the log.")
+                ->with('cmd_output', "Started in background (PID: {$pid}).")
                 ->with('cmd_ran', $cmd['label'])
                 ->with('success', "Command '{$cmd['label']}' started in background.");
         }
@@ -492,6 +549,14 @@ class SuperadminController extends Controller
             $output = \Illuminate\Support\Facades\Artisan::output();
         } catch (\Throwable $e) {
             $output = 'ERROR: ' . $e->getMessage();
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'completed',
+                'label'  => $cmd['label'],
+                'output' => trim($output) ?: '(no output)',
+            ]);
         }
 
         return back()

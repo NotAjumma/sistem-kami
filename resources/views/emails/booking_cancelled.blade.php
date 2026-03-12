@@ -68,19 +68,19 @@
       <div class="lbl">Package</div>
       <div class="val">{{ $booking->package->name ?? '-' }}</div>
     </div>
-    @php $slot = $booking->vendorTimeSlots->first(); @endphp
-    @if($slot)
-    <div class="row">
-      <div class="lbl">Date</div>
-      <div class="val">{{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}</div>
-    </div>
-    <div class="row">
-      <div class="lbl">Time</div>
-      <div class="val">
-        {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A') }}
-        @if($slot->booked_time_end) – {{ \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A') }} @endif
+    @if($booking->vendorTimeSlots->isNotEmpty())
+      @foreach($booking->vendorTimeSlots as $i => $slot)
+      <div class="row">
+        <div class="lbl">{{ $booking->vendorTimeSlots->count() > 1 ? 'Slot ' . ($i + 1) : 'Slot' }}</div>
+        <div class="val">
+          @if($slot->vendorTimeSlot?->slot_name)<strong>{{ $slot->vendorTimeSlot->slot_name }}</strong> · @endif
+          {{ \Carbon\Carbon::parse($slot->booked_date_start)->format('d M Y') }}
+          @if($slot->booked_time_start)
+            · {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('h:i A') }}@if($slot->booked_time_end) – {{ \Carbon\Carbon::parse($slot->booked_time_end)->format('h:i A') }}@endif
+          @endif
+        </div>
       </div>
-    </div>
+      @endforeach
     @endif
 
     <div class="section-title">Participant</div>

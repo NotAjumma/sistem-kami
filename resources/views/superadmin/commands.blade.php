@@ -44,50 +44,66 @@
             </div>
         </div>
 
-        {{-- ── WhatsApp Reminders ────────────────────────────────────── --}}
-        <div class="card mb-3 border-warning border-opacity-50">
+        <hr class="my-3">
+
+        {{-- ── Scheduler Commands (background with live log) ─────────── --}}
+        <h6 class="text-muted text-uppercase small mb-3" style="letter-spacing:.06em">
+            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">schedule</i>
+            Scheduled Tasks
+        </h6>
+
+        @foreach(['reminders_send', 'daily_report', 'health_report'] as $key)
+        @php $cmd = $commands[$key]; @endphp
+        <div class="card mb-3 border-primary border-opacity-25">
             <div class="card-body d-flex align-items-start gap-3">
                 <div class="flex-grow-1">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <h6 class="mb-0"><i class="material-symbols-outlined align-middle me-1" style="font-size:18px">notifications</i> WhatsApp Reminders</h6>
+                        <h6 class="mb-0">{{ $cmd['label'] }}</h6>
+                        <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:10px">Background</span>
                     </div>
-                    <p class="text-muted small mb-1">
-                        Send WhatsApp reminders to customers with bookings starting in the next 12 hours.
-                        Organizer must have a Fonnte token configured.
-                    </p>
-                    <span class="badge bg-{{ $pendingCount > 0 ? 'warning text-dark' : 'secondary' }}">
-                        {{ $pendingCount }} pending reminder{{ $pendingCount == 1 ? '' : 's' }}
-                    </span>
+                    <p class="text-muted small mb-1">{{ $cmd['description'] }}</p>
+                    <code class="small text-secondary">
+                        php artisan {{ $cmd['command'] }}{{ count($cmd['args']) ? ' ' . implode(' ', $cmd['args']) : '' }}
+                    </code>
                 </div>
                 <div>
-                    <form method="POST" action="{{ route('superadmin.reminders.trigger') }}"
-                          data-confirm="This will send WhatsApp reminders to all eligible customers now. Continue?">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-outline-warning text-nowrap">
-                            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">send</i>
-                            Run Now
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-primary text-nowrap"
+                            onclick="runBgCommand('{{ $key }}', '{{ $cmd['label'] }}')">
+                        <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">play_arrow</i>
+                        Run
+                    </button>
                 </div>
             </div>
-            @if(session('reminder_output'))
-            <div class="card-footer p-0">
-                <pre class="p-3 mb-0 bg-dark text-light rounded-bottom" style="font-size:12px;white-space:pre-wrap;max-height:200px;overflow-y:auto">{{ session('reminder_output') }}</pre>
-            </div>
-            @endif
         </div>
+        @endforeach
+
+        @if($pendingCount > 0)
+        <div class="alert alert-warning small py-2 px-3">
+            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">notifications</i>
+            <strong>{{ $pendingCount }}</strong> pending reminder{{ $pendingCount == 1 ? '' : 's' }} waiting to be sent
+        </div>
+        @endif
 
         <hr class="my-3">
 
-        {{-- ── Artisan Commands ──────────────────────────────────────── --}}
+        {{-- ── Other Artisan Commands ─────────────────────────────────── --}}
+        <h6 class="text-muted text-uppercase small mb-3" style="letter-spacing:.06em">
+            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">terminal</i>
+            System Commands
+        </h6>
+
         @foreach($commands as $key => $cmd)
+        @if(in_array($key, ['reminders_send', 'daily_report', 'health_report'])) @continue @endif
         <div class="card mb-3">
             <div class="card-body d-flex align-items-start gap-3">
                 <div class="flex-grow-1">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <h6 class="mb-0">{{ $cmd['label'] }}</h6>
-                        @if($cmd['danger'])
+                        @if(!empty($cmd['danger']))
                             <span class="badge bg-warning text-dark" style="font-size:11px">Caution</span>
+                        @endif
+                        @if(!empty($cmd['background']))
+                            <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:10px">Background</span>
                         @endif
                     </div>
                     <p class="text-muted small mb-0">{{ $cmd['description'] }}</p>
@@ -96,20 +112,22 @@
                     </code>
                 </div>
                 <div class="d-flex flex-column gap-2 align-items-end">
+                    @if(!empty($cmd['background']))
+                    <button type="button" class="btn btn-sm {{ !empty($cmd['danger']) ? 'btn-warning' : 'btn-primary' }} text-nowrap"
+                            @if(!empty($cmd['danger'])) onclick="if(confirm('This will overwrite existing files. Are you sure?')) runBgCommand('{{ $key }}', '{{ $cmd['label'] }}')" @else onclick="runBgCommand('{{ $key }}', '{{ $cmd['label'] }}')" @endif>
+                        <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">play_arrow</i>
+                        Run
+                    </button>
+                    @else
                     <form method="POST" action="{{ route('superadmin.commands.run') }}"
-                          @if($cmd['danger']) data-confirm="This will overwrite existing files. Are you sure?" @endif>
+                          @if(!empty($cmd['danger'])) data-confirm="This will overwrite existing files. Are you sure?" @endif>
                         @csrf
                         <input type="hidden" name="command_key" value="{{ $key }}">
-                        <button type="submit" class="btn btn-sm {{ $cmd['danger'] ? 'btn-warning' : 'btn-primary' }} text-nowrap">
+                        <button type="submit" class="btn btn-sm {{ !empty($cmd['danger']) ? 'btn-warning' : 'btn-primary' }} text-nowrap">
                             <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">play_arrow</i>
                             Run
                         </button>
                     </form>
-                    @if(!empty($cmd['background']))
-                        <a href="{{ route('superadmin.commands.log', $key) }}" class="btn btn-sm btn-outline-secondary text-nowrap">
-                            <i class="material-symbols-outlined align-middle me-1" style="font-size:16px">article</i>
-                            Read Log
-                        </a>
                     @endif
                 </div>
             </div>
@@ -120,7 +138,7 @@
 
     <div class="col-lg-4">
 
-        {{-- Command Output --}}
+        {{-- Command Output (for sync commands) --}}
         @if(session('cmd_output'))
         <div class="card mb-3">
             <div class="card-header d-flex align-items-center gap-2">
@@ -138,12 +156,12 @@
             <div class="card-header"><h6 class="mb-0">Info</h6></div>
             <div class="card-body">
                 <ul class="small text-muted mb-0" style="line-height:2">
-                    <li>Commands run synchronously — page will wait until complete</li>
-                    <li>Large image sets may take a minute for WebP generation</li>
-                    <li><strong>Regenerate All WebP</strong> runs in background — use Read Log to check progress</li>
-                    <li>Reminders are also sent automatically every hour via scheduler</li>
+                    <li>Scheduler commands run in background with live log</li>
+                    <li><strong>Reminders</strong> run automatically every 15 min via scheduler</li>
+                    <li><strong>Daily Report</strong> runs automatically at 11 PM MYT</li>
+                    <li><strong>Health Check</strong> runs automatically at 8 AM MYT</li>
                     <li>Each booking is reminded once (<code>reminder_sent_at</code> is set)</li>
-                    <li>Quiet hours per organizer are respected</li>
+                    <li>Report emails sent to the configured <code>report_email</code></li>
                 </ul>
             </div>
         </div>
@@ -175,10 +193,37 @@
         </div>
     </div>
 </div>
+
+{{-- ── Live Log Modal ────────────────────────────────────────────── --}}
+<div class="modal fade" id="liveLogModal" tabindex="-1" aria-labelledby="liveLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="liveLogModalLabel">
+                    <i class="material-symbols-outlined align-middle me-2" style="font-size:20px">terminal</i>
+                    <span id="liveLogTitle">Command Output</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopPolling()"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="liveLogStatus" class="px-3 py-2 bg-primary bg-opacity-10 d-flex align-items-center gap-2" style="font-size:13px">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span class="text-primary fw-semibold">Running...</span>
+                </div>
+                <pre id="liveLogOutput" class="p-3 mb-0 bg-dark text-light" style="font-size:12px;white-space:pre-wrap;min-height:150px;max-height:500px;overflow-y:auto">(waiting for output...)</pre>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <small id="liveLogInfo" class="text-muted"></small>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" onclick="stopPolling()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
+/* ── Health Check ───────────────────────────────────────────────── */
 const HC_GROUP_ICONS = {
     'Infrastructure':      'fa-server',
     'Profile Page':        'fa-user-circle',
@@ -190,7 +235,6 @@ const HC_GROUP_ICONS = {
 
 function runHealthCheck() {
     const btn     = document.getElementById('runHealthCheckBtn');
-    const summary = document.getElementById('healthCheckSummary');
     const loading = document.getElementById('healthCheckLoading');
     const content = document.getElementById('healthCheckContent');
     const runAt   = document.getElementById('healthCheckRunAt');
@@ -264,5 +308,95 @@ function runHealthCheck() {
             btn.innerHTML = '<i class="fa-solid fa-stethoscope me-1"></i> Run Check';
         });
 }
+
+/* ── Live Log: Background Commands ──────────────────────────────── */
+let pollTimer   = null;
+let pollKey     = null;
+
+function stopPolling() {
+    if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+    }
+    pollKey = null;
+}
+
+function runBgCommand(key, label) {
+    stopPolling();
+    pollKey = key;
+
+    const logTitle  = document.getElementById('liveLogTitle');
+    const logOutput = document.getElementById('liveLogOutput');
+    const logStatus = document.getElementById('liveLogStatus');
+    const logInfo   = document.getElementById('liveLogInfo');
+
+    logTitle.textContent  = label;
+    logOutput.textContent = '(starting command...)';
+    logInfo.textContent   = '';
+    logStatus.innerHTML   = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div><span class="text-primary fw-semibold">Running...</span>';
+    logStatus.className   = 'px-3 py-2 bg-primary bg-opacity-10 d-flex align-items-center gap-2';
+
+    const modal = new bootstrap.Modal(document.getElementById('liveLogModal'));
+    modal.show();
+
+    // Start the command via AJAX POST
+    fetch('{{ route("superadmin.commands.run") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ command_key: key }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            logOutput.textContent = 'ERROR: ' + data.error;
+            return;
+        }
+        logInfo.textContent = 'PID: ' + (data.pid || '-');
+
+        // Start polling for log output
+        pollTimer = setInterval(() => pollLog(key), 1000);
+        // Also poll immediately
+        pollLog(key);
+    })
+    .catch(err => {
+        logOutput.textContent = 'Failed to start command: ' + err.message;
+        logStatus.innerHTML   = '<i class="fa-solid fa-circle-xmark text-danger"></i><span class="text-danger fw-semibold">Error</span>';
+        logStatus.className   = 'px-3 py-2 bg-danger bg-opacity-10 d-flex align-items-center gap-2';
+    });
+}
+
+function pollLog(key) {
+    if (pollKey !== key) return; // user switched or closed
+
+    const pollUrl = '{{ route("superadmin.commands.poll", ":key") }}'.replace(':key', key);
+
+    fetch(pollUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const logOutput = document.getElementById('liveLogOutput');
+            const logStatus = document.getElementById('liveLogStatus');
+
+            logOutput.textContent = data.output;
+
+            // Auto-scroll to bottom
+            logOutput.scrollTop = logOutput.scrollHeight;
+
+            if (!data.running) {
+                stopPolling();
+                logStatus.innerHTML = '<i class="fa-solid fa-circle-check text-success"></i><span class="text-success fw-semibold">Completed</span>';
+                logStatus.className = 'px-3 py-2 bg-success bg-opacity-10 d-flex align-items-center gap-2';
+            }
+        })
+        .catch(() => {
+            // Silently retry on next interval
+        });
+}
+
+// Clean up polling when modal is closed
+document.getElementById('liveLogModal').addEventListener('hidden.bs.modal', stopPolling);
 </script>
 @endpush

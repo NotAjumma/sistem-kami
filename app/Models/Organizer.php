@@ -32,6 +32,7 @@ class Organizer extends Authenticatable
         'email',
         'phone',
         'fonnte_token',
+        'auto_send_receipt',
         'reminder_quiet_start',
         'reminder_quiet_end',
         'website',

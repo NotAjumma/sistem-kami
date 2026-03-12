@@ -17,11 +17,11 @@ class BookingCancelledMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $code     = $this->booking->booking_code;
+        $code      = $this->booking->booking_code;
         $organizer = $this->booking->organizer->name ?? '-';
 
         return new Envelope(
-            subject: mail_env_tag() . " [Sistem Kami] Booking Cancelled {$code} — {$organizer}",
+            subject: mail_env_tag() . " [{$organizer}] [Cancelled/Refund] {$code}",
         );
     }
 

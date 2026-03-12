@@ -1290,7 +1290,7 @@ class BookingController extends Controller
             try {
                 $reportTo = AppSetting::get('report_email');
                 if ($reportTo && configure_resend_mailer()) {
-                    $booking->load(['organizer', 'participant', 'package', 'vendorTimeSlots', 'addons']);
+                    $booking->load(['organizer', 'participant', 'package', 'vendorTimeSlots.vendorTimeSlot', 'addons']);
                     Mail::to($reportTo)->send(new BookingCreatedMail($booking));
                 }
             } catch (\Exception $e) {
@@ -1417,8 +1417,8 @@ class BookingController extends Controller
         $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $phone
             . '&text=' . urlencode($text);
 
-        // Try Fonnte if token exists; fall back to WhatsApp URL on failure
-        if ($authUser->fonnte_token) {
+        // Try Fonnte if token exists, auto_send_receipt enabled, and not staging
+        if ($authUser->fonnte_token && ($authUser->auto_send_receipt ?? true) && !app()->environment('staging')) {
 
             $fonntePhone = preg_replace('/[^0-9]/', '', $phone);
             if (str_starts_with($fonntePhone, '0')) {

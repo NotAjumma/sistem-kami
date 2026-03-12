@@ -24,7 +24,7 @@ class BookingObserver
         }
 
         try {
-            $booking->load(['organizer', 'participant', 'package', 'vendorTimeSlots']);
+            $booking->load(['organizer', 'participant', 'package', 'vendorTimeSlots.vendorTimeSlot']);
 
             // Refund amount = whatever was paid (mirrors cancelBooking logic)
             $refundAmount = (float) ($booking->paid_amount ?? 0);

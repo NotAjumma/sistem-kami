@@ -21,7 +21,7 @@ class BookingFailedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: mail_env_tag() . " [Sistem Kami] ⚠️ Booking Creation Failed — {$this->organizerName}",
+            subject: mail_env_tag() . " [{$this->organizerName}] [Booking Failed] Error creating booking",
         );
     }
 

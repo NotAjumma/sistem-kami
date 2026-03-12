@@ -102,6 +102,7 @@ Route::prefix('superadmin')->group(function () {
         Route::get('/commands',                             [SuperadminController::class, 'showCommands'])->name('superadmin.commands');
         Route::post('/commands/run',                        [SuperadminController::class, 'runCommand'])->name('superadmin.commands.run');
         Route::get('/commands/log/{key}',                   [SuperadminController::class, 'readCommandLog'])->name('superadmin.commands.log');
+        Route::get('/commands/poll/{key}',                  [SuperadminController::class, 'pollCommandLog'])->name('superadmin.commands.poll');
     });
 });
 
