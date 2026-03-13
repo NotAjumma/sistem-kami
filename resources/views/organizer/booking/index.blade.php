@@ -54,7 +54,7 @@
                             </div>
                             @endif
                             <div class="col-md-2">
-                                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search bookings...">
+                                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search customer, code, addon...">
                             </div>
                             <div class="col-md-2">
                                 <button type="submit" class="btn btn-primary">Filter</button>
@@ -71,6 +71,8 @@
                                         
                                         @if ($packages)
                                             <th>Package</th>
+                                            <th>Addons</th>
+                                            <th style="min-width: 200px;">Slots</th>
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone</th>
@@ -105,6 +107,30 @@
 
                                             @if ($packages)
                                             <td>{{ $booking->package->name }}</td>
+                                            <td>
+                                                @if($booking->addons->isNotEmpty())
+                                                    @foreach($booking->addons as $addon)
+                                                        <div>{{ $addon->name }}@if($addon->pivot->qty > 1) ×{{ $addon->pivot->qty }}@endif</div>
+                                                    @endforeach
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($booking->vendorTimeSlots->isNotEmpty())
+                                                    @foreach($booking->vendorTimeSlots as $slot)
+                                                        <div>
+                                                            <strong>{{ $slot->vendorTimeSlot?->slot_name ?? '-' }}</strong><br>
+                                                            {{ \Carbon\Carbon::parse($slot->booked_date_start)->format('j M Y') }}
+                                                            @if($slot->booked_time_start)
+                                                                {{ \Carbon\Carbon::parse($slot->booked_time_start)->format('H:i') }}–{{ \Carbon\Carbon::parse($slot->booked_time_end)->format('H:i') }}
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
                                             @else
                                             <td>{{ $booking->event->title }}</td>
                                             @endif

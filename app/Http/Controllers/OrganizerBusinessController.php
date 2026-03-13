@@ -162,7 +162,7 @@ class OrganizerBusinessController extends Controller
             ->pluck('id');
 
         // Step 4: Fetch bookings with optional status & search filters
-        $bookings = Booking::with(['vendorTimeSlots', 'participant', 'package:id,name', 'promoter:id,name'])
+        $bookings = Booking::with(['vendorTimeSlots.vendorTimeSlot', 'addons', 'participant', 'package:id,name', 'promoter:id,name'])
             ->whereIn('id', $bookingIds)
 
             ->when($request->status, 
@@ -189,7 +189,10 @@ class OrganizerBusinessController extends Controller
                             ->orWhere('phone', 'like', "%{$search}%")
                             ->orWhere('no_ic', 'like', "%{$search}%");
                     })
-                    ->orWhere('booking_code', 'like', "%{$search}%");
+                    ->orWhere('booking_code', 'like', "%{$search}%")
+                    ->orWhereHas('addons', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
                 });
             })
 
