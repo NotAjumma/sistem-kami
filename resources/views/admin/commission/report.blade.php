@@ -49,7 +49,7 @@
                     <tbody>
                         @foreach($report as $r)
                             <tr>
-                                <td><a href="{{ route('organizer.business.booking.show', $r['id']) }}" target="_blank">#{{ $r['id'] }}</a></td>
+                                <td><a href="{{ route('organizer.business.booking.show', $r['id']) }}" target="_blank" style="color: #0d6efd; text-decoration: underline;">#{{ $r['id'] }}</a></td>
                                 <td>{{ $r['created_at'] }}</td>
                                 <td>{{ $r['package_name'] }}</td>
                                 <td>
