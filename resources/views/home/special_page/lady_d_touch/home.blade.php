@@ -1,6 +1,18 @@
 @php
     $spImgs = $organizer->special_page_images ?? [];
-    $img = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
+    $img    = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
+
+    $cfg    = $organizer->special_page_config ?? [];
+    $accent = $cfg['accent_color'] ?? '#14b9d5';
+    $vis    = fn(string $s) => ($cfg['sections'][$s]['visible'] ?? true) !== false;
+    $txt    = fn(string $s, string $k, string $fallback) =>
+                  (!empty($cfg['sections'][$s][$k]) ? $cfg['sections'][$s][$k] : $fallback);
+
+    // Fonts
+    $headingFont = $cfg['heading_font'] ?? 'Imperial Script';
+    $bodyFont    = $cfg['body_font']    ?? 'Poppins';
+    $gfHeading   = ['Imperial Script'=>'Imperial+Script','Great Vibes'=>'Great+Vibes','Playfair Display'=>'Playfair+Display:ital,wght@1,400','Cormorant Garamond'=>'Cormorant+Garamond:ital,wght@1,400','Dancing Script'=>'Dancing+Script','Cinzel'=>'Cinzel'][$headingFont] ?? 'Imperial+Script';
+    $gfBody      = ['Poppins'=>'Poppins:wght@300;400;500','Lato'=>'Lato:wght@300;400;700','Montserrat'=>'Montserrat:wght@300;400;500;600','Raleway'=>'Raleway:wght@300;400;500;600'][$bodyFont] ?? 'Poppins:wght@300;400;500';
 @endphp
 
 <!DOCTYPE html>
@@ -13,7 +25,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Imperial+Script&family=Josefin+Sans:wght@300;400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family={{ $gfHeading }}&family=Josefin+Sans:wght@300;400;600&family={{ $gfBody }}&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,12 +54,12 @@
         }
         .ldt-nav .nav-links a::after {
             content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-            height: 1px; background: #14b9d5; transform: scaleX(0); transition: transform 0.25s;
+            height: 1px; background: {{ $accent }}; transform: scaleX(0); transition: transform 0.25s;
         }
-        .ldt-nav .nav-links a:hover, .ldt-nav .nav-links a.active { color: #14b9d5; }
+        .ldt-nav .nav-links a:hover, .ldt-nav .nav-links a.active { color: {{ $accent }}; }
         .ldt-nav .nav-links a.active::after, .ldt-nav .nav-links a:hover::after { transform: scaleX(1); }
         .ldt-nav.scrolled .nav-links a { color: #444; }
-        .ldt-nav.scrolled .nav-links a:hover, .ldt-nav.scrolled .nav-links a.active { color: #14b9d5; }
+        .ldt-nav.scrolled .nav-links a:hover, .ldt-nav.scrolled .nav-links a.active { color: {{ $accent }}; }
 
         /* Lang switcher */
         .lang-switcher { display: flex; align-items: center; gap: 4px; }
@@ -57,9 +69,9 @@
             color: rgba(255,255,255,0.75) !important; transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .lang-switcher a::after { display: none !important; }
-        .lang-switcher a.active, .lang-switcher a:hover { background: #14b9d5; border-color: #14b9d5; color: #fff !important; }
+        .lang-switcher a.active, .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
         .ldt-nav.scrolled .lang-switcher a { border-color: #ddd; color: #777 !important; }
-        .ldt-nav.scrolled .lang-switcher a.active, .ldt-nav.scrolled .lang-switcher a:hover { background: #14b9d5; border-color: #14b9d5; color: #fff !important; }
+        .ldt-nav.scrolled .lang-switcher a.active, .ldt-nav.scrolled .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
 
         .ldt-nav .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
         .ldt-nav .nav-toggle span { display: block; width: 22px; height: 1.5px; background: #fff; margin: 5px 0; transition: background 0.35s; }
@@ -70,10 +82,10 @@
         .ldt-mobile-menu.open { display: block; }
         .ldt-mobile-menu a { display: block; padding: 13px 0; font-family: 'Josefin Sans', sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #555; border-bottom: 1px solid #f0ebe4; }
         .ldt-mobile-menu a:last-child { border-bottom: none; }
-        .ldt-mobile-menu a.active { color: #14b9d5; }
+        .ldt-mobile-menu a.active { color: {{ $accent }}; }
         .mobile-lang { display: flex !important; gap: 8px; padding: 13px 0; border-bottom: 1px solid #f0ebe4; }
         .mobile-lang a { display: inline-block !important; padding: 4px 10px !important; border: 1px solid #ddd !important; font-size: 11px !important; color: #777 !important; border-bottom: 1px solid #ddd !important; }
-        .mobile-lang a.active, .mobile-lang a:hover { background: #14b9d5 !important; border-color: #14b9d5 !important; color: #fff !important; }
+        .mobile-lang a.active, .mobile-lang a:hover { background: {{ $accent }} !important; border-color: {{ $accent }} !important; color: #fff !important; }
 
         @media (max-width: 767px) { .ldt-nav .nav-links { display: none; } .ldt-nav .nav-toggle { display: block; } }
 
@@ -105,7 +117,7 @@
         .about-text p { font-size: 14px; color: #888; line-height: 1.9; margin-bottom: 14px; }
         .about-text p:last-of-type { margin-bottom: 28px; }
         .about-link { font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #222; border-bottom: 1px solid #222; padding-bottom: 2px; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s, border-color 0.2s; }
-        .about-link:hover { color: #14b9d5; border-color: #14b9d5; }
+        .about-link:hover { color: {{ $accent }}; border-color: {{ $accent }}; }
         .about-img-col { flex: 1; }
         .about-img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .about-img-grid img { width: 100%; height: 200px; object-fit: cover; }
@@ -118,7 +130,7 @@
         .gallery-text .eyebrow { font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #bbb; margin-bottom: 12px; }
         .gallery-text h2 { font-family: 'Imperial Script', cursive; font-size: clamp(40px, 5vw, 58px); font-weight: 400; color: #222; line-height: 1.15; margin-bottom: 28px; }
         .gallery-text .gallery-link { font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #222; border-bottom: 1px solid #222; padding-bottom: 2px; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s, border-color 0.2s; }
-        .gallery-text .gallery-link:hover { color: #14b9d5; border-color: #14b9d5; }
+        .gallery-text .gallery-link:hover { color: {{ $accent }}; border-color: {{ $accent }}; }
         .gallery-img-col { flex: 1; }
         .gallery-couple-img { width: 100%; max-width: 480px; margin-left: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
@@ -134,7 +146,7 @@
         .wedding-text h2 { font-family: 'Imperial Script', cursive; font-size: clamp(44px, 5.5vw, 66px); font-weight: 400; color: #222; line-height: 1.1; margin-bottom: 20px; }
         .wedding-text p { font-size: 14px; color: #888; line-height: 1.9; margin-bottom: 12px; }
         .wedding-text p:last-of-type { margin-bottom: 28px; }
-        .btn-wedding { display: inline-flex; align-items: center; gap: 8px; font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #fff; background: #14b9d5; padding: 14px 28px; transition: background 0.2s; }
+        .btn-wedding { display: inline-flex; align-items: center; gap: 8px; font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #fff; background: {{ $accent }}; padding: 14px 28px; transition: background 0.2s; }
         .btn-wedding:hover { background: #0ea5c9; color: #fff; }
 
         /* Location */
@@ -146,7 +158,7 @@
         .location-item svg { flex-shrink: 0; margin-top: 3px; }
         .location-map-col { flex: 1; }
         .location-map-col img { width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
-        .hours-box { margin-top: 28px; padding: 20px; background: #fff; border-left: 3px solid #14b9d5; }
+        .hours-box { margin-top: 28px; padding: 20px; background: #fff; border-left: 3px solid {{ $accent }}; }
         .hours-box h4 { font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #222; margin-bottom: 10px; }
         .hours-box p { font-size: 13px; color: #999; margin-bottom: 4px; }
 
@@ -156,7 +168,16 @@
         .ldt-footer p { font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .ldt-footer .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
         .ldt-footer .footer-links a { font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.5); transition: color 0.2s; }
-        .ldt-footer .footer-links a:hover { color: #14b9d5; }
+        .ldt-footer .footer-links a:hover { color: {{ $accent }}; }
+
+        /* Dynamic font overrides */
+        body { font-family: '{{ $bodyFont }}', sans-serif; }
+        .ldt-nav .nav-brand,
+        .hero-content h1,
+        .gallery-text h2,
+        .wedding-text h2,
+        .location-text h2,
+        .ldt-footer .footer-brand { font-family: '{{ $headingFont }}', cursive; }
 
         /* Responsive */
         @media (max-width: 991px) {
@@ -173,21 +194,24 @@
 
     <main>
 
+        @if($vis('hero'))
         <section class="hero-section">
             <div class="hero-content">
                 <h1>{{ $organizer->name }}</h1>
-                <p>{{ __('lady_d_touch.hero_slogan') }}</p>
+                <p>{{ $txt('hero', 'slogan', __('lady_d_touch.hero_slogan')) }}</p>
             </div>
         </section>
+        @endif
 
+        @if($vis('about'))
         <section class="about-section" id="story">
             <div class="ldt-container">
                 <div class="about-row">
                     <div class="about-text reveal">
-                        <p>{{ __('lady_d_touch.about_p1', ['name' => $organizer->name]) }}</p>
-                        <p>{{ __('lady_d_touch.about_p2') }}</p>
-                        <p>{{ __('lady_d_touch.about_p3', ['name' => $organizer->name]) }}</p>
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="about-link">{{ __('lady_d_touch.about_link') }}</a>
+                        <p>{{ $txt('about', 'p1', __('lady_d_touch.about_p1', ['name' => $organizer->name])) }}</p>
+                        <p>{{ $txt('about', 'p2', __('lady_d_touch.about_p2')) }}</p>
+                        <p>{{ $txt('about', 'p3', __('lady_d_touch.about_p3', ['name' => $organizer->name])) }}</p>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="about-link">{{ $txt('about', 'link_text', __('lady_d_touch.about_link')) }}</a>
                     </div>
                     <div class="about-img-col reveal reveal-delay-2">
                         <div class="about-img-grid">
@@ -199,18 +223,20 @@
                 </div>
             </div>
         </section>
+        @endif
 
+        @if($vis('gallery'))
         <section class="gallery-section">
             <div class="ldt-container">
                 <div class="gallery-row">
                     <div class="gallery-text reveal">
-                        <p class="eyebrow">{{ __('lady_d_touch.gallery_eyebrow') }}</p>
-                        <h2>{{ __('lady_d_touch.gallery_heading') }}</h2>
+                        <p class="eyebrow">{{ $txt('gallery', 'eyebrow', __('lady_d_touch.gallery_eyebrow')) }}</p>
+                        <h2>{{ $txt('gallery', 'heading', __('lady_d_touch.gallery_heading')) }}</h2>
                         @php $fbLink = ($organizer->social_links ?? [])['facebook'] ?? null; @endphp
                         @if($fbLink)
-                        <a href="{{ $fbLink }}" target="_blank" class="gallery-link">{{ __('lady_d_touch.gallery_link') }}</a>
+                        <a href="{{ $fbLink }}" target="_blank" class="gallery-link">{{ $txt('gallery', 'link_text', __('lady_d_touch.gallery_link')) }}</a>
                         @else
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="gallery-link">{{ __('lady_d_touch.gallery_link_venues') }}</a>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="gallery-link">{{ $txt('gallery', 'link_text', __('lady_d_touch.gallery_link_venues')) }}</a>
                         @endif
                     </div>
                     <div class="gallery-img-col reveal reveal-delay-2">
@@ -219,7 +245,9 @@
                 </div>
             </div>
         </section>
+        @endif
 
+        @if($vis('venues'))
         <section class="wedding-section" id="venues">
             <div class="ldt-container">
                 <div class="wedding-row">
@@ -231,42 +259,44 @@
                         </div>
                     </div>
                     <div class="wedding-text reveal reveal-delay-2">
-                        <h2>{{ __('lady_d_touch.showcase_heading') }}</h2>
-                        <p>{{ __('lady_d_touch.showcase_p1') }}</p>
-                        <p>{{ __('lady_d_touch.showcase_p2') }}</p>
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="btn-wedding">{{ __('lady_d_touch.showcase_btn') }}</a>
+                        <h2>{{ $txt('venues', 'heading', __('lady_d_touch.showcase_heading')) }}</h2>
+                        <p>{{ $txt('venues', 'p1', __('lady_d_touch.showcase_p1')) }}</p>
+                        <p>{{ $txt('venues', 'p2', __('lady_d_touch.showcase_p2')) }}</p>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="btn-wedding">{{ $txt('venues', 'btn_text', __('lady_d_touch.showcase_btn')) }}</a>
                     </div>
                 </div>
             </div>
         </section>
+        @endif
 
+        @if($vis('location'))
         <section class="location-section" id="location">
             <div class="ldt-container">
                 <div class="location-row">
                     <div class="location-text reveal">
-                        <h2>{{ __('lady_d_touch.location_heading') }}</h2>
+                        <h2>{{ $txt('location', 'heading', __('lady_d_touch.location_heading')) }}</h2>
                         @if($organizer->address_line1 || $organizer->city)
                         <div class="location-item">
-                            <svg width="16" height="16" fill="none" stroke="#14b9d5" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="{{ $accent }}" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span>{{ $organizer->address_line1 }}@if($organizer->address_line2), {{ $organizer->address_line2 }}@endif @if($organizer->city), {{ $organizer->city }}@endif @if($organizer->state), {{ $organizer->state }}@endif @if($organizer->postal_code){{ $organizer->postal_code }}@endif</span>
                         </div>
                         @endif
                         @if($organizer->email)
                         <div class="location-item">
-                            <svg width="16" height="16" fill="none" stroke="#14b9d5" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="{{ $accent }}" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <a href="mailto:{{ $organizer->email }}" style="color:#888;">{{ $organizer->email }}</a>
                         </div>
                         @endif
                         @if($organizer->phone)
                         <div class="location-item">
-                            <svg width="16" height="16" fill="none" stroke="#14b9d5" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="{{ $accent }}" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                             <a href="tel:{{ $organizer->phone }}" style="color:#888;">{{ $organizer->phone }}</a>
                         </div>
                         @endif
                         <div class="hours-box">
-                            <h4>{{ __('lady_d_touch.hours_heading') }}</h4>
-                            <p>{{ __('lady_d_touch.hours_line1') }}</p>
-                            <p style="font-size:12px;color:#bbb;">{{ __('lady_d_touch.hours_note') }}</p>
+                            <h4>{{ $txt('location', 'hours_heading', __('lady_d_touch.hours_heading')) }}</h4>
+                            <p>{{ $txt('location', 'hours_line1', __('lady_d_touch.hours_line1')) }}</p>
+                            <p style="font-size:12px;color:#bbb;">{{ $txt('location', 'hours_note', __('lady_d_touch.hours_note')) }}</p>
                         </div>
                     </div>
                     <div class="location-map-col reveal reveal-delay-2">
@@ -275,6 +305,7 @@
                 </div>
             </div>
         </section>
+        @endif
 
     </main>
 

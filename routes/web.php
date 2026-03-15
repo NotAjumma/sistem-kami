@@ -225,6 +225,11 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::patch('/booking/{id}/send-receipt', [OrganizerBusinessController::class, 'sendReceipt'])->name('organizer.business.booking.send-receipt');
     Route::get('/packages/{package}/form-fields', [BookingController::class, 'getFormFields']);
     
+    // Special Page Customizer
+    Route::get('/special-page', 'showSpecialPage')->name('organizer.business.special-page');
+    Route::post('/special-page', 'updateSpecialPage')->name('organizer.business.special-page.update');
+    Route::post('/special-page/upload-image', 'uploadSpecialPageImage')->name('organizer.business.special-page.upload-image');
+
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
     Route::post('/packages/create', 'storePackage')->name('organizer.business.package.store');
