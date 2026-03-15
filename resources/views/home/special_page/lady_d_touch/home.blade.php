@@ -85,7 +85,7 @@
         /* Hero */
         .hero-section {
             position: relative; width: 100%; height: 100vh; min-height: 500px;
-            background-image: url("{{ asset('storage/lady_d_touch/hero-main.jpg') }}");
+            background-image: url("{{ $img('hero', 'lady_d_touch/hero-main.jpg') }}");
             background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         .hero-section::before { content: ''; position: absolute; inset: 0; background: rgba(10, 18, 30, 0.45); }
@@ -164,6 +164,11 @@
 </head>
 <body>
 
+@php
+    $spImgs = $organizer->special_page_images ?? [];
+    $img = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
+@endphp
+
     @include('home.special_page.lady_d_touch._navbar')
 
     <main>
@@ -186,9 +191,9 @@
                     </div>
                     <div class="about-img-col reveal reveal-delay-2">
                         <div class="about-img-grid">
-                            <img src="{{ asset('storage/Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Venue" loading="lazy">
-                            <img src="{{ asset('storage/DataranSriDusun-1024x682.jpg') }}" alt="Dataran" loading="lazy">
-                            <img src="{{ asset('storage/LamanDusun-1024x768.jpg') }}" alt="Laman" loading="lazy">
+                            <img src="{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Venue" loading="lazy">
+                            <img src="{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}" alt="Dataran" loading="lazy">
+                            <img src="{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}" alt="Laman" loading="lazy">
                         </div>
                     </div>
                 </div>
@@ -209,7 +214,7 @@
                         @endif
                     </div>
                     <div class="gallery-img-col reveal reveal-delay-2">
-                        <img src="{{ asset('storage/lady_d_touch/gallery-couple.png') }}" alt="Gallery" class="gallery-couple-img" loading="lazy">
+                        <img src="{{ $img('gallery', 'lady_d_touch/gallery-couple.png') }}" alt="Gallery" class="gallery-couple-img" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -220,9 +225,9 @@
                 <div class="wedding-row">
                     <div class="wedding-img-col reveal">
                         <div class="wedding-mosaic">
-                            <img src="{{ asset('storage/DataranSriDusun-1024x682.jpg') }}" alt="Dataran Sri Dusun" loading="lazy">
-                            <img src="{{ asset('storage/Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Dewan Sri Dusun" loading="lazy">
-                            <img src="{{ asset('storage/LamanDusun-1024x768.jpg') }}" alt="Laman Dusun" loading="lazy">
+                            <img src="{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}" alt="Dataran Sri Dusun" loading="lazy">
+                            <img src="{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Dewan Sri Dusun" loading="lazy">
+                            <img src="{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}" alt="Laman Dusun" loading="lazy">
                         </div>
                     </div>
                     <div class="wedding-text reveal reveal-delay-2">
@@ -265,7 +270,7 @@
                         </div>
                     </div>
                     <div class="location-map-col reveal reveal-delay-2">
-                        <img src="{{ asset('storage/lady_d_touch/map.jpeg') }}" alt="Our Location" loading="lazy">
+                        <img src="{{ $img('map', 'lady_d_touch/map.jpeg') }}" alt="Our Location" loading="lazy">
                     </div>
                 </div>
             </div>
