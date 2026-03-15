@@ -795,7 +795,7 @@ class BusinessController extends Controller
         }
 
         $date = Carbon::parse($request->date);
-        $dayOfWeek = $date->dayOfWeekIso; // 1 = Monday, 7 = Sunday
+        $dayOfWeek = $date->dayOfWeek; // 0 = Sunday, 6 = Saturday (matches form values)
 
         // Weekly off (off_date = NULL + day_of_week = current day)
         $weeklyOffs = VendorOffDay::where('organizer_id', $package->organizer->id)

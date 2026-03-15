@@ -106,7 +106,7 @@
                                         </td>
                                         <td>
                                             @if($od->day_of_week !== null)
-                                                {{ ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][$od->day_of_week] }}
+                                                {{ ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][$od->day_of_week] ?? 'Day '.$od->day_of_week }}
                                             @else
                                                 {{ \Carbon\Carbon::parse($od->off_date)->format('d M Y') }}
                                             @endif

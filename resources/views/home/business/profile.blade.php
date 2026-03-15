@@ -1752,7 +1752,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function checkDateSelected(bookedDatesFormatted, offDaysFormatted, currentLoopDate, formattedDate) {
             if (selectedDateInput.value && bookedDatesFormatted.includes(formattedDate)) {
-                // Disable 
+                // Disable
                 if (bookNowBtn) bookNowBtn.setAttribute('disabled', true);
                 if (whatsappNowBtn) {
                     whatsappNowBtn.style.pointerEvents = 'none';
