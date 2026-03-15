@@ -1,3 +1,8 @@
+@php
+    $spImgs = $organizer->special_page_images ?? [];
+    $img = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB' }}">
 <head>
@@ -115,11 +120,6 @@
     </style>
 </head>
 <body>
-
-@php
-    $spImgs = $organizer->special_page_images ?? [];
-    $img = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
-@endphp
 
     @include('home.special_page.lady_d_touch._navbar')
 

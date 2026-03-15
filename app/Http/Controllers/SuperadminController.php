@@ -225,13 +225,13 @@ class SuperadminController extends Controller
             'reminder_quiet_start' => 'nullable|integer|min:0|max:23',
             'reminder_quiet_end'   => 'nullable|integer|min:0|max:23',
             'payment_qr'           => 'nullable|image|max:2048',
-            'sp_img_hero'          => 'nullable|image|max:4096',
-            'sp_img_gallery'       => 'nullable|image|max:4096',
-            'sp_img_map'           => 'nullable|image|max:4096',
-            'sp_img_venue_dewan'   => 'nullable|image|max:4096',
-            'sp_img_venue_dataran' => 'nullable|image|max:4096',
-            'sp_img_venue_laman'   => 'nullable|image|max:4096',
-            'sp_img_wedding_hero'  => 'nullable|image|max:4096',
+            'sp_img_hero'          => 'nullable|image|max:20480',
+            'sp_img_gallery'       => 'nullable|image|max:20480',
+            'sp_img_map'           => 'nullable|image|max:20480',
+            'sp_img_venue_dewan'   => 'nullable|image|max:20480',
+            'sp_img_venue_dataran' => 'nullable|image|max:20480',
+            'sp_img_venue_laman'   => 'nullable|image|max:20480',
+            'sp_img_wedding_hero'  => 'nullable|image|max:20480',
             'wallet_balance'       => 'nullable|numeric|min:0',
             'wallet_currency'      => 'nullable|string|max:10',
             'is_active'            => 'boolean',
@@ -290,9 +290,10 @@ class SuperadminController extends Controller
         $spSlots = ['hero', 'gallery', 'map', 'venue_dewan', 'venue_dataran', 'venue_laman', 'wedding_hero'];
         $spImages = $organizer->special_page_images ?? [];
         $folder   = 'uploads/' . $organizer->id . '/special_page';
+        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($folder);
         foreach ($spSlots as $slot) {
             $field = 'sp_img_' . $slot;
-            if ($request->hasFile($field)) {
+            if ($request->hasFile($field) && $request->file($field)->isValid()) {
                 if (!empty($spImages[$slot])) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($spImages[$slot]);
                 }
