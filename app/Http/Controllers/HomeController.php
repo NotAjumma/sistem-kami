@@ -139,6 +139,15 @@ class HomeController extends Controller
             abort(404);
         }
 
+        // Private visibility check
+        $cfg = $organizer->special_page_config ?? [];
+        if (($cfg['visibility'] ?? 'public') === 'private') {
+            $authOrg = auth()->guard('organizer')->user();
+            if (! $authOrg || $authOrg->id !== $organizer->id) {
+                return response()->view('home.special_page._private', ['organizer' => $organizer], 403);
+            }
+        }
+
         $view = 'home.special_page.' . $specialPage . '.' . $sub;
 
         if (! view()->exists($view)) {

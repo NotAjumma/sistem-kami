@@ -59,6 +59,7 @@ class Organizer extends Authenticatable
         'what_flow',
         'special_page',
         'special_page_images',
+        'special_page_config',
         'user_id',
     ];
 
@@ -67,6 +68,7 @@ class Organizer extends Authenticatable
         'social_links'         => 'array',
         'wallet_history'       => 'array',
         'special_page_images'  => 'array',
+        'special_page_config'  => 'array',
         'is_active'         => 'boolean',
         'is_gmaps_verified' => 'boolean',
         'google_map_show'   => 'boolean',
