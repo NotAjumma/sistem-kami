@@ -14,6 +14,7 @@ return [
     'organizer_register' => '注册',
     'worker_login'       => '员工登录',
     'search'             => '搜索',
+    'wedding'            => '婚礼',
 
     // Footer
     'quick_links'        => '快速链接',

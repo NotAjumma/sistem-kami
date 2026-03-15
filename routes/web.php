@@ -124,6 +124,7 @@ $homeRoutes = function () {
     Route::get('/privacy-policy',       [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
     Route::get('/terms-and-conditions', [HomeController::class, 'terms'])->name('terms');
     Route::get('/search',               [HomeController::class, 'search'])->name('search');
+    Route::get('/wedding',              [HomeController::class, 'wedding'])->name('wedding');
 };
 
 // Mandarin home routes (fixed zh/ prefix)
@@ -139,8 +140,9 @@ Route::get('/qr/{slug}', function ($slug) {
     return response()->file($path, ['Content-Type' => $mime]);
 })->name('organizer.payment.qr');
 
+
 Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
-Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
+Route::get('/{slug}',             [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/receipt/pdf/{booking_code}', function ($booking_code) {
 
@@ -297,6 +299,7 @@ Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackag
 // Locale-aware profile routes — BM first (fixed prefix, more specific) then EN (wildcard)
 $profileRoutes = function () {
     Route::get('/{slug}',                                [BusinessController::class, 'showProfile'])->name('business.profile');
+    Route::get('/{slug}/wedding',                        [HomeController::class,     'specialPageWedding'])->name('special-page.wedding');
     Route::get('/{organizerSlug}/{packageSlug}',         [BusinessController::class, 'showPackage'])->name('business.package');
     Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
 };

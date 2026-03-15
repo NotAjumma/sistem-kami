@@ -57,6 +57,7 @@ class Organizer extends Authenticatable
         'is_active',
         'visibility',
         'what_flow',
+        'special_page',
         'user_id',
     ];
 
