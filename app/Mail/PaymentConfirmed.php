@@ -12,9 +12,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use App\Models\Booking;
 
-class PaymentConfirmed extends Mailable
+class PaymentConfirmed extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+    public $queue = 'high';
     public $booking;
     /**
      * Create a new message instance.

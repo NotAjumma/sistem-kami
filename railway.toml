@@ -1,6 +1,5 @@
 [deploy]
-# Run health check report (emails on failure) right after every deploy
-# then start the web server
-startCommand = "bash start.sh"
+# Web service entrypoint (Nginx + PHP-FPM)
+# Worker service: override start command to "/entrypoint-worker.sh" in Railway dashboard
 healthcheckPath = "/superadmin/login"
 healthcheckTimeout = 30
