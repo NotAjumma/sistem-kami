@@ -14,6 +14,7 @@ return [
     'organizer_register' => 'Register',
     'worker_login'       => 'Worker Login',
     'search'             => 'Search',
+    'wedding'            => 'Wedding',
 
     // Footer
     'quick_links'        => 'Quick Links',

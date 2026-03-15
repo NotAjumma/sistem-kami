@@ -25,4 +25,8 @@ return [
         'title'       => '搜索服务提供商 | Sistem Kami',
         'description' => '搜索并发现马来西亚的服务提供商，通过 Sistem Kami 轻松预订。',
     ],
+    'wedding' => [
+        'title'       => '婚礼场地 | Sistem Kami',
+        'description' => '探索我们的婚礼场地——从可容纳1000位宾客的冷气礼堂到传统户外空间及花园场地，尽在马来西亚。',
+    ],
 ];
