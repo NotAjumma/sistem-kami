@@ -58,13 +58,15 @@ class Organizer extends Authenticatable
         'visibility',
         'what_flow',
         'special_page',
+        'special_page_images',
         'user_id',
     ];
 
     protected $casts = [
-        'banner_path'       => 'array',
-        'social_links'      => 'array',
-        'wallet_history'    => 'array',
+        'banner_path'          => 'array',
+        'social_links'         => 'array',
+        'wallet_history'       => 'array',
+        'special_page_images'  => 'array',
         'is_active'         => 'boolean',
         'is_gmaps_verified' => 'boolean',
         'google_map_show'   => 'boolean',

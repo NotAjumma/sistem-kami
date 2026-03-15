@@ -72,7 +72,7 @@
         .hero-title-anim { animation: heroSlideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
 
         /* Hero */
-        .wedding-hero { position: relative; width: 100%; height: 380px; background-image: url("{{ asset('storage/Pelamin_wedding_hero.jpg') }}"); background-size: cover; background-position: center top; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .wedding-hero { position: relative; width: 100%; height: 380px; background-image: url("{{ $img('wedding_hero', 'Pelamin_wedding_hero.jpg') }}"); background-size: cover; background-position: center top; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .wedding-hero::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.42); }
         .wedding-hero h1 { position: relative; font-family: 'Imperial Script', cursive; font-size: clamp(64px, 10vw, 100px); font-weight: 400; color: #ffffff; margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,0.4); line-height: 1; }
 
@@ -86,9 +86,9 @@
         .venue-section::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
         .venue-section:nth-of-type(odd)::before  { background: rgba(243, 237, 229, 0.90); }
         .venue-section:nth-of-type(even)::before { background: rgba(235, 228, 218, 0.90); }
-        .venue-dewan   { background-image: url("{{ asset('storage/Pelamin_DSDusun_2024-1-1024x618.jpeg') }}"); }
-        .venue-dataran { background-image: url("{{ asset('storage/DataranSriDusun-1024x682.jpg') }}"); }
-        .venue-laman   { background-image: url("{{ asset('storage/LamanDusun-1024x768.jpg') }}"); }
+        .venue-dewan   { background-image: url("{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}"); }
+        .venue-dataran { background-image: url("{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}"); }
+        .venue-laman   { background-image: url("{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}"); }
         .venue-section .ldt-container { position: relative; z-index: 1; }
         .venue-row { display: flex; flex-direction: row; align-items: center; gap: 52px; }
         .venue-text-col { flex: 0 0 36%; max-width: 36%; }
@@ -116,6 +116,11 @@
 </head>
 <body>
 
+@php
+    $spImgs = $organizer->special_page_images ?? [];
+    $img = fn(string $key, string $fallback) => asset('storage/' . ($spImgs[$key] ?? $fallback));
+@endphp
+
     @include('home.special_page.lady_d_touch._navbar')
 
     <main>
@@ -141,7 +146,7 @@
                         <p class="venue-desc">{{ __('lady_d_touch.venue1_desc') }}</p>
                     </div>
                     <div class="venue-img-col slide-up-child delay-2">
-                        <img src="{{ asset('storage/Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="{{ __('lady_d_touch.venue1_name') }}" class="venue-img" loading="lazy">
+                        <img src="{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="{{ __('lady_d_touch.venue1_name') }}" class="venue-img" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -155,7 +160,7 @@
                         <p class="venue-desc">{{ __('lady_d_touch.venue2_desc') }}</p>
                     </div>
                     <div class="venue-img-col slide-up-child delay-2">
-                        <img src="{{ asset('storage/DataranSriDusun-1024x682.jpg') }}" alt="{{ __('lady_d_touch.venue2_name') }}" class="venue-img" loading="lazy">
+                        <img src="{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}" alt="{{ __('lady_d_touch.venue2_name') }}" class="venue-img" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -169,7 +174,7 @@
                         <p class="venue-desc">{{ __('lady_d_touch.venue3_desc') }}</p>
                     </div>
                     <div class="venue-img-col slide-up-child delay-2">
-                        <img src="{{ asset('storage/LamanDusun-1024x768.jpg') }}" alt="{{ __('lady_d_touch.venue3_name') }}" class="venue-img" loading="lazy">
+                        <img src="{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}" alt="{{ __('lady_d_touch.venue3_name') }}" class="venue-img" loading="lazy">
                     </div>
                 </div>
             </div>
