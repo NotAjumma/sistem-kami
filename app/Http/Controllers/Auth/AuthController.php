@@ -205,13 +205,15 @@ class AuthController extends Controller
         $user->save();
 
         // Redirect
-        return match ($role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'organizer' => redirect()->route('organizer.dashboard'),
-            'marshal' => redirect()->route('marshal.dashboard'),
-            'worker' => redirect()->route('worker.tickets.confirmed'),
-            default => redirect()->route('participant.dashboard'),
+        $default = match ($role) {
+            'admin' => route('admin.dashboard'),
+            'organizer' => route('organizer.dashboard'),
+            'marshal' => route('marshal.dashboard'),
+            'worker' => route('worker.tickets.confirmed'),
+            default => route('participant.dashboard'),
         };
+
+        return redirect()->intended($default);
     }
 
     /**
