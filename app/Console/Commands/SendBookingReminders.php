@@ -26,8 +26,7 @@ class SendBookingReminders extends Command
 
         $now    = Carbon::now();
         $hour   = (int) $now->format('H');
-        // Look back 2 hours to catch slots missed due to scheduler downtime/restarts
-        $start  = Carbon::now()->subHours(2);
+        $start  = Carbon::now();
         $cutoff = Carbon::now()->addHours(12);
 
         $systemFonnteToken = AppSetting::get('fonnte_token');

@@ -97,12 +97,14 @@ class HealthCheckService
             return "$withImages / $total packages have images";
         });
 
-        $check('Profile Page', 'WhatsApp Button (fonnte_token)', function () {
+        $check('Profile Page', 'Auto WhatsApp (Fonnte Token)', function () {
             $total        = Organizer::where('is_active', true)->count();
             $withToken    = Organizer::where('is_active', true)->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '')->count();
             $withoutToken = $total - $withToken;
-            if ($withToken === 0) throw new \Exception("No active organizers have fonnte_token set — WhatsApp button will not work");
-            if ($withoutToken > 0) return "$withToken / $total have fonnte_token (WhatsApp OK); $withoutToken missing token";
+            $systemToken  = \App\Models\AppSetting::get('fonnte_token');
+            if ($withToken === 0 && !$systemToken) throw new \Exception("No Fonnte token set (organizer or system) — auto reminders & receipts will not work");
+            if ($withoutToken > 0 && $systemToken) return "$withToken / $total have own token; $withoutToken will use system token (OK)";
+            if ($withoutToken > 0 && !$systemToken) return "$withToken / $total have token; $withoutToken have no token (no system fallback — reminders & receipts won't send for them)";
             return "All $total active organizers have fonnte_token";
         });
 
@@ -222,6 +224,15 @@ class HealthCheckService
         });
 
         $check('Forms & Buttons', 'WhatsApp: organizer phone set', function () {
+            $systemToken  = \App\Models\AppSetting::get('fonnte_token');
+            // If system token exists, all organizers can send — check all have phone numbers
+            if ($systemToken) {
+                $active  = Organizer::where('is_active', true)->get();
+                if ($active->isEmpty()) return 'No active organizers — skipped';
+                $noPhone = $active->filter(fn($o) => empty($o->phone))->count();
+                if ($noPhone > 0) throw new \Exception("$noPhone active organizer(s) have no phone number — WhatsApp link in messages will be missing");
+                return "{$active->count()} active organizer(s) all have phone numbers (system Fonnte token set)";
+            }
             $withToken = Organizer::where('is_active', true)->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '')->get();
             if ($withToken->isEmpty()) return 'No organizers with fonnte_token — skipped';
             $noPhone = $withToken->filter(fn($o) => empty($o->phone))->count();
