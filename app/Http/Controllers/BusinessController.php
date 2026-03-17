@@ -86,6 +86,29 @@ class BusinessController extends Controller
 
     public function showProfile(Request $request, $slug)
     {
+        // If organizer has a special branded page, serve it instead of the default profile
+        $specialOrganizer = \App\Models\Organizer::where('slug', $slug)
+            ->whereNotNull('special_page')
+            ->where('is_active', true)
+            ->first();
+        if ($specialOrganizer) {
+            $view = 'home.special_page.' . $specialOrganizer->special_page . '.home';
+            if (view()->exists($view)) {
+                // Private visibility check
+                $cfg = $specialOrganizer->special_page_config ?? [];
+                if (($cfg['visibility'] ?? 'public') === 'private') {
+                    $authOrg = auth()->guard('organizer')->user();
+                    if (! $authOrg || $authOrg->id !== $specialOrganizer->id) {
+                        return response()->view('home.special_page._private', ['organizer' => $specialOrganizer], 403);
+                    }
+                }
+                return view($view, [
+                    'organizer'   => $specialOrganizer,
+                    'specialPage' => str_replace('_', '-', $specialOrganizer->special_page),
+                ]);
+            }
+        }
+
         $isPrivateRoute = $request->routeIs('business.profile.private');
 
         // Server-side cache for public profiles (5 min) — bypasses DB on repeat visits

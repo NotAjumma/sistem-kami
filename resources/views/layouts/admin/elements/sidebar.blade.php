@@ -191,6 +191,16 @@
                     </ul>
 
                 </li>
+                @if(!empty($authUser->special_page))
+                <li>
+                    <a href="{{ route('organizer.business.special-page') }}"
+                        class="{{ request()->routeIs('organizer.business.special-page*') ? 'active' : '' }}"
+                        aria-expanded="false">
+                        <i class="material-symbols-outlined">web</i>
+                        <span class="nav-text">Profile Page</span>
+                    </a>
+                </li>
+                @endif
                 <li>
                     <a href="{{ route('organizer.business.settings') }}"
                         class="{{ request()->routeIs('organizer.business.settings*') ? 'active' : '' }}"

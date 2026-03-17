@@ -2386,4 +2386,96 @@ class OrganizerBusinessController extends Controller
 
         return back()->with('success', 'Time slot deleted.');
     }
+
+    // ─── Special Page Customizer ─────────────────────────────────────────────
+
+    public function showSpecialPage()
+    {
+        $authUser  = auth()->guard('organizer')->user()->load('user');
+        $organizer = $authUser;
+
+        if (! $organizer->special_page) {
+            abort(403, 'Special page not enabled for this account.');
+        }
+
+        $cfg        = $organizer->special_page_config ?? [];
+        $page_title = 'Profile Page';
+
+        return view('organizer.special-page', compact('organizer', 'cfg', 'authUser', 'page_title'));
+    }
+
+    public function updateSpecialPage(Request $request)
+    {
+        $organizer = auth()->guard('organizer')->user();
+
+        if (! $organizer->special_page) {
+            abort(403);
+        }
+
+        $request->validate([
+            'accent_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ]);
+
+        $sections = [
+            'hero', 'about', 'gallery', 'venues', 'location',
+            'wedding_intro', 'venue_dewan', 'venue_dataran', 'venue_laman',
+        ];
+
+        $cfg = $organizer->special_page_config ?? [];
+        $cfg['accent_color'] = $request->input('accent_color') ?: '#14b9d5';
+        $cfg['heading_font'] = $request->input('heading_font', 'Imperial Script');
+        $cfg['body_font']    = $request->input('body_font', 'Poppins');
+        $cfg['visibility']   = $request->input('visibility', 'public') === 'private' ? 'private' : 'public';
+
+        foreach ($sections as $sec) {
+            $input   = $request->input("sections.{$sec}", []);
+            // Unchecked checkbox submits nothing — treat absence as false
+            $visible = !empty($input['visible']);
+            // Save all text fields as-is (empty string = user cleared it)
+            $fields  = array_filter($input, fn($k) => $k !== 'visible', ARRAY_FILTER_USE_KEY);
+            $cfg['sections'][$sec] = array_merge($fields, ['visible' => $visible]);
+        }
+
+        $organizer->update(['special_page_config' => $cfg]);
+
+        return back()->with('success', 'Special page updated.');
+    }
+
+    public function uploadSpecialPageImage(Request $request)
+    {
+        $organizer = auth()->guard('organizer')->user();
+
+        if (! $organizer->special_page) {
+            abort(403);
+        }
+
+        $request->validate([
+            'slot'  => ['required', 'in:hero,gallery,map,venue_dewan,venue_dataran,venue_laman,wedding_hero'],
+            'image' => ['required', 'image', 'max:20480'],
+        ]);
+
+        $slot   = $request->input('slot');
+        $file   = $request->file('image');
+        $folder = 'uploads/' . $organizer->id . '/special_page';
+
+        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($folder);
+
+        $spImages = $organizer->special_page_images ?? [];
+
+        if (! empty($spImages[$slot])) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($spImages[$slot]);
+        }
+
+        $filename = $slot . '.' . $file->getClientOriginalExtension();
+        $file->storeAs($folder, $filename, 'public');
+        $spImages[$slot] = $folder . '/' . $filename;
+
+        $organizer->update(['special_page_images' => $spImages]);
+
+        return response()->json([
+            'success' => true,
+            'url'     => asset('storage/' . $spImages[$slot]),
+            'path'    => $spImages[$slot],
+        ]);
+    }
 }

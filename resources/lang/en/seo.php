@@ -25,4 +25,8 @@ return [
         'title'       => 'Search | Sistem Kami',
         'description' => 'Search for service providers, packages, and time slots on Sistem Kami.',
     ],
+    'wedding' => [
+        'title'       => 'Wedding Venues | Sistem Kami',
+        'description' => 'Discover our wedding venues — from air-conditioned halls for up to 1,000 guests to traditional outdoor spaces and lush garden settings in Malaysia.',
+    ],
 ];

@@ -124,6 +124,7 @@ $homeRoutes = function () {
     Route::get('/privacy-policy',       [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
     Route::get('/terms-and-conditions', [HomeController::class, 'terms'])->name('terms');
     Route::get('/search',               [HomeController::class, 'search'])->name('search');
+    Route::get('/wedding',              [HomeController::class, 'wedding'])->name('wedding');
 };
 
 // Mandarin home routes (fixed zh/ prefix)
@@ -139,8 +140,9 @@ Route::get('/qr/{slug}', function ($slug) {
     return response()->file($path, ['Content-Type' => $mime]);
 })->name('organizer.payment.qr');
 
+
 Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
-Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
+Route::get('/{slug}',             [EventController::class, 'showBySlug'])->name('event.slug');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/receipt/pdf/{booking_code}', function ($booking_code) {
 
@@ -223,6 +225,11 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::patch('/booking/{id}/send-receipt', [OrganizerBusinessController::class, 'sendReceipt'])->name('organizer.business.booking.send-receipt');
     Route::get('/packages/{package}/form-fields', [BookingController::class, 'getFormFields']);
     
+    // Special Page Customizer
+    Route::get('/special-page', 'showSpecialPage')->name('organizer.business.special-page');
+    Route::post('/special-page', 'updateSpecialPage')->name('organizer.business.special-page.update');
+    Route::post('/special-page/upload-image', 'uploadSpecialPageImage')->name('organizer.business.special-page.upload-image');
+
     // Package
     Route::get('/packages/create', 'showCreatePackage')->name('organizer.business.package.create');
     Route::post('/packages/create', 'storePackage')->name('organizer.business.package.store');
@@ -297,6 +304,7 @@ Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackag
 // Locale-aware profile routes — BM first (fixed prefix, more specific) then EN (wildcard)
 $profileRoutes = function () {
     Route::get('/{slug}',                                [BusinessController::class, 'showProfile'])->name('business.profile');
+    Route::get('/{slug}/wedding',                        [HomeController::class,     'specialPageWedding'])->name('special-page.wedding');
     Route::get('/{organizerSlug}/{packageSlug}',         [BusinessController::class, 'showPackage'])->name('business.package');
     Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
 };
