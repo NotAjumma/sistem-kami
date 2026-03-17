@@ -122,58 +122,6 @@ class HomeController extends Controller
         return view('home.terms', compact('seo'));
     }
 
-    /**
-     * Generic special organizer branded page.
-     * URL slug  (hyphenated, e.g. "lady-d-touch")  →  special_page DB value (underscored, e.g. "lady_d_touch").
-     * Renders home.{special_page}_{sub} if the view exists; falls back to the organizer's public profile.
-     */
-    public function specialPage(string $page, string $sub = 'home')
-    {
-        $specialPage = str_replace('-', '_', $page);
-
-        $organizer = \App\Models\Organizer::where('special_page', $specialPage)
-            ->where('is_active', true)
-            ->first();
-
-        if (! $organizer) {
-            abort(404);
-        }
-
-        // Private visibility check
-        $cfg = $organizer->special_page_config ?? [];
-        if (($cfg['visibility'] ?? 'public') === 'private') {
-            $authOrg = auth()->guard('organizer')->user();
-            if (! $authOrg || $authOrg->id !== $organizer->id) {
-                return response()->view('home.special_page._private', ['organizer' => $organizer], 403);
-            }
-        }
-
-        $view = 'home.special_page.' . $specialPage . '.' . $sub;
-
-        if (! view()->exists($view)) {
-            // Fallback: redirect to the organizer's default public profile
-            return redirect()->route('business.profile', ['slug' => $organizer->slug]);
-        }
-
-        return view($view, ['organizer' => $organizer, 'specialPage' => $page]);
-    }
-
-    public function specialPageWedding(string $slug)
-    {
-        return $this->specialPage($slug, 'wedding');
-    }
-
-    public function wedding()
-    {
-        $seo = [
-            'title'       => __('seo.wedding.title'),
-            'description' => __('seo.wedding.description'),
-            'canonical'   => url('/wedding'),
-        ];
-
-        return view('home.wedding', compact('seo'));
-    }
-
     public function search(Request $request)
     {
         $page_title = __('seo.search.title');

@@ -294,7 +294,6 @@
 				<ul class="hidden lg:flex space-x-6 text-sm font-normal text-gray-900" style="position:absolute;left:50%;transform:translateX(-50%);align-items:center;list-style:none;margin:0;padding:0;">
 					<li><a class="hover:underline" href="{{ lroute('index') }}">{{ __('nav.home') }}</a></li>
 					<li><a class="hover:underline" href="{{ lroute('about') }}">{{ __('nav.about_us') }}</a></li>
-					<li><a class="hover:underline" href="{{ lroute('wedding') }}">{{ __('nav.wedding') }}</a></li>
 
 					<!-- Pages Dropdown -->
 					<li class="relative">
@@ -400,11 +399,6 @@
 					<a href="{{ lroute('about') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
 						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
 						{{ __('nav.about_us') }}
-					</a>
-
-					<a href="{{ lroute('wedding') }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;color:rgba(255,255,255,0.9);text-decoration:none;font-size:0.95rem;font-weight:500;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
-						<svg style="width:18px;height:18px;opacity:0.6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-						{{ __('nav.wedding') }}
 					</a>
 
 				{{-- Contact Us collapsible --}}
@@ -532,7 +526,6 @@
 						<ul class="list-unstyled" style="font-size: 0.85rem;">
 							<li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.home') }}</a></li>
 							<li class="mb-2"><a href="{{ lroute('about') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.about_us') }}</a></li>
-							<li class="mb-2"><a href="{{ lroute('wedding') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.wedding') }}</a></li>
 							<li class="mb-2"><a href="{{ lroute('search') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.search') }}</a></li>
 							<li class="mb-2"><a href="{{ lroute('faq') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.faq') }}</a></li>
 							<li class="mb-2"><a href="{{ lroute('privacy-policy') }}" class="text-decoration-none" style="color: rgba(255,255,255,0.6); transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">{{ __('nav.privacy_policy') }}</a></li>

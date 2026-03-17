@@ -275,48 +275,6 @@
             </div>
         </div>
 
-        {{-- ── Special Page Images ─────────────────────────────────────── --}}
-        @if($organizer->special_page)
-        <div class="col-12">
-            <div class="card border-info">
-                <div class="card-header bg-info bg-opacity-10">
-                    <h6 class="mb-0">Special Page Images <span class="badge bg-info text-white ms-1">{{ $organizer->special_page }}</span></h6>
-                </div>
-                <div class="card-body">
-                    @php
-                        $spImgs = $organizer->special_page_images ?? [];
-                        $slots = [
-                            'hero'          => 'Home Hero Background',
-                            'gallery'       => 'Gallery / About Image',
-                            'map'           => 'Location Map Image',
-                            'venue_dewan'   => 'Venue: Dewan Sri Dusun',
-                            'venue_dataran' => 'Venue: Dataran Sri Dusun',
-                            'venue_laman'   => 'Venue: Laman Dusun',
-                            'wedding_hero'  => 'Wedding Page Hero',
-                        ];
-                    @endphp
-                    <div class="row g-3">
-                        @foreach($slots as $key => $label)
-                        <div class="col-md-6 col-lg-4">
-                            <label class="form-label fw-semibold">{{ $label }}</label>
-                            @if(!empty($spImgs[$key]))
-                                <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $spImgs[$key]) }}" alt="{{ $label }}"
-                                         style="max-height:120px;max-width:100%;border:1px solid #dee2e6;border-radius:6px;object-fit:cover;">
-                                </div>
-                            @endif
-                            <input type="file" name="sp_img_{{ $key }}" class="form-control form-control-sm" accept="image/*">
-                            @if(!empty($spImgs[$key]))
-                                <small class="text-muted">Upload new to replace</small>
-                            @endif
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-
     </div>{{-- row --}}
 
     <div class="d-flex gap-2 mt-4">

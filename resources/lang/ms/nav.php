@@ -14,7 +14,6 @@ return [
     'organizer_register' => 'Daftar',
     'worker_login'       => 'Log Masuk Pekerja',
     'search'             => 'Cari',
-    'wedding'            => 'Perkahwinan',
 
     // Footer
     'quick_links'        => 'Pautan Pantas',

@@ -12,18 +12,6 @@ class EventController extends Controller
 
     public function showBySlug($slug)
     {
-        // If this slug matches an organizer's special branded page, serve it directly
-        $specialPage = str_replace('-', '_', $slug);
-        $specialOrganizer = \App\Models\Organizer::where('special_page', $specialPage)
-            ->where('is_active', true)
-            ->first();
-        if ($specialOrganizer) {
-            $view = 'home.special_page.' . $specialPage . '.home';
-            if (view()->exists($view)) {
-                return view($view, ['organizer' => $specialOrganizer, 'specialPage' => $slug]);
-            }
-        }
-
         $event = Event::with(['category', 'organizer', 'tickets'])->where('slug', $slug)->firstOrFail();
 
         if (!$event->organizer || $event->organizer->type !== 'event') {

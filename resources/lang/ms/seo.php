@@ -25,8 +25,4 @@ return [
         'title'       => 'Cari | Sistem Kami',
         'description' => 'Cari penyedia perkhidmatan, pakej, dan slot masa di Sistem Kami.',
     ],
-    'wedding' => [
-        'title'       => 'Venue Perkahwinan | Sistem Kami',
-        'description' => 'Temui venue perkahwinan kami — dari dewan berhawa dingin untuk sehingga 1,000 tetamu hingga ruang tradisional luar dan taman hijau yang indah di Malaysia.',
-    ],
 ];
