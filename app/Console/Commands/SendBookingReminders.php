@@ -30,28 +30,38 @@ class SendBookingReminders extends Command
         $start  = Carbon::now()->subHours(2);
         $cutoff = Carbon::now()->addHours(12);
 
+        $systemFonnteToken = AppSetting::get('fonnte_token');
+
         // Quick check: any pending reminders at all?
-        $pendingCount = Booking::whereNotIn('status', ['cancelled'])
+        $pendingQuery = Booking::whereNotIn('status', ['cancelled'])
             ->whereNull('reminder_sent_at')
             ->whereHas('vendorTimeSlots', function ($q) use ($start, $cutoff) {
                 $q->whereRaw("CONCAT(booked_date_start, ' ', booked_time_start) BETWEEN ? AND ?", [
                     $start->toDateTimeString(),
                     $cutoff->toDateTimeString(),
                 ]);
-            })
-            ->whereHas('organizer', function ($q) {
-                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
-            })
-            ->count();
+            });
 
-        if ($pendingCount === 0) {
+        // If no system fallback token, only check organizers with their own token
+        if (!$systemFonnteToken) {
+            $pendingQuery->whereHas('organizer', function ($q) {
+                $q->whereNotNull('fonnte_token')->where('fonnte_token', '!=', '');
+            });
+        }
+
+        if ($pendingQuery->count() === 0) {
             $this->info('No pending reminders. Skipping.');
             return;
         }
 
-        $organizers = Organizer::whereNotNull('fonnte_token')
-            ->where('fonnte_token', '!=', '')
-            ->get();
+        // Get all organizers (those with own token + those that can use system token)
+        if ($systemFonnteToken) {
+            $organizers = Organizer::all();
+        } else {
+            $organizers = Organizer::whereNotNull('fonnte_token')
+                ->where('fonnte_token', '!=', '')
+                ->get();
+        }
 
         $report = [
             'ran_at'        => $now->setTimezone('Asia/Kuala_Lumpur')->format('d M Y, h:i A'),
@@ -83,6 +93,14 @@ class SendBookingReminders extends Command
                 })
                 ->get();
 
+            // Resolve fonnte token: organizer's own or system fallback
+            $fonnteToken = $organizer->fonnte_token ?: $systemFonnteToken;
+            if (!$fonnteToken) {
+                $this->info("Organizer {$organizer->name}: no Fonnte token. Skipping.");
+                $report['total_skipped']++;
+                continue;
+            }
+
             $orgEntry = [
                 'name'     => $organizer->name,
                 'sent'     => 0,
@@ -91,7 +109,7 @@ class SendBookingReminders extends Command
             ];
 
             foreach ($bookings as $booking) {
-                $result = $this->sendReminder($booking, $organizer);
+                $result = $this->sendReminder($booking, $organizer, $fonnteToken);
 
                 $slot     = $booking->vendorTimeSlots->first();
                 $slotDate = $slot ? Carbon::parse($slot->booked_date_start)->format('d M Y') : '-';
@@ -165,7 +183,7 @@ class SendBookingReminders extends Command
         return $hour >= $start || $hour < $end;
     }
 
-    private function sendReminder(Booking $booking, Organizer $organizer): array
+    private function sendReminder(Booking $booking, Organizer $organizer, string $fonnteToken): array
     {
         $fail = fn(string $msg = '') => ['success' => false, 'message' => $msg, 'phone' => ''];
 
@@ -267,16 +285,45 @@ class SendBookingReminders extends Command
         $lines[] = "Kerjasama anda amat dihargai. Jumpa nanti! 😊";
 
         if ($organizer->payment_qr_path && $booking->payment_type === 'deposit' && $balance > 0) {
+            $waOrgPhone = preg_replace('/\D/', '', $organizer->phone ?? '');
+            if (str_starts_with($waOrgPhone, '0')) {
+                $waOrgPhone = '60' . substr($waOrgPhone, 1);
+            } elseif ($waOrgPhone && !str_starts_with($waOrgPhone, '60')) {
+                $waOrgPhone = '60' . $waOrgPhone;
+            }
+
             $lines[] = "";
             $lines[] = "💳 QR Kod Pembayaran:";
+            $lines[] = "Tekan link di bawah untuk lihat QR code, screenshot dan scan untuk bayar baki sebanyak *RM" . number_format($balance, 2) . "*.";
             $lines[] = $organizer->payment_qr_url;
+            $lines[] = "";
+            $lines[] = "Selepas berjaya membuat pembayaran, sila hantar resit kepada WhatsApp kami:";
+            if ($waOrgPhone) {
+                $lines[] = "👉 https://wa.me/{$waOrgPhone}";
+            }
+        }
+
+        $lines[] = "";
+        $lines[] = "---";
+        $lines[] = "Mesej ini dijana secara automatik oleh Sistem Kami.";
+        $lines[] = "Tidak perlu balas mesej ini.";
+        $lines[] = "";
+        $lines[] = "📞 {$organizer->name}";
+        if ($organizer->phone) {
+            $waPhone = preg_replace('/\D/', '', $organizer->phone);
+            if (str_starts_with($waPhone, '0')) {
+                $waPhone = '60' . substr($waPhone, 1);
+            } elseif (!str_starts_with($waPhone, '60')) {
+                $waPhone = '60' . $waPhone;
+            }
+            $lines[] = "WhatsApp: https://wa.me/{$waPhone}";
         }
 
         $message = implode("\n", $lines);
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => $organizer->fonnte_token,
+                'Authorization' => $fonnteToken,
             ])->asForm()->post('https://api.fonnte.com/send', [
                 'target'      => $phone,
                 'message'     => $message,

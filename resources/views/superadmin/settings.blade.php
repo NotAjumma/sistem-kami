@@ -60,6 +60,22 @@
                 </div>
             </div>
 
+            <hr class="my-4">
+
+            <div class="mb-1">
+                <label class="form-label fw-semibold">
+                    <i class="fab fa-whatsapp me-1 text-success"></i> Fonnte Token (Sistem Kami)
+                </label>
+                <input type="password" class="form-control font-monospace" name="fonnte_token"
+                       value="{{ old('fonnte_token', $settings['fonnte_token']) }}"
+                       placeholder="Paste Fonnte API token here"
+                       autocomplete="new-password">
+                <div class="form-text">
+                    System-level Fonnte token. Used as fallback for organizers that don't have their own Fonnte token.
+                    Get your token at <strong>fonnte.com</strong> → Dashboard → Device.
+                </div>
+            </div>
+
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </div>

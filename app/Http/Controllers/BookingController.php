@@ -1414,11 +1414,24 @@ class BookingController extends Controller
 
         $text .= "Google Maps:\n{$mapsUrl}\n\n";
 
+        $text .= "---\n";
+        $text .= "Mesej ini dijana secara automatik oleh Sistem Kami.\n";
+        $text .= "Tidak perlu balas mesej ini.\n\n";
+        $text .= "📞 {$authUser->name}\n";
+        if ($authUser->phone) {
+            $waOrgPhoneFallback = preg_replace('/[^0-9]/', '', $authUser->phone);
+            if (substr($waOrgPhoneFallback, 0, 1) === '0') {
+                $waOrgPhoneFallback = '6' . $waOrgPhoneFallback;
+            }
+            $text .= "WhatsApp: https://wa.me/{$waOrgPhoneFallback}\n";
+        }
+
         $whatsappUrl = 'https://api.whatsapp.com/send?phone=+6' . $phone
             . '&text=' . urlencode($text);
 
         // Try Fonnte if token exists, auto_send_receipt enabled, and not staging
-        if ($authUser->fonnte_token && ($authUser->auto_send_receipt ?? true) && !app()->environment('staging')) {
+        $fonnteToken = $authUser->fonnte_token ?: \App\Models\AppSetting::get('fonnte_token');
+        if ($fonnteToken && ($authUser->auto_send_receipt ?? true) && !app()->environment('staging')) {
 
             $fonntePhone = preg_replace('/[^0-9]/', '', $phone);
             if (str_starts_with($fonntePhone, '0')) {
@@ -1482,12 +1495,24 @@ class BookingController extends Controller
             $fonnteLines[] = "• Lewat = tiada masa tambahan";
             $fonnteLines[] = "";
             $fonnteLines[] = "Terima kasih";
-            // $fonnteLines[] = "- {$authUser->name}";
+            $fonnteLines[] = "";
+            $fonnteLines[] = "---";
+            $fonnteLines[] = "Mesej ini dijana secara automatik oleh Sistem Kami.";
+            $fonnteLines[] = "Tidak perlu balas mesej ini.";
+            $fonnteLines[] = "";
+            $fonnteLines[] = "📞 {$authUser->name}";
+            if ($authUser->phone) {
+                $waOrgPhone = preg_replace('/[^0-9]/', '', $authUser->phone);
+                if (substr($waOrgPhone, 0, 1) === '0') {
+                    $waOrgPhone = '6' . $waOrgPhone;
+                }
+                $fonnteLines[] = "WhatsApp: https://wa.me/{$waOrgPhone}";
+            }
 
             $fonnteText = implode("\n", $fonnteLines);
             try {
                 $fonnteResponse = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $authUser->fonnte_token,
+                    'Authorization' => $fonnteToken,
                 ])->asForm()->post('https://api.fonnte.com/send', [
                     'target'      => $fonntePhone,
                     'message'     => $fonnteText,

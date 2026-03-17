@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Participant;
 use App\Models\Booking;
+use App\Models\BookingsVendorTimeSlot;
 use App\Models\BookingTicket;
 use App\Models\EmailLog;
 use App\Models\Ticket;
@@ -1003,28 +1004,52 @@ class OrganizerBusinessController extends Controller
         // Keyed by addon_id for quick lookup in view
         $currentAddons = $booking->bookingAddons->keyBy('addon_id');
 
+        // Load all active packages for package change
+        $packages = Package::query()
+            ->active()
+            ->sortedAsc()
+            ->select('id', 'name', 'organizer_id', 'package_slot_quantity', 'duration_minutes', 'base_price', 'category_id')
+            ->where('organizer_id', $authUser->id)
+            ->with([
+                'addons' => fn($q) => $q->where('is_active', true),
+            ])
+            ->get();
+
+        // Build current booked slots info for JS pre-selection
+        $currentSlots = $booking->vendorTimeSlots->map(function ($slot) {
+            return [
+                'date' => Carbon::parse($slot->booked_date_start)->format('Y-m-d'),
+                'id' => $slot->vendor_time_slot_id,
+                'time_start' => $slot->booked_time_start,
+                'time_end' => $slot->booked_time_end,
+            ];
+        });
+
         $page_title = 'Edit Booking';
 
-        return view('organizer.booking.edit', compact('page_title', 'authUser', 'booking', 'promoters', 'currentAddons'));
+        return view('organizer.booking.edit', compact('page_title', 'authUser', 'booking', 'promoters', 'currentAddons', 'packages', 'currentSlots'));
     }
 
     public function updateBooking(Request $request, $id)
     {
-        $authUser = auth()->guard('organizer')->user();
+        $authUser = auth()->guard('organizer')->user()->load('user');
 
         $booking = Booking::with(['participant', 'vendorTimeSlots', 'bookingAddons'])
             ->where('organizer_id', $authUser->id)
             ->findOrFail($id);
 
         $request->validate([
-            'status'       => 'required|in:pending,paid,cancelled',
-            'payment_type' => 'required|in:deposit,full_payment',
-            'paid_amount'  => 'required|numeric|min:0',
-            'notes'        => 'nullable|string|max:1000',
-            'addons'       => 'nullable|array',
-            'addons.*'     => 'integer|min:0',
-            'details'      => 'nullable|array',
-            'details.*'    => 'nullable|string|max:1000',
+            'status'        => 'required|in:pending,paid,cancelled',
+            'payment_type'  => 'required|in:deposit,full_payment',
+            'paid_amount'   => 'required|numeric|min:0',
+            'notes'         => 'nullable|string|max:1000',
+            'addons'        => 'nullable|array',
+            'addons.*'      => 'integer|min:0',
+            'details'       => 'nullable|array',
+            'details.*'     => 'nullable|string|max:1000',
+            'package_id'    => 'nullable|exists:packages,id',
+            'selected_date' => 'nullable|date',
+            'selected_time' => 'nullable|string',
         ]);
 
         // Participant fields
@@ -1044,13 +1069,112 @@ class OrganizerBusinessController extends Controller
             $booking->vendorTimeSlots()->update(['notes' => $request->notes]);
         }
 
+        // Handle package, date, and time slot changes
+        $packageChanged = $request->filled('package_id') && $request->package_id != $booking->package_id;
+        $dateChanged = $request->filled('selected_date');
+        $selectedTime = json_decode($request->input('selected_time'), true) ?? [];
+
+        if ($packageChanged || $dateChanged || !empty($selectedTime)) {
+            $newPackageId = $request->input('package_id', $booking->package_id);
+            $package = Package::whereHas('organizer', function ($query) use ($authUser) {
+                $query->where('id', $authUser->id);
+            })
+                ->where('id', $newPackageId)
+                ->with(['addons', 'vendorTimeSlots', 'organizer'])
+                ->firstOrFail();
+
+            // Delete old vendor time slots
+            $booking->vendorTimeSlots()->delete();
+
+            $selectedDate = $request->input('selected_date');
+            $paymentTypeStatus = $request->payment_type === 'deposit' ? 'deposit_paid' : 'full_payment';
+
+            // Calculate extra minutes from time-based addons
+            $extraMinutes = 0;
+            if ($request->filled('addons')) {
+                foreach ($request->input('addons', []) as $addonId => $qty) {
+                    $qty = (int) $qty;
+                    if ($qty > 0) {
+                        $addon = \App\Models\PackageAddon::find($addonId);
+                        if ($addon && $addon->is_time && $addon->time_minutes) {
+                            $extraMinutes += $addon->time_minutes * $qty;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($selectedTime)) {
+                if ($package->organizer->what_flow == 2) {
+                    $slotDurations = collect($package->vendorTimeSlots)
+                        ->mapWithKeys(fn($slot) => [$slot->id => $slot->duration_minutes]);
+                } else {
+                    $slotDurations = $package->duration_minutes;
+                }
+
+                foreach ($selectedTime as $slot) {
+                    if ($package->organizer->what_flow == 2) {
+                        $baseDuration = $slotDurations[$slot['id']] ?? 0;
+                    } else {
+                        $baseDuration = $slotDurations ?? 0;
+                    }
+                    $totalDuration = $baseDuration + $extraMinutes;
+
+                    $start = Carbon::createFromFormat('g:i A', $slot['time']);
+                    $end = $totalDuration > 0
+                        ? $start->copy()->addMinutes($totalDuration)
+                        : null;
+
+                    BookingsVendorTimeSlot::create([
+                        'booking_id'          => $booking->id,
+                        'vendor_time_slot_id' => $slot['id'],
+                        'booked_date_start'   => $slot['date'],
+                        'booked_date_end'     => $slot['date'],
+                        'package_id'          => $package->id,
+                        'package_category_id' => $package->category_id,
+                        'organizer_id'        => $package->organizer_id,
+                        'booked_time_start'   => $start->format('H:i:s'),
+                        'booked_time_end'     => $end?->format('H:i:s'),
+                        'status'              => $paymentTypeStatus,
+                        'notes'               => $request->input('notes'),
+                    ]);
+                }
+            } else {
+                // Full-day booking (no time slots)
+                BookingsVendorTimeSlot::create([
+                    'booking_id'          => $booking->id,
+                    'vendor_time_slot_id' => $package->vendorTimeSlots->first()?->id,
+                    'booked_date_start'   => $selectedDate,
+                    'booked_date_end'     => $selectedDate,
+                    'package_id'          => $package->id,
+                    'package_category_id' => $package->category_id,
+                    'organizer_id'        => $package->organizer_id,
+                    'booked_time_start'   => null,
+                    'booked_time_end'     => null,
+                    'status'              => $paymentTypeStatus,
+                    'notes'               => $request->input('notes'),
+                ]);
+            }
+
+            // Update package_id on booking if changed
+            if ($packageChanged) {
+                $booking->update(['package_id' => $package->id]);
+                $booking->refresh();
+            }
+        }
+
         // Calculate current addon total before deleting
         $currentAddonTotal = 0;
-        $booking->load('bookingAddons.addon');
+        $booking->load('bookingAddons.addon', 'package');
         foreach ($booking->bookingAddons as $ba) {
             $currentAddonTotal += ($ba->addon->price ?? 0) * $ba->qty;
         }
-        $basePrice = ($booking->total_price ?? 0) - $currentAddonTotal;
+
+        // Recalculate base price from package
+        $package = $booking->package;
+        $slotQtyRequired = $package->package_slot_quantity ?? 1;
+        $selectedCount = !empty($selectedTime) ? count($selectedTime) : max($booking->vendorTimeSlots()->count(), 1);
+        $packageQty = $selectedCount > 0 ? intdiv($selectedCount, $slotQtyRequired) : 1;
+        $basePrice = (float) $package->base_price * $packageQty;
 
         // Sync addons: addons[addon_id] = qty
         $booking->bookingAddons()->delete();
@@ -1070,16 +1194,15 @@ class OrganizerBusinessController extends Controller
             }
         }
 
+        $discountAmount = (float) ($booking->discount ?? 0);
         $newTotalPrice = $basePrice + $newAddonTotal;
         $paidAmount    = (float) $request->paid_amount;
         $paymentType   = $request->payment_type;
 
-        if ($paymentType === 'full_payment' && $paidAmount < $newTotalPrice) {
-            // Added addons: paid no longer covers total → downgrade to deposit
+        if ($paymentType === 'full_payment' && $paidAmount < ($newTotalPrice - $discountAmount)) {
             $paymentType = 'deposit';
-        } elseif ($paymentType === 'full_payment' && $paidAmount > $newTotalPrice) {
-            // Removed addons: overpaid → clamp paid down to new total (refund handled externally)
-            $paidAmount = $newTotalPrice;
+        } elseif ($paymentType === 'full_payment' && $paidAmount > ($newTotalPrice - $discountAmount)) {
+            $paidAmount = max($newTotalPrice - $discountAmount, 0);
         }
 
         $booking->update([
@@ -1822,10 +1945,23 @@ class OrganizerBusinessController extends Controller
 
         $text .= "Google Maps:\n{$mapsUrl}\n\n";
 
+        $text .= "---\n";
+        $text .= "Mesej ini dijana secara automatik oleh Sistem Kami.\n";
+        $text .= "Tidak perlu balas mesej ini.\n\n";
+        $text .= "📞 {$authUser->name}\n";
+        if ($authUser->phone) {
+            $waOrgPhoneFallback = preg_replace('/[^0-9]/', '', $authUser->phone);
+            if (substr($waOrgPhoneFallback, 0, 1) === '0') {
+                $waOrgPhoneFallback = '6' . $waOrgPhoneFallback;
+            }
+            $text .= "WhatsApp: https://wa.me/{$waOrgPhoneFallback}\n";
+        }
+
         // =========================
         // Send via Fonnte if token exists, else return WhatsApp URL
         // =========================
-        if ($authUser->fonnte_token) {
+        $fonnteToken = $authUser->fonnte_token ?: \App\Models\AppSetting::get('fonnte_token');
+        if ($fonnteToken) {
             // Build rich Fonnte message (reminder-style, no receipt URL)
             $firstSlot  = $booking->vendorTimeSlots->first();
             $slotDate   = $firstSlot ? Carbon::parse($firstSlot->booked_date_start)->format('d M Y') : '-';
@@ -1883,12 +2019,24 @@ class OrganizerBusinessController extends Controller
             $fonnteLines[] = "• Lewat = tiada masa tambahan";
             $fonnteLines[] = "";
             $fonnteLines[] = "Terima kasih! Jumpa nanti! 😊";
-            $fonnteLines[] = "- {$authUser->name}";
+            $fonnteLines[] = "";
+            $fonnteLines[] = "---";
+            $fonnteLines[] = "Mesej ini dijana secara automatik oleh Sistem Kami.";
+            $fonnteLines[] = "Tidak perlu balas mesej ini.";
+            $fonnteLines[] = "";
+            $fonnteLines[] = "📞 {$authUser->name}";
+            if ($authUser->phone) {
+                $waOrgPhone = preg_replace('/[^0-9]/', '', $authUser->phone);
+                if (substr($waOrgPhone, 0, 1) === '0') {
+                    $waOrgPhone = '6' . $waOrgPhone;
+                }
+                $fonnteLines[] = "WhatsApp: https://wa.me/{$waOrgPhone}";
+            }
 
             $fonnteText = implode("\n", $fonnteLines);
             try {
                 $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $authUser->fonnte_token,
+                    'Authorization' => $fonnteToken,
                 ])->asForm()->post('https://api.fonnte.com/send', [
                     'target'      => $phone,
                     'message'     => $fonnteText,
