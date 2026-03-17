@@ -236,23 +236,52 @@ document.addEventListener('DOMContentLoaded', function () {
     eventClick: function(info) {
       info.jsEvent.preventDefault();
 
+      // Skip confirmation for holiday events
+      if (info.event.extendedProps.isHoliday || info.event.extendedProps.description) {
+        return;
+      }
+
       if (info.view.type === 'dayGridMonth') {
 
         const date = info.event.startStr;
         const packageName = info.event.title;
 
-        window.open(
-          `/organizer/business/bookings?date=${date}&event_search=${encodeURIComponent(packageName)}`,
-          '_blank'
-        );
+        Swal.fire({
+          title: 'View Bookings?',
+          text: `Open booking list for ${packageName}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, open',
+          cancelButtonText: 'Cancel',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open(
+              `/organizer/business/bookings?date=${date}&event_search=${encodeURIComponent(packageName)}`,
+              '_blank'
+            );
+          }
+        });
 
         return;
       }
 
       const bookingId = info.event.extendedProps.booking_id;
+      const customer = info.event.extendedProps.customer || '';
+      const title = info.event.title || '';
 
       if (bookingId) {
-        window.open(`/organizer/business/booking/${bookingId}`, '_blank');
+        Swal.fire({
+          title: 'View Booking Details?',
+          html: `${title}<br>${customer}`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, open',
+          cancelButtonText: 'Cancel',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open(`/organizer/business/booking/${bookingId}`, '_blank');
+          }
+        });
       }
     }
 
