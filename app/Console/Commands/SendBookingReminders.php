@@ -284,22 +284,13 @@ class SendBookingReminders extends Command
         $lines[] = "Kerjasama anda amat dihargai. Jumpa nanti! 😊";
 
         if ($organizer->payment_qr_path && $booking->payment_type === 'deposit' && $balance > 0) {
-            $waOrgPhone = preg_replace('/\D/', '', $organizer->phone ?? '');
-            if (str_starts_with($waOrgPhone, '0')) {
-                $waOrgPhone = '60' . substr($waOrgPhone, 1);
-            } elseif ($waOrgPhone && !str_starts_with($waOrgPhone, '60')) {
-                $waOrgPhone = '60' . $waOrgPhone;
-            }
+            $bookingSuffix = last(explode('-', $booking->booking_code));
+            $qrUrl = route('organizer.payment.qr', [$organizer->slug, $booking->id . '-' . $bookingSuffix]);
 
             $lines[] = "";
             $lines[] = "💳 QR Kod Pembayaran:";
             $lines[] = "Tekan link di bawah untuk lihat QR code, screenshot dan scan untuk bayar baki sebanyak *RM" . number_format($balance, 2) . "*.";
-            $lines[] = $organizer->payment_qr_url;
-            $lines[] = "";
-            $lines[] = "Selepas berjaya membuat pembayaran, sila hantar resit kepada WhatsApp kami:";
-            if ($waOrgPhone) {
-                $lines[] = "👉 https://wa.me/{$waOrgPhone}";
-            }
+            $lines[] = $qrUrl;
         }
 
         $lines[] = "";

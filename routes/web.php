@@ -132,12 +132,32 @@ Route::group(['prefix' => 'zh', 'as' => 'zh.', 'locale' => 'zh', 'middleware' =>
 Route::group(['prefix' => 'bm', 'as' => 'bm.', 'locale' => 'ms', 'middleware' => 'setlocale'], $homeRoutes);
 // English home routes (no prefix)
 Route::group(['locale' => 'en', 'middleware' => 'setlocale'], $homeRoutes);
-Route::get('/qr/{slug}', function ($slug) {
+Route::get('/qr/{slug}/{token?}', function ($slug, $token = null) {
+    $organizer = \App\Models\Organizer::where('slug', $slug)->whereNotNull('payment_qr_path')->firstOrFail();
+    $booking   = null;
+    if ($token) {
+        if (!str_contains($token, '-')) {
+            return view('home.payment-qr-invalid', compact('organizer'));
+        }
+        [$id, $suffix] = explode('-', $token, 2);
+        $booking = \App\Models\Booking::where('id', $id)
+            ->where('organizer_id', $organizer->id)
+            ->where('booking_code', 'LIKE', '%-' . $suffix)
+            ->with(['package', 'participant', 'vendorTimeSlots.vendorTimeSlot', 'payment'])
+            ->first();
+        if (!$booking) {
+            return view('home.payment-qr-invalid', compact('organizer'));
+        }
+    }
+    return view('home.payment-qr', compact('organizer', 'booking'));
+})->name('organizer.payment.qr');
+
+Route::get('/qr/{slug}/image', function ($slug) {
     $organizer = \App\Models\Organizer::where('slug', $slug)->whereNotNull('payment_qr_path')->firstOrFail();
     $path      = \Illuminate\Support\Facades\Storage::disk('public')->path($organizer->payment_qr_path);
     $mime      = mime_content_type($path) ?: 'image/jpeg';
     return response()->file($path, ['Content-Type' => $mime]);
-})->name('organizer.payment.qr');
+})->name('organizer.payment.qr.image');
 
 Route::get('/{slug}/leaderboard', [EventController::class, 'showFishingLeaderboard'])->name('event.fishing.leaderboard');
 Route::get('/{slug}', [EventController::class, 'showBySlug'])->name('event.slug');
