@@ -182,11 +182,24 @@ class HomeController extends Controller
             ->orderBy('order_by', 'asc')
             ->get();
 
+        // Active wedding packages (non-group, includes children of groups like "Pelamin")
+        $weddingPackages = \App\Models\Package::with([
+                'images',
+                'items' => fn($q) => $q->orderBy('sort_order', 'asc'),
+                'addons' => fn($q) => $q->where('is_active', true),
+            ])
+            ->where('organizer_id', $organizer->id)
+            ->where('status', 'active')
+            ->where('is_group', false)
+            ->orderBy('order_by', 'asc')
+            ->get();
+
         return view($view, [
             'organizer'          => $organizer,
             'specialPage'        => $page,
             'packageGroups'      => $packageGroups,
             'standalonePackages' => $standalonePackages,
+            'weddingPackages'    => $weddingPackages,
         ]);
     }
 
