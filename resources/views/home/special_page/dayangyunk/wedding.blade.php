@@ -24,12 +24,12 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB' }}">
+<html lang="ms-MY">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $organizer->name }} | Perkahwinan</title>
-    <meta name="description" content="Discover beautiful wedding venues at {{ $organizer->name }}.">
+    <meta name="description" content="Temukan pakej perkahwinan eksklusif di {{ $organizer->name }}. Majlis impian anda bermula di sini.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,14 +59,6 @@
         .ldt-nav.scrolled .nav-links a { color: #444; }
         .ldt-nav.scrolled .nav-links a:hover, .ldt-nav.scrolled .nav-links a.active { color: {{ $accent }}; }
 
-        /* Lang switcher */
-        .lang-switcher { display: flex; align-items: center; gap: 4px; }
-        .lang-switcher a { font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; padding: 3px 7px; border: 1px solid rgba(255,255,255,0.4); color: rgba(255,255,255,0.75) !important; transition: background 0.2s, color 0.2s, border-color 0.2s; }
-        .lang-switcher a::after { display: none !important; }
-        .lang-switcher a.active, .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
-        .ldt-nav.scrolled .lang-switcher a { border-color: #ddd; color: #777 !important; }
-        .ldt-nav.scrolled .lang-switcher a.active, .ldt-nav.scrolled .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
-
         .ldt-nav .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
         .ldt-nav .nav-toggle span { display: block; width: 22px; height: 1.5px; background: #fff; margin: 5px 0; transition: background 0.35s; }
         .ldt-nav.scrolled .nav-toggle span { background: #222; }
@@ -77,10 +69,6 @@
         .ldt-mobile-menu a { display: block; padding: 13px 0; font-family: 'Josefin Sans', sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #555; border-bottom: 1px solid #f0ebe4; }
         .ldt-mobile-menu a:last-child { border-bottom: none; }
         .ldt-mobile-menu a.active { color: {{ $accent }}; }
-        .mobile-lang { display: flex !important; gap: 8px; padding: 13px 0; border-bottom: 1px solid #f0ebe4; }
-        .mobile-lang a { display: inline-block !important; padding: 4px 10px !important; border: 1px solid #ddd !important; font-size: 11px !important; color: #777 !important; border-bottom: 1px solid #ddd !important; }
-        .mobile-lang a.active, .mobile-lang a:hover { background: {{ $accent }} !important; border-color: {{ $accent }} !important; color: #fff !important; }
-
         @media (max-width: 767px) { .ldt-nav .nav-links { display: none; } .ldt-nav .nav-toggle { display: block; } }
 
         main { padding-top: 0; }
@@ -261,7 +249,38 @@
 </head>
 <body>
 
-    @include('home.special_page.lady_d_touch._navbar')
+    @php
+        $homeUrl    = route('business.profile', ['slug' => $specialPage]);
+        $weddingUrl = route('special-page.wedding', ['slug' => $specialPage]);
+    @endphp
+
+    <nav class="ldt-nav" id="ldt-nav">
+        <div class="nav-inner">
+            <a href="{{ $homeUrl }}" class="nav-brand">{{ $organizer->name }}</a>
+            <ul class="nav-links">
+                <li><a href="{{ $homeUrl }}">Laman Utama</a></li>
+                <li><a href="{{ $homeUrl }}#story">Kisah Kami</a></li>
+                <li><a href="{{ $weddingUrl }}" class="active">Perkahwinan</a></li>
+                <li><a href="{{ $homeUrl }}#location">Lokasi</a></li>
+                @if($organizer->phone)
+                <li><a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}?text=Salam%2C%20saya%20berminat%20dengan%20pakej%20perkahwinan." target="_blank">Hubungi Kami</a></li>
+                @endif
+            </ul>
+            <button class="nav-toggle" id="ldt-toggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="ldt-mobile-menu" id="ldt-mobile-menu">
+        <a href="{{ $homeUrl }}" class="ldt-ml">Laman Utama</a>
+        <a href="{{ $homeUrl }}#story" class="ldt-ml">Kisah Kami</a>
+        <a href="{{ $weddingUrl }}" class="ldt-ml active">Perkahwinan</a>
+        <a href="{{ $homeUrl }}#location" class="ldt-ml">Lokasi</a>
+        @if($organizer->phone)
+        <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}" target="_blank" class="ldt-ml">Hubungi Kami</a>
+        @endif
+    </div>
 
     <main>
 
@@ -295,7 +314,7 @@
 
                         @if($package->final_price)
                         <div class="butik-price">
-                            <span class="butik-price-label">Bermula</span>
+                            <span class="butik-price-label">Bermula dari</span>
                             <span class="butik-price-amount">RM {{ number_format($package->final_price, 0) }}</span>
                         </div>
                         @endif

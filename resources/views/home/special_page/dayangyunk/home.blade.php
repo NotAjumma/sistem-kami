@@ -16,12 +16,12 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB' }}">
+<html lang="ms-MY">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $organizer->name }}</title>
-    <meta name="description" content="{{ $organizer->description ?? 'Beautiful wedding venue for your special day.' }}">
+    <meta name="description" content="{{ $organizer->description ?? 'Venue perkahwinan eksklusif untuk hari istimewa anda.' }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,18 +61,6 @@
         .ldt-nav.scrolled .nav-links a { color: #444; }
         .ldt-nav.scrolled .nav-links a:hover, .ldt-nav.scrolled .nav-links a.active { color: {{ $accent }}; }
 
-        /* Lang switcher */
-        .lang-switcher { display: flex; align-items: center; gap: 4px; }
-        .lang-switcher a {
-            font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 600;
-            letter-spacing: 1px; padding: 3px 7px; border: 1px solid rgba(255,255,255,0.4);
-            color: rgba(255,255,255,0.75) !important; transition: background 0.2s, color 0.2s, border-color 0.2s;
-        }
-        .lang-switcher a::after { display: none !important; }
-        .lang-switcher a.active, .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
-        .ldt-nav.scrolled .lang-switcher a { border-color: #ddd; color: #777 !important; }
-        .ldt-nav.scrolled .lang-switcher a.active, .ldt-nav.scrolled .lang-switcher a:hover { background: {{ $accent }}; border-color: {{ $accent }}; color: #fff !important; }
-
         .ldt-nav .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
         .ldt-nav .nav-toggle span { display: block; width: 22px; height: 1.5px; background: #fff; margin: 5px 0; transition: background 0.35s; }
         .ldt-nav.scrolled .nav-toggle span { background: #222; }
@@ -83,10 +71,6 @@
         .ldt-mobile-menu a { display: block; padding: 13px 0; font-family: 'Josefin Sans', sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #555; border-bottom: 1px solid #f0ebe4; }
         .ldt-mobile-menu a:last-child { border-bottom: none; }
         .ldt-mobile-menu a.active { color: {{ $accent }}; }
-        .mobile-lang { display: flex !important; gap: 8px; padding: 13px 0; border-bottom: 1px solid #f0ebe4; }
-        .mobile-lang a { display: inline-block !important; padding: 4px 10px !important; border: 1px solid #ddd !important; font-size: 11px !important; color: #777 !important; border-bottom: 1px solid #ddd !important; }
-        .mobile-lang a.active, .mobile-lang a:hover { background: {{ $accent }} !important; border-color: {{ $accent }} !important; color: #fff !important; }
-
         @media (max-width: 767px) { .ldt-nav .nav-links { display: none; } .ldt-nav .nav-toggle { display: block; } }
 
         /* Scroll animations */
@@ -190,7 +174,7 @@
 </head>
 <body>
 
-    @include('home.special_page.lady_d_touch._navbar')
+    @include('home.special_page.dayangyunk._navbar')
 
     <main>
 
@@ -300,7 +284,7 @@
                         </div>
                     </div>
                     <div class="location-map-col reveal reveal-delay-2">
-                        <img src="{{ $img('map', 'lady_d_touch/map.jpeg') }}" alt="Our Location" loading="lazy">
+                        <img src="{{ $img('map', 'lady_d_touch/map.jpeg') }}" alt="Lokasi Kami" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -309,7 +293,7 @@
 
     </main>
 
-    @include('home.special_page.lady_d_touch._footer')
+    @include('home.special_page.dayangyunk._footer')
 
     <script>
         (function () {

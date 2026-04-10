@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms-MY">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $organizer->name }} | Wedding Venues</title>
-    <meta name="description" content="Discover beautiful wedding venues at {{ $organizer->name }}.">
+    <title>{{ $organizer->name }} | Venue Perkahwinan</title>
+    <meta name="description" content="Temukan venue perkahwinan eksklusif di {{ $organizer->name }}.">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -281,12 +281,12 @@
             <a href="#" class="nav-brand">{{ $organizer->name }}</a>
 
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#venues">Wedding</a></li>
+                <li><a href="#home">Laman Utama</a></li>
+                <li><a href="#venues">Perkahwinan</a></li>
                 @if($organizer->phone)
                 <li>
-                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}?text=Hi%2C%20I%27m%20interested%20in%20your%20wedding%20venue." target="_blank">
-                        Contact Us
+                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}?text=Salam%2C%20saya%20berminat%20dengan%20venue%20perkahwinan%20anda." target="_blank">
+                        Hubungi Kami
                     </a>
                 </li>
                 @endif
@@ -299,10 +299,10 @@
     </nav>
 
     <div class="ldt-mobile-menu" id="ldt-mobile-menu">
-        <a href="#home" class="ldt-mobile-link">Home</a>
-        <a href="#venues" class="ldt-mobile-link">Wedding</a>
+        <a href="#home" class="ldt-mobile-link">Laman Utama</a>
+        <a href="#venues" class="ldt-mobile-link">Perkahwinan</a>
         @if($organizer->phone)
-        <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}?text=Hi%2C%20I%27m%20interested%20in%20your%20wedding%20venue." target="_blank" class="ldt-mobile-link">Contact Us</a>
+        <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}?text=Salam%2C%20saya%20berminat%20dengan%20venue%20perkahwinan%20anda." target="_blank" class="ldt-mobile-link">Hubungi Kami</a>
         @endif
     </div>
 
@@ -310,16 +310,16 @@
 
         {{-- ── Hero ──────────────────────────────────────────────────────────── --}}
         <div class="wedding-hero">
-            <h1 class="hero-title-anim">Wedding</h1>
+            <h1 class="hero-title-anim">Perkahwinan</h1>
         </div>
 
         {{-- ── Intro ───────────────────────────────────────────────────────────── --}}
         <section class="wedding-intro">
             <div class="wedding-intro-inner">
-                <p class="slide-up">Be it a small romantic affair or a large scale ground celebration, view our array of choice to kickstart your journey to a beautiful and memorable wedding.</p>
-                <p class="slide-up">Compliment your event setting with and add-on individual items to the featured package.</p>
-                <p class="slide-up">At {{ $organizer->name }}, guests have the option of holding their ceremonies either indoors or outdoors. We offer a wide selection of wedding packages ranging from simple yet elegant styles to elaborate modern settings. An extended menu of delectable Malay and International dishes is also available to serve for your F&amp;B needs.</p>
-                <p class="slide-up">The house includes the usage of bridal suite with attached bathroom as well as two other private rooms for guests.</p>
+                <p class="slide-up">Sama ada majlis romantik yang kecil mahupun perayaan besar-besaran, lihat pelbagai pilihan kami untuk memulakan perjalanan anda ke arah perkahwinan yang indah dan tidak terlupakan.</p>
+                <p class="slide-up">Lengkapkan tetapan acara anda dengan item tambahan individu kepada pakej pilihan.</p>
+                <p class="slide-up">Di {{ $organizer->name }}, tetamu mempunyai pilihan untuk mengadakan majlis mereka sama ada di dalam atau di luar. Kami menawarkan pelbagai pakej perkahwinan dari gaya mudah namun elegan hingga tetapan moden yang mewah. Menu makanan Melayu dan Antarabangsa yang lazat juga tersedia untuk keperluan F&amp;B anda.</p>
+                <p class="slide-up">Rumah ini termasuk penggunaan bilik pengantin dengan bilik mandi dalam serta dua bilik persendirian lain untuk tetamu.</p>
             </div>
         </section>
 
@@ -332,7 +332,7 @@
                     <div class="venue-row">
                         <div class="venue-text-col slide-up-child delay-1">
                             <h3 class="venue-name">Dewan Sri Dusun</h3>
-                            <p class="venue-desc">Our Dewan Sri Dusun consists of Ruang Kaca (air-conditioned) and can seat up to 160 guests for sit down dinner receptions whilst for buffet lunch receptions we can host a maximum of 1000 guests (come &amp; go) with the usage of outdoor areas as well.</p>
+                            <p class="venue-desc">Dewan Sri Dusun kami terdiri daripada Ruang Kaca (berhawa dingin) dan mampu memuatkan sehingga 160 tetamu bagi majlis makan malam duduk, manakala bagi jamuan tengah hari secara bufet, kami boleh menampung sehingga 1000 tetamu (datang &amp; pergi) dengan penggunaan kawasan luar sekali.</p>
                         </div>
                         <div class="venue-img-col slide-up-child delay-2">
                             <img src="{{ asset('storage/Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Dewan Sri Dusun" class="venue-img" loading="lazy">
@@ -347,7 +347,7 @@
                     <div class="venue-row">
                         <div class="venue-text-col slide-up-child delay-1">
                             <h3 class="venue-name">Dataran Sri Dusun</h3>
-                            <p class="venue-desc">Dataran Sri Dusun is an outdoor space that is perfect for those who would want to keep the traditional wedding ambiance. Dataran Sri Dusun can accommodate up to 150 chairs for theatre seating and Dewan Sri Dusun will be used as guests dining.</p>
+                            <p class="venue-desc">Dataran Sri Dusun merupakan ruang terbuka yang sempurna bagi mereka yang ingin mengekalkan suasana perkahwinan tradisional. Dataran Sri Dusun mampu memuatkan sehingga 150 kerusi untuk susunan teater dan Dewan Sri Dusun akan digunakan sebagai ruang jamuan tetamu.</p>
                         </div>
                         <div class="venue-img-col slide-up-child delay-2">
                             <img src="{{ asset('storage/DataranSriDusun-1024x682.jpg') }}" alt="Dataran Sri Dusun" class="venue-img" loading="lazy">
@@ -362,7 +362,7 @@
                     <div class="venue-row">
                         <div class="venue-text-col slide-up-child delay-1">
                             <h3 class="venue-name">Laman Dusun</h3>
-                            <p class="venue-desc">Our Laman Dusun is perfect for outdoor ceremonies. We can accommodate up to 150 chiavari chairs for theatre seating. Laman Dusun is also covered by canopies for guest dining.</p>
+                            <p class="venue-desc">Laman Dusun kami amat sesuai untuk upacara di luar. Kami mampu memuatkan sehingga 150 kerusi chiavari untuk susunan teater. Laman Dusun juga dilengkapi kanopi untuk jamuan makan tetamu.</p>
                         </div>
                         <div class="venue-img-col slide-up-child delay-2">
                             <img src="{{ asset('storage/LamanDusun-1024x768.jpg') }}" alt="Laman Dusun" class="venue-img" loading="lazy">
@@ -377,10 +377,10 @@
 
     {{-- ── Footer ───────────────────────────────────────────────────────────── --}}
     <footer class="ldt-footer">
-        <p>© {{ date('Y') }} {{ $organizer->name }}. All rights reserved.</p>
+        <p>© {{ date('Y') }} {{ $organizer->name }}. Hak cipta terpelihara.</p>
         @if($organizer->phone)
         <p style="margin-top:8px;">
-            <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}" target="_blank">WhatsApp Us</a>
+            <a href="https://wa.me/{{ preg_replace('/\D/', '', $organizer->phone) }}" target="_blank">WhatsApp Kami</a>
         </p>
         @endif
     </footer>
