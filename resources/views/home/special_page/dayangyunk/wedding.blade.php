@@ -28,7 +28,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $organizer->name }} | {{ __('lady_d_touch.nav_wedding') }}</title>
+    <title>{{ $organizer->name }} | Perkahwinan</title>
     <meta name="description" content="Discover beautiful wedding venues at {{ $organizer->name }}.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,11 +106,11 @@
         .wedding-intro p { font-size: 15px; color: #555555; line-height: 1.85; margin-bottom: 14px; }
         .wedding-intro p:last-child { margin-bottom: 0; }
 
-        /* Venue sections */
-        .venue-section { padding: 80px 0; position: relative; background-size: cover; background-position: center; background-attachment: fixed; }
+        /* Venue / group sections */
+        .venue-section { padding: 72px 0 80px; position: relative; background-size: cover; background-position: center; background-attachment: fixed; }
         .venue-section::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
-        .venue-section:nth-of-type(odd)::before  { background: rgba(243, 237, 229, 0.90); }
-        .venue-section:nth-of-type(even)::before { background: rgba(235, 228, 218, 0.90); }
+        .venue-section:nth-of-type(odd)::before  { background: rgba(243, 237, 229, 0.92); }
+        .venue-section:nth-of-type(even)::before { background: rgba(232, 224, 213, 0.92); }
         .venue-dewan   { background-image: url("{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}"); }
         .venue-dataran { background-image: url("{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}"); }
         .venue-laman   { background-image: url("{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}"); }
@@ -158,16 +158,16 @@
     <main>
 
         <div class="wedding-hero">
-            <h1 class="hero-title-anim">{{ __('lady_d_touch.wedding_hero') }}</h1>
+            <h1 class="hero-title-anim">Perkahwinan</h1>
         </div>
 
         @if($vis('wedding_intro'))
         <section class="wedding-intro">
             <div class="ldt-container" style="max-width:760px;">
-                <p class="slide-up">{{ $txt('wedding_intro', 'intro1', __('lady_d_touch.wedding_intro1')) }}</p>
-                <p class="slide-up">{{ $txt('wedding_intro', 'intro2', __('lady_d_touch.wedding_intro2')) }}</p>
-                <p class="slide-up">{{ $txt('wedding_intro', 'intro3', __('lady_d_touch.wedding_intro3', ['name' => $organizer->name])) }}</p>
-                <p class="slide-up">{{ $txt('wedding_intro', 'intro4', __('lady_d_touch.wedding_intro4')) }}</p>
+                <p class="slide-up">{{ $txt('wedding_intro', 'intro1', 'Sama ada majlis romantik yang kecil atau perayaan besar-besaran, lihat pelbagai pilihan kami untuk memulakan perjalanan anda ke arah perkahwinan yang indah dan tidak terlupakan.') }}</p>
+                <p class="slide-up">{{ $txt('wedding_intro', 'intro2', 'Lengkapkan tetapan acara anda dengan item tambahan individu kepada pakej pilihan.') }}</p>
+                <p class="slide-up">{{ $txt('wedding_intro', 'intro3', 'Di ' . $organizer->name . ', tetamu mempunyai pilihan untuk mengadakan majlis mereka sama ada di dalam atau di luar. Kami menawarkan pelbagai pakej perkahwinan dari gaya mudah namun elegan hingga tetapan moden yang mewah. Menu makanan Melayu dan Antarabangsa yang lazat juga tersedia untuk keperluan F&B anda.') }}</p>
+                <p class="slide-up">{{ $txt('wedding_intro', 'intro4', 'Rumah ini termasuk penggunaan bilik pengantin dengan bilik mandi dalam serta dua bilik persendirian lain untuk tetamu.') }}</p>
             </div>
         </section>
         @endif

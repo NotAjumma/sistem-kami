@@ -102,9 +102,36 @@ class BusinessController extends Controller
                         return response()->view('home.special_page._private', ['organizer' => $specialOrganizer], 403);
                     }
                 }
+                $packageGroups = \App\Models\Package::with([
+                        'images',
+                        'children' => function ($q) {
+                            $q->with(['images'])
+                                ->where('status', 'active')
+                                ->where('is_group', false)
+                                ->orderBy('order_by', 'asc');
+                        },
+                    ])
+                    ->where('organizer_id', $specialOrganizer->id)
+                    ->where('is_group', true)
+                    ->whereNull('parent_id')
+                    ->where('status', 'active')
+                    ->orderBy('order_by', 'asc')
+                    ->orderBy('name', 'asc')
+                    ->get();
+
+                $standalonePackages = \App\Models\Package::with(['images'])
+                    ->where('organizer_id', $specialOrganizer->id)
+                    ->where('is_group', false)
+                    ->whereNull('parent_id')
+                    ->where('status', 'active')
+                    ->orderBy('order_by', 'asc')
+                    ->get();
+
                 return view($view, [
-                    'organizer'   => $specialOrganizer,
-                    'specialPage' => str_replace('_', '-', $specialOrganizer->special_page),
+                    'organizer'          => $specialOrganizer,
+                    'specialPage'        => str_replace('_', '-', $specialOrganizer->special_page),
+                    'packageGroups'      => $packageGroups,
+                    'standalonePackages' => $standalonePackages,
                 ]);
             }
         }

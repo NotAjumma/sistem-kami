@@ -198,7 +198,7 @@
         <section class="hero-section">
             <div class="hero-content">
                 <h1>{{ $organizer->name }}</h1>
-                <p>{{ $txt('hero', 'slogan', __('lady_d_touch.hero_slogan')) }}</p>
+                <p>{{ $txt('hero', 'slogan', 'Mereka Impian, Meraikan Cinta') }}</p>
             </div>
         </section>
         @endif
@@ -208,10 +208,10 @@
             <div class="ldt-container">
                 <div class="about-row">
                     <div class="about-text reveal">
-                        <p>{{ $txt('about', 'p1', __('lady_d_touch.about_p1', ['name' => $organizer->name])) }}</p>
-                        <p>{{ $txt('about', 'p2', __('lady_d_touch.about_p2')) }}</p>
-                        <p>{{ $txt('about', 'p3', __('lady_d_touch.about_p3', ['name' => $organizer->name])) }}</p>
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="about-link">{{ $txt('about', 'link_text', __('lady_d_touch.about_link')) }}</a>
+                        <p>{{ $txt('about', 'p1', $organizer->name . ' adalah tempat perkahwinan yang indah di tengah alam semula jadi, menawarkan suasana tenang untuk momen paling bermakna anda.') }}</p>
+                        <p>{{ $txt('about', 'p2', 'Idea ini bermula dari impian untuk mewujudkan ruang di mana keluarga dan orang tersayang dapat meraikan majlis paling bermakna dalam hidup, dikelilingi kehangatan tradisi dan keindahan alam.') }}</p>
+                        <p>{{ $txt('about', 'p3', 'Hari ini, ' . $organizer->name . ' tersedia untuk tempahan bagi mereka yang ingin menganjurkan majlis eksklusif dan indah dengan sentuhan kontemporari.') }}</p>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="about-link">{{ $txt('about', 'link_text', '→ Baca Kisah Penuh') }}</a>
                     </div>
                     <div class="about-img-col reveal reveal-delay-2">
                         <div class="about-img-grid">
@@ -230,13 +230,13 @@
             <div class="ldt-container">
                 <div class="gallery-row">
                     <div class="gallery-text reveal">
-                        <p class="eyebrow">{{ $txt('gallery', 'eyebrow', __('lady_d_touch.gallery_eyebrow')) }}</p>
-                        <h2>{{ $txt('gallery', 'heading', __('lady_d_touch.gallery_heading')) }}</h2>
+                        <p class="eyebrow">{{ $txt('gallery', 'eyebrow', 'Gambar yang bernilai') }}</p>
+                        <h2>{{ $txt('gallery', 'heading', 'Seribu Kata') }}</h2>
                         @php $fbLink = ($organizer->social_links ?? [])['facebook'] ?? null; @endphp
                         @if($fbLink)
-                        <a href="{{ $fbLink }}" target="_blank" class="gallery-link">{{ $txt('gallery', 'link_text', __('lady_d_touch.gallery_link')) }}</a>
+                        <a href="{{ $fbLink }}" target="_blank" class="gallery-link">{{ $txt('gallery', 'link_text', '▤ Lihat Album Facebook') }}</a>
                         @else
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="gallery-link">{{ $txt('gallery', 'link_text', __('lady_d_touch.gallery_link_venues')) }}</a>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="gallery-link">{{ $txt('gallery', 'link_text', '♥ Lihat Venue Kami') }}</a>
                         @endif
                     </div>
                     <div class="gallery-img-col reveal reveal-delay-2">
@@ -259,10 +259,52 @@
                         </div>
                     </div>
                     <div class="wedding-text reveal reveal-delay-2">
-                        <h2>{{ $txt('venues', 'heading', __('lady_d_touch.showcase_heading')) }}</h2>
-                        <p>{{ $txt('venues', 'p1', __('lady_d_touch.showcase_p1')) }}</p>
-                        <p>{{ $txt('venues', 'p2', __('lady_d_touch.showcase_p2')) }}</p>
-                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="btn-wedding">{{ $txt('venues', 'btn_text', __('lady_d_touch.showcase_btn')) }}</a>
+                        <h2>{{ $txt('venues', 'heading', 'Perkahwinan') }}</h2>
+                        <p>{{ $txt('venues', 'p1', 'Sama ada majlis romantik yang kecil atau perayaan besar-besaran, lihat pelbagai pilihan kami untuk memulakan perjalanan anda ke arah perkahwinan yang indah dan tidak terlupakan.') }}</p>
+                        <p>{{ $txt('venues', 'p2', 'Lengkapkan tetapan acara anda dengan item tambahan individu kepada pakej pilihan.') }}</p>
+                        <a href="{{ route('special-page.wedding', ['slug' => $specialPage]) }}" class="btn-wedding">{{ $txt('venues', 'btn_text', '♥ Lihat Pakej Perkahwinan') }}</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        @endif
+
+        {{-- ── Packages Showcase ───────────────────────────────────────────── --}}
+        @php
+            $hasPackages = $packageGroups->isNotEmpty() || $standalonePackages->isNotEmpty();
+            if ($hasPackages) {
+                $showcaseImgs = collect();
+                foreach ($packageGroups as $g) {
+                    foreach ($g->children as $c) {
+                        $cover = $c->images->firstWhere('is_cover', true) ?? $c->images->first();
+                        if ($cover) { $showcaseImgs->push(['id' => $c->id, 'url' => $cover->url]); break; }
+                    }
+                    if ($showcaseImgs->count() >= 3) break;
+                }
+                if ($showcaseImgs->count() < 3) {
+                    foreach ($standalonePackages as $p) {
+                        $cover = $p->images->firstWhere('is_cover', true) ?? $p->images->first();
+                        if ($cover) { $showcaseImgs->push(['id' => $p->id, 'url' => $cover->url]); }
+                        if ($showcaseImgs->count() >= 3) break;
+                    }
+                }
+            }
+        @endphp
+        @if($hasPackages)
+        <section class="wedding-section" id="packages">
+            <div class="ldt-container">
+                <div class="wedding-row">
+                    <div class="wedding-img-col reveal">
+                        <div class="wedding-mosaic">
+                            @forelse ($showcaseImgs->take(3) as $item)
+                                <img src="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $item['id'] . '/' . $item['url']) }}"
+                                    alt="Package" loading="lazy">
+                            @empty
+                                <img src="{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}" alt="Package" loading="lazy">
+                                <img src="{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Package" loading="lazy">
+                                <img src="{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}" alt="Package" loading="lazy">
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
@@ -274,7 +316,7 @@
             <div class="ldt-container">
                 <div class="location-row">
                     <div class="location-text reveal">
-                        <h2>{{ $txt('location', 'heading', __('lady_d_touch.location_heading')) }}</h2>
+                        <h2>{{ $txt('location', 'heading', 'Lokasi Kami') }}</h2>
                         @if($organizer->address_line1 || $organizer->city)
                         <div class="location-item">
                             <svg width="16" height="16" fill="none" stroke="{{ $accent }}" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -294,9 +336,9 @@
                         </div>
                         @endif
                         <div class="hours-box">
-                            <h4>{{ $txt('location', 'hours_heading', __('lady_d_touch.hours_heading')) }}</h4>
-                            <p>{{ $txt('location', 'hours_line1', __('lady_d_touch.hours_line1')) }}</p>
-                            <p style="font-size:12px;color:#bbb;">{{ $txt('location', 'hours_note', __('lady_d_touch.hours_note')) }}</p>
+                            <h4>{{ $txt('location', 'hours_heading', 'Waktu Operasi') }}</h4>
+                            <p>{{ $txt('location', 'hours_line1', 'Ahad – Sabtu (8pg – 5ptg)') }}</p>
+                            <p style="font-size:12px;color:#bbb;">{{ $txt('location', 'hours_note', '*Lawatan adalah mengikut temujanji sahaja') }}</p>
                         </div>
                     </div>
                     <div class="location-map-col reveal reveal-delay-2">

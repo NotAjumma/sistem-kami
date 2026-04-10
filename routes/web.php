@@ -257,6 +257,7 @@ Route::prefix('organizer/business')->middleware('auth:organizer')->controller(Or
     Route::get('/packages/{id}/edit', 'showEditPackage')->name('organizer.business.package.edit');
     Route::patch('/packages/{id}', 'updatePackage')->name('organizer.business.package.update');
     Route::delete('/packages/{id}', 'destroyPackage')->name('organizer.business.package.destroy');
+    Route::patch('/packages/{id}/toggle-status', 'togglePackageStatus')->name('organizer.business.package.toggle-status');
     Route::get('/packages/{id}/calendar-data', 'fetchCalendarData')->name('organizer.business.package.calendar.data');
     Route::post('/packages/{id}/upload-image', 'uploadPackageImage')->name('organizer.business.package.upload-image');
     Route::post('/packages/upload-temp-image', 'uploadTempImage')->name('organizer.business.package.upload-temp-image');
@@ -325,6 +326,7 @@ Route::post('/webform/booking', [BookingController::class, 'webFormBookingPackag
 $profileRoutes = function () {
     Route::get('/{slug}',                                [BusinessController::class, 'showProfile'])->name('business.profile');
     Route::get('/{slug}/wedding',                        [HomeController::class,     'specialPageWedding'])->name('special-page.wedding');
+    Route::get('/{slug}/packages',                       [HomeController::class,     'specialPagePackages'])->name('special-page.packages');
     Route::get('/{organizerSlug}/{packageSlug}',         [BusinessController::class, 'showPackage'])->name('business.package');
     Route::get('/{organizerSlug}/{packageSlug}/booking', [BusinessController::class, 'showBooking'])->name('business.booking');
 };

@@ -13,6 +13,8 @@ class Package extends Model
     use SoftDeletes;
     protected $fillable = [
         'organizer_id',
+        'parent_id',
+        'is_group',
         'category_id',
         'name',
         'slug',
@@ -49,6 +51,7 @@ class Package extends Model
         'discount_percentage'       => 'integer',
         'max_booking_year_offset'   => 'integer',
         'is_manual'                 => 'integer',
+        'is_group'                  => 'boolean',
         'valid_from'                => 'datetime',
         'valid_until'               => 'datetime',
         'exclude_vendor_time_slots' => 'array',
@@ -57,6 +60,16 @@ class Package extends Model
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(Organizer::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Package::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Package::class, 'parent_id')->orderBy('order_by', 'asc');
     }
 
     public function category(): BelongsTo
@@ -102,6 +115,16 @@ class Package extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function scopeGroups($query)
+    {
+        return $query->where('is_group', true);
+    }
+
+    public function scopeTopLevel($query)
+    {
+        return $query->whereNull('parent_id');
     }
 
     public function scopeActive($query)

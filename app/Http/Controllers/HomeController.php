@@ -155,12 +155,49 @@ class HomeController extends Controller
             return redirect()->route('business.profile', ['slug' => $organizer->slug]);
         }
 
-        return view($view, ['organizer' => $organizer, 'specialPage' => $page]);
+        // Package groups with their active children
+        $packageGroups = \App\Models\Package::with([
+                'images',
+                'children' => function ($q) {
+                    $q->with(['images'])
+                        ->where('status', 'active')
+                        ->where('is_group', false)
+                        ->orderBy('order_by', 'asc');
+                },
+            ])
+            ->where('organizer_id', $organizer->id)
+            ->where('is_group', true)
+            ->whereNull('parent_id')
+            ->where('status', 'active')
+            ->orderBy('order_by', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Standalone active packages (not in any group)
+        $standalonePackages = \App\Models\Package::with(['images'])
+            ->where('organizer_id', $organizer->id)
+            ->where('is_group', false)
+            ->whereNull('parent_id')
+            ->where('status', 'active')
+            ->orderBy('order_by', 'asc')
+            ->get();
+
+        return view($view, [
+            'organizer'          => $organizer,
+            'specialPage'        => $page,
+            'packageGroups'      => $packageGroups,
+            'standalonePackages' => $standalonePackages,
+        ]);
     }
 
     public function specialPageWedding(string $slug)
     {
         return $this->specialPage($slug, 'wedding');
+    }
+
+    public function specialPagePackages(string $slug)
+    {
+        return $this->specialPage($slug, 'packages');
     }
 
     public function wedding()

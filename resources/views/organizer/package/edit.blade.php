@@ -31,12 +31,28 @@
         {{-- ── BASIC INFO ──────────────────────────────────────────── --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Edit Package — {{ $package->name }}</h5>
+                <h5 class="card-title mb-0" id="formTitle">
+                    {{ old('is_group', $package->is_group) ? 'Edit Package Group' : 'Edit Package' }} — {{ $package->name }}
+                </h5>
                 <a href="{{ route('organizer.business.packages') }}" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i> Back
                 </a>
             </div>
             <div class="card-body">
+                {{-- Group toggle --}}
+                <div class="alert alert-light border mb-3 d-flex align-items-center gap-3">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                            name="is_group" id="isGroupToggle" value="1"
+                            {{ old('is_group', $package->is_group) ? 'checked' : '' }}
+                            onchange="toggleGroupMode(this.checked)">
+                        <label class="form-check-label fw-semibold" for="isGroupToggle">
+                            <i class="fas fa-layer-group me-1 text-primary"></i> This is a Package Group
+                        </label>
+                    </div>
+                    <small class="text-muted">A group is a container that organises multiple packages together (e.g. Studio Raya, Pelamin, Catering).</small>
+                </div>
+
                 <div class="row">
                     <div class="mb-3 col-md-6">
                         <label class="form-label">Package Name <span class="text-danger">*</span></label>
@@ -50,13 +66,26 @@
                             name="slug" value="{{ old('slug', $package->slug) }}" required>
                         @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="mb-3 col-md-4">
+                    <div class="mb-3 col-md-4 field-package-only">
                         <label class="form-label">Package Code</label>
                         <input type="text" class="form-control" name="package_code" value="{{ old('package_code', $package->package_code) }}">
                     </div>
+                    <div class="mb-3 col-md-4 field-package-only">
+                        <label class="form-label">Parent Group</label>
+                        <select class="form-select" name="parent_id">
+                            <option value="">— No Group (Standalone) —</option>
+                            @foreach ($packageGroups as $grp)
+                                <option value="{{ $grp->id }}"
+                                    {{ old('parent_id', $package->parent_id) == $grp->id ? 'selected' : '' }}>
+                                    {{ $grp->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Assign this package to an existing group.</div>
+                    </div>
                     <div class="mb-3 col-md-4">
-                        <label class="form-label">Category <span class="text-danger">*</span></label>
-                        <select class="form-select @error('category_id') is-invalid @enderror" name="category_id" required>
+                        <label class="form-label">Category <span class="text-danger req-mark">*</span></label>
+                        <select class="form-select @error('category_id') is-invalid @enderror" name="category_id" id="categoryField">
                             <option value="">Choose category</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id', $package->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -86,7 +115,7 @@
 
         {{-- ── PRICING ─────────────────────────────────────────────── --}}
         @php $disc = $package->discounts->first(); @endphp
-        <div class="card mb-3">
+        <div class="card mb-3 section-package-only">
             <div class="card-header"><h6 class="card-title mb-0">Pricing &amp; Deposit</h6></div>
             <div class="card-body">
                 <div class="row">
@@ -198,7 +227,7 @@
         </div>
 
         {{-- ── PACKAGE ITEMS ────────────────────────────────────────── --}}
-        <div class="card mb-3">
+        <div class="card mb-3 section-package-only">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0">Package Items</h6>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="addItem()"><i class="fas fa-plus me-1"></i> Add Row</button>
@@ -249,7 +278,7 @@
         </div>
 
         {{-- ── PACKAGE ADDONS ───────────────────────────────────────── --}}
-        <div class="card mb-3">
+        <div class="card mb-3 section-package-only">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0">Package Addons</h6>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="addAddon()"><i class="fas fa-plus me-1"></i> Add Row</button>
@@ -313,7 +342,7 @@
         </div>
 
         {{-- ── PACKAGE IMAGES ───────────────────────────────────────── --}}
-        <div class="card mb-3">
+        <div class="card mb-3 section-package-only">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0">Package Images</h6>
                 <div class="d-flex gap-2 align-items-center">
@@ -374,7 +403,7 @@
         </div>
 
         {{-- ── BOOKING FORM FIELDS ──────────────────────────────────── --}}
-        <div class="card mb-3">
+        <div class="card mb-3 section-package-only">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0">Booking Form Fields</h6>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="addField()"><i class="fas fa-plus me-1"></i> Add Row</button>
@@ -462,6 +491,33 @@
         plugins: 'advlist autolink lists link charmap preview anchor code fullscreen',
         toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link code',
         content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
+    });
+
+    function toggleGroupMode(isGroup) {
+        document.getElementById('formTitle').textContent =
+            (isGroup ? 'Edit Package Group' : 'Edit Package') + ' — {{ addslashes($package->name) }}';
+
+        document.querySelectorAll('.field-package-only').forEach(el => {
+            el.style.display = isGroup ? 'none' : '';
+            el.querySelectorAll('input,select,textarea').forEach(function(input) {
+                input.disabled = isGroup;
+            });
+        });
+
+        document.querySelectorAll('.section-package-only').forEach(el => {
+            el.style.display = isGroup ? 'none' : '';
+            el.querySelectorAll('input,select,textarea').forEach(function(input) {
+                input.disabled = isGroup;
+            });
+        });
+
+        const cat = document.getElementById('categoryField');
+        cat.required = !isGroup;
+        cat.closest('.mb-3').querySelector('.req-mark').style.display = isGroup ? 'none' : '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleGroupMode(document.getElementById('isGroupToggle').checked);
     });
 
     let itemIdx  = {{ $package->items->count() ?: 1 }};

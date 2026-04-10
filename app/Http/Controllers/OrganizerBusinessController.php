@@ -211,48 +211,49 @@ class OrganizerBusinessController extends Controller
         $page_title = 'Packages List';
         $authUser = auth()->guard('organizer')->user()->load('user');
 
-        // Step 1: Get all event IDs by this organizer
-        $packageIds = DB::table('packages')
-            ->where('organizer_id', $authUser->id)
-            ->pluck('id');
-
         $categoriesIds = DB::table('packages')
             ->where('organizer_id', $authUser->id)
             ->pluck('category_id');
 
-        // Fetch categories for the current organizer to populate dropdown
         $categories = DB::table('package_categories')
             ->whereIn('id', $categoriesIds)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
-        // Step 2: Get all ticket IDs from those events
-        $bookings = DB::table('bookings_vendor_time_slot')
-            ->whereIn('package_id', $packageIds)
-            ->pluck('booking_id');
+        // Groups (parent containers) with their children pre-loaded
+        $groups = Package::with(['children' => function ($q) use ($request) {
+                $q->with(['items', 'category', 'addons', 'images'])
+                    ->when($request->status, fn($q2) => $q2->where('status', $request->status))
+                    ->when($request->category_search, function ($q2, $cs) {
+                        $q2->whereHas('category', fn($q3) => $q3->where('name', $cs));
+                    })
+                    ->when($request->search, fn($q2, $s) => $q2->where('name', 'like', "%{$s}%"))
+                    ->orderBy('order_by', 'asc');
+            }])
+            ->where('organizer_id', $authUser->id)
+            ->where('is_group', true)
+            ->whereNull('parent_id')
+            ->orderBy('order_by', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        // Step 3: Get all booking IDs from booking_tickets
-        // $bookingIds = DB::table('bookings')
-        //     ->whereIn('id', $bookingVendorTimeSlots)
-        //     ->pluck('id');
-
-        // Step 4: Fetch bookings with optional status & search filters
-        $packages = Package::with(['items', 'category', 'addons', 'images'])
-            ->whereIn('id', $packageIds)
+        // Standalone packages (no parent, not a group)
+        $standaloneQuery = Package::with(['items', 'category', 'addons', 'images'])
+            ->where('organizer_id', $authUser->id)
+            ->where('is_group', false)
+            ->whereNull('parent_id')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
-            // ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->category_search, function ($query, $category_search) {
-                $query->whereHas('category', function ($q) use ($category_search) {
-                    $q->where('name', $category_search);
-                });
+                $query->whereHas('category', fn($q) => $q->where('name', $category_search));
             })
-            ->latest()
-            ->orderBy('name')
-            ->paginate(15)
-            ->withQueryString();
+            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
+            ->orderBy('order_by', 'asc')
+            ->orderBy('name', 'asc');
 
-        return view('organizer.package.index', compact('page_title', 'authUser', 'packages' ,'categories'));
+        $standalone = $standaloneQuery->paginate(15)->withQueryString();
+
+        return view('organizer.package.index', compact('page_title', 'authUser', 'groups', 'standalone', 'categories'));
     }
 
     public function showCreatePackage(Request $request)
@@ -265,37 +266,48 @@ class OrganizerBusinessController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('organizer.package.create', compact('page_title', 'authUser', 'categories'));
+        $packageGroups = Package::where('organizer_id', $authUser->id)
+            ->where('is_group', true)
+            ->whereNull('parent_id')
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name']);
+
+        return view('organizer.package.create', compact('page_title', 'authUser', 'categories', 'packageGroups'));
     }
 
     public function storePackage(Request $request)
     {
         $authUser = auth()->guard('organizer')->user();
 
+        $isGroup = $request->boolean('is_group');
+
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'slug'       => 'required|string|max:255|unique:packages,slug',
-            'category_id'=> 'required|exists:package_categories,id',
-            'base_price' => 'required|numeric|min:0',
-            'final_price'=> 'required|numeric|min:0',
-            'status'     => 'required|in:active,inactive,draft',
+            'name'        => 'required|string|max:255',
+            'slug'        => 'required|string|max:255|unique:packages,slug',
+            'category_id' => $isGroup ? 'nullable|exists:package_categories,id' : 'required|exists:package_categories,id',
+            'base_price'  => $isGroup ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
+            'final_price' => $isGroup ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
+            'status'      => 'required|in:active,inactive,draft',
+            'parent_id'   => 'nullable|exists:packages,id',
         ]);
 
         $package = Package::create([
             'organizer_id'              => $authUser->id,
-            'category_id'               => $request->category_id,
+            'parent_id'                 => $isGroup ? null : ($request->parent_id ?: null),
+            'is_group'                  => $isGroup,
+            'category_id'               => $request->category_id ?: null,
             'name'                      => $request->name,
             'slug'                      => $request->slug,
             'package_code'              => $request->package_code,
             'description'               => $request->description,
             'tnc'                       => $request->tnc,
-            'base_price'                => $request->base_price,
-            'final_price'               => $request->final_price,
+            'base_price'                => $request->base_price ?: null,
+            'final_price'               => $request->final_price ?: null,
             'discount_percentage'       => $request->discount_percentage ?: null,
             'deposit_percentage'        => $request->deposit_percentage ?: null,
             'deposit_fixed'             => $request->deposit_fixed ?: null,
             'service_charge_percentage' => $request->service_charge_percentage ?: null,
-            'service_charge_fixed'      => $request->service_charge_fixed ?: 1,
+            'service_charge_fixed'      => $request->service_charge_fixed ?: 0,
             'duration_minutes'          => $request->duration_minutes ?: 0,
             'rest_minutes'              => $request->rest_minutes ?: 0,
             'package_slot_quantity'     => $request->package_slot_quantity ?: 1,
@@ -304,7 +316,7 @@ class OrganizerBusinessController extends Controller
             'valid_from'                => $request->valid_from ?: null,
             'valid_until'               => $request->valid_until ?: null,
             'last_paid_date'            => $request->last_paid_date ?: null,
-            'max_booking_year_offset'   => $request->max_booking_year_offset ?: null,
+            'max_booking_year_offset'   => $request->max_booking_year_offset ?: 1,
             'is_manual'                 => $request->boolean('is_manual'),
         ]);
 
@@ -398,7 +410,14 @@ class OrganizerBusinessController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('organizer.package.edit', compact('page_title', 'authUser', 'package', 'categories'));
+        $packageGroups = Package::where('organizer_id', $authUser->id)
+            ->where('is_group', true)
+            ->whereNull('parent_id')
+            ->where('id', '!=', $id)
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name']);
+
+        return view('organizer.package.edit', compact('page_title', 'authUser', 'package', 'categories', 'packageGroups'));
     }
 
     public function updatePackage(Request $request, $id)
@@ -407,29 +426,34 @@ class OrganizerBusinessController extends Controller
 
         $package = Package::where('organizer_id', $authUser->id)->findOrFail($id);
 
+        $isGroup = $request->boolean('is_group');
+
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'slug'       => 'required|string|max:255|unique:packages,slug,' . $id,
-            'category_id'=> 'required|exists:package_categories,id',
-            'base_price' => 'required|numeric|min:0',
-            'final_price'=> 'required|numeric|min:0',
-            'status'     => 'required|in:active,inactive,draft',
+            'name'        => 'required|string|max:255',
+            'slug'        => 'required|string|max:255|unique:packages,slug,' . $id,
+            'category_id' => $isGroup ? 'nullable|exists:package_categories,id' : 'required|exists:package_categories,id',
+            'base_price'  => $isGroup ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
+            'final_price' => $isGroup ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
+            'status'      => 'required|in:active,inactive,draft',
+            'parent_id'   => 'nullable|exists:packages,id',
         ]);
 
         $package->update([
-            'category_id'               => $request->category_id,
+            'parent_id'                 => $isGroup ? null : ($request->parent_id ?: null),
+            'is_group'                  => $isGroup,
+            'category_id'               => $request->category_id ?: null,
             'name'                      => $request->name,
             'slug'                      => $request->slug,
             'package_code'              => $request->package_code,
             'description'               => $request->description,
             'tnc'                       => $request->tnc,
-            'base_price'                => $request->base_price,
-            'final_price'               => $request->final_price,
+            'base_price'                => $request->base_price ?: null,
+            'final_price'               => $request->final_price ?: null,
             'discount_percentage'       => $request->discount_percentage ?: null,
             'deposit_percentage'        => $request->deposit_percentage ?: null,
             'deposit_fixed'             => $request->deposit_fixed ?: null,
             'service_charge_percentage' => $request->service_charge_percentage ?: null,
-            'service_charge_fixed'      => $request->service_charge_fixed ?: 1,
+            'service_charge_fixed'      => $request->service_charge_fixed ?: 0,
             'duration_minutes'          => $request->duration_minutes ?: 0,
             'rest_minutes'              => $request->rest_minutes ?: 0,
             'package_slot_quantity'     => $request->package_slot_quantity ?: 1,
@@ -438,7 +462,7 @@ class OrganizerBusinessController extends Controller
             'valid_from'                => $request->valid_from ?: null,
             'valid_until'               => $request->valid_until ?: null,
             'last_paid_date'            => $request->last_paid_date ?: null,
-            'max_booking_year_offset'   => $request->max_booking_year_offset ?: null,
+            'max_booking_year_offset'   => $request->max_booking_year_offset ?: 1,
             'is_manual'                 => $request->boolean('is_manual'),
         ]);
 
@@ -545,6 +569,31 @@ class OrganizerBusinessController extends Controller
         return redirect()
             ->route('organizer.business.packages')
             ->with('success', 'Package deleted.');
+    }
+
+    public function togglePackageStatus(Request $request, $id)
+    {
+        $authUser = auth()->guard('organizer')->user();
+        $package  = Package::where('organizer_id', $authUser->id)->findOrFail($id);
+
+        $next = match ($package->status) {
+            'active'   => 'inactive',
+            'inactive' => 'active',
+            'draft'    => 'active',
+            default    => 'inactive',
+        };
+
+        $package->update(['status' => $next]);
+
+        return response()->json([
+            'status'      => $next,
+            'label'       => ucfirst($next),
+            'badgeClass'  => match ($next) {
+                'active'   => 'bg-success',
+                'inactive' => 'bg-secondary',
+                default    => 'bg-warning',
+            },
+        ]);
     }
 
     public function uploadPackageImage(Request $request, $id)
