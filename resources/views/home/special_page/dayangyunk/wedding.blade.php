@@ -148,6 +148,7 @@
         .butik-row {
             display: flex; flex-direction: row; align-items: center; gap: 56px;
         }
+        .butik-row-reverse { flex-direction: row-reverse; }
         .butik-text-col { flex: 0 0 42%; max-width: 42%; }
         .butik-img-col  { flex: 1; }
 
@@ -244,7 +245,8 @@
 
         /* ── Responsive ─────────────────────────────────────────────── */
         @media (max-width: 991px) {
-            .butik-row { flex-direction: column; gap: 32px; }
+            .butik-row,
+            .butik-row.butik-row-reverse { flex-direction: column; gap: 32px; }
             .butik-text-col, .butik-img-col { flex: unset; max-width: 100%; width: 100%; }
             .butik-section { padding: 60px 0 68px; background-attachment: scroll; }
             .wedding-hero { height: 320px; }
@@ -287,7 +289,7 @@
         @foreach ($weddingPackages as $package)
         <section class="butik-section slide-up" style="background-image: url('{{ $package->display_image_url }}');">
             <div class="ldt-container">
-                <div class="butik-row">
+                <div class="butik-row {{ $loop->odd ? 'butik-row-reverse' : '' }}">
                     <div class="butik-text-col slide-up-child delay-1">
                         <h3 class="butik-title">{{ $package->name }}</h3>
 

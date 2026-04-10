@@ -269,48 +269,6 @@
         </section>
         @endif
 
-        {{-- ── Packages Showcase ───────────────────────────────────────────── --}}
-        @php
-            $hasPackages = $packageGroups->isNotEmpty() || $standalonePackages->isNotEmpty();
-            if ($hasPackages) {
-                $showcaseImgs = collect();
-                foreach ($packageGroups as $g) {
-                    foreach ($g->children as $c) {
-                        $cover = $c->images->firstWhere('is_cover', true) ?? $c->images->first();
-                        if ($cover) { $showcaseImgs->push(['id' => $c->id, 'url' => $cover->url]); break; }
-                    }
-                    if ($showcaseImgs->count() >= 3) break;
-                }
-                if ($showcaseImgs->count() < 3) {
-                    foreach ($standalonePackages as $p) {
-                        $cover = $p->images->firstWhere('is_cover', true) ?? $p->images->first();
-                        if ($cover) { $showcaseImgs->push(['id' => $p->id, 'url' => $cover->url]); }
-                        if ($showcaseImgs->count() >= 3) break;
-                    }
-                }
-            }
-        @endphp
-        @if($hasPackages)
-        <section class="wedding-section" id="packages">
-            <div class="ldt-container">
-                <div class="wedding-row">
-                    <div class="wedding-img-col reveal">
-                        <div class="wedding-mosaic">
-                            @forelse ($showcaseImgs->take(3) as $item)
-                                <img src="{{ asset('storage/uploads/' . $organizer->id . '/packages/' . $item['id'] . '/' . $item['url']) }}"
-                                    alt="Package" loading="lazy">
-                            @empty
-                                <img src="{{ $img('venue_dataran', 'DataranSriDusun-1024x682.jpg') }}" alt="Package" loading="lazy">
-                                <img src="{{ $img('venue_dewan', 'Pelamin_DSDusun_2024-1-1024x618.jpeg') }}" alt="Package" loading="lazy">
-                                <img src="{{ $img('venue_laman', 'LamanDusun-1024x768.jpg') }}" alt="Package" loading="lazy">
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        @endif
-
         @if($vis('location'))
         <section class="location-section" id="location">
             <div class="ldt-container">
